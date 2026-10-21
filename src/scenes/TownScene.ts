@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { C, CH1_DEADLINE, GAME_W, T } from '../config';
 import { feedCat, repay, spoiledFish } from '../state/actions';
 import { deleteSave, persist, S } from '../state/save';
+import { closedToday, dateLabel } from '../systems/calendar';
 import { marketHeadline } from '../systems/economy';
 import { daysLeft, endDay, isMarketOpen, isTruckOpen, slotName } from '../systems/time';
 import { Hud, HUD_H } from '../ui/hud';
@@ -48,7 +49,9 @@ export class TownScene extends Phaser.Scene {
     const news = this.add.graphics();
     news.fillStyle(C.ink, 0.6);
     news.fillRect(0, HUD_H, GAME_W, 28);
-    txt(this, 12, HUD_H + 4, `소식 · ${marketHeadline()}`, { size: 'small', color: T.paper });
+    const closed = closedToday();
+    const headline = closed.length ? `${closed.join('·')} 금어기` : marketHeadline();
+    txt(this, 12, HUD_H + 4, `${dateLabel()} · ${headline}`, { size: 'small', color: T.paper });
 
     this.makeMenu();
 

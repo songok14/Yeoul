@@ -122,6 +122,21 @@ def build():
         im = raw(src).convert('RGB').resize((900, 1600), Image.LANCZOS)
         save(im, key, q=82)
 
+    # 트럭 장사 배경: 간판 글자와 칠판 메뉴를 지우고 게임에서 다시 쓴다
+    im = raw('60-truckstop').convert('RGB')
+    def erase(box, pad=10):
+        x0, y0, x1, y1 = box
+        ring = im.crop((x0 - pad, y0 - pad, x1 + pad, y1 + pad)).filter(ImageFilter.GaussianBlur(14))
+        patch = ring.crop((pad, pad, pad + x1 - x0, pad + y1 - y0))
+        # 가장자리 색만 남기도록 크게 흐린 뒤 덮는다
+        patch = patch.resize((4, 4), Image.BILINEAR).resize((x1 - x0, y1 - y0), Image.BICUBIC)
+        mask = Image.new('L', patch.size, 0)
+        mask.paste(255, (6, 6, patch.width - 6, patch.height - 6))
+        im.paste(patch, (x0, y0), mask.filter(ImageFilter.GaussianBlur(5)))
+    erase((548, 438, 765, 522))
+    erase((740, 712, 884, 910))
+    save(im.resize((900, 1600), Image.LANCZOS), 'bg-truckstop', q=82)
+
     # 인물: 배경을 지우고 잘라 낸다
     singles = {
         'ch-yeoul': ('15-yeoul-anime-front', None),
@@ -133,6 +148,17 @@ def build():
         'ch-cat-walk': ('31-cat-sheet-b', (19, 634, 238, 1007)),
         'ch-cat-sleep': ('31-cat-sheet-b', (934, 760, 1305, 994)),
         'truck': ('33-truck-sheet', (42, 561, 791, 961)),
+        # 여울 감정 장면
+        'y-notaste': ('41-y-notaste', None),
+        'y-knees': ('42-y-knees', None),
+        'y-phone': ('43-y-phone', None),
+        'y-back-bag': ('44-y-back-bag', None),
+        'y-rod-broken': ('46-y-rod-bamboo', None),
+        'y-journal': ('47-y-journal', None),
+        'y-salty-tear': ('48-y-salty-tear', None),
+        'y-peace': ('54-y-peace', None),
+        'y-chef-cheer': ('59-y-chef-cheer', None),
+        'y-chef-nervous': ('56-y-chef-nervous', None),
     }
     for key, (src, box) in singles.items():
         im = raw(src)

@@ -318,3 +318,10 @@ export function sprite(scene: Phaser.Scene, key: string, x: number, y: number, h
   img.setScale(h / img.height);
   return img;
 }
+
+/** 물고기 그림을 가로 폭 기준으로 놓는다 (FishingPlan 도감 그림, 600x420) */
+export function fishIcon(scene: Phaser.Scene, species: string, x: number, y: number, w: number): Phaser.GameObjects.Image {
+  const img = scene.add.image(x, y, `fish-${species}`);
+  img.setScale(w / img.width);
+  return img;
+}

@@ -30,8 +30,10 @@ export interface Species {
   rare: boolean;
   /** 숙성하면 값이 오르는 어종 */
   aging: boolean;
-  /** 금지체장(cm). 이보다 작으면 놓아줘야 한다 */
+  /** 금지체장(cm). 이 길이 이하는 놓아줘야 한다 */
   limitCm?: number;
+  /** 금어기 [시작 월, 일, 끝 월, 일]. 이 기간에는 놓아줘야 한다 */
+  closed?: [number, number, number, number];
   /** 거리별 입질 가중치 [근거리, 중거리, 원거리] */
   zone: [number, number, number];
   /** 시간대별 가중치 [새벽, 아침, 낮, 저녁] */
@@ -53,10 +55,11 @@ export const SPECIES: Species[] = [
     strength: 2,
     rare: false,
     aging: false,
+    limitCm: 15,
     zone: [5, 2, 0.4],
     slot: [1.7, 0.8, 0.5, 1.7],
     hint: '새벽·저녁 · 근거리',
-    desc: '눈이 왕방울만 한 방파제 터줏대감. 해 뜨기 전과 해 질 녘에 테트라포드 틈에서 잘 문다. 아버지와 처음 낚은 물고기.',
+    desc: '눈이 왕방울만 한 방파제 터줏대감. 해 뜨기 전과 해 질 녘에 테트라포드 틈에서 잘 문다. 아버지와 처음 낚은 물고기. 15cm 이하는 놓아준다.',
     look: { len: 16, h: 8, back: '#4a3b36', body: '#6e5a4f', belly: '#b9a48c', fin: '#33282a', pattern: 'spot', patColor: '#3a2d29', bigEye: true, spiny: true },
   },
   {
@@ -118,10 +121,11 @@ export const SPECIES: Species[] = [
     rare: true,
     aging: true,
     limitCm: 25,
+    closed: [5, 1, 5, 31],
     zone: [0, 0.25, 1.1],
     slot: [1.8, 1, 0.5, 1.2],
     hint: '새벽 · 원거리 · 숙성 어종',
-    desc: '방파제 꾼들의 꿈. 새벽 먼 물에서 드물게 모습을 보인다. 힘이 엄청나서 장비가 약하면 버티기 어렵다. 숙성회로 최고다. 25cm 이하는 놓아줘야 한다.',
+    desc: '방파제 꾼들의 꿈. 새벽 먼 물에서 드물게 모습을 보인다. 힘이 엄청나서 장비가 약하면 버티기 어렵다. 숙성회로 최고다. 25cm 이하와 5월 금어기에는 놓아줘야 한다.',
     look: { len: 18, h: 10, back: '#3c4148', body: '#7b838c', belly: '#c9ced3', fin: '#2a2e33', pattern: 'band', patColor: '#4b5259', spiny: true },
   },
 ];

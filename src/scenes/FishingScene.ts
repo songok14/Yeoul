@@ -6,10 +6,11 @@ import { addToCooler, coolerFull, recordCatch } from '../state/actions';
 import { S, persist } from '../state/save';
 import { coolerCapacity, fishValue } from '../systems/economy';
 import { rollSize, rollSpecies, zoneOf, ZONE_NAME } from '../systems/fishing';
+import { releaseReason } from '../systems/calendar';
 import { checkTasteUnlock } from '../systems/taste';
 import { useSlot } from '../systems/time';
 import { Hud } from '../ui/hud';
-import { backdrop, bubble, Button, drawPanel, fadeIn, goTo, modal, sprite, toast, txt } from '../ui/ui';
+import { backdrop, fishIcon, bubble, Button, drawPanel, fadeIn, goTo, modal, sprite, toast, txt } from '../ui/ui';
 import { clamp, lerp, won } from '../utils';
 
 type Phase = 'aim' | 'power' | 'flying' | 'wait' | 'bite' | 'reel' | 'result' | 'busy';
@@ -546,8 +547,9 @@ export class FishingScene extends Phaser.Scene {
     const isNew = !S.dex[sp.id] || (S.dex[sp.id]?.count ?? 0) === 0;
     const value = fishValue({ uid: 0, species: sp.id, size, caughtDay: S.day, fresh: 100 });
     const full = !this.tutorial && coolerFull();
-    // 금지체장 미달이면 챙길 수 없다
-    const undersize = sp.limitCm !== undefined && size <= sp.limitCm;
+    // 금지체장 미달이거나 금어기면 챙길 수 없다
+    const rule = this.tutorial ? null : releaseReason(sp.id, size);
+    const undersize = rule !== null;
 
     const finish = (released: boolean) => {
       recordCatch(sp.id, size, released);
@@ -577,21 +579,26 @@ export class FishingScene extends Phaser.Scene {
 
     modal(this, {
       title: `${sp.name}${isNew ? ' (새 어종!)' : ''}`,
-      body: `${size.toFixed(1)}cm${sp.rare ? ' · 귀한 고기' : ''}\n${this.tutorial ? '손바닥만 한 볼락이다' : `오늘 위판장 시세로 약 ${won(value)}`}${undersize ? `\n금지체장 ${sp.limitCm}cm 이하라 놓아줘야 한다` : full ? '\n쿨러가 가득 찼다' : ''}`,
+      body: `${size.toFixed(1)}cm${sp.rare ? ' · 귀한 고기' : ''}\n${this.tutorial ? '손바닥만 한 볼락이다' : `오늘 위판장 시세로 약 ${won(value)}`}${rule ? `\n${rule}` : full ? '\n쿨러가 가득 찼다' : ''}`,
       extra: (c, top) => {
-        const img = this.add.image(0, top + 40, `fish-${sp.id}`).setScale(sp.look.len > 20 ? 5 : 6);
+        const img = fishIcon(this, sp.id, 0, top + 46, 170);
         c.add(img);
         this.tweens.add({ targets: img, angle: { from: -4, to: 4 }, duration: 300, yoyo: true, repeat: -1 });
-        return 96;
+        return 110;
       },
       buttons: this.tutorial
         ? [{ label: '챙기기', color: C.green, onClick: () => finish(false) }]
         : [
             { label: '놓아주기', color: C.blueDark, onClick: () => finish(true) },
-            { label: undersize ? '금지체장' : full ? '쿨러 가득' : '챙기기', color: C.green, disabled: full || undersize, onClick: () => finish(false) },
+            { label: undersize ? '놓아줘야 해요' : full ? '쿨러 가득' : '챙기기', color: C.green, disabled: full || undersize, onClick: () => finish(false) },
           ],
     });
-    if (isNew && !this.tutorial) toast(this, '도감에 새로 등록!', T.gold, 150);
+    if (isNew && !this.tutorial) {
+      toast(this, '도감에 새로 등록!', T.gold, 150);
+      const joy = sprite(this, 'y-peace', 360, 800, 260).setDepth(1001).setAlpha(0);
+      this.tweens.add({ targets: joy, alpha: 1, y: 790, duration: 300 });
+      this.time.delayedCall(1800, () => this.tweens.add({ targets: joy, alpha: 0, duration: 300, onComplete: () => joy.destroy() }));
+    }
   }
 
   private finishCast(): void {

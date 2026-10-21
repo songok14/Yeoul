@@ -6,7 +6,7 @@ import { S } from '../state/save';
 import { coolerCapacity, fishValue, STAGE_COLOR, STAGE_INK, STAGE_NAME, stageOf } from '../systems/economy';
 import { speciesCaught, tasteLevel, TASTE_STAGES } from '../systems/taste';
 import { Hud, HUD_H } from '../ui/hud';
-import { Button, drawPanel, fadeIn, goTo, modal, txt } from '../ui/ui';
+import { Button, drawPanel, fadeIn, fishIcon, goTo, modal, txt } from '../ui/ui';
 import { won } from '../utils';
 
 type Tab = 'cooler' | 'dex' | 'taste' | 'journal';
@@ -68,7 +68,7 @@ export class NotebookScene extends Phaser.Scene {
     list.forEach((f, i) => {
       const y = top + 40 + i * 40;
       const stage = stageOf(f.fresh);
-      this.add.image(44, y + 12, `fish-${f.species}`).setScale(1.4);
+      fishIcon(this, f.species, 46, y + 12, 44);
       txt(this, 76, y, `${SPECIES_BY_ID[f.species].name} ${f.size.toFixed(1)}cm`, { size: 'small', color: T.ink });
       const g = this.add.graphics();
       g.fillStyle(C.ink, 1);
@@ -87,7 +87,7 @@ export class NotebookScene extends Phaser.Scene {
     SPECIES.forEach((sp, i) => {
       const y = top + 44 + i * 100;
       const e = S.dex[sp.id];
-      const img = this.add.image(62, y + 30, `fish-${sp.id}`).setScale(sp.look.len > 20 ? 2.4 : 3);
+      const img = fishIcon(this, sp.id, 62, y + 32, 86);
       if (!e) {
         img.setTintFill(0x5b5148);
         txt(this, 120, y + 4, '???', { size: 'h1', color: T.inkSoft });
@@ -106,8 +106,8 @@ export class NotebookScene extends Phaser.Scene {
           title: sp.name,
           body: `${sp.desc}\n\n${sp.minSize}~${sp.maxSize}cm · 힘 ${'●'.repeat(sp.strength)}${sp.aging ? '\n숙성하면 값이 오른다' : ''}`,
           extra: (c, t) => {
-            c.add(this.add.image(0, t + 30, `fish-${sp.id}`).setScale(5));
-            return 70;
+            c.add(fishIcon(this, sp.id, 0, t + 34, 170));
+            return 84;
           },
           buttons: [{ label: '닫기', color: C.grayDark }],
         });

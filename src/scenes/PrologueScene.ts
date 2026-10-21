@@ -3,12 +3,14 @@ import { C, GAME_W, T } from '../config';
 import { CLEAR_PAGES, FAIL_PAGES, PROLOGUE_1, PROLOGUE_2, type StoryBg, type StoryPage } from '../data/story';
 import { S, persist } from '../state/save';
 import { SeasonGauge } from '../ui/gauge';
-import { backdrop, Button, drawPanel, fadeIn, goTo, modal, sprite, txt } from '../ui/ui';
+import { backdrop, Button, drawPanel, fadeIn, fishIcon, goTo, modal, sprite, txt } from '../ui/ui';
 
 type Mode = 'p1' | 'p2' | 'clear' | 'fail';
 
 interface PrologueData {
   part?: number | string;
+  /** 확인용: 이 페이지부터 보여 준다 */
+  page?: number | string;
   mode?: Mode;
 }
 
@@ -25,7 +27,7 @@ export class PrologueScene extends Phaser.Scene {
   private bgLayer!: Phaser.GameObjects.Container;
   private bodyText!: Phaser.GameObjects.Text;
   private nextMark!: Phaser.GameObjects.Text;
-  private currentBg: StoryBg | null = null;
+  private currentBg: string | null = null;
   private gauge?: SeasonGauge;
 
   constructor() {
@@ -36,7 +38,7 @@ export class PrologueScene extends Phaser.Scene {
     const part = Number(data.part ?? 1);
     this.mode = data.mode ?? (part === 2 ? 'p2' : 'p1');
     this.pages = { p1: PROLOGUE_1, p2: PROLOGUE_2, clear: CLEAR_PAGES, fail: FAIL_PAGES }[this.mode];
-    this.index = 0;
+    this.index = Math.min(Number(data.page ?? 0), this.pages.length - 1);
     this.blocked = false;
     this.currentBg = null;
     this.gauge = undefined;
@@ -80,9 +82,11 @@ export class PrologueScene extends Phaser.Scene {
 
   private showPage(): void {
     const page = this.pages[this.index];
-    if (page.bg !== this.currentBg) {
+    const look = `${page.bg}/${page.pic ?? ''}`;
+    if (look !== this.currentBg) {
       this.drawBg(page.bg);
-      this.currentBg = page.bg;
+      if (page.pic) this.drawPic(page.pic);
+      this.currentBg = look;
     }
     // 글자가 늘어나며 줄이 바뀌지 않도록 미리 줄바꿈을 계산해 둔다
     this.full = this.bodyText.getWrappedText(page.text).join('\n');
@@ -173,6 +177,15 @@ export class PrologueScene extends Phaser.Scene {
       return;
     }
     goTo(this, 'Title');
+  }
+
+  /** 감정 그림: 배경 위에 밝은 종이를 깔고 (흰 테두리가 안 보이게) 가운데 크게 올린다 */
+  private drawPic(key: string): void {
+    this.bgLayer.add(this.add.rectangle(0, 0, GAME_W, 548, 0xf4ecd8, 0.88).setOrigin(0, 0));
+    const pic = sprite(this, key, GAME_W / 2, 556, 470);
+    pic.setAlpha(0);
+    this.tweens.add({ targets: pic, alpha: 1, duration: 400 });
+    this.bgLayer.add(pic);
   }
 
   private drawBg(bg: StoryBg): void {
@@ -281,7 +294,7 @@ export class PrologueScene extends Phaser.Scene {
           const f = add(this.add.rectangle(140 + i * 24, 430, 16, 30, i % 2 ? 0xf08a3a : C.gold).setOrigin(0.5, 1));
           this.tweens.add({ targets: f, scaleY: 1.5, duration: 160 + (i % 3) * 70, yoyo: true, repeat: -1 });
         }
-        add(this.add.image(225, 388, 'fish-bollak').setScale(5));
+        add(fishIcon(this, 'bollak', 225, 380, 140));
         add(sprite(this, 'ch-yeoul', 84, 548, 230));
         break;
       }

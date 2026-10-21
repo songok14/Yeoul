@@ -7,7 +7,7 @@ import { S, type FishItem } from '../state/save';
 import { changePercent, coolerCapacity, fishValue, STAGE_INK, STAGE_NAME, stageOf, todayBasePrice, type FreshStage } from '../systems/economy';
 import { isMarketOpen } from '../systems/time';
 import { Hud, HUD_H } from '../ui/hud';
-import { backdrop, Button, drawPanel, fadeIn, floatText, goTo, modal, toast, txt } from '../ui/ui';
+import { backdrop, fishIcon, Button, drawPanel, fadeIn, floatText, goTo, modal, toast, txt } from '../ui/ui';
 import { won } from '../utils';
 
 interface Group {
@@ -75,7 +75,7 @@ export class MarketScene extends Phaser.Scene {
     L.add(txt(this, 30, top + 12, '오늘 시세 (평균 크기 활어 한 마리)', { size: 'small', color: T.gold }));
     SPECIES.forEach((sp, i) => {
       const y = top + 46 + i * 29;
-      L.add(this.add.image(46, y + 9, `fish-${sp.id}`).setScale(1.4));
+      L.add(fishIcon(this, sp.id, 46, y + 10, 40));
       L.add(txt(this, 80, y, sp.name, { size: 'small', color: S.dex[sp.id] ? T.paper : T.gray }));
       L.add(txt(this, 300, y, won(todayBasePrice(sp.id)), { size: 'small', color: T.paper, origin: [1, 0] }));
       const c = changePercent(sp.id);
@@ -99,7 +99,7 @@ export class MarketScene extends Phaser.Scene {
       const y = ctop + 50 + i * 48;
       g.fillStyle(i % 2 === 0 ? C.paperDark : C.paper, 0.6);
       g.fillRect(20, y - 4, GAME_W - 40, 44);
-      L.add(this.add.image(48, y + 18, `fish-${grp.species}`).setScale(1.6));
+      L.add(fishIcon(this, grp.species, 48, y + 18, 50));
       const name = txt(this, 82, y + 8, `${SPECIES_BY_ID[grp.species].name} ×${grp.items.length}`, { size: 'small', color: T.ink });
       L.add(name);
       L.add(txt(this, 82 + name.width + 8, y + 8, STAGE_NAME[grp.stage], { size: 'small', color: STAGE_INK[grp.stage] }));
@@ -187,7 +187,7 @@ export class MarketScene extends Phaser.Scene {
       const left = req.deadline - S.day;
       L.add(txt(this, GAME_W - 32, y + 18, left <= 0 ? '오늘까지' : `D-${left}`, { size: 'small', color: left <= 1 ? T.red : T.inkSoft, origin: [1, 0] }));
       L.add(txt(this, 32, y + 54, `"${t.text}"`, { size: 'small', color: T.inkSoft, wrap: GAME_W - 70 }));
-      L.add(this.add.image(60, y + 140, `fish-${t.species}`).setScale(2.4));
+      L.add(fishIcon(this, t.species, 62, y + 140, 80));
       const have = S.cooler.filter((f) => f.species === t.species && ['live', 'fresh'].includes(stageOf(f.fresh))).length;
       L.add(txt(this, 110, y + 120, `${SPECIES_BY_ID[t.species].name} ${t.count}마리 (선어 이상)`, { size: 'small', color: T.ink }));
       L.add(txt(this, 110, y + 146, `가진 것 ${have}마리`, { size: 'small', color: have >= t.count ? '#3f8a4a' : T.red }));

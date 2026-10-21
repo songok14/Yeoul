@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { C, CUSTOMERS_PER_SHIFT, GAME_W, T } from '../config';
+import { C, CUSTOMERS_PER_SHIFT, GAME_H, GAME_W, T } from '../config';
 import { SPECIES_BY_ID } from '../data/fish';
 import { FLAVOR_NAME, FLAVOR_REVIEW, FLAVOR_TOOL, RECIPES, type Recipe } from '../data/recipes';
 import { earn, removeFish } from '../state/actions';
@@ -10,7 +10,7 @@ import { useSlot } from '../systems/time';
 import { CUSTOMER_COUNT, drawFace } from '../ui/art';
 import { SeasonGauge } from '../ui/gauge';
 import { Hud, HUD_H } from '../ui/hud';
-import { backdrop, bubble, Button, drawPanel, fadeIn, floatText, goTo, modal, sprite, txt } from '../ui/ui';
+import { bubble, fishIcon, Button, drawPanel, fadeIn, floatText, goTo, modal, sprite, txt } from '../ui/ui';
 import { clamp, round100, won } from '../utils';
 
 /** 요리 신선도 배율. 회는 신선도에 민감하고 숙성 어종은 숙성일 때 가장 좋다 */
@@ -53,13 +53,19 @@ export class TruckScene extends Phaser.Scene {
 
   create(): void {
     fadeIn(this);
-    backdrop(this, 'bg-plaza', [0xc8c4e8, 0xfff2e2, 0xfff8ee, 0xffffff][S.slot]);
+    // 노을 포차 그림을 위로 100 올려 트럭과 칠판이 패널 위에 오게 한다
+    this.add.image(0, -100, 'bg-truckstop').setOrigin(0, 0).setDisplaySize(GAME_W, GAME_H)
+      .setTint([0xb8b8e0, 0xfff2e2, 0xfff8ee, 0xffffff][S.slot]);
+    this.add.rectangle(0, GAME_H - 100, GAME_W, 100, 0x3b2a20).setOrigin(0, 0);
     this.hud = new Hud(this);
     txt(this, 16, HUD_H + 10, '여울호 푸드트럭', { size: 'h1', color: T.paper, stroke: '#1b2a41' });
     const lv = tasteLevel();
     txt(this, GAME_W - 16, HUD_H + 12, `미각 ${TASTE_STAGES[lv].name}`, { size: 'small', color: T.gold, origin: [1, 0], stroke: '#1b2a41' });
 
-    sprite(this, 'truck', 150, 330, 150);
+    // 지운 간판과 칠판 자리에 게임 글자를 쓴다
+    txt(this, 316, 130, '여울호', { size: 'h1', color: '#2f4a7a', origin: [0.5, 0.5] }).setScale(1.3);
+    const board = cookable().slice(0, 4).map((r) => r.name);
+    txt(this, 389, 252, board.length ? board.join('\n') : '재료 준비 중', { size: 'small', color: '#f4f0e6', origin: [0.5, 0], align: 'center', lineSpacing: 10 }).setScale(0.7);
     this.stage = this.add.container(0, 0);
     this.showMenu();
   }
@@ -79,7 +85,7 @@ export class TruckScene extends Phaser.Scene {
       const y = 420 + i * 50;
       const n = S.cooler.filter((f) => f.species === r.species && stageOf(f.fresh) !== 'spoiled').length;
       const known = S.dex[r.species];
-      L.add(this.add.image(58, y + 16, `fish-${r.species}`).setScale(1.5).setAlpha(n > 0 ? 1 : 0.35));
+      L.add(fishIcon(this, r.species, 58, y + 16, 46).setAlpha(n > 0 ? 1 : 0.35));
       L.add(txt(this, 92, y, known ? r.name : '???', { size: 'body', color: n > 0 ? T.paper : T.gray }));
       const flavors = r.steps.map((s) => (canTaste(s.flavor) ? FLAVOR_NAME[s.flavor] : '???')).join(' · ');
       L.add(txt(this, 92, y + 26, flavors, { size: 'small', color: T.gray }));
@@ -100,11 +106,11 @@ export class TruckScene extends Phaser.Scene {
       return;
     }
     const recipe = menu[Math.floor(Math.random() * menu.length)];
-    const cust = this.add.image(GAME_W + 40, 330, `cust${Math.floor(Math.random() * CUSTOMER_COUNT)}`).setOrigin(0.5, 1).setScale(3);
+    const cust = this.add.image(-40, 352, `cust${Math.floor(Math.random() * CUSTOMER_COUNT)}`).setOrigin(0.5, 1).setScale(3);
     this.customer = cust;
     this.tweens.add({
       targets: cust,
-      x: 340,
+      x: 104,
       duration: 600,
       ease: 'Quad.Out',
       onComplete: () => this.takeOrder(recipe),
@@ -114,7 +120,7 @@ export class TruckScene extends Phaser.Scene {
 
   private takeOrder(recipe: Recipe): void {
     const known = !!S.dex[recipe.species];
-    const order = (this.order = bubble(this, 340, 226, `${known ? recipe.name : SPECIES_BY_ID[recipe.species].name + ' 요리'}\n하나 주세요!`, { wrap: 180 }));
+    const order = (this.order = bubble(this, 136, 246, `${known ? recipe.name : SPECIES_BY_ID[recipe.species].name + ' 요리'}\n하나 주세요!`, { wrap: 180 }));
     this.stage.add(order);
     this.cook(recipe, 0, []);
   }
@@ -192,16 +198,17 @@ export class TruckScene extends Phaser.Scene {
     const g = this.add.graphics();
     drawPanel(g, 16, 360, GAME_W - 32, 330, C.paper, C.ink);
     this.stage.add(g);
-    this.stage.add(this.add.image(GAME_W / 2, 420, `fish-${recipe.species}`).setScale(4));
+    this.stage.add(fishIcon(this, recipe.species, GAME_W / 2, 418, 120));
+    if (mood !== 1) this.stage.add(sprite(this, mood === 2 ? 'y-chef-cheer' : 'y-chef-nervous', 290, 358, 190));
     this.stage.add(txt(this, GAME_W / 2, 462, `${recipe.name} 완성${firstTime ? ' (레시피 기록!)' : ''}`, { size: 'h1', color: T.ink, origin: [0.5, 0] }));
     this.stage.add(drawFace(this, 70, 560, mood));
     this.stage.add(txt(this, 110, 510, lines.map((l) => `"${l}"`).join('\n'), { size: 'small', color: T.inkSoft, wrap: 300, lineSpacing: 8 }));
     this.stage.add(txt(this, GAME_W / 2, 650, `받은 돈 ${won(pay)}`, { size: 'h1', color: '#9e3330', origin: [0.5, 0.5] }));
-    floatText(this, 340, 250, `+${won(pay)}`);
+    floatText(this, 110, 270, `+${won(pay)}`);
 
     const next = new Button(this, GAME_W / 2, 740, this.served >= CUSTOMERS_PER_SHIFT ? '장사 마치기' : '다음 손님', () => {
       if (this.customer) {
-        this.tweens.add({ targets: this.customer, x: GAME_W + 60, duration: 400, onComplete: () => this.nextCustomer() });
+        this.tweens.add({ targets: this.customer, x: -60, duration: 400, onComplete: () => this.nextCustomer() });
       } else this.nextCustomer();
     }, { w: 240, h: 54, color: C.green });
     this.stage.add(next);

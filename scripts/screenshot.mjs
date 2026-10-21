@@ -90,6 +90,8 @@ const shots = [
   { name: '14-notebook-cooler', url: '/?scene=Notebook&demo=1&tab=cooler', wait: 1000 },
   { name: '15-notebook-dex', url: '/?scene=Notebook&demo=1&tab=dex', wait: 1000 },
   { name: '16-notebook-taste', url: '/?scene=Notebook&demo=1&tab=taste', wait: 1000 },
+  { name: '18-prologue-pic', url: '/?scene=Prologue&part=1&page=1', wait: 3000 },
+  { name: '19-prologue-taste', url: '/?scene=Prologue&part=2&page=1', wait: 3000 },
   {
     name: '17-town-restaurant',
     url: '/?scene=Town&demo=1',

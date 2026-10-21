@@ -13,8 +13,11 @@ export class BootScene extends Phaser.Scene {
   preload(): void {
     const images = [
       'bg-village-0', 'bg-village-1', 'bg-village-2', 'bg-village-3', 'bg-breakwater', 'bg-market', 'bg-plaza',
-      'bg-baitshop', 'bg-restaurant', 'bg-alley', 'ch-yeoul', 'ch-yeoul-back', 'ch-grandma', 'ch-grandma-stew',
+      'bg-baitshop', 'bg-restaurant', 'bg-alley', 'bg-truckstop', 'ch-yeoul', 'ch-yeoul-back', 'ch-grandma', 'ch-grandma-stew',
       'ch-nossi', 'ch-cat', 'ch-cat-walk', 'ch-cat-sleep', 'truck',
+      'fish-bollak', 'fish-godeungeo', 'fish-noraemi', 'fish-hakgongchi', 'fish-gamseongdom',
+      'y-notaste', 'y-knees', 'y-phone', 'y-back-bag', 'y-rod-broken', 'y-journal', 'y-salty-tear', 'y-peace',
+      'y-chef-cheer', 'y-chef-nervous',
     ];
     for (const key of images) this.load.image(key, `assets/${key}.webp`);
   }
