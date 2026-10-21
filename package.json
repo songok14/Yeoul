@@ -1,0 +1,23 @@
+{
+  "name": "han-jeopsi-ui-bada",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "한 접시의 바다 - 모바일 웹 낚시 경영 게임",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "shot": "node scripts/screenshot.mjs"
+  },
+  "dependencies": {
+    "galmuri": "2.40.3",
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "typescript": "~5.6.3",
+    "vite": "6.4.5"
+  }
+}

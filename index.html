@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1b2a41" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>한 접시의 바다</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #0f1a2b;
+        overflow: hidden;
+        overscroll-behavior: none;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #game { width: 100%; height: 100%; }
+      #loading {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+        color: #f4ecd8; font: 16px sans-serif; letter-spacing: 2px;
+      }
+      canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+    </style>
+  </head>
+  <body>
+    <div id="loading">바다로 가는 중...</div>
+    <div id="game"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

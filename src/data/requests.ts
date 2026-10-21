@@ -1,0 +1,21 @@
+import type { SpeciesId } from './fish';
+
+export interface RequestTemplate {
+  client: string;
+  text: string;
+  species: SpeciesId;
+  count: number;
+  /** 시세 대비 보상 배율 */
+  mul: number;
+}
+
+export const REQUEST_TEMPLATES: RequestTemplate[] = [
+  { client: '바다횟집 사장', text: '단체 손님이 온다네. 학공치 좀 구해 주게.', species: 'hakgongchi', count: 3, mul: 1.6 },
+  { client: '민박집 할머니', text: '손주들이 온다는데 볼락 구워 먹이고 싶어.', species: 'bollak', count: 2, mul: 1.7 },
+  { client: '어촌계장', text: '마을 잔치에 고등어가 넉넉히 필요해요.', species: 'godeungeo', count: 4, mul: 1.5 },
+  { client: '노씨', text: '...노래미. 두 마리.', species: 'noraemi', count: 2, mul: 1.8 },
+  { client: '읍내 일식집', text: '감성돔 한 마리면 값은 넉넉히 쳐 드리죠.', species: 'gamseongdom', count: 1, mul: 2.0 },
+  { client: '우체국 집배원', text: '아내 생일이라서요. 매운탕 끓일 노래미 한 마리만.', species: 'noraemi', count: 1, mul: 2.2 },
+  { client: '방파제 꼬마', text: '누나! 볼락 한 마리만 보여 줘! 학교 숙제야.', species: 'bollak', count: 1, mul: 2.0 },
+  { client: '포장마차 아저씨', text: '고등어 두 마리. 오늘 밤 안주로 쓸 거야.', species: 'godeungeo', count: 2, mul: 1.6 },
+];
