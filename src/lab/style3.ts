@@ -3,11 +3,9 @@
 import '@fontsource/gowun-dodum/400.css';
 import '@fontsource/gowun-batang/700.css';
 import Phaser from 'phaser';
-import { canvasTex, rng, text, type Ctx } from './paint';
-
-const SERIF = "'Gowun Batang'";
-const SANS = "'Gowun Dodum'";
-const INK = '#4B3A2F';
+import { canvasTex, text, type Ctx } from './paint';
+import { CAT_SIZE, drawCatWC, drawTruckWC, drawYeoulWC, TRUCK_SIZE, YEOUL_SIZE } from './wc-characters';
+import { blob, ink, inkRect, INK, paper, rand, SANS, seed, SERIF, wash, wrect } from './watercolor';
 const SCALE = 2;
 const SAMPLE = '4일차새벽아침낮저녁D-26 86,000원갚을돈2,640,000원오늘들은소문노래미값이23%떨어졌대위판장미끼가게여울식당방파제여울호수첩낚시1칸경매중장사장비미끼상환휴식도감미각·';
 
@@ -15,129 +13,8 @@ export async function loadWatercolorFonts(): Promise<void> {
   await Promise.all([document.fonts.load(`400 20px ${SANS}`, SAMPLE), document.fonts.load(`700 20px ${SERIF}`, SAMPLE)]);
 }
 
-let r = rng(3);
-
-/** 울퉁불퉁한 덩어리 경로 */
-function blob(cx: number, cy: number, rx: number, ry: number, wobble = 0.16, n = 16): Path2D {
-  const p = new Path2D();
-  const pts: [number, number][] = [];
-  for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2;
-    const k = 1 + (r() - 0.5) * wobble * 2;
-    pts.push([cx + Math.cos(a) * rx * k, cy + Math.sin(a) * ry * k]);
-  }
-  const mid = (i: number) => {
-    const a = pts[i % n];
-    const b = pts[(i + 1) % n];
-    return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-  };
-  const m0 = mid(0);
-  p.moveTo(m0[0], m0[1]);
-  for (let i = 1; i <= n; i++) {
-    const m = mid(i);
-    p.quadraticCurveTo(pts[i % n][0], pts[i % n][1], m[0], m[1]);
-  }
-  p.closePath();
-  return p;
-}
-
-/** 가장자리가 흔들리는 사각형 */
-function wrect(x: number, y: number, w: number, h: number, j = 1.6): Path2D {
-  const p = new Path2D();
-  const steps = (len: number) => Math.max(2, Math.round(len / 14));
-  const jit = () => (r() - 0.5) * j * 2;
-  p.moveTo(x + jit(), y + jit());
-  const edge = (x0: number, y0: number, x1: number, y1: number) => {
-    const n = steps(Math.hypot(x1 - x0, y1 - y0));
-    for (let i = 1; i <= n; i++) p.lineTo(x0 + ((x1 - x0) * i) / n + jit(), y0 + ((y1 - y0) * i) / n + jit());
-  };
-  edge(x, y, x + w, y);
-  edge(x + w, y, x + w, y + h);
-  edge(x + w, y + h, x, y + h);
-  edge(x, y + h, x, y);
-  p.closePath();
-  return p;
-}
-
-/** 물감 한 겹: 여러 번 살짝 어긋나게 칠하고 가장자리에 물감이 고이게 한다 */
-function wash(ctx: Ctx, path: Path2D, color: string, alpha = 0.4, blur = 1.4, edge = true, knock = false): void {
-  ctx.save();
-  if (knock) {
-    ctx.fillStyle = '#F7F0E2';
-    ctx.fill(path);
-  }
-  ctx.globalCompositeOperation = 'multiply';
-  for (let i = 0; i < 3; i++) {
-    ctx.save();
-    ctx.translate((r() - 0.5) * 2.4, (r() - 0.5) * 2.4);
-    ctx.globalAlpha = alpha * 0.45;
-    ctx.filter = `blur(${blur}px)`;
-    ctx.fillStyle = color;
-    ctx.fill(path);
-    ctx.restore();
-  }
-  if (edge) {
-    ctx.globalAlpha = alpha * 0.55;
-    ctx.filter = 'blur(0.8px)';
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.3;
-    ctx.stroke(path);
-  }
-  ctx.restore();
-}
-
-/** 떨리는 잉크 선 */
-function ink(ctx: Ctx, pts: [number, number][], w = 1.1, color = INK, alpha = 0.85, close = false): void {
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.globalAlpha = alpha;
-  ctx.lineWidth = w;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  const all = close ? [...pts, pts[0]] : pts;
-  ctx.moveTo(all[0][0], all[0][1]);
-  for (let i = 1; i < all.length; i++) {
-    const [x0, y0] = all[i - 1];
-    const [x1, y1] = all[i];
-    const n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / 10));
-    for (let k = 1; k <= n; k++) {
-      const t = k / n;
-      ctx.lineTo(x0 + (x1 - x0) * t + (k < n ? (r() - 0.5) * 0.9 : 0), y0 + (y1 - y0) * t + (k < n ? (r() - 0.5) * 0.9 : 0));
-    }
-  }
-  ctx.stroke();
-  ctx.restore();
-}
-
-const inkRect = (ctx: Ctx, x: number, y: number, w: number, h: number, wd = 1.1) =>
-  ink(ctx, [[x, y], [x + w, y], [x + w, y + h], [x, y + h]], wd, INK, 0.85, true);
-
-function paper(ctx: Ctx, x: number, y: number, w: number, h: number, base = '#F6EEDD'): void {
-  ctx.fillStyle = base;
-  ctx.fillRect(x, y, w, h);
-  ctx.save();
-  for (let i = 0; i < (w * h) / 22; i++) {
-    ctx.globalAlpha = 0.05 + r() * 0.07;
-    ctx.fillStyle = r() > 0.5 ? '#B8A27E' : '#FFFFFF';
-    ctx.fillRect(x + r() * w, y + r() * h, 0.6 + r(), 0.6 + r());
-  }
-  ctx.globalAlpha = 0.06;
-  ctx.strokeStyle = '#A08A66';
-  ctx.lineWidth = 0.4;
-  for (let i = 0; i < (w * h) / 900; i++) {
-    const fx = x + r() * w;
-    const fy = y + r() * h;
-    ctx.beginPath();
-    ctx.moveTo(fx, fy);
-    ctx.quadraticCurveTo(fx + 4, fy + (r() - 0.5) * 4, fx + 8 + r() * 6, fy + (r() - 0.5) * 3);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
 function drawScene(ctx: Ctx): void {
-  r = rng(3);
+  seed(3);
   paper(ctx, 0, 0, 450, 800);
 
   // 하늘
@@ -148,8 +25,8 @@ function drawScene(ctx: Ctx): void {
   sky.addColorStop(1, 'rgba(246,206,170,0.8)');
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, 450, 324);
-  for (let i = 0; i < 7; i++) wash(ctx, blob(r() * 450, 20 + r() * 140, 60 + r() * 60, 18 + r() * 16, 0.3), '#7FAFC8', 0.16, 8, false);
-  for (let i = 0; i < 4; i++) wash(ctx, blob(r() * 450, 270 + r() * 40, 70, 12, 0.3), '#EFA97E', 0.14, 8, false);
+  for (let i = 0; i < 7; i++) wash(ctx, blob(rand() * 450, 20 + rand() * 140, 60 + rand() * 60, 18 + rand() * 16, 0.3), '#7FAFC8', 0.16, 8, false);
+  for (let i = 0; i < 4; i++) wash(ctx, blob(rand() * 450, 270 + rand() * 40, 70, 12, 0.3), '#EFA97E', 0.14, 8, false);
   ctx.save();
   ctx.filter = 'blur(10px)';
   ctx.globalAlpha = 0.7;
@@ -191,13 +68,13 @@ function drawScene(ctx: Ctx): void {
   ctx.strokeStyle = '#FBF6EA';
   ctx.lineCap = 'round';
   for (let i = 0; i < 46; i++) {
-    const x = r() * 450;
-    const y = 330 + r() * 120;
-    ctx.globalAlpha = 0.55 + r() * 0.35;
-    ctx.lineWidth = 0.8 + r() * 1.2;
+    const x = rand() * 450;
+    const y = 330 + rand() * 120;
+    ctx.globalAlpha = 0.55 + rand() * 0.35;
+    ctx.lineWidth = 0.8 + rand() * 1.2;
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x + 6 + r() * 18, y + (r() - 0.5));
+    ctx.lineTo(x + 6 + rand() * 18, y + (rand() - 0.5));
     ctx.stroke();
   }
   ctx.strokeStyle = '#F6D78A';
@@ -206,8 +83,8 @@ function drawScene(ctx: Ctx): void {
     ctx.globalAlpha = 0.8 - i * 0.07;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(318 - w / 2 + (r() - 0.5) * 6, 330 + i * 10);
-    ctx.lineTo(318 + w / 2 + (r() - 0.5) * 6, 330 + i * 10);
+    ctx.moveTo(318 - w / 2 + (rand() - 0.5) * 6, 330 + i * 10);
+    ctx.lineTo(318 + w / 2 + (rand() - 0.5) * 6, 330 + i * 10);
     ctx.stroke();
   }
   ctx.restore();
@@ -251,7 +128,7 @@ function drawScene(ctx: Ctx): void {
   ctx.globalAlpha = 0.9;
   ctx.lineWidth = 2.5;
   ctx.beginPath();
-  for (let x = -10; x <= 460; x += 12) ctx.lineTo(x, 450 + Math.sin(x / 18) * 2 + (r() - 0.5) * 2);
+  for (let x = -10; x <= 460; x += 12) ctx.lineTo(x, 450 + Math.sin(x / 18) * 2 + (rand() - 0.5) * 2);
   ctx.stroke();
   ctx.restore();
 
@@ -348,7 +225,7 @@ function drawScene(ctx: Ctx): void {
   const camellia = (x: number, y: number, s: number) => {
     wash(ctx, blob(x, y, 22 * s, 14 * s, 0.25), '#5E8A5E', 0.55, 2);
     wash(ctx, blob(x + 6 * s, y - 8 * s, 12 * s, 8 * s, 0.25), '#7FA674', 0.45, 2, false);
-    for (let i = 0; i < 5; i++) wash(ctx, blob(x + (r() - 0.5) * 30 * s, y + (r() - 0.5) * 16 * s, 3.2 * s, 3.2 * s, 0.2, 8), '#C8434A', 0.85, 0.6, false);
+    for (let i = 0; i < 5; i++) wash(ctx, blob(x + (rand() - 0.5) * 30 * s, y + (rand() - 0.5) * 16 * s, 3.2 * s, 3.2 * s, 0.2, 8), '#C8434A', 0.85, 0.6, false);
   };
   camellia(288, 538, 1);
   camellia(436, 536, 0.9);
@@ -369,102 +246,8 @@ function drawScene(ctx: Ctx): void {
   ctx.restore();
 }
 
-function drawTruck(ctx: Ctx): void {
-  r = rng(21);
-  ctx.save();
-  ctx.globalAlpha = 0.25;
-  ctx.filter = 'blur(3px)';
-  ctx.fillStyle = '#6A5A4A';
-  ctx.beginPath();
-  ctx.ellipse(82, 80, 76, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-  wash(ctx, wrect(4, 26, 50, 44, 0.8), '#86BCCD', 0.65, 1.2, true, true);
-  wash(ctx, wrect(12, 32, 30, 16, 0.5), '#E3F0F2', 0.8, 1, false);
-  ink(ctx, [[4, 70], [4, 36], [16, 26], [54, 26], [54, 70]], 1.1);
-  inkRect(ctx, 12, 32, 30, 16, 0.9);
-  wash(ctx, wrect(52, 4, 104, 68, 1), '#F4E9D2', 0.55, 1.2, true, true);
-  for (let i = 0; i < 7; i++) wash(ctx, wrect(58 + i * 13, 10, 13, 13, 0.4), i % 2 ? '#F6EEDD' : '#C8664A', 0.8, 0.8, false);
-  inkRect(ctx, 52, 4, 104, 68, 1.1);
-  ink(ctx, [[58, 23], [149, 23]], 0.9);
-  wash(ctx, wrect(64, 30, 78, 20, 0.5), '#8A5E42', 0.7, 1);
-  inkRect(ctx, 64, 30, 78, 20, 0.9);
-  text(ctx, '여울호', 96, 61, `700 15px ${SERIF}`, '#2F4A7A', 'center');
-  for (const x of [28, 132]) {
-    wash(ctx, blob(x, 72, 11, 11, 0.06, 12), '#3E3A3A', 0.85, 0.8, false);
-    wash(ctx, blob(x, 72, 4, 4, 0.06, 10), '#D9D2C4', 0.9, 0.5, false);
-  }
-}
 
-function drawYeoul(ctx: Ctx): void {
-  r = rng(31);
-  wash(ctx, wrect(16, 58, 8, 18, 0.4), '#3F5E8C', 0.7, 0.8, false, true);
-  wash(ctx, wrect(26, 58, 8, 18, 0.4), '#3F5E8C', 0.7, 0.8, false, true);
-  const coat = new Path2D();
-  coat.moveTo(14, 36);
-  coat.quadraticCurveTo(25, 30, 36, 36);
-  coat.lineTo(41, 64);
-  coat.quadraticCurveTo(25, 68, 9, 64);
-  coat.closePath();
-  wash(ctx, coat, '#E8B83A', 0.75, 1, true, true);
-  ctx.save();
-  ctx.strokeStyle = INK;
-  ctx.globalAlpha = 0.85;
-  ctx.lineWidth = 1;
-  ctx.stroke(coat);
-  ctx.restore();
-  wash(ctx, blob(25, 22, 14, 14, 0.04, 14), '#F2C9A8', 0.7, 0.8, true, true);
-  const hair = new Path2D();
-  hair.arc(25, 19, 15, Math.PI * 1.02, Math.PI * 1.98);
-  hair.lineTo(40, 30);
-  hair.lineTo(35, 30);
-  hair.lineTo(34, 18);
-  hair.lineTo(16, 18);
-  hair.lineTo(15, 30);
-  hair.lineTo(10, 30);
-  hair.closePath();
-  wash(ctx, hair, '#4B3A2F', 0.85, 0.8);
-  wash(ctx, blob(25, 4, 6, 6, 0.05, 10), '#4B3A2F', 0.85, 0.6, false);
-  ctx.fillStyle = INK;
-  ctx.beginPath();
-  ctx.arc(20, 25, 1.4, 0, Math.PI * 2);
-  ctx.arc(30, 25, 1.4, 0, Math.PI * 2);
-  ctx.fill();
-  wash(ctx, blob(17, 29, 3, 2, 0.1, 8), '#E07A7A', 0.4, 1, false);
-  wash(ctx, blob(33, 29, 3, 2, 0.1, 8), '#E07A7A', 0.4, 1, false);
-}
 
-function drawCat(ctx: Ctx): void {
-  r = rng(41);
-  wash(ctx, blob(22, 31, 14, 12, 0.08), '#8E949C', 0.6, 1, true, true);
-  wash(ctx, blob(22, 14, 12, 11, 0.05), '#8E949C', 0.6, 1, true, true);
-  ink(ctx, [[10, 10], [13, 0], [18, 6]], 1);
-  ink(ctx, [[26, 6], [31, 0], [34, 10]], 1);
-  ctx.save();
-  ctx.strokeStyle = INK;
-  ctx.globalAlpha = 0.8;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.ellipse(22, 14, 12, 11, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.ellipse(22, 31, 14, 12, 0, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.lineWidth = 3;
-  ctx.globalAlpha = 0.55;
-  ctx.beginPath();
-  ctx.moveTo(34, 38);
-  ctx.quadraticCurveTo(46, 36, 42, 24);
-  ctx.stroke();
-  ctx.restore();
-  for (const x of [17, 22, 27]) ink(ctx, [[x, 4], [x, 8]], 1, '#5E646C', 0.8);
-  ctx.fillStyle = INK;
-  ctx.beginPath();
-  ctx.arc(18, 15, 1.4, 0, Math.PI * 2);
-  ctx.arc(26, 15, 1.4, 0, Math.PI * 2);
-  ctx.fill();
-  wash(ctx, wrect(19, 24, 6, 9, 0.3), '#C8434A', 0.85, 0.5, false);
-}
 
 /** 손그림 아이콘 */
 function doodle(ctx: Ctx, kind: string, x: number, y: number): void {
@@ -507,10 +290,10 @@ function doodle(ctx: Ctx, kind: string, x: number, y: number): void {
 function tornPaper(ctx: Ctx, x: number, y: number, w: number, h: number, color: string, tornTop: boolean, tornBottom: boolean): void {
   const p = new Path2D();
   p.moveTo(x, y);
-  if (tornTop) for (let i = 0; i <= w; i += 6) p.lineTo(x + i, y + (r() - 0.5) * 4);
+  if (tornTop) for (let i = 0; i <= w; i += 6) p.lineTo(x + i, y + (rand() - 0.5) * 4);
   else p.lineTo(x + w, y);
   p.lineTo(x + w, y + h);
-  if (tornBottom) for (let i = w; i >= 0; i -= 6) p.lineTo(x + i, y + h + (r() - 0.5) * 4);
+  if (tornBottom) for (let i = w; i >= 0; i -= 6) p.lineTo(x + i, y + h + (rand() - 0.5) * 4);
   else p.lineTo(x, y + h);
   p.closePath();
   ctx.save();
@@ -566,7 +349,7 @@ function tag(ctx: Ctx, cx: number, cy: number, label: string): void {
 }
 
 function drawUi(ctx: Ctx): void {
-  r = rng(51);
+  seed(51);
   // 상단 쪽지
   tornPaper(ctx, 12, 12, 426, 94, '#FBF7EE', false, true);
   tape(ctx, 30, 14, 46, -0.25);
@@ -651,6 +434,36 @@ function drawUi(ctx: Ctx): void {
   });
 }
 
+/** 캐릭터 시트: 세 캐릭터를 크게 보여 주는 종이 한 장 */
+function drawSheetBg(ctx: Ctx): void {
+  seed(61);
+  paper(ctx, 0, 0, 450, 800);
+  text(ctx, '물비늘포 사람들', 225, 44, `700 26px ${SERIF}`, INK, 'center');
+  ink(ctx, [[150, 62], [300, 62]], 1.2, '#C8664A', 0.7);
+  const note = (x: number, y: number, title: string, lines: string[]) => {
+    text(ctx, title, x, y, `700 18px ${SERIF}`, INK);
+    lines.forEach((l, i) => text(ctx, l, x, y + 24 + i * 19, `400 13px ${SANS}`, '#6A5644'));
+  };
+  note(28, 92, '한여울 (29)', ['전 르 블랑 수셰프', '불이 난 뒤 맛을 잃었다', '볼에 그날의 밴드']);
+  note(262, 92, '고등어', ['트럭에 눌러앉은 길고양이', '귀 끝이 살짝 찢겼다', "목에 'D.Y.' 낡은 찌"]);
+  note(28, 476, '여울호', ['할아버지의 1톤 트럭. 배 이름을 붙였다', '짐칸을 주방으로 고쳤고 지붕엔 낚싯대']);
+  // 확대해서 보여 주는 찌
+  ctx.save();
+  ctx.strokeStyle = INK;
+  ctx.globalAlpha = 0.5;
+  ctx.setLineDash([3, 3]);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(392, 410, 26, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+  wash(ctx, wrect(384, 392, 16, 16, 0.4), '#C8434A', 0.9, 0.5, false, true);
+  wash(ctx, wrect(384, 408, 16, 18, 0.4), '#FBF6EA', 0.95, 0.5, false, true);
+  ink(ctx, [[384, 392], [400, 392], [400, 426], [384, 426]], 1, INK, 0.8, true);
+  ink(ctx, [[392, 384], [392, 392]], 1);
+  text(ctx, 'D.Y.', 392, 416, `700 8px ${SERIF}`, '#8A2A30', 'center');
+}
+
 export class WatercolorScene extends Phaser.Scene {
   constructor() {
     super('Watercolor');
@@ -658,12 +471,29 @@ export class WatercolorScene extends Phaser.Scene {
 
   create(): void {
     this.cameras.main.setZoom(SCALE).centerOn(225, 400);
+    const sheet = new URLSearchParams(location.search).get('sheet') === '1';
     const img = (key: string, x: number, y: number, w: number, h: number) => this.add.image(x, y, key).setDisplaySize(w, h);
+    const Y = YEOUL_SIZE;
+    const CT = CAT_SIZE;
+    const TR = TRUCK_SIZE;
+    const yeoulKey = canvasTex(this, 'wc-yeoul', Y.w, Y.h, 3, drawYeoulWC);
+    const catKey = canvasTex(this, 'wc-cat', CT.w, CT.h, 3, (c) => drawCatWC(c, false));
+    const truckKey = canvasTex(this, 'wc-truck', TR.w, TR.h, 2.4, (c) => drawTruckWC(c, true));
+
+    if (sheet) {
+      img(canvasTex(this, 'wc-sheet', 450, 800, SCALE, drawSheetBg), 225, 400, 450, 800);
+      const yeoul = img(yeoulKey, 112, 300, Y.w * 1.55, Y.h * 1.55).setOrigin(0.5, 0.5);
+      this.tweens.add({ targets: yeoul, y: 297, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+      img(catKey, 322, 318, CT.w * 1.6, CT.h * 1.6);
+      img(truckKey, 225, 650, TR.w * 1.32, TR.h * 1.32);
+      return;
+    }
+
     img(canvasTex(this, 'wc-bg', 450, 800, SCALE, drawScene), 225, 400, 450, 800);
-    img(canvasTex(this, 'wc-truck', 160, 86, SCALE, drawTruck), 230, 566, 160, 86);
-    const yeoul = img(canvasTex(this, 'wc-yeoul', 50, 80, SCALE, drawYeoul), 104, 590, 50, 80);
-    this.tweens.add({ targets: yeoul, y: 587, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
-    img(canvasTex(this, 'wc-cat', 48, 44, SCALE, drawCat), 352, 604, 48, 44);
+    img(truckKey, 232, 562, TR.w * 0.6, TR.h * 0.6);
+    const yeoul = img(yeoulKey, 90, 580, Y.w * 0.6, Y.h * 0.6);
+    this.tweens.add({ targets: yeoul, y: 578, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+    img(catKey, 372, 596, CT.w * 0.64, CT.h * 0.64);
     img(canvasTex(this, 'wc-ui', 450, 800, SCALE, drawUi), 225, 400, 450, 800);
   }
 }

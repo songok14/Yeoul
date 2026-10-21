@@ -14,7 +14,7 @@ for (const s of styles) {
   page.on('console', (m) => {
     if (m.type() === 'error' && !/swiftshader|GroupMarker/i.test(m.text())) errors.push(`[${s}] ${m.text()}`);
   });
-  await page.goto(`http://localhost:4176/lab.html?style=${s}`);
+  await page.goto(`http://localhost:4176/lab.html?style=${s.replace('sheet', '3&sheet=1')}`);
   await page.waitForSelector('canvas');
   await page.waitForTimeout(2500);
   await page.screenshot({ path: `screenshots/style-${s}.png` });
