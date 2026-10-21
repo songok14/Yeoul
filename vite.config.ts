@@ -6,6 +6,7 @@ export default defineConfig({
     target: 'es2020',
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
+      input: { main: 'index.html', lab: 'lab.html' },
       output: {
         manualChunks: { phaser: ['phaser'] },
       },
