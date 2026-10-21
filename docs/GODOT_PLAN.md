@@ -14,7 +14,7 @@
 | 엔진 | **Godot 4.7.2 .NET(C#)**. MIT 라이선스, 계정·비용 없음 |
 | 렌더러 | Compatibility(OpenGL ES 3). 2D 게임이라 충분하고 오래된 폰까지 돈다 |
 | 목표 기기 | 안드로이드 먼저(arm64). 세로 1080×1920 기준, 화면이 길면 세로로 늘어난다(stretch `canvas_items` + `expand`) |
-| 언어 | C# (.NET 8). 코어와 고닷 쪽 모두 |
+| 언어 | C#. 코어는 .NET 8, 고닷 프로젝트는 .NET 9 (안드로이드 C# 템플릿 조건) |
 | 규칙 코드 | 고닷을 모르는 순수 C# 코어(`core/`). dotnet으로 빌드하고 xUnit으로 테스트 |
 | 데이터 | JSON (`godot/data/*.json`). 파싱은 Newtonsoft Json |
 | 웹과 같은지 확인 | 웹 코드로 기준값(골든)을 뽑아 C# 테스트가 비교한다 |
@@ -58,7 +58,7 @@ Yeoul/
 ```
 
 - 코어는 고닷을 모른다. 고닷 쪽(`godot/scripts`)은 `ProjectReference`로 코어를 쓴다. 계산식이 화면 코드에 들어가면 테스트할 수 없으니 코어로 뺀다.
-- 고닷 쪽 C#은 여기서도 `dotnet build godot/Hanjeopsi.csproj`로 진짜 GodotSharp API에 대고 컴파일된다.
+- 고닷 쪽 C#은 여기서도 `dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true`로 진짜 GodotSharp API에 대고 컴파일된다. 프로젝트 기본은 net9.0이다(고닷 4.7 안드로이드 C# 템플릿 조건).
 - `.godot/`, `build/`, `bin/`, `obj/`는 커밋하지 않는다. 에디터가 만드는 `*.import`, `*.uid` 파일은 PC에서 에디터를 열었을 때 커밋해도 된다.
 
 ## 3. 웹 구조 규칙을 그대로

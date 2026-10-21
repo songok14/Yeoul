@@ -30,7 +30,7 @@
 - 게임 규칙은 `core/Hanjeopsi.Core` (고닷을 모르는 순수 C#, net8.0). 고닷 쪽 코드는 `godot/scripts`. 화면 코드에 계산식을 넣지 않고 코어로 뺀다.
 - 데이터는 `godot/data/*.json`. 수치와 글은 코드에 쓰지 않는다.
 - 웹과 같은 결과인지 골든 테스트로 확인한다. 웹 수치나 계산을 바꾸면 `npm run golden`으로 `core/golden/`을 다시 만든다.
-- 이 환경에서는 고닷을 실행하지 못한다. 고닷 쪽 C#은 `dotnet build godot/Hanjeopsi.csproj`로 진짜 GodotSharp에 대고 컴파일한다.
+- 이 환경에서는 고닷을 실행하지 못한다. 고닷 쪽 C#은 `dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true`로 진짜 GodotSharp에 대고 컴파일한다(프로젝트는 안드로이드 템플릿 때문에 net9.0, 여기엔 .NET 8만 있다).
 - **APK와 화면 사진은 GitHub Actions(`.github/workflows/android.yml`)가 만든다.** 비밀값은 필요 없다. `core/`나 `godot/`를 푸시하면 돌고, 사용자는 릴리스 `test-latest`에서 받아 폰에서 테스트한다.
 - 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인한다. 성공하면 `git fetch origin ci-build`로 `lab.png` 같은 화면 사진을 받아 **직접 열어 본다**(글자 겹침, 화면 밖 글자, 버튼 겹침). 실패하면 로그를 보고 고쳐서 다시 푸시한다.
 - 새 화면을 만들면 사진 모드(`-- --shot=<경로>`)에서 그 화면을 찍도록 워크플로에 한 줄 추가한다.
@@ -39,7 +39,7 @@
 
 ```bash
 dotnet test core/Hanjeopsi.sln              # 코어 빌드 + 테스트. 모두 통과해야 한다
-dotnet build godot/Hanjeopsi.csproj          # 고닷 쪽 C# 컴파일
+dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true   # 고닷 쪽 C# 컴파일 (여기엔 .NET 8만 있다)
 npm run golden                               # 웹 코드를 고쳤으면 기준값 다시 만들기
 ```
 - 웹 코드를 고치면(계산을 systems로 빼는 리팩터링 포함) 웹 "작업 후 확인"도 함께 돌린다.
