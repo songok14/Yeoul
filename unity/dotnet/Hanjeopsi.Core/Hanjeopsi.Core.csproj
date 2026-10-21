@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- 유니티 패키지의 Runtime 소스를 그대로 컴파일한다. 소스는 한 벌만 둔다 -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <!-- Unity 6 가 지원하는 C# 9 로 묶어 둔다 -->
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>Hanjeopsi.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../com.songok.hanjeopsi.core/Runtime/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 유니티 com.unity.nuget.newtonsoft-json 3.2.1 (Json.NET 13) 과 맞춘다 -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+</Project>

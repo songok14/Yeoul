@@ -1,0 +1,83 @@
+{
+  "rods": [
+    {
+      "name": "다이소 낚싯대",
+      "desc": "할머니가 쓰던 이천 원짜리",
+      "price": 0,
+      "reach": 0.8,
+      "absorb": 0,
+      "hookBonus": 0
+    },
+    {
+      "name": "갯바위 찌낚싯대 1호",
+      "desc": "먼 물까지 닿는다. 저항 흡수",
+      "price": 80000,
+      "reach": 1,
+      "absorb": 0.25,
+      "hookBonus": 80
+    },
+    {
+      "name": "노씨의 감성돔대",
+      "desc": "노씨 애장품. 저항 크게 흡수",
+      "price": 300000,
+      "reach": 1,
+      "absorb": 0.45,
+      "hookBonus": 160
+    }
+  ],
+  "reels": [
+    {
+      "name": "녹슨 스피닝릴",
+      "desc": "감을 때마다 끼익 소리가 난다",
+      "price": 0,
+      "speed": 5,
+      "tensionMul": 1,
+      "drag": 101
+    },
+    {
+      "name": "2500번 스피닝릴",
+      "desc": "빨리 감긴다. 드랙 텐션 90",
+      "price": 60000,
+      "speed": 7,
+      "tensionMul": 0.9,
+      "drag": 90
+    },
+    {
+      "name": "레버브레이크릴",
+      "desc": "더 빨리 감긴다. 드랙 85",
+      "price": 250000,
+      "speed": 9,
+      "tensionMul": 0.8,
+      "drag": 85
+    }
+  ],
+  "tackles": [
+    {
+      "name": "양동이",
+      "desc": "8마리. 금방 상한다",
+      "price": 0,
+      "capacity": 8,
+      "decay": 40
+    },
+    {
+      "name": "아이스 쿨러",
+      "desc": "15마리. 천천히 상한다",
+      "price": 50000,
+      "capacity": 15,
+      "decay": 25
+    },
+    {
+      "name": "대형 아이스박스",
+      "desc": "25마리. 얼음 가득",
+      "price": 180000,
+      "capacity": 25,
+      "decay": 15
+    }
+  ],
+  "bait": {
+    "name": "크릴 미끼",
+    "desc": "한 봉지에 10번",
+    "price": 3000,
+    "amount": 10
+  }
+}

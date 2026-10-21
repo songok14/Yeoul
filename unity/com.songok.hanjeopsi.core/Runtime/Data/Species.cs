@@ -1,0 +1,31 @@
+namespace Hanjeopsi.Core.Data
+{
+    /// <summary>어종 한 종. species.json 한 항목 (웹 src/data/fish.ts)</summary>
+    public sealed class Species
+    {
+        /// <summary>로마자 id. FishingPlan 도감 그림 이름(fish_&lt;id&gt;)과 같다</summary>
+        public string Id;
+        public string Name;
+        public double MinSize;
+        public double MaxSize;
+        public double AvgSize;
+        /// <summary>평균 크기 활어 한 마리 기준 경매가</summary>
+        public int BasePrice;
+        /// <summary>힘 1~5. 텐션이 오르는 속도와 저항 빈도에 영향</summary>
+        public int Strength;
+        public bool Rare;
+        /// <summary>숙성하면 값이 오르는 어종</summary>
+        public bool Aging;
+        /// <summary>금지체장(cm). 이 길이 이하는 놓아줘야 한다. 없으면 null</summary>
+        public double? LimitCm;
+        /// <summary>금어기 [시작 월, 일, 끝 월, 일]. 없으면 null</summary>
+        public int[] Closed;
+        /// <summary>거리별 입질 가중치 [근거리, 중거리, 원거리]</summary>
+        public double[] Zone;
+        /// <summary>시간대별 가중치 [새벽, 아침, 낮, 저녁]</summary>
+        public double[] Slot;
+        /// <summary>도감 한 줄 힌트</summary>
+        public string Hint;
+        public string Desc;
+    }
+}

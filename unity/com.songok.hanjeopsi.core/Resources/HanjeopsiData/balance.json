@@ -1,0 +1,32 @@
+{
+  "chapter1": {
+    "deadlineDays": 30,
+    "debt": 3000000,
+    "startMoney": 20000,
+    "startBait": 12,
+    "castsPerTrip": 6,
+    "customersPerShift": 5,
+    "startMonth": 4,
+    "startDate": 16
+  },
+  "market": {
+    "dailySwing": 0.5,
+    "minMul": 0.55,
+    "maxMul": 1.7,
+    "glutBelow": 0.06,
+    "glutMul": 0.6,
+    "shortageAbove": 0.95,
+    "shortageMul": 1.45,
+    "sizeExponent": 1.5
+  },
+  "fresh": {
+    "start": 100,
+    "liveAbove": 75,
+    "freshAbove": 40,
+    "agedAbove": 10,
+    "liveFactor": 1,
+    "freshFactor": 0.75,
+    "agedFactor": 0.45,
+    "agedFactorAging": 1.3
+  }
+}

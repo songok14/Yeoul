@@ -1,6 +1,9 @@
 # CLAUDE.md · 프로젝트 규칙
 
-모바일 웹 낚시 경영 게임 **한 접시의 바다**. 처음 보는 사람도 이 파일과 `docs/`만 읽고 작업을 이어갈 수 있게 유지한다.
+모바일 낚시 경영 게임 **한 접시의 바다**. 처음 보는 사람도 이 파일과 `docs/`만 읽고 작업을 이어갈 수 있게 유지한다.
+
+> **2026-10부터 유니티로 옮기는 중이다.** 계획은 `docs/UNITY_PLAN.md`, 유니티 쪽은 `unity/`.
+> 웹 버전(`src/`, Phaser)은 지우지 않고 기획과 동작의 기준으로 남긴다. 아래 "기술 결정"과 "작업 후 확인"은 웹 버전 규칙이고, 유니티 규칙은 "유니티" 절에 있다.
 
 ## 언어
 
@@ -20,6 +23,20 @@
 - **돈이 드는 것은 쓰지 않는다.** 유료 API, 유료 에셋, 유료 호스팅 금지. 배포는 Vercel 또는 Cloudflare Pages 무료 플랜.
 - 일러스트는 사용자가 이미지 AI로 뽑아 준다. 원본은 레포에 넣지 않고 `python3 scripts/art.py <원본 폴더>`로 배경 제거·자르기·WebP 변환을 해서 `public/assets/`에 넣는다. 새 그림은 `scripts/art.py`의 목록과 `BootScene.preload()`에 같이 추가한다.
 - 새 그림이 필요하면 `docs/ART_PROMPTS.md` 형식(복붙용 코드 블록 하나, 시트형)으로 프롬프트를 준다.
+
+## 유니티 (2026-10~)
+
+- Unity 6 LTS, Universal 2D(URP), Personal. 안드로이드 먼저, 세로 1080×1920 기준.
+- 게임 규칙은 `unity/com.songok.hanjeopsi.core` (UnityEngine 없는 순수 C# 9, asmdef `noEngineReferences`). 유니티 쪽 코드는 `unity/com.songok.hanjeopsi.game`. 유니티 프로젝트는 `unity/HanjeopsiBada` (사용자가 Unity Hub로 만든다).
+- 데이터는 `unity/com.songok.hanjeopsi.core/Resources/HanjeopsiData/*.json`. 수치와 글은 코드에 쓰지 않는다.
+- 웹과 같은 결과인지 골든 테스트로 확인한다. 웹 수치를 바꾸면 `npm run golden`으로 `unity/golden/`을 다시 만든다.
+- 클라우드에서는 유니티 에디터를 못 돌린다. 계산은 최대한 Core로 보내서 dotnet 테스트로 확인하고, 에디터에서 할 일은 `docs/UNITY_PLAN.md` 10장에 단계별로 적는다.
+- 그림: 배경은 수채화 일러스트 그대로, 인게임 캐릭터·물체는 SD(2~2.5등신), 일러스트는 컷신 전용. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).
+- 유니티는 WebP를 못 읽는다. 그림은 PNG로 넣는다.
+
+```bash
+cd unity/dotnet && dotnet test   # 코어 빌드 + 테스트. 모두 통과해야 한다
+```
 
 ## 구조 규칙
 

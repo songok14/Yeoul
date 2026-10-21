@@ -1,0 +1,10 @@
+{
+  "name": "com.songok.hanjeopsi.game",
+  "version": "0.1.0",
+  "displayName": "한 접시의 바다 게임",
+  "description": "씬, UI, 연출 같은 유니티 쪽 코드. 규칙 계산은 com.songok.hanjeopsi.core 에 맡긴다.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.songok.hanjeopsi.core": "0.1.0"
+  }
+}
