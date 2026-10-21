@@ -8,7 +8,11 @@
 | `com.songok.hanjeopsi.game/` | 씬, UI, 연출 같은 유니티 쪽 코드 (로컬 UPM 패키지) |
 | `dotnet/` | 코어를 dotnet으로 빌드하고 xUnit으로 테스트 |
 | `golden/` | 웹 버전 코드로 뽑은 기준값. 테스트가 이것과 비교한다 |
-| `HanjeopsiBada/` | 유니티 프로젝트 (Unity Hub로 만든다) |
+| `HanjeopsiBada/` | 유니티 프로젝트. 씬과 설정은 빌드 스크립트가 만든다 |
+
+## APK
+
+`unity/**`를 푸시하면 GitHub Actions가 코어 테스트 → 유니티 코드 점검 → APK 빌드를 하고, 릴리스 `test-latest`에 올린다. 처음 한 번 저장소 비밀값(`UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD`)이 필요하다. 순서는 `docs/UNITY_PLAN.md` 10장.
 
 ## 코어 빌드와 테스트
 
@@ -17,6 +21,7 @@
 ```bash
 cd unity/dotnet
 dotnet test          # 빌드 + 테스트. 모두 통과해야 한다
+dotnet build UnityCheck   # 유니티 쪽 코드 근사 점검 컴파일
 ```
 
 ## 웹 수치를 바꿨을 때

@@ -26,17 +26,23 @@
 
 ## 유니티 (2026-10~)
 
-- Unity 6 LTS, Universal 2D(URP), Personal. 안드로이드 먼저, 세로 1080×1920 기준.
-- 게임 규칙은 `unity/com.songok.hanjeopsi.core` (UnityEngine 없는 순수 C# 9, asmdef `noEngineReferences`). 유니티 쪽 코드는 `unity/com.songok.hanjeopsi.game`. 유니티 프로젝트는 `unity/HanjeopsiBada` (사용자가 Unity Hub로 만든다).
+- Unity 6.3 LTS(`6000.3.27f1`), Personal. 안드로이드 먼저, 세로 1080×1920 기준. URP 2D는 씬을 옮길 때(U5) 넣는다.
+- 게임 규칙은 `unity/com.songok.hanjeopsi.core` (UnityEngine 없는 순수 C# 9, asmdef `noEngineReferences`). 유니티 쪽 코드는 `unity/com.songok.hanjeopsi.game`. 유니티 프로젝트는 `unity/HanjeopsiBada`.
 - 데이터는 `unity/com.songok.hanjeopsi.core/Resources/HanjeopsiData/*.json`. 수치와 글은 코드에 쓰지 않는다.
 - 웹과 같은 결과인지 골든 테스트로 확인한다. 웹 수치를 바꾸면 `npm run golden`으로 `unity/golden/`을 다시 만든다.
-- 클라우드에서는 유니티 에디터를 못 돌린다. 계산은 최대한 Core로 보내서 dotnet 테스트로 확인하고, 에디터에서 할 일은 `docs/UNITY_PLAN.md` 10장에 단계별로 적는다.
+- 클라우드에서는 유니티 에디터를 못 돌린다(라이선스·패키지 서버가 막혀 있다). 계산은 최대한 Core로 보내서 dotnet 테스트로 확인한다.
+- **APK는 GitHub Actions(`.github/workflows/android.yml`, GameCI)가 만든다.** `unity/**`를 푸시하면 돌고, 사용자는 릴리스 `test-latest`에서 받아 폰에서 테스트한다. 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인하고, 실패하면 로그를 보고 고쳐서 다시 푸시한다.
+- 유니티 쪽 코드는 푸시 전에 `dotnet build unity/dotnet/UnityCheck`로 근사 점검 컴파일을 한다(Unity 2021.1 참조본. Unity 6 전용 API는 `HANJEOPSI_UNITY_CHECK`로 갈라 둔다).
+- 씬과 플레이어 설정은 `com.songok.hanjeopsi.game/Editor/BuildScript.cs`가 코드로 만든다. 사용자가 할 일은 `docs/UNITY_PLAN.md` 10장.
 - 그림: 배경은 수채화 일러스트 그대로, 인게임 캐릭터·물체는 SD(2~2.5등신), 일러스트는 컷신 전용. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).
-- 유니티는 WebP를 못 읽는다. 그림은 PNG로 넣는다.
+- 유니티는 WebP를 못 읽는다. 그림은 PNG로 `unity/HanjeopsiBada/Assets/Resources/Art/`에 넣는다. SD 시트는 `python3 scripts/sd_sheet.py <시트> <행> <열> <폴더> <이름들>`로 자른다(원본 시트는 커밋하지 않는다).
 
 ```bash
-cd unity/dotnet && dotnet test   # 코어 빌드 + 테스트. 모두 통과해야 한다
+cd unity/dotnet && dotnet test        # 코어 빌드 + 테스트. 모두 통과해야 한다
+dotnet build unity/dotnet/UnityCheck  # 유니티 쪽 코드 근사 점검
+npm run golden                        # 웹 코드를 고쳤으면 기준값 다시 만들기
 ```
+- 웹 코드를 고치면(계산을 systems로 빼는 리팩터링 포함) 웹 "작업 후 확인"도 함께 돌린다.
 
 ## 구조 규칙
 
