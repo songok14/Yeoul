@@ -21,7 +21,8 @@ namespace Hanjeopsi.App.Lab
     /// </summary>
     public partial class CoreLab : Control
     {
-        private const int LogLines = 7;
+        private const int LogLines = 30;
+        private const int LogHeight = 214;
 
         private static readonly string[] YeoulPoses = { "front", "wave", "three-quarter", "side", "walk", "back", "idle" };
         private static readonly string[] CatPoses = { "sit-front", "meow-1", "walk", "loaf", "eat", "jump", "sleep", "stretch", "sit-side", "back" };
@@ -91,7 +92,7 @@ namespace Hanjeopsi.App.Lab
             catch (Exception e)
             {
                 GD.PushError(e.ToString());
-                var err = new Label { Text = "데이터를 읽지 못했다\n" + e.GetType().Name + ": " + e.Message, AutowrapMode = TextServer.AutowrapMode.WordSmart };
+                var err = MakeLabel("데이터를 읽지 못했다\n" + e.GetType().Name + ": " + e.Message, 36, Paper, true);
                 err.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect, LayoutPresetMode.KeepSize, 40);
                 AddChild(err);
             }
@@ -162,9 +163,17 @@ namespace Hanjeopsi.App.Lab
             return sb;
         }
 
-        private static Label MakeLabel(string text, int size, Color color)
+        /// <summary>기본은 한 줄. 넘치면 말줄임표. 여러 줄이 필요하면 wrap</summary>
+        private static Label MakeLabel(string text, int size, Color color, bool wrap = false)
         {
-            var l = new Label { Text = text, AutowrapMode = TextServer.AutowrapMode.WordSmart };
+            var l = new Label { Text = text };
+            if (wrap) l.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+            else
+            {
+                l.AutowrapMode = TextServer.AutowrapMode.Off;
+                l.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+                l.ClipText = true;
+            }
             l.AddThemeFontSizeOverride("font_size", size);
             l.AddThemeColorOverride("font_color", color);
             return l;
@@ -224,6 +233,8 @@ namespace Hanjeopsi.App.Lab
             _date = MakeLabel("", 46, Paper);
             _date.SizeFlagsHorizontal = SizeFlags.ExpandFill;
             _dday = MakeLabel("", 46, Red);
+            _dday.ClipText = false;
+            _dday.TextOverrunBehavior = TextServer.OverrunBehavior.NoTrimming;
             top.AddChild(_date);
             top.AddChild(_dday);
             hudCol.AddChild(top);
@@ -269,8 +280,10 @@ namespace Hanjeopsi.App.Lab
             _requests = new VBoxContainer();
             _requests.AddThemeConstantOverride("separation", 0);
             body.AddChild(_requests);
-            _logView = new RichTextLabel { BbcodeEnabled = true, FitContent = true, ScrollActive = false, CustomMinimumSize = new Vector2(0, 40) };
-            _logView.AddThemeFontSizeOverride("normal_font_size", 31);
+            // 기록은 높이를 고정하고 마지막 줄을 따라간다. 길어져도 패널이 커지지 않는다
+            _logView = new RichTextLabel { BbcodeEnabled = true, FitContent = false, ScrollActive = false, ScrollFollowing = true, ClipContents = true, CustomMinimumSize = new Vector2(0, LogHeight) };
+            _logView.AddThemeFontSizeOverride("normal_font_size", 30);
+            _logView.AddThemeConstantOverride("line_separation", 2);
             body.AddChild(_logView);
 
             var buttons = new GridContainer { Columns = 3 };
@@ -334,7 +347,7 @@ namespace Hanjeopsi.App.Lab
             panel.AddThemeStyleboxOverride("panel", Box(new Color("f4ecd8"), 28, 40, 34));
             var col = new VBoxContainer();
             col.AddThemeConstantOverride("separation", 20);
-            col.AddChild(MakeLabel("웹 일치 점검", 50, new Color("2b2b2b")));
+            col.AddChild(MakeLabel("웹 일치 점검", 50, new Color("2b2b2b"), true));
             _checkText = new RichTextLabel { BbcodeEnabled = true, FitContent = true, ScrollActive = false };
             _checkText.AddThemeFontSizeOverride("normal_font_size", 33);
             _checkText.AddThemeColorOverride("default_color", new Color("2b2b2b"));
@@ -686,7 +699,8 @@ namespace Hanjeopsi.App.Lab
             string json = SaveJson.ToJson(_game.Save);
             var back = SaveJson.FromJson(json, d);
             Check("세이브 JSON 왕복 (" + json.Length + "자)", back != null && SaveJson.ToJson(back) == json);
-            Check("세이브 파일 " + (SaveStore.Has() ? "있음" : "없음"), SaveStore.Has());
+            if (_shotPath != null) Check("세이브 파일 (사진 모드라 건너뜀)", true);
+            else Check("세이브 파일 " + (SaveStore.Has() ? "있음" : "없음"), SaveStore.Has());
             return list;
         }
     }
