@@ -21,6 +21,14 @@ export const STAGE_COLOR: Record<FreshStage, string> = {
   spoiled: '#a08a7a',
 };
 
+/** 밝은 종이 위에 쓸 진한 신선도 색 */
+export const STAGE_INK: Record<FreshStage, string> = {
+  live: '#3f8a4a',
+  fresh: '#2f5689',
+  aged: '#a8761a',
+  spoiled: '#8a7a6a',
+};
+
 export function stageOf(fresh: number): FreshStage {
   if (fresh > 75) return 'live';
   if (fresh > 40) return 'fresh';

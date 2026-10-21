@@ -25,6 +25,7 @@ function pixelTexture(scene: Phaser.Scene, key: string, rows: string[], pal: Pal
     });
   });
   tex.refresh();
+  tex.setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
 const PERSON_BACK = [
@@ -207,6 +208,7 @@ function fishTexture(scene: Phaser.Scene, key: string, L: FishLook): void {
   for (let j = 1; j <= jaw; j++) px(x0 - j, Math.round(cy + 0.6), j === jaw ? '#d9534f' : L.fin);
 
   tex.refresh();
+  tex.setFilter(Phaser.Textures.FilterMode.NEAREST);
 }
 
 export function createTextures(scene: Phaser.Scene): void {

@@ -1,23 +1,14 @@
-import galmuri11 from 'galmuri/dist/Galmuri11.woff2?url';
-import galmuri11Bold from 'galmuri/dist/Galmuri11-Bold.woff2?url';
-import galmuri9 from 'galmuri/dist/Galmuri9.woff2?url';
-import { FONT, FONT_BOLD, FONT_SMALL } from './config';
+import '@fontsource/gowun-dodum/400.css';
+import '@fontsource/gowun-batang/700.css';
+import { FONT, FONT_BOLD } from './config';
 
-/** Phaser 텍스트가 대체 글꼴로 그려지지 않도록 게임 시작 전에 글꼴을 모두 불러온다 */
+const SAMPLE = '한 접시의 바다 물비늘포 여울식당 위판장 0123456789,원';
+
+/** Phaser 텍스트가 대체 글꼴로 그려지지 않도록 게임 시작 전에 글꼴을 불러온다 */
 export async function loadFonts(): Promise<void> {
-  const faces = [
-    new FontFace(FONT, `url(${galmuri11})`),
-    new FontFace(FONT_BOLD, `url(${galmuri11Bold})`),
-    new FontFace(FONT_SMALL, `url(${galmuri9})`),
-  ];
-  await Promise.all(
-    faces.map(async (face) => {
-      try {
-        await face.load();
-        document.fonts.add(face);
-      } catch (err) {
-        console.warn('글꼴을 불러오지 못했습니다', face.family, err);
-      }
-    }),
-  );
+  try {
+    await Promise.all([document.fonts.load(`400 22px '${FONT}'`, SAMPLE), document.fonts.load(`700 22px '${FONT_BOLD}'`, SAMPLE)]);
+  } catch (err) {
+    console.warn('글꼴을 불러오지 못했습니다', err);
+  }
 }

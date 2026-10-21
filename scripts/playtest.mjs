@@ -196,27 +196,25 @@ try {
     await press('여울호');
     await untilScene('Truck');
     await press('장사 시작');
-    for (let n = 0; n < 5; n++) {
-      await wait(900);
-      for (let k = 0; k < 2; k++) {
+    // 보이는 버튼을 상황에 맞게 누른다. 장사가 끝나면 '마을로'가 뜬다
+    for (let k = 0; k < 80; k++) {
+      await wait(500);
+      let done = false;
+      for (const label of ['마을로', '넣기!', '다음 손님', '장사 마치기']) {
         try {
-          await press('넣기!');
-          await wait(700);
-        } catch {
+          if (label === '마을로') {
+            const onModal = await page.evaluate(() => window.__game.scene.getScene('Truck').children.list.some((o) => o.depth === 1000));
+            if (!onModal) continue;
+            done = true;
+            break;
+          }
+          await press(label);
           break;
+        } catch {
+          /* 이 버튼은 지금 없다 */
         }
       }
-      await wait(400);
-      try {
-        await press('다음 손님');
-      } catch {
-        try {
-          await press('장사 마치기');
-        } catch {
-          break;
-        }
-      }
-      if ((await page.evaluate(() => !!window.__game.scene.getScene('Truck').children.list.find((o) => o.depth === 1000)))) break;
+      if (done) break;
     }
     await wait(800);
     await page.screenshot({ path: 'screenshots/p-truck-end.png' });

@@ -4,10 +4,10 @@ import { SPECIES, SPECIES_BY_ID, type SpeciesId } from '../data/fish';
 import { REQUEST_TEMPLATES } from '../data/requests';
 import { deliverRequest, fishForRequest, sellFish } from '../state/actions';
 import { S, type FishItem } from '../state/save';
-import { changePercent, coolerCapacity, fishValue, STAGE_COLOR, STAGE_NAME, stageOf, todayBasePrice, type FreshStage } from '../systems/economy';
+import { changePercent, coolerCapacity, fishValue, STAGE_INK, STAGE_NAME, stageOf, todayBasePrice, type FreshStage } from '../systems/economy';
 import { isMarketOpen } from '../systems/time';
 import { Hud, HUD_H } from '../ui/hud';
-import { Button, drawPanel, fadeIn, floatText, goTo, modal, toast, txt } from '../ui/ui';
+import { backdrop, Button, drawPanel, fadeIn, floatText, goTo, modal, toast, txt } from '../ui/ui';
 import { won } from '../utils';
 
 interface Group {
@@ -37,14 +37,11 @@ export class MarketScene extends Phaser.Scene {
 
   create(): void {
     fadeIn(this);
-    this.cameras.main.setBackgroundColor('#24384f');
-    const g = this.add.graphics();
-    // 위판장 바닥 타일
-    g.fillStyle(0x2c4560, 1);
-    for (let y = HUD_H; y < 800; y += 40) for (let x = (y / 40) % 2 === 0 ? 0 : 40; x < GAME_W; x += 80) g.fillRect(x, y, 40, 40);
+    backdrop(this, 'bg-market');
+    this.add.rectangle(0, 0, GAME_W, 800, 0x12202e, 0.35).setOrigin(0, 0);
     this.hud = new Hud(this);
 
-    txt(this, 16, HUD_H + 12, '물비늘포 위판장', { size: 'h1', color: T.paper });
+    txt(this, 16, HUD_H + 12, '물비늘포 위판장', { size: 'h1', color: T.paper, stroke: '#1b2a41' });
     txt(this, GAME_W - 16, HUD_H + 14, isMarketOpen() ? '경매 진행 중' : '경매 마감', { size: 'small', color: isMarketOpen() ? T.green : T.red, origin: [1, 0] });
 
     new Button(this, 118, HUD_H + 66, '경매', () => this.switchTab('auction'), { w: 200, h: 44, color: this.tab === 'auction' ? C.gold : C.grayDark, textColor: this.tab === 'auction' ? T.ink : T.white });
@@ -105,7 +102,7 @@ export class MarketScene extends Phaser.Scene {
       L.add(this.add.image(48, y + 18, `fish-${grp.species}`).setScale(1.6));
       const name = txt(this, 82, y + 8, `${SPECIES_BY_ID[grp.species].name} ×${grp.items.length}`, { size: 'small', color: T.ink });
       L.add(name);
-      L.add(txt(this, 82 + name.width + 8, y + 8, STAGE_NAME[grp.stage], { size: 'small', color: STAGE_COLOR[grp.stage], stroke: '#2b2b2b' }));
+      L.add(txt(this, 82 + name.width + 8, y + 8, STAGE_NAME[grp.stage], { size: 'small', color: STAGE_INK[grp.stage] }));
       L.add(txt(this, 300, y + 10, won(grp.value), { size: 'small', color: T.ink, origin: [1, 0] }));
       const btn = new Button(this, 372, y + 18, '팔기', () => this.auction(grp.items), {
         w: 80, h: 38, size: 'small', color: C.red, disabled: !open || grp.stage === 'spoiled',

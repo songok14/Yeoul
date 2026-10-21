@@ -4,9 +4,8 @@ import { feedCat, repay, spoiledFish } from '../state/actions';
 import { deleteSave, persist, S } from '../state/save';
 import { marketHeadline } from '../systems/economy';
 import { daysLeft, endDay, isMarketOpen, isTruckOpen, slotName } from '../systems/time';
-import { addSparkles, bands, drawLighthouse, drawSeascape, drawTruck } from '../ui/art';
 import { Hud, HUD_H } from '../ui/hud';
-import { bubble, Button, drawPanel, fadeIn, floatText, goTo, modal, toast, txt } from '../ui/ui';
+import { backdrop, bubble, Button, drawPanel, fadeIn, floatText, goTo, modal, sprite, toast, txt } from '../ui/ui';
 import { pick, won } from '../utils';
 
 const GRANDMA_LINES = [
@@ -71,93 +70,33 @@ export class TownScene extends Phaser.Scene {
   }
 
   private drawTown(): void {
-    drawSeascape(this, S.slot, HUD_H, 250, 400);
-    addSparkles(this, 0, 260, GAME_W, 130, 14);
-    const g = this.add.graphics();
+    backdrop(this, `bg-village-${S.slot}`);
 
-    // 방파제와 등대
-    g.fillStyle(C.concreteDark, 1);
-    g.fillRect(250, 334, 200, 18);
-    g.fillStyle(C.concrete, 1);
-    g.fillRect(250, 328, 200, 8);
-    drawLighthouse(g, 420, 330, 0.9);
+    // 그림 속 건물 위에 이름표를 단다
+    this.sign(70, 300, '위판장', () => goTo(this, 'Market'));
+    this.sign(118, 448, '미끼가게', () => goTo(this, 'Shop'));
+    this.sign(372, 352, '여울식당', () => this.restaurant());
+    this.sign(365, 262, '방파제 →', () => this.goFishing());
 
-    // 땅과 길
-    bands(g, 0, 400, GAME_W, 250, 0xdcc89a, 0xc2ab7a, 10);
-    g.fillStyle(0x9a9286, 1);
-    g.fillRect(0, 560, GAME_W, 56);
-    g.fillStyle(0xe8e2d4, 1);
-    for (let i = 0; i < 9; i++) g.fillRect(10 + i * 52, 586, 28, 4);
+    const truck = sprite(this, 'truck', 300, 600, 78);
+    truck.setInteractive({ useHandCursor: true }).on('pointerup', () => this.openTruck());
 
-    // 위판장
-    this.building(g, 12, 410, 146, 120, 0xdfe8ee, 0x2f5689);
-    g.fillStyle(0x5e6a74, 1);
-    g.fillRect(28, 460, 114, 70);
-    g.fillStyle(0x3d6e8c, 1);
-    for (let i = 0; i < 4; i++) g.fillRect(34 + i * 27, 506, 22, 18);
-    // 미끼가게
-    this.building(g, 166, 440, 88, 90, 0xb88a5a, 0x5e3b26);
-    for (let i = 0; i < 8; i++) {
-      g.fillStyle(i % 2 === 0 ? C.green : C.white, 1);
-      g.fillRect(166 + i * 11, 470, 11, 12);
-    }
-    g.fillStyle(0x3b2a20, 1);
-    g.fillRect(196, 494, 28, 36);
-    // 여울식당
-    this.building(g, 262, 420, 176, 110, 0xf1e6cc, 0x3c4148);
-    g.fillStyle(0x6a4a30, 1);
-    g.fillRect(330, 478, 40, 52);
-    g.fillStyle(C.paper, 1);
-    g.fillRect(338, 490, 24, 16);
-    g.fillStyle(0x8fc1d4, 1);
-    g.fillRect(282, 470, 34, 26);
-    g.fillRect(386, 470, 34, 26);
+    const yeoul = sprite(this, 'ch-yeoul', 200, 636, 150);
+    this.tweens.add({ targets: yeoul, scaleY: yeoul.scaleY * 1.012, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
 
-    this.sign(85, 430, '위판장', () => goTo(this, 'Market'));
-    this.sign(210, 456, '미끼', () => goTo(this, 'Shop'));
-    this.sign(350, 440, '여울식당', () => this.restaurant());
-
-    const truck = drawTruck(this, 150, 540, 1);
-    truck.setSize(150, 70);
-    const tz = this.add.zone(225, 570, 150, 70).setInteractive({ useHandCursor: true });
-    tz.on('pointerup', () => this.openTruck());
-
-    const yeoul = this.add.image(110, 610, 'yeoul').setOrigin(0.5, 1).setScale(2.5);
-    this.tweens.add({ targets: yeoul, y: 608, duration: 700, yoyo: true, repeat: -1 });
-
-    const cat = this.add.image(330, 618, 'cat').setOrigin(0.5, 1).setScale(2.5).setInteractive({ useHandCursor: true });
+    const cat = sprite(this, 'ch-cat', 120, 636, 62).setInteractive({ useHandCursor: true });
     cat.on('pointerup', () => this.tapCat(cat));
-
-    // 방파제 가는 길 표지
-    this.sign(380, 380, '방파제 →', () => this.goFishing());
-  }
-
-  private building(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, wall: number, roof: number): void {
-    g.fillStyle(C.black, 0.2);
-    g.fillRect(x + 6, y + h - 4, w, 8);
-    g.fillStyle(C.ink, 1);
-    g.fillRect(x - 2, y - 2, w + 4, h + 4);
-    g.fillStyle(wall, 1);
-    g.fillRect(x, y, w, h);
-    g.fillStyle(C.ink, 1);
-    g.fillRect(x - 10, y - 22, w + 20, 26);
-    g.fillStyle(roof, 1);
-    g.fillRect(x - 8, y - 20, w + 16, 22);
-    g.fillStyle(C.white, 0.15);
-    g.fillRect(x - 8, y - 20, w + 16, 4);
   }
 
   private sign(x: number, y: number, label: string, onTap: () => void): void {
-    const t = txt(this, x, y, label, { size: 'small', color: T.ink, origin: [0.5, 0.5] });
-    const w = t.width + 16;
-    const g = this.add.graphics();
-    g.fillStyle(C.ink, 1);
-    g.fillRect(x - w / 2 - 2, y - 14, w + 4, 28);
-    g.fillStyle(C.paper, 1);
-    g.fillRect(x - w / 2, y - 12, w, 24);
-    t.setDepth(1);
-    g.setDepth(0.5);
-    const z = this.add.zone(x, y, w + 10, 36).setInteractive({ useHandCursor: true });
+    const t = txt(this, x, y, label, { size: 'small', color: T.ink, origin: [0.5, 0.5] }).setDepth(2);
+    const w = t.width + 22;
+    const g = this.add.graphics().setDepth(1);
+    g.fillStyle(C.black, 0.25);
+    g.fillRoundedRect(x - w / 2 + 2, y - 13, w, 28, 14);
+    g.fillStyle(0xfbf6ea, 0.95);
+    g.fillRoundedRect(x - w / 2, y - 15, w, 28, 14);
+    const z = this.add.zone(x, y, w + 10, 40).setInteractive({ useHandCursor: true });
     z.on('pointerup', onTap);
   }
 
@@ -221,7 +160,7 @@ export class TownScene extends Phaser.Scene {
       });
       return;
     }
-    const b = bubble(this, cat.x, cat.y - 64, pick(['냐옹', '냐아...', '(하품)', '(꼬리를 흔든다)']), { wrap: 160 });
+    const b = bubble(this, cat.x, cat.y - 84, pick(['냐옹', '냐아...', '(하품)', '(꼬리를 흔든다)']), { wrap: 160 });
     this.tweens.add({ targets: cat, y: cat.y - 6, duration: 100, yoyo: true });
     this.time.delayedCall(1200, () => b.destroy());
   }
@@ -232,8 +171,8 @@ export class TownScene extends Phaser.Scene {
       title: '여울식당',
       body: `막순 할머니: "${pick(GRANDMA_LINES)}"\n\n남은 빚 ${won(S.debt)}\n소지금 ${won(S.money)}`,
       extra: (c, top) => {
-        c.add(this.add.image(0, top + 34, 'grandma').setScale(3));
-        return 76;
+        c.add(sprite(this, 'ch-grandma', 0, top + 150, 150));
+        return 158;
       },
       buttons: [
         { label: '10만 원 갚기', color: C.gold, disabled: S.debt <= 0 || S.money < 100_000, onClick: () => this.pay(100_000) },

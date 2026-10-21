@@ -30,6 +30,8 @@ export interface Species {
   rare: boolean;
   /** 숙성하면 값이 오르는 어종 */
   aging: boolean;
+  /** 금지체장(cm). 이보다 작으면 놓아줘야 한다 */
+  limitCm?: number;
   /** 거리별 입질 가중치 [근거리, 중거리, 원거리] */
   zone: [number, number, number];
   /** 시간대별 가중치 [새벽, 아침, 낮, 저녁] */
@@ -108,17 +110,18 @@ export const SPECIES: Species[] = [
   {
     id: 'gamseongdom',
     name: '감성돔',
-    minSize: 25,
+    minSize: 18,
     maxSize: 52,
     avgSize: 34,
     basePrice: 28000,
     strength: 5,
     rare: true,
     aging: true,
+    limitCm: 25,
     zone: [0, 0.25, 1.1],
     slot: [1.8, 1, 0.5, 1.2],
     hint: '새벽 · 원거리 · 숙성 어종',
-    desc: '방파제 꾼들의 꿈. 새벽 먼 물에서 드물게 모습을 보인다. 힘이 엄청나서 장비가 약하면 버티기 어렵다. 숙성회로 최고다.',
+    desc: '방파제 꾼들의 꿈. 새벽 먼 물에서 드물게 모습을 보인다. 힘이 엄청나서 장비가 약하면 버티기 어렵다. 숙성회로 최고다. 25cm 이하는 놓아줘야 한다.',
     look: { len: 18, h: 10, back: '#3c4148', body: '#7b838c', belly: '#c9ced3', fin: '#2a2e33', pattern: 'band', patColor: '#4b5259', spiny: true },
   },
 ];

@@ -3,9 +3,11 @@
 export const GAME_W = 450;
 export const GAME_H = 800;
 
-export const FONT = 'Galmuri11';
-export const FONT_BOLD = 'Galmuri11Bold';
-export const FONT_SMALL = 'Galmuri9';
+export const FONT = 'Gowun Dodum';
+export const FONT_BOLD = 'Gowun Batang';
+export const FONT_SMALL = 'Gowun Dodum';
+/** 실제 캔버스는 논리 크기의 몇 배로 그리는지. 일러스트와 글자를 선명하게 */
+export const RENDER_SCALE = 2;
 
 /** 숫자 색 (Graphics용) */
 export const C = {

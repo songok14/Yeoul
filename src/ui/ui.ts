@@ -1,15 +1,15 @@
 // 공용 UI 부품: 글자, 버튼, 패널, 모달, 토스트
 
 import Phaser from 'phaser';
-import { C, FONT, FONT_BOLD, FONT_SMALL, GAME_H, GAME_W, T } from '../config';
+import { C, FONT, FONT_BOLD, FONT_SMALL, GAME_H, GAME_W, RENDER_SCALE, T } from '../config';
 
 export type TextSize = 'title' | 'h1' | 'body' | 'small';
 
-const SIZE: Record<TextSize, { font: string; px: number }> = {
-  title: { font: FONT_BOLD, px: 44 },
-  h1: { font: FONT_BOLD, px: 22 },
-  body: { font: FONT, px: 22 },
-  small: { font: FONT_SMALL, px: 18 },
+const SIZE: Record<TextSize, { font: string; px: number; bold?: boolean }> = {
+  title: { font: FONT_BOLD, px: 44, bold: true },
+  h1: { font: FONT_BOLD, px: 22, bold: true },
+  body: { font: FONT, px: 21 },
+  small: { font: FONT_SMALL, px: 17 },
 };
 
 export interface TextOpts {
@@ -25,7 +25,8 @@ export interface TextOpts {
 export function txt(scene: Phaser.Scene, x: number, y: number, str: string, o: TextOpts = {}): Phaser.GameObjects.Text {
   const s = SIZE[o.size ?? 'body'];
   const t = scene.add.text(x, y, str, {
-    fontFamily: s.font,
+    fontFamily: `'${s.font}'`,
+    fontStyle: s.bold ? 'bold' : 'normal',
     fontSize: `${s.px}px`,
     color: o.color ?? T.paper,
     align: o.align ?? 'left',
@@ -33,10 +34,12 @@ export function txt(scene: Phaser.Scene, x: number, y: number, str: string, o: T
     padding: { top: 2, bottom: 2 },
     wordWrap: o.wrap ? { width: o.wrap, useAdvancedWrap: true } : undefined,
     stroke: o.stroke,
-    strokeThickness: o.stroke ? 4 : 0,
+    strokeThickness: o.stroke ? (o.size === 'title' ? 6 : o.size === 'small' ? 3 : 4) : 0,
   });
   const [ox, oy] = o.origin ?? [0, 0];
   t.setOrigin(ox, oy);
+  // 카메라를 두 배로 확대하므로 글자도 두 배 해상도로 그린다
+  t.setResolution(RENDER_SCALE);
   return t;
 }
 
@@ -297,5 +300,21 @@ export function goTo(scene: Phaser.Scene, key: string, data?: object): void {
 
 export function fadeIn(scene: Phaser.Scene): void {
   scene.input.enabled = true;
+  // 모든 씬은 450x800 논리 좌표로 그리고, 카메라가 두 배로 확대해 보여 준다
+  scene.cameras.main.setZoom(RENDER_SCALE).centerOn(GAME_W / 2, GAME_H / 2);
   scene.cameras.main.fadeIn(200, 15, 26, 43);
+}
+
+/** 화면을 꽉 채우는 배경 그림 */
+export function backdrop(scene: Phaser.Scene, key: string, tint?: number): Phaser.GameObjects.Image {
+  const img = scene.add.image(0, 0, key).setOrigin(0, 0).setDisplaySize(GAME_W, GAME_H);
+  if (tint !== undefined) img.setTint(tint);
+  return img;
+}
+
+/** 높이를 기준으로 비율을 지켜 그림을 놓는다. 기본 기준점은 발밑 */
+export function sprite(scene: Phaser.Scene, key: string, x: number, y: number, h: number, origin: [number, number] = [0.5, 1]): Phaser.GameObjects.Image {
+  const img = scene.add.image(x, y, key).setOrigin(origin[0], origin[1]);
+  img.setScale(h / img.height);
+  return img;
 }

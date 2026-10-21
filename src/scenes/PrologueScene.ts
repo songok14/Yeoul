@@ -2,9 +2,8 @@ import Phaser from 'phaser';
 import { C, GAME_W, T } from '../config';
 import { CLEAR_PAGES, FAIL_PAGES, PROLOGUE_1, PROLOGUE_2, type StoryBg, type StoryPage } from '../data/story';
 import { S, persist } from '../state/save';
-import { drawLighthouse, drawSeascape, drawTruck } from '../ui/art';
 import { SeasonGauge } from '../ui/gauge';
-import { Button, drawPanel, fadeIn, goTo, modal, txt } from '../ui/ui';
+import { backdrop, Button, drawPanel, fadeIn, goTo, modal, sprite, txt } from '../ui/ui';
 
 type Mode = 'p1' | 'p2' | 'clear' | 'fail';
 
@@ -137,7 +136,7 @@ export class PrologueScene extends Phaser.Scene {
   }
 
   private catEvent(): void {
-    const cat = this.add.image(-40, 470, 'cat').setScale(4);
+    const cat = sprite(this, 'ch-cat-walk', -40, 520, 90).setFlipX(true);
     this.bgLayer.add(cat);
     this.tweens.add({
       targets: cat,
@@ -229,29 +228,16 @@ export class PrologueScene extends Phaser.Scene {
       case 'memory':
       case 'night':
       case 'dawn': {
-        const slot = bg === 'harbor' ? 1 : bg === 'breakwater' || bg === 'memory' ? 3 : 0;
-        add(drawSeascape(this, slot, 0, 300, 548));
-        const g2 = add(this.add.graphics());
-        // 방파제와 등대
-        g2.fillStyle(C.concreteDark, 1);
-        g2.fillRect(0, 440, W, 108);
-        g2.fillStyle(C.concrete, 1);
-        g2.fillRect(0, 430, W, 16);
-        drawLighthouse(g2, 380, 432, 1.2);
-        if (bg === 'night') {
-          g2.fillStyle(0x0f1a2b, 0.55);
-          g2.fillRect(0, 0, W, 548);
-        }
+        const key = { harbor: 'bg-village-1', breakwater: 'bg-breakwater', memory: 'bg-village-3', night: 'bg-village-0', dawn: 'bg-village-1' }[bg];
+        const tint = { harbor: 0xffffff, breakwater: 0xffd8b8, memory: 0xe8c89a, night: 0x6a70a8, dawn: 0xfff0dc }[bg];
+        add(backdrop(this, key, tint));
         if (bg === 'memory') {
-          g2.fillStyle(0x8a5a3b, 0.3);
-          g2.fillRect(0, 0, W, 548);
-          add(this.add.image(170, 432, 'yeoul-back').setOrigin(0.5, 1).setScale(4).setTint(0x3a2a20));
-          add(this.add.image(215, 432, 'yeoul-back').setOrigin(0.5, 1).setScale(2.4).setTint(0x3a2a20));
+          // 오래된 기억: 빛바랜 세피아
+          add(this.add.rectangle(0, 0, W, 800, 0x8a5a3b, 0.28).setOrigin(0, 0));
         } else if (bg === 'breakwater' || bg === 'night') {
-          add(this.add.image(200, 432, 'yeoul-back').setOrigin(0.5, 1).setScale(3));
-        }
-        if (bg === 'harbor') {
-          add(drawTruck(this, 40, 470, 1));
+          add(sprite(this, 'ch-yeoul-back', 200, 548, 200));
+        } else if (bg === 'harbor') {
+          add(sprite(this, 'truck', 150, 540, 90));
         }
         break;
       }
@@ -273,7 +259,7 @@ export class PrologueScene extends Phaser.Scene {
         g.fillRect(0, 0, W, 548);
         g.fillStyle(0x4a3528, 1);
         for (let i = 0; i < 8; i++) g.fillRect(0, i * 60, W, 4);
-        add(drawTruck(this, 150, 300, 1.6));
+        add(sprite(this, 'truck', 225, 400, 160));
         // 부러진 대나무대
         g.lineStyle(5, 0xc8a85a, 1);
         g.lineBetween(30, 520, 120, 300);
@@ -296,7 +282,7 @@ export class PrologueScene extends Phaser.Scene {
           this.tweens.add({ targets: f, scaleY: 1.5, duration: 160 + (i % 3) * 70, yoyo: true, repeat: -1 });
         }
         add(this.add.image(225, 388, 'fish-bollak').setScale(5));
-        add(this.add.image(80, 432, 'yeoul').setOrigin(0.5, 1).setScale(4));
+        add(sprite(this, 'ch-yeoul', 84, 548, 230));
         break;
       }
       case 'seize': {

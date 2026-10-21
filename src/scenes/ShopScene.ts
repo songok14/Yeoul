@@ -4,7 +4,7 @@ import { BAIT } from '../data/gear';
 import { buyBait, gearList, upgradeGear, type GearSlot } from '../state/actions';
 import { S } from '../state/save';
 import { Hud, HUD_H } from '../ui/hud';
-import { bubble, Button, drawPanel, fadeIn, floatText, goTo, toast, txt } from '../ui/ui';
+import { backdrop, bubble, Button, drawPanel, fadeIn, floatText, goTo, sprite, toast, txt } from '../ui/ui';
 import { pick, won } from '../utils';
 
 const NOSSI_LINES = [
@@ -30,21 +30,11 @@ export class ShopScene extends Phaser.Scene {
 
   create(): void {
     fadeIn(this);
-    this.cameras.main.setBackgroundColor('#3b2a20');
-    const g = this.add.graphics();
-    // 선반과 미끼 상자
-    for (let i = 0; i < 2; i++) {
-      g.fillStyle(0x5e3b26, 1);
-      g.fillRect(0, HUD_H + 40 + i * 50, GAME_W, 8);
-      for (let j = 0; j < 9; j++) {
-        g.fillStyle([0xd9534f, 0x4a7fc1, 0xf2c14e, 0x6abf69][(i + j) % 4], 0.8);
-        g.fillRect(16 + j * 48, HUD_H + 14 + i * 50, 30, 26);
-      }
-    }
+    backdrop(this, 'bg-baitshop');
     this.hud = new Hud(this);
-    const nossi = this.add.image(60, HUD_H + 170, 'nossi').setOrigin(0.5, 1).setScale(4);
+    const nossi = sprite(this, 'ch-nossi', 62, HUD_H + 182, 172);
     nossi.setInteractive({ useHandCursor: true }).on('pointerup', () => this.say(pick(NOSSI_LINES)));
-    txt(this, 110, HUD_H + 140, '노씨 미끼가게', { size: 'h1', color: T.paper });
+    txt(this, 120, HUD_H + 140, '노씨 미끼가게', { size: 'h1', color: T.paper, stroke: '#1b2a41' });
     this.say(S.flags.nossiFavor ? '...노래미 고맙다.' : pick(NOSSI_LINES));
 
     this.layer = this.add.container(0, 0);

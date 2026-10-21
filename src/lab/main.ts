@@ -1,6 +1,6 @@
 // 스타일 시안 페이지: lab.html?style=1|2|3
 import Phaser from 'phaser';
-import { loadFonts } from '../fonts';
+import { loadGalmuri } from './galmuri';
 import { CasualScene, loadCasualFonts } from './style1';
 import { PixelScene } from './style2';
 import { WatercolorScene, loadWatercolorFonts } from './style3';
@@ -10,7 +10,7 @@ async function start(): Promise<void> {
   const pixel = style === '2';
   if (style === '1') await loadCasualFonts();
   else if (style === '3') await loadWatercolorFonts();
-  else await loadFonts();
+  else await loadGalmuri();
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,

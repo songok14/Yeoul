@@ -7,10 +7,10 @@ import { persist, S, type FishItem } from '../state/save';
 import { stageOf, type FreshStage } from '../systems/economy';
 import { canTaste, tasteLevel, TASTE_STAGES } from '../systems/taste';
 import { useSlot } from '../systems/time';
-import { bands, CUSTOMER_COUNT, drawFace, drawTruck, SKY } from '../ui/art';
+import { CUSTOMER_COUNT, drawFace } from '../ui/art';
 import { SeasonGauge } from '../ui/gauge';
 import { Hud, HUD_H } from '../ui/hud';
-import { bubble, Button, drawPanel, fadeIn, floatText, goTo, modal, txt } from '../ui/ui';
+import { backdrop, bubble, Button, drawPanel, fadeIn, floatText, goTo, modal, sprite, txt } from '../ui/ui';
 import { clamp, round100, won } from '../utils';
 
 /** 요리 신선도 배율. 회는 신선도에 민감하고 숙성 어종은 숙성일 때 가장 좋다 */
@@ -53,22 +53,13 @@ export class TruckScene extends Phaser.Scene {
 
   create(): void {
     fadeIn(this);
-    const sky = SKY[S.slot] ?? SKY[1];
-    const g = this.add.graphics();
-    bands(g, 0, HUD_H, GAME_W, 240, sky.top, sky.bot, 8);
-    bands(g, 0, HUD_H + 240, GAME_W, 800 - HUD_H - 240, 0xcfc3a4, 0xa89a7a, 10);
-    // 항구 광장 바닥
-    g.fillStyle(0xbfb293, 1);
-    for (let i = 0; i < 10; i++) g.fillRect(i * 48, 330, 40, 4);
-    g.fillStyle(C.concreteDark, 1);
-    g.fillRect(0, 290, GAME_W, 10);
-
+    backdrop(this, 'bg-plaza', [0xc8c4e8, 0xfff2e2, 0xfff8ee, 0xffffff][S.slot]);
     this.hud = new Hud(this);
-    txt(this, 16, HUD_H + 10, '여울호 푸드트럭', { size: 'h1', color: sky.dark ? T.paper : T.ink });
+    txt(this, 16, HUD_H + 10, '여울호 푸드트럭', { size: 'h1', color: T.paper, stroke: '#1b2a41' });
     const lv = tasteLevel();
-    txt(this, GAME_W - 16, HUD_H + 12, `미각 ${TASTE_STAGES[lv].name}`, { size: 'small', color: sky.dark ? T.gold : '#9e3330', origin: [1, 0] });
+    txt(this, GAME_W - 16, HUD_H + 12, `미각 ${TASTE_STAGES[lv].name}`, { size: 'small', color: T.gold, origin: [1, 0], stroke: '#1b2a41' });
 
-    drawTruck(this, 12, 160, 1.6);
+    sprite(this, 'truck', 150, 330, 150);
     this.stage = this.add.container(0, 0);
     this.showMenu();
   }
@@ -118,7 +109,7 @@ export class TruckScene extends Phaser.Scene {
       ease: 'Quad.Out',
       onComplete: () => this.takeOrder(recipe),
     });
-    this.stage.add(txt(this, GAME_W - 16, 350, `손님 ${this.served + 1}/${CUSTOMERS_PER_SHIFT}`, { size: 'small', color: T.ink, origin: [1, 1] }));
+    this.stage.add(txt(this, GAME_W - 16, 350, `손님 ${this.served + 1}/${CUSTOMERS_PER_SHIFT}`, { size: 'small', color: T.paper, origin: [1, 1], stroke: '#1b2a41' }));
   }
 
   private takeOrder(recipe: Recipe): void {

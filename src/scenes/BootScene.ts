@@ -10,6 +10,15 @@ export class BootScene extends Phaser.Scene {
     super('Boot');
   }
 
+  preload(): void {
+    const images = [
+      'bg-village-0', 'bg-village-1', 'bg-village-2', 'bg-village-3', 'bg-breakwater', 'bg-market', 'bg-plaza',
+      'bg-baitshop', 'bg-restaurant', 'bg-alley', 'ch-yeoul', 'ch-yeoul-back', 'ch-grandma', 'ch-grandma-stew',
+      'ch-nossi', 'ch-cat', 'ch-cat-walk', 'ch-cat-sleep', 'truck',
+    ];
+    for (const key of images) this.load.image(key, `assets/${key}.webp`);
+  }
+
   create(): void {
     createTextures(this);
     document.getElementById('loading')?.remove();

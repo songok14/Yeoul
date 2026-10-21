@@ -1,7 +1,7 @@
 // 시안 2: 고퀄 픽셀아트 (225×400 도트 격자, 노을, 디더링, 빛 번짐, Galmuri)
 
 import Phaser from 'phaser';
-import { FONT_BOLD, FONT_SMALL } from '../config';
+import { GALMURI_BOLD as FONT_BOLD, GALMURI_SMALL as FONT_SMALL } from './galmuri';
 import { canvasTex, rng, type Ctx } from './paint';
 
 const W = 225;

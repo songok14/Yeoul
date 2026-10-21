@@ -11,11 +11,14 @@
 ## 기술 결정 (확정)
 
 - Phaser **3.90.0** + TypeScript + Vite. 버전은 고정해 둔다.
-- 글꼴은 npm `galmuri@2.40.3`. 본문 `Galmuri11` 22px, 굵게 `Galmuri11Bold`, 작은 글씨 `Galmuri9` 18px, 제목 44px. 도트가 깨지지 않게 **11의 배수 / 9의 배수 크기만** 쓴다. 글자는 `ui/ui.ts`의 `txt()`로만 만든다.
-- 화면은 세로 450×800, `Scale.FIT`, `pixelArt: true`.
+- 그림체는 **일러스트(애니메이션 채색 + 수채화 배경)**로 확정. 기준 그림은 `docs/ART_PROMPTS.md`.
+- 글꼴은 고운돋움(본문, `@fontsource/gowun-dodum`)과 고운바탕 굵게(제목, `@fontsource/gowun-batang`). 모두 OFL. 글자는 `ui/ui.ts`의 `txt()`로만 만든다(해상도 2배로 그린다).
+- 화면은 논리 좌표 세로 450×800. 캔버스는 두 배(900×1600)로 만들고 `fadeIn()`에서 카메라를 2배 확대한다. 그래서 씬 좌표는 계속 450×800 기준으로 쓰고, 포인터는 `p.x` 대신 `p.worldX`/`p.worldY`를 쓴다.
+- 아직 그림이 없는 것(물고기, 손님, 요리)은 `ui/art.ts`의 임시 도트로 그린다(NEAREST 필터).
 - 세이브는 localStorage 하나(`SAVE_KEY`). 필드를 추가하면 `createSave()`에 기본값을 넣는다(옛 세이브는 기본값 위에 덮어 불러온다). 구조를 깨는 변경이면 `version`을 올린다.
 - **돈이 드는 것은 쓰지 않는다.** 유료 API, 유료 에셋, 유료 호스팅 금지. 배포는 Vercel 또는 Cloudflare Pages 무료 플랜.
-- 그래픽은 아직 임시. `ui/art.ts`에서 코드로 도트를 찍거나 Graphics로 그린다. 외부 이미지 파일을 넣기 전에 먼저 상의한다.
+- 일러스트는 사용자가 이미지 AI로 뽑아 준다. 원본은 레포에 넣지 않고 `python3 scripts/art.py <원본 폴더>`로 배경 제거·자르기·WebP 변환을 해서 `public/assets/`에 넣는다. 새 그림은 `scripts/art.py`의 목록과 `BootScene.preload()`에 같이 추가한다.
+- 새 그림이 필요하면 `docs/ART_PROMPTS.md` 형식(복붙용 코드 블록 하나, 시트형)으로 프롬프트를 준다.
 
 ## 구조 규칙
 

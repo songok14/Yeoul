@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_H, GAME_W } from './config';
+import { GAME_H, GAME_W, RENDER_SCALE } from './config';
 import { loadFonts } from './fonts';
 import { BootScene } from './scenes/BootScene';
 import { FishingScene } from './scenes/FishingScene';
@@ -16,10 +16,10 @@ async function start(): Promise<void> {
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: 'game',
-    width: GAME_W,
-    height: GAME_H,
+    width: GAME_W * RENDER_SCALE,
+    height: GAME_H * RENDER_SCALE,
     backgroundColor: '#1b2a41',
-    pixelArt: true,
+    antialias: true,
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,

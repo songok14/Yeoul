@@ -8,17 +8,16 @@ import { coolerCapacity, fishValue } from '../systems/economy';
 import { rollSize, rollSpecies, zoneOf, ZONE_NAME } from '../systems/fishing';
 import { checkTasteUnlock } from '../systems/taste';
 import { useSlot } from '../systems/time';
-import { addSparkles, drawSeascape } from '../ui/art';
 import { Hud } from '../ui/hud';
-import { bubble, Button, drawPanel, fadeIn, goTo, modal, toast, txt } from '../ui/ui';
+import { backdrop, bubble, Button, drawPanel, fadeIn, goTo, modal, sprite, toast, txt } from '../ui/ui';
 import { clamp, lerp, won } from '../utils';
 
 type Phase = 'aim' | 'power' | 'flying' | 'wait' | 'bite' | 'reel' | 'result' | 'busy';
 
-const HORIZON = 210;
-const SHORE_Y = 586;
-const HAND = { x: 218, y: 660 };
-const TIP_IDLE = { x: 268, y: 548 };
+// 배경 그림(방파제) 기준 좌표
+const HORIZON = 290;
+const SHORE_Y = 560;
+const TIP_IDLE = { x: 238, y: 528 };
 const GAUGE_X = 45;
 const GAUGE_W = 360;
 const GAUGE_Y = 768;
@@ -91,20 +90,19 @@ export class FishingScene extends Phaser.Scene {
 
   create(): void {
     fadeIn(this);
+    // 시간대에 맞춰 배경 색을 살짝 바꾼다
     const slot = this.tutorial ? 3 : S.slot;
-    drawSeascape(this, slot, 0, HORIZON, SHORE_Y);
-    addSparkles(this, 0, HORIZON + 20, GAME_W, SHORE_Y - HORIZON - 40, 26);
-    this.drawBreakwater();
+    backdrop(this, 'bg-breakwater', [0xb8b4d8, 0xfff4e6, 0xffffff, 0xffc8a8][slot]);
 
     this.laneG = this.add.graphics();
     this.shadow = this.add.ellipse(0, 0, 40, 14, 0x0b1a2a, 0.55).setVisible(false);
     this.bobber = this.makeBobber();
     this.bobber.setVisible(false);
 
-    this.add.image(200, 690, 'yeoul-back').setOrigin(0.5, 1).setScale(3);
+    sprite(this, 'ch-yeoul-back', 200, 702, 180);
     this.rodG = this.add.graphics();
     if (!this.tutorial) {
-      this.cat = this.add.image(345, 690, 'cat').setOrigin(0.5, 1).setScale(3);
+      this.cat = sprite(this, 'ch-cat', 352, 698, 70);
       this.cat.setInteractive({ useHandCursor: true }).on('pointerdown', () => this.showCatHint());
     }
 
@@ -150,34 +148,6 @@ export class FishingScene extends Phaser.Scene {
 
   // ───────── 그리기 ─────────
 
-  private drawBreakwater(): void {
-    const g = this.add.graphics();
-    // 테트라포드 무더기
-    const tetra = (x: number, y: number, s: number) => {
-      g.fillStyle(C.concreteDark, 1);
-      g.fillTriangle(x - 18 * s, y + 10 * s, x + 18 * s, y + 10 * s, x, y - 16 * s);
-      g.fillStyle(C.concrete, 1);
-      g.fillTriangle(x - 12 * s, y + 6 * s, x + 4 * s, y + 6 * s, x - 4 * s, y - 10 * s);
-      g.fillStyle(C.grayDark, 1);
-      g.fillRect(x - 4 * s, y + 8 * s, 8 * s, 8 * s);
-    };
-    for (let i = 0; i < 4; i++) tetra(30 + i * 34, SHORE_Y - 4 + (i % 2) * 6, 1.3);
-    for (let i = 0; i < 3; i++) tetra(330 + i * 40, SHORE_Y - 2 + (i % 2) * 6, 1.3);
-    // 방파제 상판
-    g.fillStyle(C.ink, 1);
-    g.fillRect(0, SHORE_Y + 8, GAME_W, 4);
-    g.fillStyle(C.concrete, 1);
-    g.fillRect(0, SHORE_Y + 12, GAME_W, 110);
-    g.fillStyle(C.concreteDark, 1);
-    for (let i = 0; i < 6; i++) g.fillRect(i * 80 + 20, SHORE_Y + 12, 3, 110);
-    g.fillRect(0, SHORE_Y + 60, GAME_W, 3);
-    // 양동이
-    g.fillStyle(C.blueDark, 1);
-    g.fillRect(110, 662, 30, 28);
-    g.fillStyle(C.blue, 1);
-    g.fillRect(113, 665, 24, 8);
-  }
-
   private makeBobber(): Phaser.GameObjects.Container {
     const c = this.add.container(0, 0);
     const g = this.add.graphics();
@@ -195,13 +165,14 @@ export class FishingScene extends Phaser.Scene {
     return c;
   }
 
+  /** 낚싯대는 그림에 있으니 초릿대 끝의 휨과 낚싯줄만 그린다 */
   private drawRod(tx: number, ty: number, withLine: boolean, lx = 0, ly = 0): void {
     const g = this.rodG;
     g.clear();
-    g.lineStyle(4, C.ink, 1);
-    g.lineBetween(HAND.x, HAND.y, tx, ty);
-    g.lineStyle(2, 0xc8a85a, 1);
-    g.lineBetween(HAND.x, HAND.y, tx, ty);
+    if (tx !== TIP_IDLE.x || ty !== TIP_IDLE.y) {
+      g.lineStyle(3, 0x2b2b2b, 1);
+      g.lineBetween(TIP_IDLE.x - 4, TIP_IDLE.y + 10, tx, ty);
+    }
     if (withLine) {
       g.lineStyle(1, C.white, 0.8);
       g.lineBetween(tx, ty, lx, ly);
@@ -210,7 +181,7 @@ export class FishingScene extends Phaser.Scene {
 
   private posFor(lane: number, d: number): { x: number; y: number; s: number } {
     return {
-      x: GAME_W / 2 + lane * (48 + 110 * (1 - d)),
+      x: GAME_W / 2 + lane * (44 + 74 * (1 - d)),
       y: SHORE_Y - 14 - d * (SHORE_Y - HORIZON - 40),
       s: 1.6 - d * 0.9,
     };
@@ -270,9 +241,9 @@ export class FishingScene extends Phaser.Scene {
     if (!this.cat || this.phase !== 'aim') return;
     this.catBubble?.destroy();
     const dirText = this.hintLane === -1 ? '왼쪽' : this.hintLane === 1 ? '오른쪽' : '앞바다';
-    this.catBubble = bubble(this, 345, 600, `냐아옹\n(${dirText}을 본다)`, { wrap: 160 });
+    this.catBubble = bubble(this, 352, 594, `냐아옹\n(${dirText}을 본다)`, { wrap: 160 });
     this.cat.setFlipX(this.hintLane === 1);
-    this.tweens.add({ targets: this.cat, y: 684, duration: 120, yoyo: true });
+    this.tweens.add({ targets: this.cat, y: this.cat.y - 6, duration: 120, yoyo: true });
     this.ripple?.destroy();
     const p = this.posFor(this.hintLane, 0.55);
     this.ripple = this.add.ellipse(p.x, p.y, 30, 10).setStrokeStyle(2, C.foam, 0.9);
@@ -282,8 +253,8 @@ export class FishingScene extends Phaser.Scene {
   private onTap(p: Phaser.Input.Pointer): void {
     switch (this.phase) {
       case 'aim':
-        if (p.y > SHORE_Y + 10) return;
-        this.lane = p.x < 150 ? -1 : p.x > 300 ? 1 : 0;
+        if (p.worldY > SHORE_Y + 10 || p.worldY < HORIZON) return;
+        this.lane = p.worldX < 150 ? -1 : p.worldX > 300 ? 1 : 0;
         this.startPower();
         break;
       case 'power':
@@ -511,12 +482,12 @@ export class FishingScene extends Phaser.Scene {
     this.fishWobble += dt * (2 + str * 0.6 + this.surgeKick * 20);
     const from = this.posFor(this.lane, this.dist01);
     const fx = lerp(from.x, GAME_W / 2 + 10, p) + Math.sin(this.fishWobble) * (18 + this.surgeKick * 40) * (1 - p * 0.6);
-    const fy = lerp(from.y, SHORE_Y - 20, p);
+    const fy = lerp(from.y, SHORE_Y - 16, p);
     this.shadow.setPosition(fx, fy);
     this.shadow.setScale(lerp(0.6, 1.3, p));
     const bend = this.tension / 100;
-    const tipX = lerp(TIP_IDLE.x, fx, bend * 0.35);
-    const tipY = lerp(TIP_IDLE.y, fy, bend * 0.2) + bend * 26;
+    const tipX = lerp(TIP_IDLE.x, fx, bend * 0.25);
+    const tipY = lerp(TIP_IDLE.y, fy, bend * 0.2) + bend * 18;
     this.drawRod(tipX, tipY, true, fx, fy);
     this.drawTension(reel.drag);
     this.sub.setText(`남은 거리 ${Math.max(0, this.distance).toFixed(1)}m`);
@@ -575,6 +546,8 @@ export class FishingScene extends Phaser.Scene {
     const isNew = !S.dex[sp.id] || (S.dex[sp.id]?.count ?? 0) === 0;
     const value = fishValue({ uid: 0, species: sp.id, size, caughtDay: S.day, fresh: 100 });
     const full = !this.tutorial && coolerFull();
+    // 금지체장 미달이면 챙길 수 없다
+    const undersize = sp.limitCm !== undefined && size <= sp.limitCm;
 
     const finish = (released: boolean) => {
       recordCatch(sp.id, size, released);
@@ -604,7 +577,7 @@ export class FishingScene extends Phaser.Scene {
 
     modal(this, {
       title: `${sp.name}${isNew ? ' (새 어종!)' : ''}`,
-      body: `${size.toFixed(1)}cm${sp.rare ? ' · 귀한 고기' : ''}\n${this.tutorial ? '손바닥만 한 볼락이다' : `오늘 위판장 시세로 약 ${won(value)}`}${full ? '\n쿨러가 가득 찼다' : ''}`,
+      body: `${size.toFixed(1)}cm${sp.rare ? ' · 귀한 고기' : ''}\n${this.tutorial ? '손바닥만 한 볼락이다' : `오늘 위판장 시세로 약 ${won(value)}`}${undersize ? `\n금지체장 ${sp.limitCm}cm 이하라 놓아줘야 한다` : full ? '\n쿨러가 가득 찼다' : ''}`,
       extra: (c, top) => {
         const img = this.add.image(0, top + 40, `fish-${sp.id}`).setScale(sp.look.len > 20 ? 5 : 6);
         c.add(img);
@@ -615,7 +588,7 @@ export class FishingScene extends Phaser.Scene {
         ? [{ label: '챙기기', color: C.green, onClick: () => finish(false) }]
         : [
             { label: '놓아주기', color: C.blueDark, onClick: () => finish(true) },
-            { label: full ? '쿨러 가득' : '챙기기', color: C.green, disabled: full, onClick: () => finish(false) },
+            { label: undersize ? '금지체장' : full ? '쿨러 가득' : '챙기기', color: C.green, disabled: full || undersize, onClick: () => finish(false) },
           ],
     });
     if (isNew && !this.tutorial) toast(this, '도감에 새로 등록!', T.gold, 150);
