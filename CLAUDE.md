@@ -2,8 +2,8 @@
 
 모바일 낚시 경영 게임 **한 접시의 바다**. 처음 보는 사람도 이 파일과 `docs/`만 읽고 작업을 이어갈 수 있게 유지한다.
 
-> **2026-10부터 유니티로 옮기는 중이다.** 계획은 `docs/UNITY_PLAN.md`, 유니티 쪽은 `unity/`.
-> 웹 버전(`src/`, Phaser)은 지우지 않고 기획과 동작의 기준으로 남긴다. 아래 "기술 결정"과 "작업 후 확인"은 웹 버전 규칙이고, 유니티 규칙은 "유니티" 절에 있다.
+> **2026-10부터 고닷 4(C#)로 옮기는 중이다.** 계획은 `docs/GODOT_PLAN.md`. 규칙은 `core/`, 고닷 프로젝트는 `godot/`.
+> 웹 버전(`src/`, Phaser)은 지우지 않고 기획과 동작의 기준으로 남긴다. 아래 "기술 결정"과 "작업 후 확인"은 웹 버전 규칙이고, 고닷 규칙은 "고닷" 절에 있다.
 
 ## 언어
 
@@ -24,23 +24,23 @@
 - 일러스트는 사용자가 이미지 AI로 뽑아 준다. 원본은 레포에 넣지 않고 `python3 scripts/art.py <원본 폴더>`로 배경 제거·자르기·WebP 변환을 해서 `public/assets/`에 넣는다. 새 그림은 `scripts/art.py`의 목록과 `BootScene.preload()`에 같이 추가한다.
 - 새 그림이 필요하면 `docs/ART_PROMPTS.md` 형식(복붙용 코드 블록 하나, 시트형)으로 프롬프트를 준다.
 
-## 유니티 (2026-10~)
+## 고닷 (2026-10~)
 
-- Unity 6.3 LTS(`6000.3.27f1`), Personal. 안드로이드 먼저, 세로 1080×1920 기준. URP 2D는 씬을 옮길 때(U5) 넣는다.
-- 게임 규칙은 `unity/com.songok.hanjeopsi.core` (UnityEngine 없는 순수 C# 9, asmdef `noEngineReferences`). 유니티 쪽 코드는 `unity/com.songok.hanjeopsi.game`. 유니티 프로젝트는 `unity/HanjeopsiBada`.
-- 데이터는 `unity/com.songok.hanjeopsi.core/Resources/HanjeopsiData/*.json`. 수치와 글은 코드에 쓰지 않는다.
-- 웹과 같은 결과인지 골든 테스트로 확인한다. 웹 수치를 바꾸면 `npm run golden`으로 `unity/golden/`을 다시 만든다.
-- 클라우드에서는 유니티 에디터를 못 돌린다(라이선스·패키지 서버가 막혀 있다). 계산은 최대한 Core로 보내서 dotnet 테스트로 확인한다.
-- **APK는 GitHub Actions(`.github/workflows/android.yml`, GameCI)가 만든다.** `unity/**`를 푸시하면 돌고, 사용자는 릴리스 `test-latest`에서 받아 폰에서 테스트한다. 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인하고, 실패하면 로그를 보고 고쳐서 다시 푸시한다.
-- 유니티 쪽 코드는 푸시 전에 `dotnet build unity/dotnet/UnityCheck`로 근사 점검 컴파일을 한다(Unity 2021.1 참조본. Unity 6 전용 API는 `HANJEOPSI_UNITY_CHECK`로 갈라 둔다).
-- 씬과 플레이어 설정은 `com.songok.hanjeopsi.game/Editor/BuildScript.cs`가 코드로 만든다. 사용자가 할 일은 `docs/UNITY_PLAN.md` 10장.
+- Godot 4.7.2 .NET(C#), Compatibility 렌더러. 안드로이드 먼저(arm64), 세로 1080×1920 기준. 유니티는 라이선스 문제로 접었다(`docs/GODOT_PLAN.md` 머리말).
+- 게임 규칙은 `core/Hanjeopsi.Core` (고닷을 모르는 순수 C#, net8.0). 고닷 쪽 코드는 `godot/scripts`. 화면 코드에 계산식을 넣지 않고 코어로 뺀다.
+- 데이터는 `godot/data/*.json`. 수치와 글은 코드에 쓰지 않는다.
+- 웹과 같은 결과인지 골든 테스트로 확인한다. 웹 수치나 계산을 바꾸면 `npm run golden`으로 `core/golden/`을 다시 만든다.
+- 이 환경에서는 고닷을 실행하지 못한다. 고닷 쪽 C#은 `dotnet build godot/Hanjeopsi.csproj`로 진짜 GodotSharp에 대고 컴파일한다.
+- **APK와 화면 사진은 GitHub Actions(`.github/workflows/android.yml`)가 만든다.** 비밀값은 필요 없다. `core/`나 `godot/`를 푸시하면 돌고, 사용자는 릴리스 `test-latest`에서 받아 폰에서 테스트한다.
+- 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인한다. 성공하면 `git fetch origin ci-build`로 `lab.png` 같은 화면 사진을 받아 **직접 열어 본다**(글자 겹침, 화면 밖 글자, 버튼 겹침). 실패하면 로그를 보고 고쳐서 다시 푸시한다.
+- 새 화면을 만들면 사진 모드(`-- --shot=<경로>`)에서 그 화면을 찍도록 워크플로에 한 줄 추가한다.
 - 그림: 배경은 수채화 일러스트 그대로, 인게임 캐릭터·물체는 SD(2~2.5등신), 일러스트는 컷신 전용. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).
-- 유니티는 WebP를 못 읽는다. 그림은 PNG로 `unity/HanjeopsiBada/Assets/Resources/Art/`에 넣는다. SD 시트는 `python3 scripts/sd_sheet.py <시트> <행> <열> <폴더> <이름들>`로 자른다(원본 시트는 커밋하지 않는다).
+- 그림은 PNG로 `godot/art/`에 넣는다(웹은 WebP). SD 시트는 `python3 scripts/sd_sheet.py <시트> <행> <열> <폴더> <이름들>`로 자른다. 원본 시트는 커밋하지 않는다.
 
 ```bash
-cd unity/dotnet && dotnet test        # 코어 빌드 + 테스트. 모두 통과해야 한다
-dotnet build unity/dotnet/UnityCheck  # 유니티 쪽 코드 근사 점검
-npm run golden                        # 웹 코드를 고쳤으면 기준값 다시 만들기
+dotnet test core/Hanjeopsi.sln              # 코어 빌드 + 테스트. 모두 통과해야 한다
+dotnet build godot/Hanjeopsi.csproj          # 고닷 쪽 C# 컴파일
+npm run golden                               # 웹 코드를 고쳤으면 기준값 다시 만들기
 ```
 - 웹 코드를 고치면(계산을 systems로 빼는 리팩터링 포함) 웹 "작업 후 확인"도 함께 돌린다.
 

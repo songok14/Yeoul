@@ -2,7 +2,7 @@
 
 이미지 AI에 그대로 붙여 넣는 프롬프트 모음.
 
-## 지금 방향 (2026-10 유니티 이전부터)
+## 지금 방향 (2026-10 고닷 이전부터)
 
 | 쓰임 | 그림체 | 비고 |
 |---|---|---|
@@ -16,7 +16,7 @@
 - SD는 **시트형**: 한 장에 여러 포즈·표정을 칸마다 넉넉히 띄워서. 모든 칸은 같은 크기 비율, 같은 바닥선.
 - 시트 배경은 **연한 회색 단색 #EDEDED**. 투명 체크무늬, 글자, 라벨, 숫자, 테두리, 칸 선, 바닥 그림자 금지. (`scripts/art.py`가 가장자리와 이어진 밝은 무채색을 지운다)
 - 빛은 모든 그림에서 **왼쪽 위**에서. 배경 그림의 맑은 남해 오후 빛과 맞춘다.
-- 유니티 뼈대 애니메이션용 **부품 분리 시트**는 따로 뽑는다.
+- 뼈대 애니메이션용 **부품 분리 시트**는 따로 뽑는다.
 - 컷신은 세로 9:16 한 장 그림. 아래 30%는 글 상자가 올라가니 단순하고 차분하게 둔다.
 
 ### 캐릭터 고정 설정
@@ -36,7 +36,7 @@
 ---
 
 ### 받은 SD 시트
-- 2026-10: **SD 1 여울 기본 시트**, **SD 5 고등어 시트**. 디자인과 찌가 잘 나왔다. `scripts/sd_sheet.py`로 여울 8장, 고등어 12장을 잘라 `unity/HanjeopsiBada/Assets/Resources/Art/`에 넣었다.
+- 2026-10: **SD 1 여울 기본 시트**, **SD 5 고등어 시트**. 디자인과 찌가 잘 나왔다. `scripts/sd_sheet.py`로 여울 8장, 고등어 12장을 잘라 `godot/art/`에 넣었다.
 - 머리카락 끝에 회색 배경이 조금 남는다. 다음 시트는 같은 프롬프트로 뽑되, 머리 둘레가 배경과 또렷이 갈리면 더 깔끔하다.
 
 ## SD 1. 여울 기본 시트 (정면·옆·뒤·걷기)
@@ -90,10 +90,10 @@ Row 3: sharp focused eyes, tasting with eyes closed, a single tear of joy while 
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines.
 ```
 
-## SD 4. 여울 부품 분리 시트 (유니티 뼈대 애니메이션용)
+## SD 4. 여울 부품 분리 시트 (뼈대 애니메이션용)
 
 ```
-Create one cut-out puppet parts sheet for 2D skeletal animation in Unity. Attached images: watercolor background illustrations from my game (color palette and lighting only) and the current illustration of the heroine (her design).
+Create one cut-out puppet parts sheet for 2D skeletal animation in a game engine. Attached images: watercolor background illustrations from my game (color palette and lighting only) and the current illustration of the heroine (her design).
 
 Character: Han Yeoul in cute chibi SD style, 2.5 heads tall, front view. Long brown hair in a high messy bun, brown eyes, oversized cream-white hooded jacket with toggle buttons, white t-shirt, black crossbody harness bag with blue accents, dark brown cargo jogger pants, chunky white-gray sneakers. Clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
 
@@ -122,10 +122,10 @@ Row 3: sleeping curled up, stretching with rear up, eating a small fish happily,
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow.
 ```
 
-## SD 6. 고등어 부품 분리 시트 (유니티 뼈대 애니메이션용)
+## SD 6. 고등어 부품 분리 시트 (뼈대 애니메이션용)
 
 ```
-Create one cut-out puppet parts sheet for 2D skeletal animation in Unity. Attached images: watercolor background illustrations from my game (color palette and lighting only) and the current illustration of the cat (its design).
+Create one cut-out puppet parts sheet for 2D skeletal animation in a game engine. Attached images: watercolor background illustrations from my game (color palette and lighting only) and the current illustration of the cat (its design).
 
 Character: Godeungeo, a cute chibi SD stray cat, side view facing left. Silver-gray mackerel tabby with dark stripes, white chest, muzzle and paws, yellow-green eyes, pink nose, red collar with a small gold bell and a tiny old wooden fishing float (faded red and white, no letters). Clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
 
