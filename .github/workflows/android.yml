@@ -1,7 +1,7 @@
 # 안드로이드 테스트 APK 빌드 (고닷 4.7.2 C#, 비밀값 필요 없음)
 # 결과
 # - 릴리스 test-latest: 폰에서 바로 받는 APK
-# - 아티팩트: APK와 화면 사진
+# (아티팩트는 쓰지 않는다. 계정 저장 공간 한도를 다른 레포와 같이 쓴다)
 # - 브랜치 ci-build: APK와 화면 사진 (Claude가 git으로 받아 화면을 확인한다)
 
 name: 안드로이드 테스트 빌드
@@ -120,15 +120,6 @@ jobs:
           "$GODOT" --headless --path godot --export-release "Android" build/hanjeopsi.apk
           ls -la godot/build
           cp godot/build/hanjeopsi.apk "hanjeopsi-${{ github.run_number }}.apk"
-
-      - name: 아티팩트 올리기
-        uses: actions/upload-artifact@v4
-        with:
-          name: hanjeopsi-${{ github.run_number }}
-          path: |
-            hanjeopsi-${{ github.run_number }}.apk
-            shots/*.png
-          retention-days: 14
 
       - name: 테스트 빌드 릴리스 갱신 (폰에서 받기)
         env:
