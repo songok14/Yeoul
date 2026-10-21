@@ -1,0 +1,5 @@
+<!-- IL2CPP가 JSON으로만 채우는 클래스를 지우지 않게 한다 -->
+<linker>
+  <assembly fullname="Hanjeopsi.Core" preserve="all" />
+  <assembly fullname="Hanjeopsi.Game" preserve="all" />
+</linker>

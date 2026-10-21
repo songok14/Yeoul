@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    유니티 쪽 코드(com.songok.hanjeopsi.game)를 여기서 미리 컴파일해 보는 근사 점검.
+    NuGet 의 Unity3D.SDK(2021.1 참조 어셈블리)를 쓰므로 Unity 6 과 API가 조금 다를 수 있다.
+    Unity 6 에만 있는 API는 Shims.cs 에 껍데기만 둔다. 진짜 확인은 GitHub Actions 빌드.
+    사용법: dotnet build unity/dotnet/UnityCheck
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>CS0618</NoWarn>
+    <DefineConstants>$(DefineConstants);HANJEOPSI_UNITY_CHECK</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../com.songok.hanjeopsi.game/Runtime/**/*.cs" />
+    <Compile Include="../../com.songok.hanjeopsi.game/Editor/**/*.cs" />
+    <Compile Include="Shims.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Hanjeopsi.Core/Hanjeopsi.Core.csproj" />
+    <PackageReference Include="Unity3D.SDK" Version="2021.1.14.1" />
+  </ItemGroup>
+</Project>
