@@ -1,4 +1,4 @@
-// 웹 버전 코드로 유니티 코어 테스트 기준값(unity/golden/*.json)을 만든다
+// 웹 버전 코드로 C# 코어 테스트 기준값(core/golden/*.json)을 만든다
 // 사용법: node scripts/export-golden.mjs
 
 import { build } from 'esbuild';
@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = join(root, 'unity', 'golden');
+const outDir = join(root, 'core', 'golden');
 const targets = ['market', 'rules', 'scenario'];
 
 // localStorage가 없는 node 에서도 save.ts 가 조용히 넘어가도록

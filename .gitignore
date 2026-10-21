@@ -6,3 +6,15 @@ screenshots/
 .vercel
 .wrangler
 __pycache__/
+
+# C# 코어
+core/**/bin/
+core/**/obj/
+# 고닷
+godot/.godot/
+godot/build/
+godot/.mono/
+godot/**/bin/
+godot/**/obj/
+*.apk
+*.aab

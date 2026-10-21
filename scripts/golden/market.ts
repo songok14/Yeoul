@@ -1,5 +1,5 @@
-// 유니티 코어 테스트용 기준값: 시세와 신선도
-// 웹 버전 코드를 그대로 불러 계산한 값을 unity/golden/market.json 으로 남긴다
+// C# 코어 테스트용 기준값: 시세와 신선도
+// 웹 버전 코드를 그대로 불러 계산한 값을 core/golden/market.json 으로 남긴다
 
 import { SPECIES } from '../../src/data/fish';
 import { BAIT, REELS, RODS, TACKLES } from '../../src/data/gear';

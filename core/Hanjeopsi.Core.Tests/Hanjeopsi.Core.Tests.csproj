@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Hanjeopsi.Core/Hanjeopsi.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 게임 데이터와 웹 버전 기준값을 출력 폴더로 복사 -->
+    <None Include="../../godot/data/*.json" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../golden/*.json" LinkBase="golden" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

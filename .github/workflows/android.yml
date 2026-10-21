@@ -1,13 +1,18 @@
-# 안드로이드 테스트 APK 빌드 (GameCI, 무료)
-# 필요한 저장소 비밀값: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD  (docs/UNITY_PLAN.md 10장)
-# 결과: Actions 실행 화면의 apk 아티팩트, 그리고 릴리스 "test-latest"(폰에서 바로 받기)
+# 안드로이드 테스트 APK 빌드 (고닷 4.7.2 C#, 비밀값 필요 없음)
+# 결과
+# - 릴리스 test-latest: 폰에서 바로 받는 APK
+# - 아티팩트: APK와 화면 사진
+# - 브랜치 ci-build: APK와 화면 사진 (Claude가 git으로 받아 화면을 확인한다)
 
 name: 안드로이드 테스트 빌드
 
 on:
   push:
+    branches-ignore:
+      - ci-build
     paths:
-      - 'unity/**'
+      - 'core/**'
+      - 'godot/**'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 
@@ -19,8 +24,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  UNITY_VERSION: 6000.3.27f1
-  PROJECT_PATH: unity/HanjeopsiBada
+  GODOT_VERSION: 4.7.2
+  GODOT_RELEASE: 4.7.2-stable
 
 jobs:
   core:
@@ -32,73 +37,95 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: 코어 빌드와 테스트
-        run: dotnet test unity/dotnet/Hanjeopsi.sln
-      - name: 유니티 코드 점검 컴파일
-        run: dotnet build unity/dotnet/UnityCheck
+        run: dotnet test core/Hanjeopsi.sln
 
   android:
     name: APK 빌드
     needs: core
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 40
     steps:
-      - name: 유니티 라이선스 비밀값 확인
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        run: |
-          if [ -z "$UNITY_LICENSE" ] || [ -z "$UNITY_EMAIL" ] || [ -z "$UNITY_PASSWORD" ]; then
-            echo "::error::저장소 비밀값 UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD 가 필요하다. docs/UNITY_PLAN.md 10-2 를 따라 넣는다."
-            exit 1
-          fi
-
-      - name: 디스크 비우기 (유니티 이미지가 크다)
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: false
-
       - uses: actions/checkout@v4
 
-      - name: Library 캐시
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 고닷 캐시
+        id: godot-cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.PROJECT_PATH }}/Library
-          key: Library-Android-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/HanjeopsiBada/Assets/**', 'unity/HanjeopsiBada/Packages/**', 'unity/com.songok.hanjeopsi.core/**', 'unity/com.songok.hanjeopsi.game/**') }}
-          restore-keys: |
-            Library-Android-${{ env.UNITY_VERSION }}-
+          path: ~/godot
+          key: godot-${{ env.GODOT_RELEASE }}-mono
 
-      - name: 유니티 빌드
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          projectPath: ${{ env.PROJECT_PATH }}
-          unityVersion: ${{ env.UNITY_VERSION }}
-          targetPlatform: Android
-          buildName: hanjeopsi
-          buildMethod: Hanjeopsi.EditorTools.BuildScript.BuildAndroid
-          versioning: None
-          androidExportType: androidPackage
-
-      - name: APK 이름 붙이기
+      - name: 고닷과 내보내기 템플릿 받기 (공식 배포판)
+        if: steps.godot-cache.outputs.cache-hit != 'true'
         run: |
-          ls -la build/Android
-          cp build/Android/hanjeopsi.apk "hanjeopsi-${{ github.run_number }}.apk"
+          mkdir -p ~/godot && cd ~/godot
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}"
+          curl -fsSL -o editor.zip "$base/Godot_v${GODOT_RELEASE}_mono_linux_x86_64.zip"
+          curl -fsSL -o templates.tpz "$base/Godot_v${GODOT_RELEASE}_mono_export_templates.tpz"
+          unzip -q editor.zip && unzip -q templates.tpz && rm editor.zip templates.tpz
+          ls -la ~/godot
+
+      - name: 고닷 준비
+        run: |
+          GODOT=$(find ~/godot -maxdepth 2 -type f -name "Godot_v*_mono_linux.x86_64" | head -1)
+          chmod +x "$GODOT"
+          echo "GODOT=$GODOT" >> "$GITHUB_ENV"
+          tpl=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono
+          mkdir -p "$tpl" && cp -r ~/godot/templates/* "$tpl/"
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-4.7.tres <<EOT
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "${ANDROID_SDK_ROOT}"
+          export/android/java_sdk_path = "${JAVA_HOME}"
+          EOT
+          sed -i 's/^ *//' ~/.config/godot/editor_settings-4.7.tres
+          "$GODOT" --version
+          ls "${ANDROID_SDK_ROOT}/build-tools"
+
+      - name: 그림 가져오기와 C# 빌드
+        run: |
+          "$GODOT" --headless --path godot --import
+          dotnet build godot/Hanjeopsi.csproj
+
+      - name: 화면 사진 (가상 화면)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri > /dev/null
+          mkdir -p shots
+          for mode in lab checks; do
+            extra=""; [ "$mode" = checks ] && extra="--shot-checks"
+            timeout 180 xvfb-run -a -s "-screen 0 1080x1920x24" \
+              "$GODOT" --path godot --rendering-driver opengl3 --resolution 1080x1920 -- --shot="$PWD/shots/$mode.png" $extra
+          done
+          ls -la shots
+
+      - name: APK 내보내기
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ github.workspace }}/godot/keystore/ci-test.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: hanjeopsi
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: hanjeopsi-test
+        run: |
+          mkdir -p godot/build
+          sed -i "s/^version\/code=.*/version\/code=${{ github.run_number }}/; s/^version\/name=.*/version\/name=\"0.3.${{ github.run_number }}\"/" godot/export_presets.cfg
+          "$GODOT" --headless --path godot --export-release "Android" build/hanjeopsi.apk
+          ls -la godot/build
+          cp godot/build/hanjeopsi.apk "hanjeopsi-${{ github.run_number }}.apk"
 
       - name: 아티팩트 올리기
         uses: actions/upload-artifact@v4
         with:
-          name: hanjeopsi-apk-${{ github.run_number }}
-          path: hanjeopsi-${{ github.run_number }}.apk
+          name: hanjeopsi-${{ github.run_number }}
+          path: |
+            hanjeopsi-${{ github.run_number }}.apk
+            shots/*.png
           retention-days: 14
 
       - name: 테스트 빌드 릴리스 갱신 (폰에서 받기)
@@ -106,8 +133,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete test-latest --cleanup-tag --yes || true
-          gh release create test-latest "hanjeopsi-${{ github.run_number }}.apk" \
+          gh release create test-latest "hanjeopsi-${{ github.run_number }}.apk" shots/lab.png \
             --prerelease \
             --target "${{ github.sha }}" \
             --title "테스트 빌드 #${{ github.run_number }}" \
-            --notes "브랜치 ${{ github.ref_name }} · 커밋 ${{ github.sha }}. 테스트 서명이라 같은 키로 덮어 설치된다."
+            --notes "브랜치 ${{ github.ref_name }} · 커밋 ${{ github.sha }}. 테스트 키로 서명해서 다음 빌드도 덮어 설치된다."
+
+      - name: 결과를 ci-build 브랜치에 (Claude 확인용)
+        run: |
+          mkdir out && cp "hanjeopsi-${{ github.run_number }}.apk" out/hanjeopsi.apk && cp shots/*.png out/
+          echo "빌드 #${{ github.run_number }} · ${{ github.ref_name }} · ${{ github.sha }}" > out/BUILD.txt
+          cd out
+          git init -q && git checkout -q -b ci-build
+          git add . && git -c user.name="github-actions" -c user.email="actions@github.com" commit -qm "빌드 #${{ github.run_number }} (${{ github.sha }})"
+          git push -f -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-build

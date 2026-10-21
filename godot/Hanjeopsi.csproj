@@ -1,0 +1,12 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+  <!-- 고닷 쪽 코드(화면, 입력, 연출). 게임 규칙은 core/Hanjeopsi.Core 에 있다 -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>Hanjeopsi.App</RootNamespace>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../core/Hanjeopsi.Core/Hanjeopsi.Core.csproj" />
+  </ItemGroup>
+</Project>
