@@ -327,13 +327,13 @@ namespace Hanjeopsi.Game.DebugTools
             var back = SaveJson.FromJson(json, d);
             Check("세이브 JSON 왕복 (" + json.Length + "자)", back != null && SaveJson.ToJson(back) == json);
             Check("세이브 파일 " + (SaveStore.Has() ? "있음" : "없음"), SaveStore.Has());
-            int ok = _checks.Count(c => c.StartsWith("✓"));
+            int ok = _checks.Count(c => c.StartsWith("○"));
             _checks.Insert(0, ok + " / " + _checks.Count + " 통과");
         }
 
         private void Check(string label, bool ok)
         {
-            _checks.Add((ok ? "✓ " : "✗ ") + label);
+            _checks.Add((ok ? "○ " : "× ") + label);
         }
 
         // ───────── 그리기 ─────────
