@@ -21,6 +21,7 @@ HanjeopsiBada/.idea/
 *.apk
 *.aab
 *.keystore
+!HanjeopsiBada/Keystore/ci-test.keystore
 
 # 빌드 스크립트가 만드는 점검 씬
 HanjeopsiBada/Assets/Scenes/
