@@ -3,8 +3,10 @@
 import { SPECIES_BY_ID, type SpeciesId } from '../data/fish';
 import { BAIT, REELS, RODS, TACKLES } from '../data/gear';
 import { REQUEST_TEMPLATES } from '../data/requests';
-import { coolerCapacity, fishValue, stageOf } from '../systems/economy';
+import { coolerCapacity, fishValue, stageOf, type FreshStage } from '../systems/economy';
 import { refreshRequests } from '../systems/time';
+import { averageQuality, bestFishFor, dishPay, type SeasonResult } from '../systems/truck';
+import type { Recipe } from '../data/recipes';
 import { createSave, persist, S, setState, type FishItem } from './save';
 
 export function newGame(): void {
@@ -133,4 +135,35 @@ export function feedCat(): number {
 
 export function speciesName(id: SpeciesId): string {
   return SPECIES_BY_ID[id].name;
+}
+
+/** 트럭에서 요리 한 접시를 낸다. 가장 좋은 재료를 쓰고 값을 받는다. 재료가 없으면 null */
+export function serveDish(recipe: Recipe, results: SeasonResult[]): { stage: FreshStage; avg: number; pay: number; firstTime: boolean } | null {
+  const fish = bestFishFor(recipe);
+  if (!fish) return null;
+  const stage = stageOf(fish.fresh);
+  removeFish([fish.uid]);
+  const avg = averageQuality(results);
+  const pay = dishPay(recipe, stage, avg);
+  earn(pay);
+  S.dishesCooked += 1;
+  const firstTime = !S.recipesCooked.includes(recipe.id);
+  if (firstTime) S.recipesCooked.push(recipe.id);
+  persist();
+  return { stage, avg, pay, firstTime };
+}
+
+/** 프롤로그를 마쳤다. 볼락구이로 짠맛이 돌아온다 */
+export function completePrologue(): void {
+  S.flags.prologueDone = true;
+  S.flags.firstTaste = true;
+  S.flags.taste1 = true;
+  S.dishesCooked = Math.max(1, S.dishesCooked);
+  persist();
+}
+
+/** 캐스팅 한 번에 미끼 하나 */
+export function useBait(): void {
+  S.bait -= 1;
+  persist();
 }

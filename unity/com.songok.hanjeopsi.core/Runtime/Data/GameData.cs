@@ -12,7 +12,7 @@ namespace Hanjeopsi.Core.Data
     /// </summary>
     public sealed class GameData
     {
-        public static readonly string[] FileNames = { "species", "gear", "balance", "texts" };
+        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste" };
 
         public static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
@@ -24,9 +24,14 @@ namespace Hanjeopsi.Core.Data
         public GearTable Gear { get; private set; }
         public Balance Balance { get; private set; }
         public Texts Texts { get; private set; }
+        public RecipeTable Recipes { get; private set; }
+        public List<RequestTemplate> RequestTemplates { get; private set; }
+        public List<TasteStage> TasteStages { get; private set; }
 
         private Dictionary<string, Species> _byId;
         private Dictionary<string, int> _indexOf;
+        private Dictionary<string, Flavor> _flavors;
+        private Dictionary<string, Recipe> _recipes;
 
         private sealed class SpeciesFile
         {
@@ -42,6 +47,9 @@ namespace Hanjeopsi.Core.Data
                 Gear = Parse<GearTable>(readText("gear")),
                 Balance = Parse<Balance>(readText("balance")),
                 Texts = Parse<Texts>(readText("texts")),
+                Recipes = Parse<RecipeTable>(readText("recipes")),
+                RequestTemplates = Parse<RequestTable>(readText("requests")).Templates,
+                TasteStages = Parse<TasteTable>(readText("taste")).Stages,
             };
             d._byId = new Dictionary<string, Species>();
             d._indexOf = new Dictionary<string, int>();
@@ -50,6 +58,10 @@ namespace Hanjeopsi.Core.Data
                 d._byId.Add(d.Species[i].Id, d.Species[i]);
                 d._indexOf.Add(d.Species[i].Id, i);
             }
+            d._flavors = new Dictionary<string, Flavor>();
+            foreach (var f in d.Recipes.Flavors) d._flavors.Add(f.Id, f);
+            d._recipes = new Dictionary<string, Recipe>();
+            foreach (var r in d.Recipes.Recipes) d._recipes.Add(r.Id, r);
             return d;
         }
 
@@ -73,6 +85,20 @@ namespace Hanjeopsi.Core.Data
             int i;
             if (!_indexOf.TryGetValue(id, out i)) throw new KeyNotFoundException("없는 어종 id: " + id);
             return i;
+        }
+    
+        public Flavor FlavorById(string id)
+        {
+            Flavor f;
+            if (!_flavors.TryGetValue(id, out f)) throw new KeyNotFoundException("없는 맛 id: " + id);
+            return f;
+        }
+
+        public Recipe RecipeById(string id)
+        {
+            Recipe r;
+            if (!_recipes.TryGetValue(id, out r)) throw new KeyNotFoundException("없는 요리 id: " + id);
+            return r;
         }
     }
 }

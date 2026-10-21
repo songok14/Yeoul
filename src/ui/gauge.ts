@@ -2,7 +2,7 @@
 
 import Phaser from 'phaser';
 import { C, T } from '../config';
-import { clamp } from '../utils';
+import { judgeSeason } from '../systems/season';
 import { txt } from './ui';
 
 export interface SeasonGaugeOpts {
@@ -88,11 +88,7 @@ export class SeasonGauge extends Phaser.GameObjects.Container {
   /** 멈추고 정확도(0~1)와 방향(-1 모자람, 1 지나침)을 돌려준다 */
   stop(): { quality: number; side: -1 | 0 | 1; pos: number } {
     this.running = false;
-    const d = Math.abs(this.pos - this.o.target);
-    const half = this.o.zoneHalf;
-    const quality = d <= half ? 1 - 0.2 * (d / half) : clamp(0.8 - (d - half) / (half * 2.5), 0, 0.8);
-    const side: -1 | 0 | 1 = d <= half ? 0 : this.pos < this.o.target ? -1 : 1;
-    return { quality, side, pos: this.pos };
+    return { ...judgeSeason(this.pos, this.o.target, this.o.zoneHalf), pos: this.pos };
   }
 
   /** 숨겨져 있던 정답 구간을 드러낸다 (프롤로그 연출용) */

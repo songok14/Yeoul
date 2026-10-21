@@ -1,34 +1,18 @@
 import Phaser from 'phaser';
 import { C, CUSTOMERS_PER_SHIFT, GAME_H, GAME_W, T } from '../config';
 import { SPECIES_BY_ID } from '../data/fish';
-import { FLAVOR_NAME, FLAVOR_REVIEW, FLAVOR_TOOL, RECIPES, type Recipe } from '../data/recipes';
-import { earn, removeFish } from '../state/actions';
-import { persist, S, type FishItem } from '../state/save';
-import { stageOf, type FreshStage } from '../systems/economy';
+import { FLAVOR_NAME, FLAVOR_TOOL, RECIPES, type Recipe } from '../data/recipes';
+import { serveDish } from '../state/actions';
+import { S } from '../state/save';
+import { stageOf } from '../systems/economy';
 import { canTaste, tasteLevel, TASTE_STAGES } from '../systems/taste';
 import { useSlot } from '../systems/time';
+import { cookable, moodOf, reviewLines } from '../systems/truck';
 import { CUSTOMER_COUNT, drawFace } from '../ui/art';
 import { SeasonGauge } from '../ui/gauge';
 import { Hud, HUD_H } from '../ui/hud';
 import { bubble, fishIcon, Button, drawPanel, fadeIn, floatText, goTo, modal, sprite, txt } from '../ui/ui';
-import { clamp, round100, won } from '../utils';
-
-/** 요리 신선도 배율. 회는 신선도에 민감하고 숙성 어종은 숙성일 때 가장 좋다 */
-function dishFresh(recipe: Recipe, stage: FreshStage): number {
-  const aging = SPECIES_BY_ID[recipe.species].aging;
-  if (recipe.raw) return { live: 1, fresh: 0.8, aged: aging ? 1.25 : 0.5, spoiled: 0 }[stage];
-  return { live: 1, fresh: 0.95, aged: aging ? 1.1 : 0.75, spoiled: 0 }[stage];
-}
-
-function bestFishFor(recipe: Recipe): FishItem | null {
-  const list = S.cooler.filter((f) => f.species === recipe.species && stageOf(f.fresh) !== 'spoiled');
-  if (list.length === 0) return null;
-  return list.sort((a, b) => dishFresh(recipe, stageOf(b.fresh)) - dishFresh(recipe, stageOf(a.fresh)) || b.size - a.size)[0];
-}
-
-function cookable(): Recipe[] {
-  return RECIPES.filter((r) => bestFishFor(r) !== null);
-}
+import { clamp, won } from '../utils';
 
 /** 여울호 푸드트럭 장사: 손님 주문 → 간 맞추기 → 반응과 계산 */
 export class TruckScene extends Phaser.Scene {
@@ -163,37 +147,19 @@ export class TruckScene extends Phaser.Scene {
   }
 
   private serve(recipe: Recipe, results: { quality: number; side: -1 | 0 | 1 }[]): void {
-    const fish = bestFishFor(recipe);
-    if (!fish) {
+    const dish = serveDish(recipe, results);
+    if (!dish) {
       this.nextCustomer();
       return;
     }
     this.order?.destroy();
-    const stage = stageOf(fish.fresh);
-    removeFish([fish.uid]);
-    const avg = results.reduce((a, r) => a + r.quality, 0) / results.length;
-    const pay = round100(recipe.price * dishFresh(recipe, stage) * (0.4 + 0.8 * avg));
-    earn(pay);
+    const { stage, avg, pay, firstTime } = dish;
     this.sales += pay;
     this.served += 1;
-    S.dishesCooked += 1;
-    const firstTime = !S.recipesCooked.includes(recipe.id);
-    if (firstTime) S.recipesCooked.push(recipe.id);
-    persist();
     this.hud.refresh();
 
-    const mood: 0 | 1 | 2 = avg >= 0.75 ? 2 : avg >= 0.45 ? 1 : 0;
-    const lines = recipe.steps.map((s, i) => {
-      if (!canTaste(s.flavor)) return '???';
-      const r = results[i];
-      const idx = r.side === 0 || r.quality >= 0.8 ? 0 : r.side < 0 ? 1 : 2;
-      return FLAVOR_REVIEW[s.flavor][idx];
-    });
-    if (tasteLevel() >= 3) {
-      if (recipe.raw && stage === 'aged' && SPECIES_BY_ID[recipe.species].aging) lines.push('숙성이 잘 됐네요. 쫀득해요');
-      else if (stage === 'live') lines.push('생선이 아주 싱싱해요');
-      lines.push(mood === 2 ? '또 올게요!' : mood === 1 ? '먹을 만했어요' : '다음엔 더 잘해 줘요');
-    }
+    const mood = moodOf(avg);
+    const lines = reviewLines(recipe, results, stage, mood);
 
     const g = this.add.graphics();
     drawPanel(g, 16, 360, GAME_W - 32, 330, C.paper, C.ink);

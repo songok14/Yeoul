@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
-import { C, CH1_DEADLINE, GAME_W, T } from '../config';
+import { C, GAME_W, T } from '../config';
 import { feedCat, repay, spoiledFish } from '../state/actions';
 import { deleteSave, persist, S } from '../state/save';
 import { closedToday, dateLabel } from '../systems/calendar';
+import { chapterOutcome } from '../systems/chapter';
 import { marketHeadline } from '../systems/economy';
 import { daysLeft, endDay, isMarketOpen, isTruckOpen, slotName } from '../systems/time';
 import { Hud, HUD_H } from '../ui/hud';
@@ -29,14 +30,13 @@ export class TownScene extends Phaser.Scene {
     fadeIn(this);
 
     // 1장 결말 확인
-    if (S.debt <= 0 && !S.flags.ch1Clear) {
-      S.flags.ch1Clear = true;
-      S.journalPages = Math.max(1, S.journalPages);
+    const outcome = chapterOutcome();
+    if (outcome === 'clear') {
       persist();
       this.scene.start('Prologue', { mode: 'clear' });
       return;
     }
-    if (S.day > CH1_DEADLINE && S.debt > 0 && !S.flags.ch1Clear) {
+    if (outcome === 'fail') {
       deleteSave();
       this.scene.start('Prologue', { mode: 'fail' });
       return;

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'unity', 'golden');
-const targets = ['market'];
+const targets = ['market', 'rules', 'scenario'];
 
 // localStorage가 없는 node 에서도 save.ts 가 조용히 넘어가도록
 globalThis.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
@@ -25,6 +25,9 @@ for (const name of targets) {
   const code = res.outputFiles[0].text;
   const mod = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
   const file = join(outDir, `${name}.json`);
-  writeFileSync(file, JSON.stringify(mod.build(), null, 1) + '\n');
+  const out = mod.build();
+  // 큰 파일(시나리오)은 들여쓰기 없이
+  const text = JSON.stringify(out, null, name === 'scenario' ? 0 : 1);
+  writeFileSync(file, text + '\n');
   console.log(`기준값 저장: ${file}`);
 }

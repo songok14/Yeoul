@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { C, CASTS_PER_TRIP, GAME_W, T } from '../config';
 import { SPECIES_BY_ID, type Species } from '../data/fish';
 import { REELS, RODS } from '../data/gear';
-import { addToCooler, coolerFull, recordCatch } from '../state/actions';
+import { addToCooler, coolerFull, recordCatch, useBait } from '../state/actions';
 import { S, persist } from '../state/save';
 import { coolerCapacity, fishValue } from '../systems/economy';
 import { rollSize, rollSpecies, zoneOf, ZONE_NAME } from '../systems/fishing';
@@ -322,9 +322,8 @@ export class FishingScene extends Phaser.Scene {
     const reach = this.tutorial ? 1 : RODS[S.rod].reach;
     this.dist01 = clamp(this.gaugePos * reach, 0.05, 1);
     if (!this.tutorial) {
-      S.bait -= 1;
+      useBait();
       this.castsLeft -= 1;
-      persist();
     }
     this.castsDone += 1;
     this.setInfo();

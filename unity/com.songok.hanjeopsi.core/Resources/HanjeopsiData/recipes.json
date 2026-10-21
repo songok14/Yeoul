@@ -1,0 +1,133 @@
+{
+  "flavors": [
+    {
+      "id": "salty",
+      "name": "짠맛",
+      "tool": "소금",
+      "review": [
+        "간이 딱 맞아요",
+        "좀 싱거워요",
+        "너무 짜요"
+      ]
+    },
+    {
+      "id": "sweet",
+      "name": "단맛",
+      "tool": "설탕",
+      "review": [
+        "달큰하니 좋네요",
+        "단맛이 모자라요",
+        "너무 달아요"
+      ]
+    },
+    {
+      "id": "umami",
+      "name": "감칠맛",
+      "tool": "멸치 육수",
+      "review": [
+        "국물이 깊어요",
+        "맛이 밍밍해요",
+        "너무 진해요"
+      ]
+    },
+    {
+      "id": "sour",
+      "name": "신맛",
+      "tool": "식초",
+      "review": [
+        "새콤해서 입맛 돌아요",
+        "새콤함이 부족해요",
+        "너무 시큼해요"
+      ]
+    },
+    {
+      "id": "bitter",
+      "name": "쓴맛",
+      "tool": "쑥갓",
+      "review": [
+        "쌉싸름해서 좋아요",
+        "향이 약해요",
+        "너무 써요"
+      ]
+    }
+  ],
+  "recipes": [
+    {
+      "id": "bollak-gui",
+      "name": "볼락구이",
+      "species": "bollak",
+      "price": 13000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.58
+        }
+      ]
+    },
+    {
+      "id": "godeungeo-jorim",
+      "name": "고등어조림",
+      "species": "godeungeo",
+      "price": 15000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.62
+        },
+        {
+          "flavor": "sweet",
+          "target": 0.38
+        }
+      ]
+    },
+    {
+      "id": "noraemi-maeun",
+      "name": "노래미 매운탕",
+      "species": "noraemi",
+      "price": 17000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.5
+        },
+        {
+          "flavor": "umami",
+          "target": 0.72
+        }
+      ]
+    },
+    {
+      "id": "hakgongchi-muchim",
+      "name": "학공치 회무침",
+      "species": "hakgongchi",
+      "price": 15000,
+      "raw": true,
+      "steps": [
+        {
+          "flavor": "sweet",
+          "target": 0.45
+        },
+        {
+          "flavor": "sour",
+          "target": 0.66
+        }
+      ]
+    },
+    {
+      "id": "gamseongdom-hoe",
+      "name": "감성돔 숙성회",
+      "species": "gamseongdom",
+      "price": 48000,
+      "raw": true,
+      "steps": [
+        {
+          "flavor": "umami",
+          "target": 0.4
+        }
+      ]
+    }
+  ]
+}

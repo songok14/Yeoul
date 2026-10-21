@@ -1,0 +1,63 @@
+{
+  "stages": [
+    {
+      "name": "무미",
+      "flavors": [],
+      "cond": "시작",
+      "effect": "손님 반응이 전부 ???"
+    },
+    {
+      "name": "짠맛",
+      "flavors": [
+        "salty"
+      ],
+      "cond": "첫 어종 요리",
+      "effect": "짠맛 정답 구간이 보인다"
+    },
+    {
+      "name": "단맛",
+      "flavors": [
+        "salty",
+        "sweet"
+      ],
+      "cond": "어종 3종 낚기",
+      "needSpecies": 3,
+      "effect": "단맛 정답 구간이 보인다"
+    },
+    {
+      "name": "감칠맛",
+      "flavors": [
+        "salty",
+        "sweet",
+        "umami"
+      ],
+      "cond": "어종 5종 낚기",
+      "needSpecies": 5,
+      "effect": "육수 맛과 손님 리뷰가 보인다"
+    },
+    {
+      "name": "쓴맛·신맛",
+      "flavors": [
+        "salty",
+        "sweet",
+        "umami",
+        "sour",
+        "bitter"
+      ],
+      "cond": "다음 챕터에서",
+      "effect": "고급 퓨전 요리와 셰프 대회"
+    },
+    {
+      "name": "완전 회복",
+      "flavors": [
+        "salty",
+        "sweet",
+        "umami",
+        "sour",
+        "bitter"
+      ],
+      "cond": "???",
+      "effect": "???"
+    }
+  ]
+}

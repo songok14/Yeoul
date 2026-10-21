@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { C, GAME_W, T } from '../config';
 import { CLEAR_PAGES, FAIL_PAGES, PROLOGUE_1, PROLOGUE_2, type StoryBg, type StoryPage } from '../data/story';
-import { S, persist } from '../state/save';
+import { completePrologue } from '../state/actions';
 import { SeasonGauge } from '../ui/gauge';
 import { backdrop, Button, drawPanel, fadeIn, fishIcon, goTo, modal, sprite, txt } from '../ui/ui';
 
@@ -159,11 +159,7 @@ export class PrologueScene extends Phaser.Scene {
       return;
     }
     if (this.mode === 'p2') {
-      S.flags.prologueDone = true;
-      S.flags.firstTaste = true;
-      S.flags.taste1 = true;
-      S.dishesCooked = Math.max(1, S.dishesCooked);
-      persist();
+      completePrologue();
       this.blocked = true;
       modal(this, {
         title: '미각 회복 1단계: 짠맛',
