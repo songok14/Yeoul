@@ -32,7 +32,9 @@ namespace Hanjeopsi.Core.Tests
                     Assert.Contains(page.Bg, Bgs);
                     Assert.False(string.IsNullOrWhiteSpace(page.Text));
                     Assert.DoesNotContain("—", page.Text);
-                    if (page.Pic != null) Assert.True(File.Exists(Path.Combine(dir, page.Pic + ".png")), page.Pic + ".png 이 없다");
+                    // "fish/bollak" 처럼 폴더가 붙으면 godot/art 아래 그림
+                    string file = page.Pic == null ? null : page.Pic.Contains('/') ? Path.Combine(dir, "..", page.Pic + ".png") : Path.Combine(dir, page.Pic + ".png");
+                    if (file != null) Assert.True(File.Exists(file), page.Pic + ".png 이 없다");
                     if (page.Event != null) Assert.Contains(page.Event, new[] { "salt", "cat" });
                 }
             }

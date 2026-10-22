@@ -341,9 +341,12 @@ namespace Hanjeopsi.App.Screens
         /// <summary>일러스트를 글 상자 바로 위에 발을 맞춰 세운다. 뒤에 은은한 빛을 깐다</summary>
         private void AddPic(Control root, string pic, bool right)
         {
-            var tex = GD.Load<Texture2D>("res://art/portraits/" + pic + ".png");
+            // "fish/bollak" 처럼 폴더가 붙으면 art 아래 그림 (작게), 아니면 감정 일러스트
+            bool prop = pic.Contains('/');
+            var tex = GD.Load<Texture2D>(prop ? "res://art/" + pic + ".png" : "res://art/portraits/" + pic + ".png");
             var area = new Control { Name = "PicArea", MouseFilter = MouseFilterEnum.Ignore };
             area.SetMeta("right", right);
+            area.SetMeta("prop", prop);
             root.AddChild(area);
             var glow = new TextureRect
             {
@@ -383,10 +386,13 @@ namespace Hanjeopsi.App.Screens
             float top = SafeTop + 150;
             float bottom = view.Y - PanelHeight - SafeBottom + 30;
             bool right = (bool)area.GetMeta("right");
+            bool prop = (bool)area.GetMeta("prop");
             var pic = area.GetNode<TextureRect>("Pic");
             var tex = pic.Texture;
             float h = bottom - top;
-            float maxW = view.X * (right ? 0.5f : 0.94f);
+            float maxW = view.X * (right ? 0.5f : prop ? 0.62f : 0.94f);
+            // 소품(구운 볼락 등)은 그림 칸 가운데쯤 떠 있게
+            if (prop) bottom -= h * 0.25f;
             float k = Mathf.Min(h / tex.GetHeight(), maxW / tex.GetWidth());
             var size = tex.GetSize() * k;
             float x = right ? view.X - size.X - 30 : (view.X - size.X) / 2;
@@ -575,6 +581,11 @@ namespace Hanjeopsi.App.Screens
             _index = salt ? 0 : Math.Min(parts.Length > 1 ? int.Parse(parts[1]) : 0, _pages.Count - 1);
             _look = null;
             ShowPage();
+            // 사진에서는 글을 다 보여 준다 (넘치는지 보려고)
+            _typing = false;
+            _text.VisibleCharacters = -1;
+            _next.Visible = true;
+            if (_skip != null) _skip.Visible = _part == "p1" || _part == "p2";
             if (salt)
             {
                 _typing = false;
@@ -583,7 +594,8 @@ namespace Hanjeopsi.App.Screens
             }
             else if (parts.Length > 2 && parts[2] == "cat")
             {
-                CatRuns();
+                // 찍는 순간(2.6초 뒤) 고등어가 가운데쯤 오게
+                Later(1.75, CatRuns);
             }
         }
     }
