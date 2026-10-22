@@ -31,6 +31,16 @@ namespace Hanjeopsi.Core
     /// (웹 state/actions.ts, systems/time.ts, systems/chapter.ts).
     /// 행동이 끝나면 Saved 를 부른다. 고닷 쪽은 여기에 파일 저장을 건다.
     /// </summary>
+    /// <summary>위판장 쿨러 한 줄: 같은 어종·같은 신선도 단계 묶음</summary>
+    public sealed class CoolerGroup
+    {
+        public string Species;
+        public FreshStage Stage;
+        public List<FishItem> Items = new List<FishItem>();
+        /// <summary>오늘 시세로 묶음 전체 값</summary>
+        public int Value;
+    }
+
     public sealed class Game
     {
         public GameData Data { get; }
@@ -335,6 +345,50 @@ namespace Hanjeopsi.Core
             if (!string.IsNullOrEmpty(flag)) Save.Flags[flag] = true;
             Persist();
             return req.Reward;
+        }
+
+        /// <summary>
+        /// 쿨러를 어종·신선도 단계별로 묶는다 (웹 MarketScene groups).
+        /// species.json 순서, 같은 어종이면 활어 → 선어 → 숙성 → 상함
+        /// </summary>
+        public List<CoolerGroup> CoolerGroups()
+        {
+            var map = new Dictionary<string, CoolerGroup>();
+            foreach (var f in Save.Cooler)
+            {
+                var stage = Fresh.StageOf(f.Fresh);
+                string key = f.Species + "-" + Freshness.Key(stage);
+                CoolerGroup g;
+                if (!map.TryGetValue(key, out g))
+                {
+                    g = new CoolerGroup { Species = f.Species, Stage = stage };
+                    map.Add(key, g);
+                }
+                g.Items.Add(f);
+                g.Value += FishValue(f);
+            }
+            return map.Values
+                .OrderBy(g => Data.SpeciesIndex(g.Species))
+                .ThenBy(g => (int)g.Stage)
+                .ToList();
+        }
+
+        /// <summary>경매에 낼 수 있는 물고기 (상한 것 빼고 전부)</summary>
+        public List<FishItem> SellableFish()
+        {
+            return Save.Cooler.Where(f => Fresh.StageOf(f.Fresh) != FreshStage.Spoiled).ToList();
+        }
+
+        /// <summary>의뢰에 쓸 수 있는(활어·선어) 해당 어종 마릿수</summary>
+        public int RequestFishHave(string species)
+        {
+            return Save.Cooler.Count(f => f.Species == species && Fresh.StageOf(f.Fresh) <= FreshStage.Fresh);
+        }
+
+        /// <summary>그 어종으로 만드는 요리 (없으면 null)</summary>
+        public Recipe RecipeForSpecies(string species)
+        {
+            return Data.Recipes.Recipes.FirstOrDefault(r => r.Species == species);
         }
 
         public List<FishItem> SpoiledFish()

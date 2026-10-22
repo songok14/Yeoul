@@ -14,6 +14,10 @@ namespace Hanjeopsi.Core.Data
         public List<string> CatIdle = new List<string>();
         /// <summary>마을에서 SD 여울을 눌렀을 때 말풍선</summary>
         public List<string> YeoulIdle = new List<string>();
+        /// <summary>노씨 미끼가게에 들어가거나 노씨를 눌렀을 때 (웹 ShopScene NOSSI_LINES)</summary>
+        public List<string> Nossi = new List<string>();
+        /// <summary>노씨가 상황에 따라 하는 말 (favor 노래미 의뢰 뒤, rod 감성돔대, gear 장비, bamboo 대나무대)</summary>
+        public Dictionary<string, string> NossiSays = new Dictionary<string, string>();
         /// <summary>대화에 나오는 사람과 감정별 일러스트</summary>
         public List<Speaker> Speakers = new List<Speaker>();
         /// <summary>이름 붙은 대화 장면 (welcome, chapterClear, chapterFail ...)</summary>

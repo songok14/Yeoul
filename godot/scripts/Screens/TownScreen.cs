@@ -311,7 +311,7 @@ namespace Hanjeopsi.App.Screens
 
         private void OpenMarket()
         {
-            NotYet("위판장");
+            GameState.I.GoTo("market");
         }
 
         private void OpenTruck()
@@ -326,12 +326,12 @@ namespace Hanjeopsi.App.Screens
 
         private void OpenShop()
         {
-            NotYet("미끼가게");
+            GameState.I.GoTo("shop");
         }
 
         private void OpenNotebook()
         {
-            NotYet("수첩");
+            GameState.I.GoTo("notebook");
         }
 
         private void NotYet(string what)

@@ -20,6 +20,12 @@ namespace Hanjeopsi.Core.Data
         public List<string> Zones = new List<string>();
         /// <summary>낚시 화면 안내 문구. {0} 자리는 화면이 채운다</summary>
         public Dictionary<string, string> Fishing = new Dictionary<string, string>();
+        /// <summary>위판장 화면 (경매, 납품 의뢰)</summary>
+        public Dictionary<string, string> Auction = new Dictionary<string, string>();
+        /// <summary>노씨 미끼가게 화면</summary>
+        public Dictionary<string, string> Shop = new Dictionary<string, string>();
+        /// <summary>수첩 화면 (쿨러, 도감, 미각, 조황일지)</summary>
+        public Dictionary<string, string> Notebook = new Dictionary<string, string>();
     }
 
     public sealed class MarketTexts

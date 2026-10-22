@@ -121,6 +121,18 @@ jobs:
             "fishing-result:--screen=fishing --shot-action=result"
             "fishing-new:--screen=fishing --shot-action=new"
             "fishing-tall:--screen=fishing --demo=summary"
+            "market:--screen=market"
+            "market-auction:--screen=market --shot-action=auction"
+            "market-request:--screen=market --shot-action=request"
+            "market-tall:--screen=market --demo=summary"
+            "shop:--screen=shop"
+            "shop-talk:--screen=shop --shot-action=talk"
+            "shop-tall:--screen=shop --demo=evening"
+            "notebook:--screen=notebook"
+            "notebook-dex:--screen=notebook --shot-action=dex"
+            "notebook-detail:--screen=notebook --shot-action=detail"
+            "notebook-taste:--screen=notebook --shot-action=taste"
+            "notebook-journal:--screen=notebook --shot-action=journal"
           )
           for s in "${shots[@]}"; do
             name="${s%%:*}"; args="${s#*:}"
