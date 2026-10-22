@@ -456,24 +456,42 @@ namespace Hanjeopsi.App.Ui
 
         // ───────── 쿨러 ─────────
 
-        /// <summary>발밑 쿨러: 파란 몸통에 흰 뚜껑. 고등어가 노리면 뚜껑이 들썩인다</summary>
+        /// <summary>발밑 쿨러: 둥근 파란 몸통에 흰 뚜껑과 손잡이. 고등어가 노리면 뚜껑이 들썩인다</summary>
         private void DrawCooler()
         {
             if (CoolerAt == Vector2.Zero) return;
             var c = P(CoolerAt);
-            float u = K;
-            u *= 1.15f;
-            var body = new Rect2(c.X - 20 * u, c.Y - 24 * u, 40 * u, 24 * u);
-            DrawRect(new Rect2(body.Position + new Vector2(2 * u, 3 * u), body.Size), new Color(0, 0, 0, 0.18f));
-            DrawRect(body, new Color("3f7fb5"));
-            DrawRect(new Rect2(body.Position.X, body.End.Y - 5 * u, body.Size.X, 5 * u), new Color("2f6596"));
-            DrawRect(new Rect2(c.X - 6 * u, c.Y - 16 * u, 12 * u, 3 * u), new Color(1, 1, 1, 0.75f));
-            float lift = CoolerLid * 5 * u;
-            var lid = new Rect2(c.X - 22 * u, c.Y - 30 * u - lift, 44 * u, 7 * u);
-            DrawSetTransform(new Vector2(lid.Position.X, lid.End.Y), -CoolerLid * 0.25f, Vector2.One);
-            DrawRect(new Rect2(0, -lid.Size.Y, lid.Size.X, lid.Size.Y), new Color("f3f1ea"));
-            DrawRect(new Rect2(0, -2 * u, lid.Size.X, 2 * u), new Color("cfcac0"));
+            float u = K * 1.1f;
+            var ink = new Color("1f3b55");
+            // 바닥 그림자
+            DrawSetTransform(c + new Vector2(2 * u, 0), 0, new Vector2(1, 0.25f));
+            DrawCircle(Vector2.Zero, 26 * u, new Color(0, 0, 0, 0.22f));
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            // 몸통: 위는 밝고 아래는 짙은 두 겹
+            var body = new Rect2(c.X - 21 * u, c.Y - 25 * u, 42 * u, 25 * u);
+            DrawStyleBox(Box(new Color("3f86c2"), ink, 4 * u, 1.6f * u), body);
+            DrawStyleBox(Box(new Color("2f6aa0"), new Color(0, 0, 0, 0), 4 * u, 0), new Rect2(body.Position.X + 1.6f * u, body.End.Y - 8 * u, body.Size.X - 3.2f * u, 6.4f * u));
+            // 이름표와 빛
+            DrawStyleBox(Box(new Color(1, 1, 1, 0.85f), new Color(0, 0, 0, 0), 1.5f * u, 0), new Rect2(c.X - 8 * u, c.Y - 17 * u, 16 * u, 5 * u));
+            DrawLine(new Vector2(body.Position.X + 4 * u, body.Position.Y + 4 * u), new Vector2(body.Position.X + 4 * u, body.End.Y - 10 * u), new Color(1, 1, 1, 0.35f), 1.6f * u);
+            // 옆 손잡이
+            DrawArc(new Vector2(body.Position.X, body.Position.Y + 9 * u), 4 * u, Mathf.Pi * 0.5f, Mathf.Pi * 1.5f, 10, ink, 1.6f * u, true);
+            DrawArc(new Vector2(body.End.X, body.Position.Y + 9 * u), 4 * u, -Mathf.Pi * 0.5f, Mathf.Pi * 0.5f, 10, ink, 1.6f * u, true);
+            // 뚜껑 (경첩은 왼쪽 아래)
+            float lift = CoolerLid * 4 * u;
+            var hinge = new Vector2(c.X - 23 * u, c.Y - 24 * u - lift);
+            DrawSetTransform(hinge, -CoolerLid * 0.3f, Vector2.One);
+            DrawStyleBox(Box(new Color("f4f1e8"), ink, 3 * u, 1.6f * u), new Rect2(0, -8 * u, 46 * u, 8 * u));
+            DrawLine(new Vector2(4 * u, -2.6f * u), new Vector2(42 * u, -2.6f * u), new Color("d6d0c2"), 1.4f * u);
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+
+        private static StyleBoxFlat Box(Color fill, Color border, float radius, float borderWidth)
+        {
+            var sb = new StyleBoxFlat { BgColor = fill, BorderColor = border, AntiAliasing = true };
+            sb.SetCornerRadiusAll((int)Mathf.Round(radius));
+            sb.SetBorderWidthAll((int)Mathf.Round(borderWidth));
+            return sb;
         }
 
         private static Vector2[] Bezier(Vector2 a, Vector2 c, Vector2 b, int n)
