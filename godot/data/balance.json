@@ -65,6 +65,7 @@
     "outWidth": 2.5
   },
   "truck": {
+    "customersPerShift": 5,
     "zoneHalf": 0.085,
     "targetJitter": 0.04,
     "targetMin": 0.12,

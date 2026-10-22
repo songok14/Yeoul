@@ -321,7 +321,7 @@ namespace Hanjeopsi.App.Screens
                 Toast("새벽엔 손님이 없다");
                 return;
             }
-            NotYet("여울호 장사");
+            GameState.I.GoTo("truck");
         }
 
         private void OpenShop()
@@ -332,11 +332,6 @@ namespace Hanjeopsi.App.Screens
         private void OpenNotebook()
         {
             GameState.I.GoTo("notebook");
-        }
-
-        private void NotYet(string what)
-        {
-            Toast(UiKit.Topic(what) + " 다음 빌드에서 열려요");
         }
 
         /// <summary>여울식당: 할머니가 한마디 하고, 대화창 위에 갚기·잠자기 선택지가 뜬다</summary>

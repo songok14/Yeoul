@@ -26,6 +26,8 @@ namespace Hanjeopsi.Core.Data
         public Dictionary<string, string> Shop = new Dictionary<string, string>();
         /// <summary>수첩 화면 (쿨러, 도감, 미각, 조황일지)</summary>
         public Dictionary<string, string> Notebook = new Dictionary<string, string>();
+        /// <summary>여울호 푸드트럭 화면</summary>
+        public Dictionary<string, string> Truck = new Dictionary<string, string>();
     }
 
     public sealed class MarketTexts

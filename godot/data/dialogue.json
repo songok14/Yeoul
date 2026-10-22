@@ -33,6 +33,32 @@
     "gear": "...괜찮은 물건이다.",
     "bamboo": "...그 대나무대.\n버리지 마라."
   },
+  "customers": [
+    {
+      "id": "fisher",
+      "order": "{0} 하나 주쇼!"
+    },
+    {
+      "id": "mom",
+      "order": "{0} 하나 주세요.\n아이랑 나눠 먹을게요"
+    },
+    {
+      "id": "student",
+      "order": "{0} 하나요!"
+    },
+    {
+      "id": "mail",
+      "order": "{0} 하나 빨리 될까요?"
+    },
+    {
+      "id": "grandpa",
+      "order": "{0} 하나 줘 보게"
+    },
+    {
+      "id": "tourist",
+      "order": "{0} 하나 주세요!\n사진 찍어도 돼요?"
+    }
+  ],
   "speakers": [
     {
       "id": "yeoul",

@@ -122,6 +122,8 @@ namespace Hanjeopsi.Core.Data
     /// <summary>푸드트럭</summary>
     public sealed class TruckBalance
     {
+        /// <summary>장사 한 번에 받는 손님 수</summary>
+        public int CustomersPerShift;
         public double ZoneHalf;
         public double TargetJitter;
         public double TargetMin;
