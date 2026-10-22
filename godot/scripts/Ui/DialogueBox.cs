@@ -49,7 +49,10 @@ namespace Hanjeopsi.App.Ui
 
         public override void _Ready()
         {
-            // 아래쪽만 어둡게. HUD 의 돈과 빚은 그대로 보인다
+            // 마을을 살짝 가라앉혀 일러스트가 앞으로 나오게 하고, 아래쪽은 더 어둡게
+            var dim = new ColorRect { Color = new Color(Palette.NightDeep, 0.32f), MouseFilter = MouseFilterEnum.Ignore };
+            dim.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            AddChild(dim);
             var shade = UiKit.VerticalShade(new Color(Palette.NightDeep, 0), new Color(Palette.NightDeep, 0.78f));
             shade.SetAnchorsAndOffsetsPreset(LayoutPreset.BottomWide);
             shade.OffsetTop = -1150;
@@ -114,12 +117,13 @@ namespace Hanjeopsi.App.Ui
                 _portrait.Position = new Vector2(cx - w / 2, boxTop + 120 - h * 0.72f);
             }
 
-            _choiceBox.ResetSize();
-            float cw = Mathf.Min(760, size.X - 120);
+            // 선택지는 말하는 사람 반대쪽에 세워 얼굴을 가리지 않는다
+            float cw = Mathf.Min(620, size.X * 0.58f);
             _choiceBox.Size = new Vector2(cw, 0);
             _choiceBox.ResetSize();
             _choiceBox.Size = new Vector2(cw, _choiceBox.Size.Y);
-            _choiceBox.Position = new Vector2((size.X - cw) / 2, boxTop - _choiceBox.Size.Y - 70);
+            float chx = right ? 48 : size.X - cw - 48;
+            _choiceBox.Position = new Vector2(chx, boxTop - _choiceBox.Size.Y - 60);
         }
 
         private string Side()
