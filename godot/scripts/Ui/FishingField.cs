@@ -207,14 +207,14 @@ namespace Hanjeopsi.App.Ui
                 pts[i] = P(PosAt(a, far));
                 pts[2 * n + 1 - i] = P(PosAt(a, near));
             }
-            float pulse = NeedleFixed ? 0.06f : 0.07f + 0.02f * Mathf.Sin(_time * 3);
+            float pulse = NeedleFixed ? 0.13f : 0.15f + 0.04f * Mathf.Sin(_time * 3);
             DrawColoredPolygon(pts, new Color(1, 1, 1, pulse));
             // 테두리와 거리 구간 (근거리 | 중거리 | 원거리)
-            DrawPolyline(Arc(far, n), new Color(1, 1, 1, 0.38f), 2.5f, true);
-            DrawLine(P(PosAt(-1, near)), P(PosAt(-1, far)), new Color(1, 1, 1, 0.3f), 2, true);
-            DrawLine(P(PosAt(1, near)), P(PosAt(1, far)), new Color(1, 1, 1, 0.3f), 2, true);
+            DrawPolyline(Arc(far, n), new Color(1, 1, 1, 0.75f), 4, true);
+            DrawLine(P(PosAt(-1, near)), P(PosAt(-1, far)), new Color(1, 1, 1, 0.6f), 3.5f, true);
+            DrawLine(P(PosAt(1, near)), P(PosAt(1, far)), new Color(1, 1, 1, 0.6f), 3.5f, true);
             foreach (float zone in new[] { 0.35f, 0.7f })
-                if (zone < far - 0.03f) DashedArc(zone, new Color(1, 1, 1, 0.22f));
+                if (zone < far - 0.03f) DashedArc(zone, new Color(1, 1, 1, 0.45f));
 
             // 바늘: 발밑에서 수평선 쪽으로 뻗은 빛줄기
             float w = 0.035f;
@@ -224,8 +224,8 @@ namespace Hanjeopsi.App.Ui
                 P(PosAt(Needle + w * 0.5f, far)), P(PosAt(Needle - w * 0.5f, far)),
             };
             var gold = Palette.Gold;
-            DrawColoredPolygon(ray, new Color(gold, NeedleFixed ? 0.45f : 0.32f));
-            DrawLine(P(PosAt(Needle, near)), P(PosAt(Needle, far)), new Color(1, 0.97f, 0.85f, NeedleFixed ? 0.95f : 0.8f), 3, true);
+            DrawColoredPolygon(ray, new Color(gold, NeedleFixed ? 0.6f : 0.45f));
+            DrawLine(P(PosAt(Needle, near)), P(PosAt(Needle, far)), new Color(1, 0.97f, 0.85f, 1), 4, true);
 
             // 파워 단계: 떨어질 자리 동그라미
             if (Aiming != null)
@@ -249,7 +249,7 @@ namespace Hanjeopsi.App.Ui
         {
             const int n = 30;
             for (int i = 0; i < n; i += 2)
-                DrawLine(P(PosAt(-1 + 2f * i / n, d)), P(PosAt(-1 + 2f * (i + 1) / n, d)), c, 2, true);
+                DrawLine(P(PosAt(-1 + 2f * i / n, d)), P(PosAt(-1 + 2f * (i + 1) / n, d)), c, 3, true);
         }
 
         // ───────── 고등어 지점: 물비늘이 반짝이고 물결이 번진다 ─────────
@@ -259,18 +259,24 @@ namespace Hanjeopsi.App.Ui
             var at = PosAt(HintAngle, HintDist);
             var c = P(at);
             float z = at.Z * K;
+            // 금빛으로 일렁이는 물 (가운데가 밝다)
+            float glow = 0.22f + 0.08f * Mathf.Sin(_time * 2.5f);
+            DrawSetTransform(c, 0, new Vector2(1, 0.34f));
+            DrawCircle(Vector2.Zero, 20 * z, new Color(Palette.Gold, glow * 0.6f));
+            DrawCircle(Vector2.Zero, 11 * z, new Color(1, 0.95f, 0.75f, glow));
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
             for (int i = 0; i < 3; i++)
             {
                 float ph = (_time / 1.6f + i / 3f) % 1f;
-                Ellipse(c, 12 * (1 + 1.8f * ph) * z, 0.34f, new Color(Palette.Foam, 0.85f * (1 - ph)), 2.5f);
+                Ellipse(c, 12 * (1 + 1.8f * ph) * z, 0.34f, new Color(i == 0 ? Palette.Gold : Palette.Foam, 1 - ph), 3.5f);
             }
-            // 반짝이는 별 다섯
-            for (int i = 0; i < 5; i++)
+            // 반짝이는 별 여섯
+            for (int i = 0; i < 6; i++)
             {
                 float seed = i * 1.7f;
                 float tw = Mathf.Max(0, Mathf.Sin(_time * 3.2f + seed * 2.3f));
-                var off = new Vector2(Mathf.Sin(seed * 3.1f) * 22, Mathf.Cos(seed * 2.2f) * 6 - 2) * z;
-                Sparkle(c + off, (3 + 4 * tw) * z * 0.6f, new Color(1, 0.98f, 0.85f, 0.35f + 0.65f * tw));
+                var off = new Vector2(Mathf.Sin(seed * 3.1f) * 24, Mathf.Cos(seed * 2.2f) * 7 - 3) * z;
+                Sparkle(c + off, (6 + 8 * tw) * z * 0.6f, new Color(1, 0.98f, 0.85f, 0.45f + 0.55f * tw));
             }
             // 가끔 작은 고기가 톡 튀어 오른다
             float jt = (_time % 2.6f) / 0.5f;
@@ -347,7 +353,7 @@ namespace Hanjeopsi.App.Ui
         private void DrawShadow()
         {
             var c = P(ShadowAt);
-            float len = 46 * ShadowSize * K * (Big ? 1.25f : 1);
+            float len = 62 * ShadowSize * K * (Big ? 1.25f : 1);
             if (FishTexture == null)
             {
                 DrawSetTransform(c, 0, new Vector2(1, 0.34f));
@@ -473,6 +479,7 @@ namespace Hanjeopsi.App.Ui
             if (CoolerAt == Vector2.Zero) return;
             var c = P(CoolerAt);
             float u = K;
+            u *= 1.15f;
             var body = new Rect2(c.X - 20 * u, c.Y - 24 * u, 40 * u, 24 * u);
             DrawRect(new Rect2(body.Position + new Vector2(2 * u, 3 * u), body.Size), new Color(0, 0, 0, 0.18f));
             DrawRect(body, new Color("3f7fb5"));

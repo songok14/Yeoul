@@ -44,9 +44,9 @@ namespace Hanjeopsi.App.Screens
         private static readonly Vector2 YeoulFoot = new Vector2(150, 690);
         private const float YeoulHeight = 168;
         private static readonly Vector2 CatFoot = new Vector2(80, 686);
-        // 쿨러는 고등어 왼쪽. 고등어는 쿨러 옆까지 살금살금 다가간다
-        private static readonly Vector2 CoolerFoot = new Vector2(30, 690);
-        private static readonly Vector2 CatThiefFoot = new Vector2(60, 688);
+        // 쿨러는 여울 오른쪽 방파제 위 (긴 화면에서도 잘리지 않게). 고등어는 여울 앞을 지나 쿨러 옆까지 살금살금 간다
+        private static readonly Vector2 CoolerFoot = new Vector2(236, 668);
+        private static readonly Vector2 CatThiefFoot = new Vector2(196, 682);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
         private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2") };
 
@@ -500,7 +500,9 @@ namespace Hanjeopsi.App.Screens
             _thiefT = 0;
             Sound.Play("sneak", -2);
             Haptics.Pulse(30, 0.4f);
-            _cat.FlipH = false;
+            // 오른쪽으로 걸어가며 여울 앞을 지난다 (그림은 왼쪽을 본다)
+            _cat.FlipH = true;
+            _stage.MoveChild(_cat, _stage.GetChildCount() - 1);
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/walk-1.png"));
             Tell(T["thief"], T["thiefSub"], Palette.Gold);
         }
@@ -550,6 +552,7 @@ namespace Hanjeopsi.App.Screens
         private void ReturnCat()
         {
             _stage.Move(_cat, CatFoot);
+            _stage.MoveChild(_cat, _yeoul.GetIndex());
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/sit-side.png"));
             _cat.FlipH = false;
         }
@@ -1092,6 +1095,8 @@ namespace Hanjeopsi.App.Screens
                     ShotHook("godeungeo", 33.5, false, 0, 1);
                     break;
                 case "big":
+                    // 큰 놈은 세서 사진 동안 줄이 터지지 않게 일찍 손을 뗀다 (버티는 포즈)
+                    _shotPull = true;
                     ShotHook("gamseongdom", 52, true, 0.3, 1);
                     break;
                 case "jump":
