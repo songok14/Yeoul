@@ -6,9 +6,10 @@
 songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"를 이어서 작업해 줘. (cloud 세션) 모든 답변, 문서, 커밋 메시지, 코드 주석은 한국어로 써줘.
 
 ## 지금까지 상황
-- 환경: cloud. 원격 https://github.com/songok14/Yeoul, 작업 브랜치 ccr-c846e49a-1tqms8 (여기서 이어서 작업하고 푸시해. PR은 만들지 마). main 브랜치도 같은 내용으로 만들어 두었다(작업은 ccr 브랜치에서). 마지막 코드 커밋 517ba35, CI 빌드 #22 성공(사진 확인함, APK 안 Hanjeopsi.dll 확인). 그 뒤 문서 커밋만 있다.
+- 환경: cloud. 원격 https://github.com/songok14/Yeoul, 작업 브랜치 ccr-c846e49a-1tqms8 (여기서 이어서 작업하고 푸시해. PR은 만들지 마). main 이 기본 브랜치이고 예전 브랜치(claude/name-change-issue-l462yn, claude/epic-maxwell-25ekj4)까지 모두 합쳐 두었다(작업은 ccr 브랜치에서 하고 끝나면 main 에도 올린다). 마지막 코드 커밋 21696b7, CI 빌드 #24 성공(사진 확인함, APK 안 Hanjeopsi.dll 확인). 그 뒤 문서 커밋만 있다.
 - 먼저 읽을 것: CLAUDE.md, docs/HANDOFF.md, docs/GODOT_PLAN.md(단계표 9절, 그림 역할 8절, 폰에서 볼 것 10-2), docs/ART_PROMPTS.md, docs/GAME_DESIGN.md 9절
-- 웹 버전(src/, Phaser)은 기준으로 남기고 고닷 4.7.2 C#으로 옮기는 중. U0~U7 완료(U5·U6·U7은 폰 확인 대기). 사용자에게 APK 빌드 #22를 보냈다.
+- 웹 버전(src/, Phaser)은 기준으로 남기고 고닷 4.7.2 C#으로 옮기는 중. U0~U7 완료(U5·U6·U7은 폰 확인 대기). 사용자에게 APK 빌드 #24를 보냈다.
+- U7 뒤에 한 일: 사용자가 다시 준 SD 원본으로 낚시 포즈 셋을 더했다. fish-cast(던지는 순간), fish-pull(릴링 중 텐션이 위험 가까이거나 꾹꾹 저항일 때 0.5초 유지), fish-joy(낚아 올리면 톡 뛰고 0.75초 뒤 결과). CI 사진 fishing-pull, fishing-joy.
 - 지난 세션에 한 일 (U7):
   - 공통 바탕 godot/scripts/Ui/PlaceScreen: HUD(노치까지 칠함) → 제목 줄(HeaderRight) → 탭(Ui/TabStrip, 금색 알약이 미끄러짐) → 내용(Content, 탭 바꾸면 BuildPage 를 다시 그려 살짝 떠오름) → 아래 "마을로" 막대. 스크롤은 쓰지 않고 쪽 넘김(Pager). FitsToHeight 를 켜면 자리가 정해진 뒤 Content 높이로 한 번 더 그린다. 조각: Paper, Board, FishIcon, Pill, SmallButton, Rule, TopAligned. 고닷 내장 TabBar 와 이름이 겹쳐서 TabStrip.
   - 위판장 Screens/MarketScreen (scenes/market.tscn): 다섯 어종 시세판, 쿨러 묶음(어종·신선도)별 팔기와 전부 팔기, 한 쪽 줄 수는 화면 높이로 계산. 경매 연출: 값이 일곱 번 툭툭 뛰고 "낙찰!" 도장이 쾅. 납품 의뢰 카드, 노씨 의뢰는 납품 뒤 노씨 대화창.
@@ -17,7 +18,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
   - 코어 Game: CoolerGroups, SellableFish, RequestFishHave, RecipeForSpecies (+ CoolerGroupTests, 전체 76개 통과). 글은 godot/data/texts.json 의 auction·shop·notebook, 노씨 대사는 dialogue.json 의 nossi·nossiSays. 데이터 클래스는 MissingMemberHandling.Error 라 JSON 키를 늘리면 Texts.cs/Dialogue.cs 도 같이 고친다.
   - 배경 godot/art/backgrounds/market.png, baitshop.png (웹 webp 를 PNG로). 마을 메뉴·간판의 위판장·미끼가게·수첩 연결(여울호 장사만 NotYet).
   - CI 사진 추가: market, market-auction, market-request, market-tall, shop, shop-talk, shop-tall, notebook, notebook-dex, notebook-detail, notebook-taste, notebook-journal.
-- 아직 안 쓴 SD 원본(사용자가 예전에 채팅에 첨부, 레포에 없음. 필요하면 다시 첨부해 달라고 한다): 옆모습 당기기·서 있기(투명 배경), 옆모습 당기기와 뒷모습(어두운 빛 배경), 15포즈 시트(체크무늬가 그림에 박힘), 6포즈 시트(#EEE 배경, sd_sheet.py 로 지우면 가는 낚싯대가 끊김). 이번 세션에서 다시 부탁했다.
+- SD 원본은 레포에 넣지 않는다. 15포즈 시트에는 아직 안 쓴 포즈(의자에 앉아 기다리기, 엎드려 졸기, 웅크려 기다리기 등)가 있다. 쓰려면 사용자에게 다시 첨부를 부탁한다.
 - 확인 필요: 폰에서 낚시 한 판(손맛, 텐션, 철수 뒤 시간 한 칸), U7 화면(경매 연출, 쪽 넘김 단추가 막대에 안 가리는지, 노씨 대화, 탭 미끄러짐), 노치·긴 화면. 조황일지에서 얻은 장 쪽지를 살짝 기울이려 했는데 GridContainer 안이라 기울지 않는다(사소함).
 
 ## 확정된 결정
@@ -47,7 +48,6 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 
 ## 이번에 해 줬으면 하는 것
 1. 사용자가 폰에서 본 낚시·위판장·미끼가게·수첩 의견이 있으면 먼저 반영하고 CI 사진으로 확인.
-2. 사용자가 SD 원본을 다시 첨부했으면 sd_pose.py 로 넣는다(예: 낚시 결과 기쁨, 옆모습 당기기를 릴링 강한 저항에).
-3. 다음 단계 U8: 여울호 트럭 장사. 웹 src/scenes/TruckScene.ts 와 코어 Truck·SeasonJudge·ServeDish 를 그대로 쓴다. SD 손님(그림이 없으면 docs/ART_PROMPTS.md 형식으로 손님 SD 시트 프롬프트를 준다), 간 맞추기 게이지, 손님 반응 말풍선, 미각 단계에 따라 ??? 표시. 글은 texts.json 에. 마을 메뉴·트럭의 NotYet 자리를 연결. CI 사진 모드(shots 목록)에 장면 추가. 끝나는 기준: 사진에서 겹침·가림·화면 밖 글자 없음.
+2. 다음 단계 U8: 여울호 트럭 장사. 웹 src/scenes/TruckScene.ts 와 코어 Truck·SeasonJudge·ServeDish 를 그대로 쓴다. SD 손님(그림이 없으면 docs/ART_PROMPTS.md 형식으로 손님 SD 시트 프롬프트를 준다), 간 맞추기 게이지, 손님 반응 말풍선, 미각 단계에 따라 ??? 표시. 글은 texts.json 에. 마을 메뉴·트럭의 NotYet 자리를 연결. CI 사진 모드(shots 목록)에 장면 추가. 끝나는 기준: 사진에서 겹침·가림·화면 밖 글자 없음.
 마지막: dotnet test core/Hanjeopsi.sln, dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true, 웹을 고쳤으면 npm run build·npm run shot·node scripts/playtest.mjs. 커밋 후 git push -u origin ccr-c846e49a-1tqms8 (main 도 맞추려면 git push origin ccr-c846e49a-1tqms8:main), CI 사진 확인, APK 보내기, GODOT_PLAN·ROADMAP·HANDOFF 갱신.
 ````
