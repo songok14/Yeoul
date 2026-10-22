@@ -125,7 +125,10 @@ namespace Hanjeopsi.App.Ui
                 var size = a.Node.GetCombinedMinimumSize();
                 a.Node.Size = size;
                 a.Node.PivotOffset = size / 2;
-                a.Node.Position = ToLocal(a.At) - size / 2;
+                // 화면이 길어 그림 양옆이 잘려도 간판은 화면 안에 남긴다
+                var pos = ToLocal(a.At) - size / 2;
+                pos.X = Mathf.Clamp(pos.X, 14, Mathf.Max(14, Size.X - size.X - 14));
+                a.Node.Position = pos;
             }
         }
     }

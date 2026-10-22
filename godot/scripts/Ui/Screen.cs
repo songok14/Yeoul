@@ -271,7 +271,8 @@ namespace Hanjeopsi.App.Ui
             var tw = root.CreateTween().SetParallel(true);
             tw.TweenProperty(root, "scale", Vector2.One, 0.3).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
             tw.TweenProperty(root, "modulate:a", 1f, 0.12);
-            if (seconds > 0)
+            // 사진 모드에서는 찍힐 때까지 남겨 둔다
+            if (seconds > 0 && !GameState.I.ShotMode)
             {
                 tw.Chain().TweenInterval(seconds);
                 tw.Chain().TweenProperty(root, "modulate:a", 0f, 0.25);

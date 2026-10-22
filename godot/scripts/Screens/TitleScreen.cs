@@ -37,7 +37,7 @@ namespace Hanjeopsi.App.Screens
             Art.AddChild(Motes());
 
             // 잠든 고등어 (숨 쉬기)
-            _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sleep.png"), new Vector2(330, 612), 50);
+            _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sleep.png"), new Vector2(352, 572), 46);
 
             // 제목과 머리말
             var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };

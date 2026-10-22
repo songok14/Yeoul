@@ -39,7 +39,8 @@
 - [x] SD 프롬프트(여울·고등어·부품 분리), 컷신 다듬기 프롬프트 8장. SD 여울 8장, 고등어 12장 잘라 넣기
 - [x] U3 릴링 물리·챔질·입질 대기를 웹 `systems/reel.ts`로 빼고 C# `ReelFight`로. 골든 260판 프레임 단위 일치
 - [x] U4 코어 자동 플레이: 30일 예외 없음, 적당히 잘하면 20판 모두 클리어(평균 22일)
-- [ ] U5~U9 화면 옮기기 (Town, Fishing, Market·Shop·Notebook, Truck, Story)
+- [x] U5 공통 UI(버튼, 모달, HUD, 토스트, 말풍선, 화면 전환)와 타이틀·마을
+- [ ] U6~U9 화면 옮기기 (Fishing, Market·Shop·Notebook, Truck, Story)
 - [ ] U10~U12 SD 그림과 애니메이션, 소리, 폰에서 1장 끝까지
 
 ## 1단계 · 재미 다듬기 (다음 작업)

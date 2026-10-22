@@ -46,13 +46,17 @@ Yeoul/
 │  └─ golden/                         웹에서 뽑은 기준값 JSON
 ├─ godot/                             ② 고닷 프로젝트
 │  ├─ project.godot, Hanjeopsi.csproj, export_presets.cfg, icon.png
-│  ├─ data/                           species, gear, balance, texts, recipes, requests, taste .json
-│  ├─ art/                            backgrounds/, yeoul/, cat/ (PNG)
-│  ├─ fonts/                          고운돋움 (OFL)
-│  ├─ scenes/                         .tscn (지금은 core_lab.tscn)
+│  ├─ data/                           species, gear, balance, texts, recipes, requests, taste, dialogue .json
+│  ├─ art/                            backgrounds/, yeoul/, cat/, props/ (PNG)
+│  ├─ fonts/                          고운돋움(본문), 고운바탕 굵게(제목) (OFL)
+│  ├─ scenes/                         boot(첫 장면), title, town, core_lab .tscn (뿌리 노드에 스크립트만 붙인다)
 │  ├─ scripts/
+│  │  ├─ App/                         GameState(자동 로드: 데이터·판·전환·사진 모드), BootLoader
+│  │  ├─ Ui/                          Palette·Fonts·TextSize, UiKit, GameButton, Screen(모달·토스트·말풍선),
+│  │  │                               Hud, ArtStage(배경 좌표계), SignButton
+│  │  ├─ Screens/                     TitleScreen, TownScreen
 │  │  ├─ Boot/                        GameDataLoader, SaveStore, SystemRandom
-│  │  └─ Lab/                         CoreLab (점검 화면)
+│  │  └─ Lab/                         CoreLab (점검 화면, 타이틀 아래 '점검')
 │  └─ keystore/ci-test.keystore       테스트 APK 서명 키 (덮어 설치용, 공개 값)
 └─ .github/workflows/android.yml      코어 테스트 → 고닷 받기 → 사진 → APK → 릴리스 test-latest, ci-build
 ```
@@ -120,7 +124,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 71개, 자동 �
 | `truck.tscn` | `TruckScene` | SD 손님 입장, 주문, 간 맞추기 게이지, 반응 |
 | `shop.tscn` | `ShopScene` | 미끼, 장비 |
 | `notebook.tscn` | `NotebookScene` | 쿨러, 도감, 미각, 조황일지 |
-| `core_lab.tscn` | (없음) | 지금 APK의 점검 화면. 씬을 다 옮기면 메뉴 깊숙이 넣거나 뺀다 |
+| `core_lab.tscn` | (없음) | 점검 화면. 타이틀 아래 작은 '점검'으로 들어간다. 씬을 다 옮기면 뺀다 |
 
 - 공통 UI(HUD, 버튼, 모달, 토스트, 말풍선, 떠오르는 숫자)는 씬으로 만들어 재사용하고, 색과 글꼴은 `Theme` 하나로 모은다.
 - 화면 좌표: 웹 논리 450×800 → 고닷 1080×1920 (2.4배).
@@ -142,9 +146,10 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 71개, 자동 �
 | `state/save.ts`, `state/actions.ts` | `State/SaveData`, `SaveJson`, `Game` (웹 세이브 JSON을 그대로 읽는다) | core | ✅ |
 | `systems/reel.ts` 릴링 텐션·거리·저항·지침·드랙, 챔질, 입질 대기·속임 입질, 고등어 힌트, 파워 게이지 | `Systems/ReelFight` (`ReelRules`, `BiteWait`, `ReelFight.Step(holding, dt)`) | core | ✅ |
 | localStorage | `SaveStore` → `user://save.json` (임시 파일에 쓰고 바꿔 끼움) | godot | ✅ |
-| `ui/ui.ts` txt, Button, modal, toast, bubble | `Theme` + 재사용 씬 | godot | U5 |
-| 고운돋움·고운바탕 | 프로젝트 기본 글꼴 (TTF 그대로, 동적 글리프) | godot | ✅ (고운돋움) |
-| tween, 카메라 흔들기 | `Tween`, `Camera2D` 오프셋 | godot | U5~ |
+| `ui/ui.ts` txt, Button, modal, toast, bubble, floatText, `ui/hud.ts` | `Ui/UiKit`, `GameButton`, `Screen.Modal/Toast/Bubble/FloatText`, `Hud` (코드로 만든다) | godot | ✅ |
+| 고운돋움·고운바탕 | `Fonts.Body`, `Fonts.Title` (TTF 그대로, 동적 글리프) | godot | ✅ |
+| `goTo`, `fadeIn` | `GameState.GoTo("town")` 어둡게 덮었다 걷기 | godot | ✅ |
+| tween, 카메라 흔들기 | `Tween`, `Camera2D` 오프셋 | godot | U5~ (Tween ✅) |
 | `scripts/art.py` | SD 시트는 `scripts/sd_sheet.py`(PNG). 배경은 WebP를 PNG로 | scripts | ✅ |
 | `scripts/screenshot.mjs` | CI 사진 모드 (`-- --shot=<경로>`), `ci-build` 브랜치 | godot / CI | ✅ |
 | `scripts/playtest.mjs` | 코어 자동 플레이 테스트 `AutoPlayTests` (30일, 시드 20개 × 두 실력) | core | ✅ |
@@ -171,7 +176,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 71개, 자동 �
 | U2 | 코어 나머지 규칙, 골든 확장(62개), 점검 화면 `CoreLab` | `dotnet test`, 폰에서 "웹 일치 점검" | ✅ (폰 확인 2026-10-22) |
 | U3 | 릴링 물리를 웹에서 `reel.ts`로 빼고 C# `ReelFight`로 | `dotnet test` | ✅ (골든 260판 프레임 단위 일치) |
 | U4 | 코어 자동 플레이: 새 게임부터 30일을 규칙대로 돌려 예외가 없는지, 빚을 갚을 수 있는지 | `dotnet test` | ✅ (적당히 잘하면 20/20 클리어, 평균 22일. `GAME_DESIGN.md` 9절) |
-| U5 | 공통 UI(Theme, 버튼, 모달, HUD, 토스트, 화면 전환), Boot·Title·Town | 사진, 폰 | |
+| U5 | 공통 UI(Theme, 버튼, 모달, HUD, 토스트, 화면 전환), Boot·Title·Town | 사진, 폰 | ✅ 사진 확인 (폰 확인 대기) |
 | U6 | Fishing (터치, 게이지, 찌, 그림자, 물보라, 결과) | 사진, 폰 | |
 | U7 | Market·Shop·Notebook | 사진, 폰 | |
 | U8 | Truck (SD 손님, 간 맞추기, 반응) | 사진, 폰 | |
@@ -191,9 +196,18 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 71개, 자동 �
 3. 같은 테스트 키로 서명해서 다음 빌드는 지우지 않고 덮어 설치된다. 세이브도 남는다.
 4. 빌드 하나는 10분 안팎 걸린다.
 
-### 10-2. 지금 APK(점검 화면)에서 볼 것
+### 10-2. 지금 APK에서 볼 것
+타이틀과 마을 (U5)
+- 켜면 어두운 막이 걷히며 타이틀. 제목 → 머리말 세 줄 → 버튼 순서로 떠오르는지, 빛 알갱이가 바다 위로 오르는지, 고등어가 숨 쉬는지.
+- 제목 글꼴(고운바탕 굵게)과 본문 글꼴(고운돋움)이 깨지지 않는지.
+- 새로 시작 → 마을. 위쪽 HUD(날짜, 시간대 칩, D-day, 소지금, 상환 막대)와 아래 메뉴 여섯 개.
+- 버튼을 누르면 살짝 눌렸다 튕기는지. 아직 없는 화면은 "…는 다음 빌드에서 열려요" 알림.
+- 간판, 여울, 고등어, 트럭을 눌러 본다. 여울은 손을 흔들고 말풍선, 고등어는 냐옹.
+- 여울식당: 빚 갚기(돈이 굴러가며 줄고 상환 막대가 찬다, 빨간 숫자가 떠오른다), 잠자기 → 다음 날 새벽과 어제 요약.
+- 앱을 껐다 켜서 이어하기. 노치나 제스처 바에 글자가 가리지 않는지, 긴 화면에서 간판이 잘리지 않는지.
+
+점검 화면 (타이틀 아래 '점검')
 - 마을 배경 위에 SD 여울과 고등어가 나오는지. 누르면 포즈가 바뀌고 걷기는 두 프레임이 번갈아 나온다.
-- 한글이 깨지지 않는지 (고운돋움).
 - 버튼 9개로 하루를 돌려 본다: 출조(6번 던지기, 미니게임 없이 다 낚음) → 경매 → 트럭 장사 → 잠자기.
 - **웹 일치 점검**을 누르면 11개 항목이 모두 ○ 인지. 하나라도 × 면 화면을 찍어 보내 준다.
 - 앱을 껐다 켜면 "이어하기"로 같은 날짜, 같은 돈이 나오는지.
