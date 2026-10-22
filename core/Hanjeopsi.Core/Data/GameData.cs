@@ -12,7 +12,7 @@ namespace Hanjeopsi.Core.Data
     /// </summary>
     public sealed class GameData
     {
-        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste" };
+        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste", "dialogue" };
 
         public static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
@@ -27,6 +27,7 @@ namespace Hanjeopsi.Core.Data
         public RecipeTable Recipes { get; private set; }
         public List<RequestTemplate> RequestTemplates { get; private set; }
         public List<TasteStage> TasteStages { get; private set; }
+        public Dialogue Dialogue { get; private set; }
 
         private Dictionary<string, Species> _byId;
         private Dictionary<string, int> _indexOf;
@@ -50,6 +51,7 @@ namespace Hanjeopsi.Core.Data
                 Recipes = Parse<RecipeTable>(readText("recipes")),
                 RequestTemplates = Parse<RequestTable>(readText("requests")).Templates,
                 TasteStages = Parse<TasteTable>(readText("taste")).Stages,
+                Dialogue = Parse<Dialogue>(readText("dialogue")),
             };
             d._byId = new Dictionary<string, Species>();
             d._indexOf = new Dictionary<string, int>();

@@ -62,6 +62,7 @@ namespace Hanjeopsi.App.Lab
 
         public override void _Ready()
         {
+            GameState.I?.Reveal();
             Theme = MakeTheme();
             ReadShotArgs();
             try
@@ -251,6 +252,10 @@ namespace Hanjeopsi.App.Lab
             var check = MakeButton("웹 일치 점검", new Color("6a5a8a"), ShowChecks, 32, 76);
             check.SizeFlagsHorizontal = SizeFlags.ShrinkEnd;
             check.CustomMinimumSize = new Vector2(240, 76);
+            var back = MakeButton("타이틀로", new Color("2f5689"), () => GameState.I.GoTo("title"), 32, 76);
+            back.SizeFlagsHorizontal = SizeFlags.ShrinkEnd;
+            back.CustomMinimumSize = new Vector2(200, 76);
+            tools.AddChild(back);
             tools.AddChild(newGame);
             tools.AddChild(check);
             col.AddChild(tools);

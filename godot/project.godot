@@ -7,10 +7,14 @@ config_version=5
 
 config/name="한 접시의 바다"
 config/version="0.3.0"
-run/main_scene="res://scenes/core_lab.tscn"
+run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 config/icon="res://icon.png"
 boot_splash/bg_color=Color(0.105882, 0.164706, 0.254902, 1)
+
+[autoload]
+
+GameState="*res://scripts/App/GameState.cs"
 
 [display]
 

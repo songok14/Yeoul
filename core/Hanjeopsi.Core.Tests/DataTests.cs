@@ -50,6 +50,17 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 마을_대사가_웹과_같다()
+        {
+            // 웹 TownScene GRANDMA_LINES, tapCat
+            var d = TestData.Game.Dialogue;
+            Assert.Equal(5, d.Grandma.Count);
+            Assert.Equal("밥은 먹고 다니나. 맛 몰라도 배는 고프다.", d.Grandma[0]);
+            Assert.Equal(new[] { "냐옹", "냐아...", "(하품)", "(꼬리를 흔든다)" }, d.CatIdle);
+            Assert.NotEmpty(d.YeoulIdle);
+        }
+
+        [Fact]
         public void 규정이_FishingPlan_기본표와_같다()
         {
             // FishingPlan core/catches/Limits.kt: 볼락 15cm 이하, 감성돔 25cm 이하 · 5/1~5/31

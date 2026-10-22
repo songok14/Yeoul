@@ -101,11 +101,24 @@ jobs:
       - name: 화면 사진 (가상 화면)
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri > /dev/null
+          sed -i "s/^config\/version=.*/config\/version=\"0.3.${{ github.run_number }}\"/" godot/project.godot
           mkdir -p shots
-          for mode in lab checks; do
-            extra=""; [ "$mode" = checks ] && extra="--shot-checks"
-            timeout 180 xvfb-run -a -s "-screen 0 1080x1920x24" \
-              "$GODOT" --path godot --rendering-driver opengl3 --resolution 1080x1920 -- --shot="$PWD/shots/$mode.png" $extra
+          # 이름:인자. 화면을 새로 만들면 여기에 한 줄 더한다
+          shots=(
+            "lab:--screen=lab"
+            "checks:--screen=lab --shot-checks"
+            "title:--screen=title"
+            "town:--screen=town"
+            "town-restaurant:--screen=town --shot-action=restaurant"
+            "town-summary:--screen=town --demo=summary"
+            "town-evening:--screen=town --demo=evening --shot-action=yeoul"
+            "town-tall:--screen=town --demo=evening"
+          )
+          for s in "${shots[@]}"; do
+            name="${s%%:*}"; args="${s#*:}"
+            res=1080x1920; [ "$name" = town-tall ] && res=1080x2400
+            timeout 180 xvfb-run -a -s "-screen 0 ${res}x24" \
+              "$GODOT" --path godot --rendering-driver opengl3 --resolution $res -- --shot="$PWD/shots/$name.png" $args
           done
           ls -la shots
 
@@ -128,7 +141,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete test-latest --cleanup-tag --yes || true
-          gh release create test-latest "hanjeopsi-${{ github.run_number }}.apk" shots/lab.png \
+          gh release create test-latest "hanjeopsi-${{ github.run_number }}.apk" shots/title.png shots/town.png \
             --prerelease \
             --target "${{ github.sha }}" \
             --title "테스트 빌드 #${{ github.run_number }}" \
