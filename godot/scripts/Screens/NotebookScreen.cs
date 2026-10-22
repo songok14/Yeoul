@@ -250,7 +250,7 @@ namespace Hanjeopsi.App.Screens
             int caught = G.Taste.SpeciesCaught(G.Save);
             col.AddChild(Heading(T["taste"], F("tasteSub", caught)));
             var stages = G.Data.TasteStages;
-            var list = new VBoxContainer { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            var list = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             list.AddThemeConstantOverride("separation", 0);
             col.AddChild(list);
             for (int i = 0; i < stages.Count; i++)
@@ -258,7 +258,7 @@ namespace Hanjeopsi.App.Screens
                 var st = stages[i];
                 bool done = i <= lv;
                 bool known = done || i == lv + 1;
-                var row = new HBoxContainer { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+                var row = new HBoxContainer { CustomMinimumSize = new Vector2(0, 150), MouseFilter = MouseFilterEnum.Ignore };
                 row.AddThemeConstantOverride("separation", 26);
                 row.AddChild(new TasteNode(i, done, i == lv + 1, i < stages.Count - 1, i < lv));
                 var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
@@ -271,7 +271,7 @@ namespace Hanjeopsi.App.Screens
                 c.SizeFlagsVertical = SizeFlags.ShrinkCenter;
                 head.AddChild(c);
                 text.AddChild(head);
-                text.AddChild(UiKit.Text(known ? st.Effect : T["unknown"], TextSize.Small, Palette.InkSoft, false, true));
+                text.AddChild(UiKit.Text(known ? st.Effect : T["unknown"], TextSize.Small, Palette.InkSoft).Ellipsis());
                 row.AddChild(text);
                 list.AddChild(row);
             }

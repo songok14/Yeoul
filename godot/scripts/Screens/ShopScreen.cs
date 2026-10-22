@@ -126,7 +126,7 @@ namespace Hanjeopsi.App.Screens
             col.AddChild(Rule());
             var show = SmallButton(T["show"], Palette.Wood, () => Nossi(G.Data.Dialogue.NossiSays["bamboo"]), 220, 96);
             col.AddChild(Row(GearIcon.Kind.Bamboo, "", T["bamboo"], T["bambooSub"], show, Palette.WoodDark));
-            return paper;
+            return TopAligned(paper);
         }
 
         private Control GearRow(GearSlot slot)

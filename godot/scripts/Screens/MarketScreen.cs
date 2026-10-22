@@ -15,7 +15,9 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class MarketScreen : PlaceScreen
     {
-        private const int PageSize = 5;
+        /// <summary>쿨러 한 줄 높이(사이 간격 포함)와 줄 말고 쿨러 상자가 쓰는 높이 (시세판, 제목, 쪽 넘김)</summary>
+        private const float RowHeight = 126;
+        private const float FixedHeight = 640;
         private int _page;
         private bool _selling;
 
@@ -27,6 +29,17 @@ namespace Hanjeopsi.App.Screens
         private string F(string key, params object[] args)
         {
             return string.Format(T[key], args);
+        }
+
+        protected override bool FitsToHeight
+        {
+            get { return true; }
+        }
+
+        /// <summary>화면 높이에 맞춰 한 쪽에 들어가는 줄 수</summary>
+        private int PageSize
+        {
+            get { return Mathf.Max(2, (int)((Content.Size.Y - FixedHeight) / RowHeight)); }
         }
 
         protected override string Backdrop
@@ -85,11 +98,12 @@ namespace Hanjeopsi.App.Screens
                 return col;
             }
 
-            int pages = (groups.Count + PageSize - 1) / PageSize;
+            int size = PageSize;
+            int pages = (groups.Count + size - 1) / size;
             _page = Mathf.Clamp(_page, 0, pages - 1);
             bool open = G.IsMarketOpen();
             int i = 0;
-            foreach (var grp in groups.Skip(_page * PageSize).Take(PageSize)) list.AddChild(GroupRow(grp, i++, open));
+            foreach (var grp in groups.Skip(_page * size).Take(size)) list.AddChild(GroupRow(grp, i++, open));
             list.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
 
             if (pages > 1)
@@ -286,8 +300,6 @@ namespace Hanjeopsi.App.Screens
             {
                 int total = G.SellFish(uids, finalMul);
                 price.Text = UiKit.Won(total);
-                title.Text = T["sold"];
-                title.LabelSettings.FontColor = Palette.RedDark;
                 stamp.Scale = new Vector2(2.4f, 2.4f);
                 stamp.RotationDegrees = -16;
                 var st = stamp.CreateTween().SetParallel(true);

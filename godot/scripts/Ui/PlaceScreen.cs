@@ -164,6 +164,20 @@ namespace Hanjeopsi.App.Ui
         {
             if (_page == null) return;
             _page.Size = Content.Size;
+            // 쪽마다 들어가는 줄 수가 화면 높이에 따라 달라지는 화면은 자리가 정해진 뒤 한 번 더 그린다
+            if (FitsToHeight && Mathf.Abs(Content.Size.Y - _drawnHeight) > 1)
+            {
+                _drawnHeight = Content.Size.Y;
+                CallDeferred(MethodName.Redraw);
+            }
+        }
+
+        private float _drawnHeight = -1;
+
+        /// <summary>BuildPage 가 Content 높이를 보고 줄 수를 정하면 true</summary>
+        protected virtual bool FitsToHeight
+        {
+            get { return false; }
         }
 
         /// <summary>탭 제목을 바꾼다 (납품 의뢰 수처럼 숫자가 바뀔 때)</summary>
@@ -180,6 +194,14 @@ namespace Hanjeopsi.App.Ui
             var p = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
             p.AddThemeStyleboxOverride("panel", UiKit.Box(Palette.Paper, 36, padX, padY).WithBorder(Palette.PaperDark, 0, 10).WithShadow(0.35f, 22, 10));
             return p;
+        }
+
+        /// <summary>내용만큼만 높이를 차지하게 위로 붙여 감싼다 (긴 화면에서 빈 종이가 늘어나지 않게)</summary>
+        public static Control TopAligned(Control c)
+        {
+            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            col.AddChild(c);
+            return col;
         }
 
         /// <summary>어두운 칠판 상자 (시세판)</summary>
