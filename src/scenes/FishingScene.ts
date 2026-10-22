@@ -7,6 +7,7 @@ import { S, persist } from '../state/save';
 import { coolerCapacity, fishValue } from '../systems/economy';
 import { rollSize, rollSpecies, zoneOf, ZONE_NAME } from '../systems/fishing';
 import { releaseReason } from '../systems/calendar';
+import { biteMissed, biteWindow, BiteWait, castDistance, isPerfectStrike, REEL_TUNING, ReelFight, rollLanes, stepPower } from '../systems/reel';
 import { checkTasteUnlock } from '../systems/taste';
 import { useSlot } from '../systems/time';
 import { Hud } from '../ui/hud';
@@ -22,7 +23,8 @@ const TIP_IDLE = { x: 238, y: 528 };
 const GAUGE_X = 45;
 const GAUGE_W = 360;
 const GAUGE_Y = 768;
-const SLACK = 12;
+const SLACK = REEL_TUNING.slack;
+const DANGER = REEL_TUNING.danger;
 
 /** 방파제 찌낚시: 캐스팅 → 입질 대기 → 챔질 → 릴링 */
 export class FishingScene extends Phaser.Scene {
@@ -55,22 +57,15 @@ export class FishingScene extends Phaser.Scene {
   private dist01 = 0;
   private target = { x: 0, y: 0 };
   private bobT = 0;
-  private waitTimer = 0;
-  private nibbleTimer = 0;
+  private wait!: BiteWait;
   private biteTimer = 0;
   private biteElapsed = 0;
   private species!: Species;
   private size = 0;
   private hot = false;
-  private tension = 0;
-  private distance = 0;
-  private startDistance = 0;
-  private slackTime = 0;
-  private surgeTimer = 0;
-  private surgeKick = 0;
+  private fight!: ReelFight;
   private holding = false;
   private fishWobble = 0;
-  private fightTime = 0;
 
   constructor() {
     super('Fishing');
@@ -214,9 +209,9 @@ export class FishingScene extends Phaser.Scene {
     this.exitBtn?.setEnabled(true);
     this.setInfo();
 
-    this.hotLane = Phaser.Math.Between(-1, 1);
-    const accuracy = Math.min(0.95, 0.6 + S.catAffinity * 0.035);
-    this.hintLane = Math.random() < accuracy ? this.hotLane : Phaser.Math.Between(-1, 1);
+    const lanes = rollLanes(S.catAffinity);
+    this.hotLane = lanes.hot;
+    this.hintLane = lanes.hint;
 
     this.drawLanes();
     if (this.tutorial) {
@@ -320,7 +315,7 @@ export class FishingScene extends Phaser.Scene {
   private cast(): void {
     this.zoneLabels.forEach((t) => t.setVisible(false));
     const reach = this.tutorial ? 1 : RODS[S.rod].reach;
-    this.dist01 = clamp(this.gaugePos * reach, 0.05, 1);
+    this.dist01 = castDistance(this.gaugePos, reach);
     if (!this.tutorial) {
       useBait();
       this.castsLeft -= 1;
@@ -364,9 +359,7 @@ export class FishingScene extends Phaser.Scene {
     this.splash(this.target.x, this.target.y, this.bobber.scale);
     this.phase = 'wait';
     this.bobT = 0;
-    const base = this.tutorial ? 2.2 : Phaser.Math.FloatBetween(2.2, 5.2);
-    this.waitTimer = base * (this.hot ? 0.55 : 1);
-    this.nibbleTimer = Phaser.Math.FloatBetween(0.6, 1.4);
+    this.wait = new BiteWait(this.hot, this.tutorial);
     this.say('찌를 지켜보세요', this.tutorial ? '톡톡 건드리는 건 속임수. 쑥 들어갈 때 누르기' : this.hot ? '물살이 좋다. 금방 올 것 같다' : '');
   }
 
@@ -386,7 +379,7 @@ export class FishingScene extends Phaser.Scene {
     const zone = zoneOf(this.dist01);
     this.species = this.tutorial ? SPECIES_BY_ID.bollak : rollSpecies(zone, S.slot, this.hot);
     this.size = this.tutorial ? 19.4 : rollSize(this.species, this.hot);
-    this.biteTimer = this.tutorial ? 1.6 : 0.62 + RODS[S.rod].hookBonus / 1000 + (this.species.rare ? -0.08 : 0);
+    this.biteTimer = biteWindow(RODS[S.rod], this.species, this.tutorial);
     this.bobber.setY(this.target.y + 10 * this.bobber.scale);
     this.bobber.setAlpha(0.35);
     this.splash(this.target.x, this.target.y, this.bobber.scale * 1.4);
@@ -396,7 +389,7 @@ export class FishingScene extends Phaser.Scene {
   }
 
   private strike(): void {
-    const perfect = this.biteElapsed < 0.28;
+    const perfect = isPerfectStrike(this.biteElapsed);
     this.msg.setColor(T.paper);
     this.bobber.setAlpha(1);
     this.startReel(perfect);
@@ -407,90 +400,50 @@ export class FishingScene extends Phaser.Scene {
     this.holding = this.input.activePointer.isDown;
     this.bobber.setVisible(false);
     this.shadow.setVisible(true);
-    this.startDistance = 8 + this.dist01 * 26;
-    this.distance = this.startDistance - (perfect ? 3 : 0);
-    this.tension = 35;
-    this.slackTime = 0;
-    this.surgeTimer = this.tutorial ? 2.5 : Phaser.Math.FloatBetween(0.8, 1.8);
-    this.surgeKick = 0;
+    this.fight = new ReelFight({
+      species: this.species,
+      size: this.size,
+      dist01: this.dist01,
+      perfect,
+      rod: this.tutorial ? RODS[1] : RODS[S.rod],
+      reel: this.tutorial ? REELS[1] : REELS[S.reel],
+      tutorial: this.tutorial,
+    });
     this.fishWobble = Math.random() * 10;
-    this.fightTime = 0;
     const s = clamp(this.size / this.species.avgSize, 0.7, 1.6);
     this.shadow.setSize(34 * s, 12 * s);
     toast(this, perfect ? '완벽한 챔질!' : '걸었다!', perfect ? T.gold : T.paper, 200);
     this.say('꾹 누르면 릴을 감아요', '빨간색이면 손을 떼고 파란색이면 감기');
   }
 
-  /** 물고기 힘. 오래 버틸수록 지쳐서 18초 뒤에는 절반 가까이 약해진다 */
-  private fishStrength(): number {
-    if (this.tutorial) return 0.8;
-    const tired = 1 - 0.55 * clamp(this.fightTime / 18, 0, 1);
-    return this.species.strength * clamp(this.size / this.species.avgSize, 0.8, 1.5) * tired;
-  }
-
   private updateReel(dt: number): void {
-    const reel = this.tutorial ? REELS[1] : REELS[S.reel];
-    const rod = this.tutorial ? RODS[1] : RODS[S.rod];
-    this.fightTime += dt;
-    const str = this.fishStrength();
-
-    if (this.holding) {
-      let rise = (26 + str * 9) * reel.tensionMul;
-      if (this.tension > reel.drag) rise *= 0.3;
-      this.tension += rise * dt;
-      this.distance -= reel.speed * (this.tension > SLACK ? 1 : 0.6) * dt;
-    } else {
-      this.tension -= 48 * dt;
-      this.distance += str * 0.55 * dt;
-    }
-
-    this.surgeTimer -= dt;
-    if (this.surgeTimer <= 0) {
-      const kick = (9 + str * 5) * (1 - rod.absorb);
-      this.tension += kick;
-      this.distance += 1.2;
-      this.surgeKick = 0.35;
+    const f = this.fight;
+    const res = f.step(this.holding, dt);
+    const str = f.strength();
+    if (res.surge) {
       this.cameras.main.shake(90, 0.003);
-      this.surgeTimer = Phaser.Math.FloatBetween(1.1, 2.6) / (0.7 + str * 0.12);
       if (!this.tutorial) toast(this, '꾹꾹!', T.red, 260);
     }
-    this.surgeKick = Math.max(0, this.surgeKick - dt);
-
-    this.tension = clamp(this.tension, 0, 110);
-    this.distance = Math.min(this.distance, this.startDistance + 4);
-
-    if (this.tension < SLACK) this.slackTime += dt;
-    else this.slackTime = Math.max(0, this.slackTime - dt * 2);
-
-    const slackLimit = this.tutorial ? 3.2 : this.species.id === 'hakgongchi' ? 1.1 : 1.6;
-    if (this.tension >= 100) {
-      if (this.tutorial) {
-        this.tension = 70;
-        toast(this, '줄이 끊어질 뻔했다! 손을 떼요', T.red, 260);
-      } else return this.lose('팅! 줄이 터졌다', '텐션이 빨간색이면 손을 떼야 한다');
-    }
-    if (this.slackTime > slackLimit) {
-      if (this.tutorial) {
-        this.slackTime = 0;
-        toast(this, '줄이 너무 느슨해요! 감아요', T.blue, 260);
-      } else return this.lose('바늘이 빠졌다', '줄이 너무 오래 느슨했다');
-    }
-    if (this.distance <= 0) return this.landFish();
+    if (res.rescueSnap) toast(this, '줄이 끊어질 뻔했다! 손을 떼요', T.red, 260);
+    if (res.rescueSlack) toast(this, '줄이 너무 느슨해요! 감아요', T.blue, 260);
+    if (res.end === 'snap') return this.lose('팅! 줄이 터졌다', '텐션이 빨간색이면 손을 떼야 한다');
+    if (res.end === 'slack') return this.lose('바늘이 빠졌다', '줄이 너무 오래 느슨했다');
+    if (res.end === 'landed') return this.landFish();
 
     // 물고기 그림자와 낚싯줄
-    const p = clamp(1 - this.distance / this.startDistance, 0, 1);
-    this.fishWobble += dt * (2 + str * 0.6 + this.surgeKick * 20);
+    const p = f.progress();
+    this.fishWobble += dt * (2 + str * 0.6 + f.surgeKick * 20);
     const from = this.posFor(this.lane, this.dist01);
-    const fx = lerp(from.x, GAME_W / 2 + 10, p) + Math.sin(this.fishWobble) * (18 + this.surgeKick * 40) * (1 - p * 0.6);
+    const fx = lerp(from.x, GAME_W / 2 + 10, p) + Math.sin(this.fishWobble) * (18 + f.surgeKick * 40) * (1 - p * 0.6);
     const fy = lerp(from.y, SHORE_Y - 16, p);
     this.shadow.setPosition(fx, fy);
     this.shadow.setScale(lerp(0.6, 1.3, p));
-    const bend = this.tension / 100;
+    const bend = f.tension / 100;
     const tipX = lerp(TIP_IDLE.x, fx, bend * 0.25);
     const tipY = lerp(TIP_IDLE.y, fy, bend * 0.2) + bend * 18;
     this.drawRod(tipX, tipY, true, fx, fy);
-    this.drawTension(reel.drag);
-    this.sub.setText(`남은 거리 ${Math.max(0, this.distance).toFixed(1)}m`);
+    this.drawTension(f.setup.reel.drag);
+    this.sub.setText(`남은 거리 ${Math.max(0, f.distance).toFixed(1)}m`);
   }
 
   private drawTension(drag: number): void {
@@ -502,15 +455,16 @@ export class FishingScene extends Phaser.Scene {
     g.fillStyle(C.blue, 1);
     g.fillRect(GAUGE_X, y, GAUGE_W * (SLACK / 100), 24);
     g.fillStyle(C.greenDark, 1);
-    g.fillRect(GAUGE_X + GAUGE_W * (SLACK / 100), y, GAUGE_W * ((85 - SLACK) / 100), 24);
+    g.fillRect(GAUGE_X + GAUGE_W * (SLACK / 100), y, GAUGE_W * ((DANGER - SLACK) / 100), 24);
     g.fillStyle(C.redDark, 1);
-    g.fillRect(GAUGE_X + GAUGE_W * 0.85, y, GAUGE_W * 0.15, 24);
+    g.fillRect(GAUGE_X + GAUGE_W * (DANGER / 100), y, GAUGE_W * (1 - DANGER / 100), 24);
     if (drag <= 100) {
       g.fillStyle(C.gold, 0.8);
       g.fillRect(GAUGE_X + GAUGE_W * (drag / 100) - 1, y, 2, 24);
     }
-    const t = clamp(this.tension / 100, 0, 1);
-    const col = this.tension >= 85 ? C.red : this.tension < SLACK ? 0x8cc8ff : C.green;
+    const tension = this.fight.tension;
+    const t = clamp(tension / 100, 0, 1);
+    const col = tension >= DANGER ? C.red : tension < SLACK ? 0x8cc8ff : C.green;
     g.fillStyle(col, 1);
     g.fillRect(GAUGE_X, y + 6, GAUGE_W * t, 12);
     g.fillStyle(C.white, 1);
@@ -638,42 +592,35 @@ export class FishingScene extends Phaser.Scene {
     const dt = Math.min(0.05, delta / 1000);
     switch (this.phase) {
       case 'power': {
-        this.gaugePos += this.gaugeDir * 1.25 * dt;
-        if (this.gaugePos >= 1) {
-          this.gaugePos = 1;
-          this.gaugeDir = -1;
-        } else if (this.gaugePos <= 0) {
-          this.gaugePos = 0;
-          this.gaugeDir = 1;
-        }
+        const g = stepPower(this.gaugePos, this.gaugeDir, dt);
+        this.gaugePos = g.pos;
+        this.gaugeDir = g.dir;
         this.drawPowerGauge();
         break;
       }
       case 'wait': {
         this.bobT += dt;
         this.bobber.setY(this.target.y + Math.sin(this.bobT * 3) * 2);
-        this.nibbleTimer -= dt;
-        if (this.nibbleTimer <= 0) {
-          this.nibbleTimer = Phaser.Math.FloatBetween(0.7, 1.6);
+        const w = this.wait.step(dt);
+        if (w.nibble) {
           this.bobber.setY(this.target.y + 5 * this.bobber.scale);
           const t = txt(this, this.target.x + 18, this.target.y - 24, '톡', { size: 'small', color: T.paper, stroke: '#1b2a41' });
           this.tweens.add({ targets: t, alpha: 0, y: t.y - 14, duration: 500, onComplete: () => t.destroy() });
         }
-        this.waitTimer -= dt;
-        if (this.waitTimer <= 0) this.startBite();
+        if (w.bite) this.startBite();
         break;
       }
       case 'bite': {
         this.biteElapsed += dt;
         this.bobber.setY(this.target.y + 10 * this.bobber.scale + Math.sin(this.biteElapsed * 30) * 2);
-        if (this.biteElapsed > this.biteTimer) {
+        if (biteMissed(this.biteElapsed, this.biteTimer)) {
           this.msg.setColor(T.paper);
           this.bobber.setAlpha(1);
           if (this.tutorial) {
             this.say('놓쳤다... 다시 기다려 보자', '찌가 들어가면 바로 누르기');
             this.phase = 'wait';
             this.bobber.setY(this.target.y);
-            this.waitTimer = 2;
+            this.wait.retry();
           } else {
             this.phase = 'busy';
             this.bobber.setVisible(false);

@@ -13,6 +13,7 @@ namespace Hanjeopsi.Core.Tests
         private static JObject _market;
         private static JObject _rules;
         private static JObject _scenario;
+        private static JObject _reel;
 
         public static GameData Game
         {
@@ -38,6 +39,12 @@ namespace Hanjeopsi.Core.Tests
         public static JObject ScenarioGolden
         {
             get { return _scenario ??= Golden("scenario"); }
+        }
+
+        /// <summary>낚시 미니게임: 힌트 방향, 파워 게이지, 입질 대기, 챔질, 릴링</summary>
+        public static JObject ReelGolden
+        {
+            get { return _reel ??= Golden("reel"); }
         }
 
         private static JObject Golden(string name)

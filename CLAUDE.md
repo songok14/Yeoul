@@ -62,6 +62,7 @@ node scripts/playtest.mjs     # 새 게임부터 하루 자동 플레이. 실패
 ```
 
 - 스크린샷은 Playwright와 미리 설치된 Chromium으로 찍는다(`playwright install` 금지).
+- 소프트웨어 렌더링이라 작업 환경에서는 초당 7프레임 안팎이다. 두 스크립트 모두 Phaser의 `smoothStep`을 꺼서 게임 시간이 실제 시간을 따라가게 하고, 시간 대신 게임 단계(`phase`)를 보고 누른다. 자동 플레이는 10분쯤 걸린다.
 - 글자 겹침, 화면 밖으로 나간 글자, 버튼 겹침을 특히 본다.
 - 새 화면을 만들면 `scripts/screenshot.mjs`에 한 장 추가한다. `?scene=이름&demo=1`로 바로 갈 수 있다.
 - `screenshots/`와 `dist/`는 커밋하지 않는다.

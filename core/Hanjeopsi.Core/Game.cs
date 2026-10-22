@@ -40,6 +40,7 @@ namespace Hanjeopsi.Core
         public Rules Rules { get; }
         public Taste Taste { get; }
         public FishingRoll Fishing { get; }
+        public ReelRules Reel { get; }
         public Truck Truck { get; }
 
         /// <summary>상태가 바뀌어 저장할 때 (웹 persist)</summary>
@@ -52,6 +53,7 @@ namespace Hanjeopsi.Core
             Rules = new Rules(data);
             Taste = new Taste(data);
             Fishing = new FishingRoll(data);
+            Reel = new ReelRules(data);
             Truck = new Truck(data, Fresh, Taste);
             Load(save);
         }

@@ -32,7 +32,7 @@ Yeoul/
 ├─ src/, public/, docs/ ...           웹 버전 (기준. 지우지 않는다)
 ├─ scripts/
 │  ├─ export-golden.mjs               웹 코드로 기준값을 뽑는다 (npm run golden)
-│  ├─ golden/*.ts                     기준값 만드는 코드 (market, rules, scenario)
+│  ├─ golden/*.ts                     기준값 만드는 코드 (market, rules, scenario, reel)
 │  └─ sd_sheet.py                     SD 시트(#EDEDED)를 칸마다 잘라 PNG로
 ├─ core/                              ① 순수 C# 코어
 │  ├─ Hanjeopsi.sln
@@ -40,9 +40,9 @@ Yeoul/
 │  │  ├─ Util/                        JsMath, Mulberry32, IRandom
 │  │  ├─ Data/                        Species, Gear, Balance, Texts, Recipe, RequestTemplate, TasteStage, GameData(로더)
 │  │  ├─ State/                       FishItem, SaveData, SaveJson
-│  │  ├─ Systems/                     Freshness, Market, Rules, Taste, FishingRoll, SeasonJudge, Truck, (ReelFight)
+│  │  ├─ Systems/                     Freshness, Market, Rules, Taste, FishingRoll, SeasonJudge, Truck, ReelFight
 │  │  └─ Game.cs                      한 판: 세이브 + 규칙 + 행동 (웹 actions.ts, time.ts)
-│  ├─ Hanjeopsi.Core.Tests/           xUnit 테스트
+│  ├─ Hanjeopsi.Core.Tests/           xUnit 테스트, 자동 플레이(AutoPlayer)
 │  └─ golden/                         웹에서 뽑은 기준값 JSON
 ├─ godot/                             ② 고닷 프로젝트
 │  ├─ project.godot, Hanjeopsi.csproj, export_presets.cfg, icon.png
@@ -94,15 +94,17 @@ Yeoul/
 core/golden/market.json   ← 시드 4개 × 45일 × 5종 시세, 물고기 값 300건, 낙찰가, endDay 신선도 감소
 core/golden/rules.json    ← 달력·금어기 60일, 놓아주기 이유, 어종·크기 뽑기 600번, 판정 200번, 요리값, 손님 한마디
 core/golden/scenario.json ← 새 게임부터 행동 2,800여 단계. 매 단계 세이브 전체와 화면 값
+core/golden/reel.json     ← 고등어 힌트 330번, 파워 게이지, 입질 대기 120번, 챔질 판정, 릴링 260판(프레임마다)
    │  dotnet test core/Hanjeopsi.sln
    ▼
-C# 코어가 같은 입력으로 계산해서 비교 (테스트 62개)
+C# 코어가 같은 입력으로 계산해서 비교 (테스트 71개, 자동 플레이 포함)
 ```
 
 - 난수는 웹과 같은 mulberry32와 hash를 C#으로 옮겼다(uint 연산). 시드가 같으면 시세가 소수점 끝자리까지 같다.
 - JS `Math.round`(.5는 위로)와 C# `Math.Round`(은행가 반올림)가 달라서 `JsMath.Round`를 쓴다.
 - 웹이 `Math.random()`을 쓰는 곳은 C#에서 `IRandom`을 받는다. 골든 스크립트에서 `Math.random`을 mulberry32로 바꿔 끼워 같은 난수 순서로 비교한다.
-- 웹에서 씬 안에 있던 계산은 먼저 웹 쪽을 systems로 빼서(동작은 그대로) 골든을 뽑는다. U2에서 `truck.ts`, `season.ts`, `chapter.ts`, `actions.ts`의 `serveDish`·`completePrologue`·`useBait`를 뺐다. 릴링 물리는 U3에서 `reel.ts`로.
+- 웹에서 씬 안에 있던 계산은 먼저 웹 쪽을 systems로 빼서(동작은 그대로) 골든을 뽑는다. U2에서 `truck.ts`, `season.ts`, `chapter.ts`, `actions.ts`의 `serveDish`·`completePrologue`·`useBait`를 뺐다. U3에서 낚시 미니게임 계산을 `reel.ts`로 뺐다.
+- 릴링 골든은 입력(누르고 있는지, 프레임 시간)을 정해진 규칙(똑똑하게 · 아무렇게나 · 계속 누름 · 안 누름, 고정 1/60초 · 들쭉날쭉)으로 만든다. C# 테스트가 같은 규칙으로 같은 입력을 만들어 프레임마다 값을 비교한다. 곱셈 순서 하나만 바뀌어도 테스트가 잡는다.
 - 시나리오 골든은 웹이 행동을 고르고 인자까지 남긴다. C#은 같은 인자로 같은 행동을 하고 세이브 JSON을 키 하나하나 비교한다.
 
 ## 6. 화면 목록
@@ -138,14 +140,14 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 62개)
 | `systems/truck.ts` 재료 고르기, 요리값, 손님 기분과 한마디 | `Systems/Truck` | core | ✅ |
 | `systems/season.ts` 간 맞추기 정확도 | `Systems/SeasonJudge` | core | ✅ |
 | `state/save.ts`, `state/actions.ts` | `State/SaveData`, `SaveJson`, `Game` (웹 세이브 JSON을 그대로 읽는다) | core | ✅ |
-| `FishingScene` 릴링 텐션·거리·저항·지침, 챔질, 입질 대기 | `Systems/ReelFight` (dt 단위 Step) | core | U3 |
+| `systems/reel.ts` 릴링 텐션·거리·저항·지침·드랙, 챔질, 입질 대기·속임 입질, 고등어 힌트, 파워 게이지 | `Systems/ReelFight` (`ReelRules`, `BiteWait`, `ReelFight.Step(holding, dt)`) | core | ✅ |
 | localStorage | `SaveStore` → `user://save.json` (임시 파일에 쓰고 바꿔 끼움) | godot | ✅ |
 | `ui/ui.ts` txt, Button, modal, toast, bubble | `Theme` + 재사용 씬 | godot | U5 |
 | 고운돋움·고운바탕 | 프로젝트 기본 글꼴 (TTF 그대로, 동적 글리프) | godot | ✅ (고운돋움) |
 | tween, 카메라 흔들기 | `Tween`, `Camera2D` 오프셋 | godot | U5~ |
 | `scripts/art.py` | SD 시트는 `scripts/sd_sheet.py`(PNG). 배경은 WebP를 PNG로 | scripts | ✅ |
 | `scripts/screenshot.mjs` | CI 사진 모드 (`-- --shot=<경로>`), `ci-build` 브랜치 | godot / CI | ✅ |
-| `scripts/playtest.mjs` | 코어 자동 플레이 테스트(dotnet) | core | U4 |
+| `scripts/playtest.mjs` | 코어 자동 플레이 테스트 `AutoPlayTests` (30일, 시드 20개 × 두 실력) | core | ✅ |
 
 ## 8. 그림 적용 방향
 
@@ -167,8 +169,8 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 62개)
 | U0 | 계획, 코어 프로젝트, 시세·신선도 이전과 골든 테스트, SD 프롬프트 | `dotnet test` | ✅ |
 | U1 | 고닷 프로젝트, CI APK 빌드와 릴리스 `test-latest`, 화면 사진 | APK가 폰에 깔리고 켜진다 | ✅ (폰 확인 2026-10-22) |
 | U2 | 코어 나머지 규칙, 골든 확장(62개), 점검 화면 `CoreLab` | `dotnet test`, 폰에서 "웹 일치 점검" | ✅ (폰 확인 2026-10-22) |
-| U3 | 릴링 물리를 웹에서 `reel.ts`로 빼고 C# `ReelFight`로 | `dotnet test` | |
-| U4 | 코어 자동 플레이: 새 게임부터 30일을 규칙대로 돌려 예외가 없는지, 빚을 갚을 수 있는지 | `dotnet test` | |
+| U3 | 릴링 물리를 웹에서 `reel.ts`로 빼고 C# `ReelFight`로 | `dotnet test` | ✅ (골든 260판 프레임 단위 일치) |
+| U4 | 코어 자동 플레이: 새 게임부터 30일을 규칙대로 돌려 예외가 없는지, 빚을 갚을 수 있는지 | `dotnet test` | ✅ (적당히 잘하면 20/20 클리어, 평균 22일. `GAME_DESIGN.md` 9절) |
 | U5 | 공통 UI(Theme, 버튼, 모달, HUD, 토스트, 화면 전환), Boot·Title·Town | 사진, 폰 | |
 | U6 | Fishing (터치, 게이지, 찌, 그림자, 물보라, 결과) | 사진, 폰 | |
 | U7 | Market·Shop·Notebook | 사진, 폰 | |

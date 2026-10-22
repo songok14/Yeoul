@@ -29,7 +29,20 @@ async function tap(gx, gy) {
 }
 /** 화면에 보이는 버튼을 글자로 찾아 누른다 */
 async function press(label) {
-  const pos = await page.evaluate((label) => {
+  // 모달이 열리는 중이면 버튼이 움직이니 위치가 멈출 때까지 기다린다
+  let pos = await findButton(label);
+  for (let i = 0; i < 20 && pos; i++) {
+    await wait(120);
+    const again = await findButton(label);
+    if (again && Math.abs(again[0] - pos[0]) < 0.5 && Math.abs(again[1] - pos[1]) < 0.5) break;
+    pos = again;
+  }
+  if (!pos) throw new Error(`버튼 없음: ${label} (씬 ${await scene()})`);
+  await tap(pos[0], pos[1]);
+  await wait(350);
+}
+function findButton(label) {
+  return page.evaluate((label) => {
     const found = [];
     const walk = (objs) => {
       for (const o of objs) {
@@ -45,9 +58,6 @@ async function press(label) {
     for (const s of window.__game.scene.getScenes(true)) walk(s.children.list);
     return found.at(-1) ?? null;
   }, label);
-  if (!pos) throw new Error(`버튼 없음: ${label} (씬 ${await scene()})`);
-  await tap(pos[0], pos[1]);
-  await wait(350);
 }
 
 async function untilScene(key, tapWhile = false, timeout = 20000) {
@@ -67,16 +77,21 @@ async function oneCast(lane = 225) {
   await tap(lane, 400);
   await wait(200);
   // 파워 게이지가 0.75쯤일 때 멈춘다
-  for (let i = 0; i < 80; i++) {
+  const g0 = Date.now();
+  while (Date.now() - g0 < 15000) {
     const p = await page.evaluate(() => window.__game.scene.getScene('Fishing').gaugePos);
     if (p > 0.7 && p < 0.85) break;
     await wait(15);
   }
   await tap(225, 400);
-  for (let i = 0; i < 200; i++) {
+  // 소프트웨어 렌더링이라 느린 컴퓨터에서는 게임 시간이 천천히 간다. 횟수 대신 실제 시간으로 기다린다
+  const w0 = Date.now();
+  while (Date.now() - w0 < 60000) {
     const ph = await phase();
     if (ph === 'bite') {
       await tap(225, 400);
+      // 입력은 다음 프레임에 처리되므로 단계가 바뀔 때까지 잠깐 기다린다
+      for (let k = 0; k < 20 && (await phase()) === 'bite'; k++) await wait(30);
       break;
     }
     if (ph !== 'wait' && ph !== 'flying') return `대기 중 단계 ${ph}`;
@@ -88,7 +103,7 @@ async function oneCast(lane = 225) {
   for (let i = 0; i < 3000; i++) {
     const st = await page.evaluate(() => {
       const s = window.__game.scene.getScene('Fishing');
-      return { ph: s.phase, t: s.tension };
+      return { ph: s.phase, t: s.fight?.tension ?? 0 };
     });
     if (st.ph !== 'reel') {
       if (down) await page.mouse.up();
@@ -110,6 +125,9 @@ async function oneCast(lane = 225) {
 
 try {
   await page.goto(`http://localhost:${PORT}/`);
+  // 프레임이 느릴 때 Phaser가 delta를 16ms로 깎아 게임이 느려지는 것을 끈다 (씬은 dt를 0.05초로 자른다)
+  await page.waitForFunction(() => window.__game?.loop);
+  await page.evaluate(() => (window.__game.loop.smoothStep = false));
   await untilScene('Title');
   await press('새로 시작');
   await untilScene('Prologue');
@@ -149,24 +167,21 @@ try {
     results.push(r);
     await wait(400);
     if (r.startsWith('result')) {
-      const btns = await page.evaluate(() => 1);
-      void btns;
-      try {
-        await press('챙기기');
-      } catch {
-        await press('놓아주기');
-      }
-      // 미각 해금 모달이 뜨면 닫는다
-      await wait(300);
-      try {
-        await press('좋아');
-      } catch {
-        /* 없음 */
+      // 느린 화면에서는 모달이 늦게 떠서 한 번에 안 눌릴 수 있다. 결과 단계가 끝날 때까지 보이는 버튼을 누른다
+      // (새 어종이면 미각 해금 모달 '좋아'가 이어서 뜬다)
+      for (let k = 0; k < 8 && (await phase()) === 'result'; k++) {
+        for (const label of ['좋아', '챙기기', '놓아주기']) {
+          if (!(await findButton(label))) continue;
+          await press(label);
+          break;
+        }
+        await wait(500);
       }
     }
     await wait(1500);
     if (c === 5) break;
-    for (let i = 0; i < 20 && (await phase()) !== 'aim'; i++) await wait(150);
+    const a0 = Date.now();
+    while (Date.now() - a0 < 20000 && (await phase()) !== 'aim') await wait(150);
   }
   console.log('출조 결과', results.join(' / '));
   await wait(800);

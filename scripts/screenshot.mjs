@@ -49,13 +49,17 @@ const shots = [
     url: '/?scene=Fishing&tutorial=1',
     wait: 1200,
     steps: async (page) => {
+      // 느린 컴퓨터에서는 게임 시간이 천천히 가므로 시간 대신 단계를 보고 누른다
+      const phase = () => page.evaluate(() => window.__game.scene.getScene('Fishing').phase);
+      const until = async (want) => {
+        for (let t0 = Date.now(); Date.now() - t0 < 30000 && (await phase()) !== want; ) await page.waitForTimeout(40);
+      };
       await tap(page, 225, 400);
-      await page.waitForTimeout(500);
+      await until('power');
       await tap(page, 225, 400);
-      // 튜토리얼은 2.2초 뒤 입질
-      await page.waitForTimeout(3200);
+      await until('bite');
       await tap(page, 225, 400);
-      await page.waitForTimeout(200);
+      await until('reel');
       await tap(page, 225, 400, 900);
       await page.waitForTimeout(150);
     },
@@ -125,6 +129,8 @@ try {
     page.on('pageerror', (e) => errors.push(`[${shot.name}] pageerror: ${e.message}`));
     await page.goto(`http://localhost:${PORT}${shot.url}`);
     await page.waitForSelector('canvas');
+    // 프레임이 느린 컴퓨터에서 Phaser가 delta를 16ms로 깎아 게임이 느려지는 것을 끈다 (씬은 dt를 0.05초로 자른다)
+    await page.evaluate(() => window.__game && (window.__game.loop.smoothStep = false));
     await page.waitForTimeout(shot.wait ?? 1500);
     if (shot.steps) await shot.steps(page);
     await page.screenshot({ path: `${OUT}/${shot.name}.png` });
