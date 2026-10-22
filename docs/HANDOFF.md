@@ -6,9 +6,11 @@
 songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"를 이어서 작업해 줘. (cloud 세션) 모든 답변, 문서, 커밋 메시지, 코드 주석은 한국어로 써줘.
 
 ## 지금까지 상황
-- 환경: cloud. 원격 https://github.com/songok14/Yeoul, 작업 브랜치 ccr-c846e49a-1tqms8 (여기서 이어서 작업하고 푸시해. PR은 만들지 마). main 이 기본 브랜치이고 예전 브랜치(claude/name-change-issue-l462yn, claude/epic-maxwell-25ekj4)까지 모두 합쳐 두었다(작업은 ccr 브랜치에서 하고 끝나면 main 에도 올린다). 마지막 코드 커밋 21696b7, CI 빌드 #24 성공(사진 확인함, APK 안 Hanjeopsi.dll 확인). 그 뒤 문서 커밋만 있다.
+- 환경: cloud. 원격 https://github.com/songok14/Yeoul, 작업 브랜치 ccr-c846e49a-1tqms8 (여기서 이어서 작업하고 푸시해. PR은 만들지 마). main 이 기본 브랜치이고 예전 브랜치(claude/name-change-issue-l462yn, claude/epic-maxwell-25ekj4)까지 모두 합쳐 두었다(작업은 ccr 브랜치에서 하고 끝나면 main 에도 올린다). 마지막 코드 커밋 590ba67, CI 빌드 #29 성공(사진 확인함, APK 안 Hanjeopsi.dll 확인). 그 뒤 문서 커밋만 있다.
 - 먼저 읽을 것: CLAUDE.md, docs/HANDOFF.md, docs/GODOT_PLAN.md(단계표 9절, 그림 역할 8절, 폰에서 볼 것 10-2), docs/ART_PROMPTS.md, docs/GAME_DESIGN.md 9절
-- 웹 버전(src/, Phaser)은 기준으로 남기고 고닷 4.7.2 C#으로 옮기는 중. U0~U7 완료(U5·U6·U7은 폰 확인 대기). 사용자에게 APK 빌드 #24를 보냈다.
+- 웹 버전(src/, Phaser)은 기준으로 남기고 고닷 4.7.2 C#으로 옮기는 중. U0~U8 완료(U5~U8은 폰 확인 대기). 사용자에게 APK 빌드 #29를 보냈다. 레포는 2026-10-22 공개(public)로 바꿨다(Actions 무료 사용량이 바닥나서). 스토어 출시 때는 새 서명 키를 Actions Secrets 에 둔다.
+- U8 트럭: Screens/TruckScreen, Ui/SeasonGauge, SD 손님 godot/art/customers/<fisher|mom|student|mail|grandpa|tourist>-<stand|walk|happy|sad>.png (scripts/sd_cells.py 로 자름, 그림은 왼쪽을 보고 있어 걸어올 때 FlipH). 주문 말투 dialogue.json customers, 글 texts.json truck, 손님 수 balance truck.customersPerShift. 장사 중 판 높이는 ShiftPanelHeight 로 고정해 손님 바닥이 흔들리지 않게.
+- 여울 일러스트 일곱 장을 사용자가 다듬은 고해상도 판으로 바꿨다(웹 900, 고닷 portraits 1400 높이).
 - U7 뒤에 한 일: 사용자가 다시 준 SD 원본으로 낚시 포즈 셋을 더했다. fish-cast(던지는 순간), fish-pull(릴링 중 텐션이 위험 가까이거나 꾹꾹 저항일 때 0.5초 유지), fish-joy(낚아 올리면 톡 뛰고 0.75초 뒤 결과). CI 사진 fishing-pull, fishing-joy.
 - 지난 세션에 한 일 (U7):
   - 공통 바탕 godot/scripts/Ui/PlaceScreen: HUD(노치까지 칠함) → 제목 줄(HeaderRight) → 탭(Ui/TabStrip, 금색 알약이 미끄러짐) → 내용(Content, 탭 바꾸면 BuildPage 를 다시 그려 살짝 떠오름) → 아래 "마을로" 막대. 스크롤은 쓰지 않고 쪽 넘김(Pager). FitsToHeight 를 켜면 자리가 정해진 뒤 Content 높이로 한 번 더 그린다. 조각: Paper, Board, FishIcon, Pill, SmallButton, Rule, TopAligned. 고닷 내장 TabBar 와 이름이 겹쳐서 TabStrip.
@@ -48,6 +50,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 
 ## 이번에 해 줬으면 하는 것
 1. 사용자가 폰에서 본 낚시·위판장·미끼가게·수첩 의견이 있으면 먼저 반영하고 CI 사진으로 확인.
-2. 다음 단계 U8: 여울호 트럭 장사. 웹 src/scenes/TruckScene.ts 와 코어 Truck·SeasonJudge·ServeDish 를 그대로 쓴다. SD 손님(그림이 없으면 docs/ART_PROMPTS.md 형식으로 손님 SD 시트 프롬프트를 준다), 간 맞추기 게이지, 손님 반응 말풍선, 미각 단계에 따라 ??? 표시. 글은 texts.json 에. 마을 메뉴·트럭의 NotYet 자리를 연결. CI 사진 모드(shots 목록)에 장면 추가. 끝나는 기준: 사진에서 겹침·가림·화면 밖 글자 없음.
+2. (끝남) U8 트럭 장사. 웹 src/scenes/TruckScene.ts 와 코어 Truck·SeasonJudge·ServeDish 를 그대로 쓴다. SD 손님(그림이 없으면 docs/ART_PROMPTS.md 형식으로 손님 SD 시트 프롬프트를 준다), 간 맞추기 게이지, 손님 반응 말풍선, 미각 단계에 따라 ??? 표시. 글은 texts.json 에. 마을 메뉴·트럭의 NotYet 자리를 연결. CI 사진 모드(shots 목록)에 장면 추가. 끝나는 기준: 사진에서 겹침·가림·화면 밖 글자 없음.
+3. 다음 단계 U9: 스토리와 컷신, 프롤로그 튜토리얼(첫 낚시와 첫 볼락구이로 짠맛), 1장 클리어·차압 결말. 웹 src/scenes/PrologueScene.ts 와 docs/STORY.md 를 따른다. 컷신은 9:16 한 장 그림(아래 30% 글 상자), 지금 있는 portraits 로 먼저 만들고 필요한 컷은 ART_PROMPTS 컷 1~8 프롬프트로 부탁한다. 17포즈 SD 시트의 앉아 기다리기·놀람(!)은 낚시 대기·입질에 쓸 수 있다(사용자에게 다시 첨부 부탁).
 마지막: dotnet test core/Hanjeopsi.sln, dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true, 웹을 고쳤으면 npm run build·npm run shot·node scripts/playtest.mjs. 커밋 후 git push -u origin ccr-c846e49a-1tqms8 (main 도 맞추려면 git push origin ccr-c846e49a-1tqms8:main), CI 사진 확인, APK 보내기, GODOT_PLAN·ROADMAP·HANDOFF 갱신.
 ````
