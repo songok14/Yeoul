@@ -43,8 +43,62 @@ namespace Hanjeopsi.App.Ui
         /// <summary>배경 그림에만 색을 살짝 입힌다 (시간대 분위기). 위에 세운 그림은 그대로</summary>
         public Color Tint
         {
-            get { return _bg.SelfModulate; }
-            set { _bg.SelfModulate = value; }
+            get { return _tint; }
+            set
+            {
+                _tint = value;
+                ApplyTint();
+            }
+        }
+
+        /// <summary>
+        /// 시간대 색을 입혀도 하늘의 흰 구름은 하얗게 둔다 (낚시·트럭).
+        /// 그림 위쪽(하늘)의 밝고 채도가 낮은 곳만 원래 색을 지킨다. 이야기 밤 장면처럼 전체를 물들일 때는 끈다
+        /// </summary>
+        public bool KeepClouds
+        {
+            get { return _keepClouds; }
+            set
+            {
+                _keepClouds = value;
+                ApplyTint();
+            }
+        }
+
+        private Color _tint = Colors.White;
+        private bool _keepClouds;
+        private static Shader _cloudShader;
+
+        private const string CloudShaderCode = @"shader_type canvas_item;
+uniform vec4 tint : source_color = vec4(1.0);
+void fragment() {
+    vec4 c = texture(TEXTURE, UV);
+    float mx = max(c.r, max(c.g, c.b));
+    float mn = min(c.r, min(c.g, c.b));
+    float sat = mx > 0.001 ? (mx - mn) / mx : 0.0;
+    // 밝고 하얀 곳 × 하늘(위쪽 30~40% 아래로는 서서히 빠진다)
+    float cloud = smoothstep(0.66, 0.84, mx) * (1.0 - smoothstep(0.14, 0.3, sat)) * (1.0 - smoothstep(0.30, 0.40, UV.y));
+    COLOR = vec4(mix(c.rgb * tint.rgb, c.rgb, cloud), c.a);
+}";
+
+        private void ApplyTint()
+        {
+            if (_keepClouds)
+            {
+                _cloudShader ??= new Shader { Code = CloudShaderCode };
+                if (_bg.Material is not ShaderMaterial m)
+                {
+                    m = new ShaderMaterial { Shader = _cloudShader };
+                    _bg.Material = m;
+                }
+                m.SetShaderParameter("tint", _tint);
+                _bg.SelfModulate = Colors.White;
+            }
+            else
+            {
+                _bg.Material = null;
+                _bg.SelfModulate = _tint;
+            }
         }
 
         /// <summary>배경을 아주 천천히 숨 쉬듯 확대한다 (1이면 그대로)</summary>

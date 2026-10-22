@@ -125,6 +125,7 @@ namespace Hanjeopsi.App.Screens
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/breakwater.png");
+            _stage.KeepClouds = true;
             _stage.Tint = SlotTint[_tutorial ? 3 : Mathf.Clamp(s.Slot, 0, 3)];
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);

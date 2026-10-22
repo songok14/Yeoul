@@ -67,6 +67,7 @@ namespace Hanjeopsi.App.Screens
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/truckstop.png");
+            _stage.KeepClouds = true;
             _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, 3)];
             Art.AddChild(_stage);
 
