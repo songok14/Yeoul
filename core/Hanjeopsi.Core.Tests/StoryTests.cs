@@ -39,6 +39,15 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 대화_감정_그림이_모두_있다()
+        {
+            string dir = Portraits();
+            foreach (var sp in TestData.Game.Dialogue.Speakers)
+                foreach (var face in sp.Faces)
+                    Assert.True(File.Exists(Path.Combine(dir, face.Value + ".png")), sp.Id + "." + face.Key + " → " + face.Value + ".png 이 없다");
+        }
+
+        [Fact]
         public void 아버지의_말과_1장_조건이_STORY_md_그대로다()
         {
             var p1 = TestData.Game.Story.Parts["p1"];

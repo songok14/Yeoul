@@ -67,16 +67,21 @@
       "side": "left",
       "faces": {
         "default": "yeoul",
-        "peace": "yeoul-peace",
+        "peace": "yeoul",
         "cheer": "yeoul-chef-cheer",
         "nervous": "yeoul-chef-nervous",
         "journal": "yeoul-journal",
         "knees": "yeoul-knees",
-        "saltyTear": "yeoul-salty-tear",
-        "notaste": "yeoul-notaste",
-        "phone": "yeoul-phone",
+        "saltyTear": "yeoul-eat",
+        "notaste": "yeoul-eat",
+        "phone": "yeoul-phone-stand",
         "backBag": "yeoul-back-bag",
-        "rodBroken": "yeoul-rod-broken"
+        "rodBroken": "yeoul-tired",
+        "eat": "yeoul-eat",
+        "tired": "yeoul-tired",
+        "serve": "yeoul-serve",
+        "hands": "yeoul-hands",
+        "backRod": "yeoul-back-rod"
       }
     },
     {
