@@ -182,15 +182,17 @@ namespace Hanjeopsi.App
             if (ShotMode && !_shotTaken && string.Equals(screen.Name, ShotScreen, StringComparison.OrdinalIgnoreCase))
             {
                 _shotTaken = true;
-                if (!string.IsNullOrEmpty(ShotAction)) screen.ShotSetup(ShotAction);
-                _ = TakeShot();
+                _ = TakeShot(screen);
             }
         }
 
         /// <summary>연출이 끝날 때쯤 화면을 찍고 끈다</summary>
-        private async Task TakeShot()
+        private async Task TakeShot(Screen screen)
         {
-            await ToSignal(GetTree().CreateTimer(3.2), SceneTreeTimer.SignalName.Timeout);
+            // 레이아웃이 자리 잡은 뒤에 사진용 동작(모달 열기 등)을 하고, 연출이 끝나면 찍는다
+            await ToSignal(GetTree().CreateTimer(0.6), SceneTreeTimer.SignalName.Timeout);
+            if (!string.IsNullOrEmpty(ShotAction)) screen.ShotSetup(ShotAction);
+            await ToSignal(GetTree().CreateTimer(2.6), SceneTreeTimer.SignalName.Timeout);
             await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
             var img = GetViewport().GetTexture().GetImage();
             var err = img.SavePng(ShotPath);
