@@ -72,6 +72,8 @@ namespace Hanjeopsi.App.Ui
         public Vector2 RodTip;
         /// <summary>텐션 0~1. 팽팽할수록 줄이 곧게 선다</summary>
         public float Bend;
+        /// <summary>릴링 중이면 텐션에 따라 줄이 떨리고 색이 바뀐다</summary>
+        public bool Fighting;
         public Vector2? LineTo;
 
         // 쿨러 (고등어가 노린다)
@@ -444,14 +446,45 @@ namespace Hanjeopsi.App.Ui
             }
         }
 
+        /// <summary>
+        /// 낚싯줄. 느슨하면 크게 처져 흔들리고, 팽팽할수록 곧게 펴진다.
+        /// 릴링 중(Fighting) 위험 가까이 가면 줄이 파르르 떨리고 금빛을 지나 빨갛게 달아오른다
+        /// </summary>
         private void DrawLine()
         {
             if (LineTo == null) return;
             var tip = P(RodTip);
             var to = P(LineTo.Value);
-            // 느슨하면 아래로 처진다
-            var lm = (tip + to) / 2 + new Vector2(0, (1 - Bend) * 34 * (K / 2.4f));
-            DrawPolyline(Bezier(tip, lm, to, 18), new Color(1, 1, 1, 0.85f), 2.2f, true);
+            float u = K / 2.4f;
+            float bend = Mathf.Clamp(Bend, 0, 1.1f);
+            float slackness = Mathf.Clamp(1 - bend / 0.55f, 0, 1);
+            // 처짐: 느슨하면 깊게, 팽팽하면 거의 없다. 느슨할 때는 바람에 살랑인다
+            float sag = (6 + 64 * slackness * slackness) * u + Mathf.Sin(_time * 2.2f) * 6 * slackness * u;
+            var mid = (tip + to) / 2 + new Vector2(0, sag);
+            var pts = Bezier(tip, mid, to, 28);
+            // 팽팽하면 줄이 파르르 떨린다 (가운데가 가장 크게)
+            float shiver = Fighting ? Mathf.Clamp((bend - 0.62f) / 0.3f, 0, 1) : 0;
+            if (shiver > 0)
+            {
+                var dir = (to - tip).Normalized();
+                var nrm = new Vector2(-dir.Y, dir.X);
+                for (int i = 1; i < pts.Length - 1; i++)
+                {
+                    float t = (float)i / (pts.Length - 1);
+                    pts[i] += nrm * Mathf.Sin(_time * 70 + t * 9) * Mathf.Sin(t * Mathf.Pi) * 3.2f * shiver * u;
+                }
+            }
+            // 색: 흰색 → 금빛 → 빨강
+            var white = new Color(1, 1, 1, 0.92f);
+            var hot = new Color(1f, 0.82f, 0.36f, 1f);
+            var danger = new Color(1f, 0.35f, 0.3f, 1f);
+            var col = !Fighting ? white : bend < 0.85f ? white.Lerp(hot, Mathf.Clamp((bend - 0.6f) / 0.25f, 0, 1)) : hot.Lerp(danger, Mathf.Clamp((bend - 0.85f) / 0.15f, 0, 1));
+            float width = (Fighting ? 2.6f + 1.2f * Mathf.Clamp(bend, 0, 1) : 2.2f) * Mathf.Max(1, u);
+            // 밝은 물 위에서도 보이게 어두운 테두리를 먼저
+            DrawPolyline(pts, new Color(0.05f, 0.12f, 0.18f, 0.35f), width + 2.4f * u, true);
+            DrawPolyline(pts, col, width, true);
+            // 위험하면 줄 둘레가 은은히 빛난다
+            if (Fighting && bend >= 0.85f) DrawPolyline(pts, new Color(danger, 0.25f + 0.15f * Mathf.Sin(_time * 18)), width + 6 * u, true);
         }
 
         // ───────── 쿨러 ─────────

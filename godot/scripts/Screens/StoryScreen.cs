@@ -32,6 +32,8 @@ namespace Hanjeopsi.App.Screens
         private int _index;
         private string _look;
         private Control _scene;
+        /// <summary>누르면 넘어가는 막. 장면은 언제나 이 막 바로 아래에 둔다 (글 상자를 덮지 않게)</summary>
+        private Control _tap;
         private ArtStage _stage;
         private Tween _zoomTween;
         private PanelContainer _panel;
@@ -56,7 +58,7 @@ namespace Hanjeopsi.App.Screens
             _index = 0;
 
             // 누르면 넘어가는 막 (그림 전체)
-            var tap = new Control { MouseFilter = MouseFilterEnum.Stop };
+            var tap = _tap = new Control { MouseFilter = MouseFilterEnum.Stop };
             tap.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             tap.GuiInput += OnTap;
             Art.AddChild(tap);
@@ -146,11 +148,11 @@ namespace Hanjeopsi.App.Screens
         {
             var old = _scene;
             _scene = scene;
+            // 옛 장면 위, 누르는 막·글 상자 아래. 몇 번을 넘겨도 순서가 같다
             Art.AddChild(scene);
-            Art.MoveChild(scene, 0);
+            Art.MoveChild(scene, _tap.GetIndex());
             if (old != null)
             {
-                Art.MoveChild(scene, old.GetIndex() + 1);
                 scene.Modulate = new Color(1, 1, 1, 0);
                 var tw = scene.CreateTween();
                 tw.TweenProperty(scene, "modulate:a", 1f, 0.5).SetTrans(Tween.TransitionType.Sine);
@@ -577,6 +579,19 @@ namespace Hanjeopsi.App.Screens
             GameState.I.StoryPart = _part;
             _pages = S.Parts[_part];
             Sound.Music(Music);
+            if (parts.Length > 1 && parts[1] == "walk")
+            {
+                // 사람이 누르듯 여러 장면을 넘긴다 (장면이 글 상자를 덮지 않는지 보려고)
+                _index = 0;
+                _look = null;
+                ShowPage();
+                for (int i = 0; i < 6; i++)
+                {
+                    Advance();
+                    Advance();
+                }
+                return;
+            }
             bool salt = parts.Length > 1 && parts[1] == "salt";
             _index = salt ? 0 : Math.Min(parts.Length > 1 ? int.Parse(parts[1]) : 0, _pages.Count - 1);
             _look = null;

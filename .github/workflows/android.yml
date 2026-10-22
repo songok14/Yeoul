@@ -139,6 +139,7 @@ jobs:
             "story-clear:--screen=story --shot-action=clear:1"
             "story-fail:--screen=story --shot-action=fail:0"
             "story-tall:--screen=story --shot-action=p1:9"
+            "story-walk:--screen=story --shot-action=p1:walk"
             "fishing-tall:--screen=fishing --demo=summary"
             "market:--screen=market"
             "market-auction:--screen=market --shot-action=auction"

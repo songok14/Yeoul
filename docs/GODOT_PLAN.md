@@ -177,11 +177,11 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 | 파일 | 쓰는 곳 | 출처 |
 |---|---|---|
 | `godot/audio/sfx/*.ogg` (31개) | 효과음 | `scripts/sound.py` 합성 |
-| `godot/audio/bgm/title.ogg` | 타이틀, 프롤로그, 차압 결말 | 사용자 제공 무료 곡 "Title" (2026-10-22). 출처·라이선스 확인 필요 |
-| `godot/audio/bgm/town.ogg` | 마을, 미끼가게, 수첩, 클리어 결말 | 사용자 제공 "Town". 출처 확인 필요 |
-| `godot/audio/bgm/sea.ogg` | 낚시 | 사용자 제공 "Sea". 출처 확인 필요 |
-| `godot/audio/bgm/market.ogg` | 위판장 | 사용자 제공 "Market". 출처 확인 필요 |
-| `godot/audio/bgm/truck.ogg` | 트럭 장사 | 사용자 제공 "restaurant". 출처 확인 필요 |
+| `godot/audio/bgm/title.ogg` | 타이틀, 프롤로그, 차압 결말 | Pixabay Music "Title" (사용자 제공, 2026-10-22). Pixabay Content License: 상업용 무료, 출처 표시 필요 없음 |
+| `godot/audio/bgm/town.ogg` | 마을, 미끼가게, 수첩, 클리어 결말 | Pixabay Music "Town" (사용자 제공) |
+| `godot/audio/bgm/sea.ogg` | 낚시 | Pixabay Music "Sea" (사용자 제공) |
+| `godot/audio/bgm/market.ogg` | 위판장 | Pixabay Music "Market" (사용자 제공) |
+| `godot/audio/bgm/truck.ogg` | 트럭 장사 | Pixabay Music "restaurant" (사용자 제공) |
 
 곡은 `python3 scripts/bgm.py <원본> <이름>`으로 넣는다(앞뒤 무음 자르기, 음량 −18dB RMS, 끝 3초를 처음에 겹쳐 반복, Vorbis q3). 원본 mp3는 레포에 넣지 않는다.
 

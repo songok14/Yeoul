@@ -330,6 +330,7 @@ namespace Hanjeopsi.App.Screens
             _field.ShadowVisible = false;
             _field.LineTo = null;
             _field.Bend = 0;
+            _field.Fighting = false;
             SetPose("fish-ready");
             _leanTarget = 0;
             _exit.SetEnabled(true);
@@ -743,9 +744,10 @@ namespace Hanjeopsi.App.Screens
             _field.ShadowWobble = _wobble;
             _field.ShadowSize = ShadowScale(p);
             _field.LineTo = _field.ShadowAt;
-            _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1);
+            _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1.1f);
+            _field.Fighting = true;
             // 팽팽할수록 대가 물고기 쪽으로 끌려가고, 저항이 오면 툭 끌려간다
-            _leanTarget = -5 + 10 * _field.Bend + (float)f.SurgeKick * 25;
+            _leanTarget = -6 + 15 * _field.Bend + (float)f.SurgeKick * 28;
             // 세게 당기면 옆으로 돌아서서 다리를 벌리고 버틴다 (옆모습 포즈는 이미 뒤로 젖혀 있어서 덜 기울인다)
             bool strain = _shotPull || f.SurgeKick > 0.15 || f.Tension >= b.Danger - 4;
             _pullHold = strain ? 0.5f : _pullHold - dt;
@@ -773,6 +775,7 @@ namespace Hanjeopsi.App.Screens
             _field.AddSplash(_field.ShadowAt, 1.5f);
             _field.LineTo = null;
             _field.Bend = 0;
+            _field.Fighting = false;
             ZoomTo(1, 0.6);
             Settle(-14);
             Tell(main, sub);
@@ -788,6 +791,7 @@ namespace Hanjeopsi.App.Screens
             Haptics.Pattern((40, 0.7f, 60), (40, 0.7f, 0));
             _gauge.Showing = ReelGauge.Mode.None;
             _field.Bend = 0;
+            _field.Fighting = false;
             ZoomTo(1, 0.6);
             Tell("");
             _field.ShadowVisible = false;
