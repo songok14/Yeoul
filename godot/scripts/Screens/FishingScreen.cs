@@ -90,6 +90,9 @@ namespace Hanjeopsi.App.Screens
         // SD 포즈와 기울기(도). 기울기는 목표값을 부드럽게 따라간다
         private string _pose;
         private float _lean, _leanTarget, _leanRate = 10;
+        // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
+        private float _pullHold;
+        private bool _shotPull;
 
         protected override void Build()
         {
@@ -376,10 +379,12 @@ namespace Hanjeopsi.App.Screens
             Tell(F("cast", G.Data.Texts.Zones[G.Fishing.ZoneOf(_dist01)]));
 
             // 찌가 포물선을 그리며 날아간다
-            // 뒤로 젖혔던 대를 앞으로 휘두른다
+            // 대를 머리 위로 휘둘러 던지고, 찌가 날아가는 동안 앞으로 내민다
+            SetPose("fish-cast");
+            _lean = -6;
             _leanRate = 26;
-            _leanTarget = 12;
-            Later(0.16, () =>
+            _leanTarget = 10;
+            Later(0.3, () =>
             {
                 if (_phase != Phase.Flying && _phase != Phase.Wait) return;
                 SetPose("fish-wait");
@@ -455,6 +460,7 @@ namespace Hanjeopsi.App.Screens
         {
             _phase = Phase.Reel;
             // 대를 확 들어 올려 챔질한다
+            _pullHold = 0;
             SetPose("fish-reel");
             _lean = -12;
             _leanRate = 12;
@@ -526,6 +532,11 @@ namespace Hanjeopsi.App.Screens
             _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1);
             // 팽팽할수록 대가 물고기 쪽으로 끌려가고, 저항이 오면 툭 끌려간다
             _leanTarget = -5 + 10 * _field.Bend + (float)f.SurgeKick * 25;
+            // 세게 당기면 옆으로 돌아서서 다리를 벌리고 버틴다 (옆모습 포즈는 이미 뒤로 젖혀 있어서 덜 기울인다)
+            bool strain = _shotPull || f.SurgeKick > 0.15 || f.Tension >= G.Data.Balance.Reel.Danger - 4;
+            _pullHold = strain ? 0.5f : _pullHold - dt;
+            SetPose(_pullHold > 0 ? "fish-pull" : "fish-reel");
+            if (_pullHold > 0) _leanTarget = 3 + (float)f.SurgeKick * 14;
             _gauge.Tension = (float)f.Tension;
             _sub.Text = F("distance", Math.Max(0, f.Distance).ToString("0.0", CultureInfo.InvariantCulture));
             // 텐션이 위험하면 큰 글이 빨개진다
@@ -555,9 +566,22 @@ namespace Hanjeopsi.App.Screens
             _field.LineTo = null;
             _field.Bend = 0;
             ZoomTo(1, 0.6);
-            Settle(-16);
             Tell("");
-            ShowResult();
+            Celebrate(ShowResult);
+        }
+
+        /// <summary>낚았다! 앞을 보고 대를 든 채 활짝 웃으며 톡 뛴다. 잠깐 뒤 결과를 띄운다</summary>
+        private void Celebrate(Action then)
+        {
+            SetPose("fish-joy");
+            _lean = 0;
+            _leanTarget = 0;
+            _leanRate = 10;
+            var tw = _yeoul.CreateTween();
+            float y = _yeoul.Position.Y;
+            tw.TweenProperty(_yeoul, "position:y", y - 26, 0.14).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+            tw.TweenProperty(_yeoul, "position:y", y, 0.24).SetTrans(Tween.TransitionType.Bounce).SetEase(Tween.EaseType.Out);
+            Later(0.75, then);
         }
 
         /// <summary>낚은 고기. 처음 보는 어종이면 여울이 먼저 기뻐한다 (감정 일러스트)</summary>
@@ -805,7 +829,16 @@ namespace Hanjeopsi.App.Screens
                     _species = G.Data.SpeciesById("noraemi");
                     _size = 27.3;
                     _phase = Phase.Result;
-                    ShowResult();
+                    Celebrate(ShowResult);
+                    break;
+                case "joy":
+                    _phase = Phase.Result;
+                    Celebrate(() => { });
+                    break;
+                case "pull":
+                    // reel 과 같지만 세게 버티는 포즈로
+                    _shotPull = true;
+                    ShotSetup("reel");
                     break;
                 case "new":
                     _species = G.Data.SpeciesById("gamseongdom");

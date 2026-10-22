@@ -120,6 +120,8 @@ jobs:
             "fishing-reel:--screen=fishing --demo=evening --shot-action=reel"
             "fishing-result:--screen=fishing --shot-action=result"
             "fishing-new:--screen=fishing --shot-action=new"
+            "fishing-pull:--screen=fishing --demo=evening --shot-action=pull"
+            "fishing-joy:--screen=fishing --shot-action=joy"
             "fishing-tall:--screen=fishing --demo=summary"
             "market:--screen=market"
             "market-auction:--screen=market --shot-action=auction"
