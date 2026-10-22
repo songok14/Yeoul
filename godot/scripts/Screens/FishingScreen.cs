@@ -494,7 +494,8 @@ namespace Hanjeopsi.App.Screens
         private void UpdateReel(float dt)
         {
             var f = _fight;
-            if (_autoHold) _holding = f.Tension < (_holding ? 72 : 52);
+            // 사진 모드 자동 감기. 버티기 포즈 사진은 줄이 터지지 않게 더 일찍 손을 뗀다
+            if (_autoHold) _holding = _shotPull ? f.Tension < (_holding ? 50 : 30) : f.Tension < (_holding ? 72 : 52);
             var r = f.Step(_holding, dt, GameState.I.Rng);
             double str = f.Strength();
             if (r.Surge)
@@ -573,6 +574,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>낚았다! 앞을 보고 대를 든 채 활짝 웃으며 톡 뛴다. 잠깐 뒤 결과를 띄운다</summary>
         private void Celebrate(Action then)
         {
+            HideCatBubble();
             SetPose("fish-joy");
             _lean = 0;
             _leanTarget = 0;
