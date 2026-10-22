@@ -20,6 +20,8 @@ namespace Hanjeopsi.App.Screens
         private const float CustomerX = 150;
         private const float CustomerHeight = 150;
         private const float OffLeft = -80;
+        /// <summary>장사 중 판 안쪽 높이 (간 맞추기 판이 들어가는 만큼)</summary>
+        private const float ShiftPanelHeight = 540;
         private static readonly Color[] SlotTint = { new Color("b8b8e0"), new Color("fff2e2"), new Color("fff8ee"), Colors.White };
 
         private CoreGame G
@@ -104,7 +106,8 @@ namespace Hanjeopsi.App.Screens
             _body = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             _body.AddThemeConstantOverride("separation", 20);
             _panel.AddChild(_body);
-            _panel.Resized += PlaceOnFloor;
+            // 크기가 바뀐 직후에는 자리가 아직 옛 값이라 한 박자 늦게 잰다
+            _panel.Resized += () => CallDeferred(MethodName.PlaceOnFloor);
             OnSafeAreaChanged();
 
             ShowMenu();
@@ -147,9 +150,11 @@ namespace Hanjeopsi.App.Screens
             if (_customer.Visible && !_walking) _customer.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.4f) * 0.012f);
         }
 
-        private void ClearBody()
+        /// <summary>판을 비운다. 장사 중에는 주문·결과 판 높이를 같게 둬서 손님이 서는 바닥이 흔들리지 않는다</summary>
+        private void ClearBody(bool shift = true)
         {
             foreach (var c in _body.GetChildren()) c.QueueFree();
+            _body.CustomMinimumSize = new Vector2(0, shift ? ShiftPanelHeight : 0);
         }
 
         /// <summary>판 안 내용이 바뀔 때 살짝 떠오르며 나타난다</summary>
@@ -164,7 +169,7 @@ namespace Hanjeopsi.App.Screens
 
         private void ShowMenu()
         {
-            ClearBody();
+            ClearBody(false);
             var s = G.Save;
             _body.AddChild(UiKit.Text(T["menu"], TextSize.H1, Palette.Gold, true, false, 0, null, HorizontalAlignment.Center));
             foreach (var r in G.Data.Recipes.Recipes)
