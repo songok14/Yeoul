@@ -64,9 +64,10 @@ namespace Hanjeopsi.Core.Tests
                     r.Seed, r.Outcome, r.ClearDay, r.Debt, r.TotalEarned, r.AuctionIncome, r.TruckIncome, r.RequestIncome, r.GearSpent,
                     r.Casts, r.Landed, r.Snapped, r.Slipped, r.MissedBites, r.Dishes, r.Gear));
             double casts = rs.Sum(r => r.Casts), fights = rs.Sum(r => r.Fights);
-            _out.WriteLine(string.Format("  평균: 가까움 {0:0.00}, 큰 놈 {1:0.0}%, 기다림 {2:0.0}초, 릴링 {3:0.0}초, 도둑 {4}번 중 {5}번 뺏김",
+            _out.WriteLine(string.Format("  평균: 가까움 {0:0.00}, 큰 놈 {1:0.0}%, 기다림 {2:0.0}초, 힘싸움 {3:0.0}초, 질주 {6:0.0}번(버팀 {7:0}%), 도둑 {4}번 중 {5}번 뺏김",
                 rs.Sum(r => r.Closeness) / casts, 100 * rs.Sum(r => r.BigBites) / casts, rs.Sum(r => r.WaitTime) / casts,
-                rs.Sum(r => r.FightTime) / Math.Max(1, fights), rs.Sum(r => r.Thieves), rs.Sum(r => r.Stolen)));
+                rs.Sum(r => r.FightTime) / Math.Max(1, fights), rs.Sum(r => r.Thieves), rs.Sum(r => r.Stolen),
+                (double)rs.Sum(r => r.Runs) / Math.Max(1, fights), 100.0 * rs.Sum(r => r.RunsHeld) / Math.Max(1, rs.Sum(r => r.Runs))));
         }
 
         [Fact]

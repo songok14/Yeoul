@@ -14,7 +14,7 @@ namespace Hanjeopsi.App.Screens
     /// <summary>
     /// 방파제 찌낚시 (웹 FishingScene). 부채꼴 방향 바늘 → 파워 게이지 → 입질 대기(속임 입질, 고등어 도둑) → 챔질 → 릴링 → 결과 → 철수.
     /// 고등어가 가리키는 반짝이는 지점에 가까이 던질수록 귀한 고기와 큰 놈이 잘 온다. 입질 시간은 어디든 같다.
-    /// 판정은 코어 SpotRules·ReelRules·BiteWait·ReelFight 가 하고, 여기서는 그리기, 소리, 진동, 입력만 한다.
+    /// 판정은 코어 SpotRules·ReelRules·BiteWait·TugFight(힘싸움) 가 하고, 여기서는 그리기, 소리, 진동, 입력만 한다.
     /// 여울은 SD 뒷모습, 처음 낚은 어종은 감정 일러스트 대화로 기뻐한다.
     /// </summary>
     public partial class FishingScreen : Screen
@@ -98,8 +98,15 @@ namespace Hanjeopsi.App.Screens
         private double _biteElapsed;
         private Species _species;
         private double _size;
-        private ReelFight _fight;
+        private TugFight _fight;
         private bool _holding;
+        /// <summary>누른 자리: -1 화면 왼쪽 절반, 1 오른쪽 절반</summary>
+        private int _side = 1;
+        /// <summary>손맛 세기 0.15~1 (진동). 입질 때 어종·크기로 정한다</summary>
+        private float _feel = 0.3f;
+        /// <summary>질주 때 물고기 자리가 옆으로 끌려간 정도 (논리 x)</summary>
+        private float _runOffset;
+        private float _braceBuzz;
         private bool _autoHold;
         private float _wobble;
         private float _time;
@@ -242,6 +249,33 @@ namespace Hanjeopsi.App.Screens
             return _stage.ToLogical(_yeoul.GetTransform() * local);
         }
 
+        /// <summary>그림 픽셀 → 논리 좌표 (기울기와 숨쉬기 반영)</summary>
+        private Vector2 PoseToLogical(Vector2 px)
+        {
+            var local = px * (_yeoul.Size / _yeoul.Texture.GetSize());
+            return _stage.ToLogical(_yeoul.GetTransform() * local);
+        }
+
+        /// <summary>감기·버티기 포즈는 대를 화면이 그린다: 손잡이, 방향, 길이를 바다 그림에 넘긴다</summary>
+        private void UpdateRod()
+        {
+            var p = SdPoses.Get(_pose);
+            if (!p.DrawnRod)
+            {
+                _field.RodDrawn = false;
+                UpdateRod();
+                return;
+            }
+            var grip = new Vector2(p.Grip[0], p.Grip[1]);
+            var end = grip + new Vector2(p.RodDir[0], p.RodDir[1]) * p.RodLen;
+            var g = PoseToLogical(grip);
+            var e = PoseToLogical(end);
+            _field.RodDrawn = true;
+            _field.RodGrip = g;
+            _field.RodDir = (e - g).Normalized();
+            _field.RodLen = (e - g).Length();
+        }
+
         private void Tell(string main, string sub = "", Color? color = null)
         {
             _msg.Text = main;
@@ -277,16 +311,29 @@ namespace Hanjeopsi.App.Screens
             };
         }
 
+        /// <summary>손맛 세기에 맞춘 진동. 작은 고기는 짧고 약하게, 큰 고기는 길고 세게</summary>
+        private void Buzz(int ms, float amp)
+        {
+            Haptics.Pulse((int)(ms * (0.6f + 0.6f * _feel)), amp * (0.3f + 0.7f * _feel));
+        }
+
         // ───────── 입력 ─────────
 
         private void OnFieldInput(InputEvent e)
         {
+            // 누른 채로 손가락을 옮기면 버티는 쪽도 바뀐다
+            if (e is InputEventMouseMotion mm && _holding)
+            {
+                _side = mm.Position.X < _field.Size.X / 2 ? -1 : 1;
+                return;
+            }
             if (e is not InputEventMouseButton mb || mb.ButtonIndex != MouseButton.Left) return;
             if (!mb.Pressed)
             {
                 _holding = false;
                 return;
             }
+            _side = mb.Position.X < _field.Size.X / 2 ? -1 : 1;
             bool onCat = !_tutorial && _cat.GetRect().Grow(40).HasPoint(mb.Position);
             switch (_phase)
             {
@@ -434,7 +481,7 @@ namespace Hanjeopsi.App.Screens
             _phase = Phase.Flying;
             _close = G.Spot.Closeness(new CastSpot(_angle, _dist01), _hotSpot);
             Sound.Play("whoosh");
-            Haptics.Pulse(25, 0.4f);
+            Haptics.Pulse(20, 0.22f);
 
             var to = PosFor((float)_angle, (float)_dist01);
             _target = new Vector2(to.X, to.Y);
@@ -482,7 +529,7 @@ namespace Hanjeopsi.App.Screens
             _bobT = 0;
             _waitT = 0;
             Sound.Play("plop");
-            Haptics.Pulse(15, 0.3f);
+            Haptics.Pulse(12, 0.18f);
             var rng = GameState.I.Rng;
             // 입질까지 기다리는 시간은 어디에 던지든 같다
             _wait = G.Reel.StartWait(false, _tutorial, rng);
@@ -531,7 +578,7 @@ namespace Hanjeopsi.App.Screens
             _thiefActive = true;
             _thiefT = 0;
             Sound.Play("sneak", -2);
-            Haptics.Pulse(30, 0.4f);
+            Haptics.Pulse(25, 0.25f);
             // 오른쪽으로 걸어가며 여울 앞을 지난다 (그림은 왼쪽을 본다)
             _cat.FlipH = true;
             _stage.MoveChild(_cat, _stage.GetChildCount() - 1);
@@ -574,7 +621,7 @@ namespace Hanjeopsi.App.Screens
             SetInfo();
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/eat.png"));
             Sound.Play("steal");
-            Haptics.Pulse(80, 0.5f);
+            Haptics.Pulse(60, 0.3f);
             if (fish != null) Toast(F("thiefStole", G.Data.SpeciesById(fish.Species).Name), Palette.RedText, SafeTop + 420);
             Later(1.2, ReturnCat);
             TellWait();
@@ -611,6 +658,7 @@ namespace Hanjeopsi.App.Screens
                 _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
             }
             _biteWindow = G.Reel.BiteWindow(G.Data.Gear.Rods[G.Save.Rod], _species, _tutorial);
+            _feel = (float)G.Spot.Feel(_species, _size, _big);
             _nibbleTween?.Kill();
             _field.BobberSink = 1;
             _field.AddSplash(_target, _targetScale * (_big ? 2.2f : 1.4f));
@@ -619,12 +667,13 @@ namespace Hanjeopsi.App.Screens
             if (_big)
             {
                 Sound.Play("big");
-                Haptics.Pattern((90, 1f, 60), (90, 1f, 60), (160, 1f, 0));
+                Haptics.Pattern((70, 0.85f * _feel, 60), (70, 0.85f * _feel, 60), (130, _feel, 0));
                 Toast(T["big"], Palette.Gold, SafeTop + 420);
             }
             else
             {
-                Haptics.Pattern((60, 0.9f, 50), (80, 1f, 0));
+                // 작은 고기는 톡, 큰 고기는 투둑
+                Haptics.Pattern(((int)(30 + 40 * _feel), 0.25f + 0.6f * _feel, 50), ((int)(40 + 50 * _feel), 0.3f + 0.65f * _feel, 0));
             }
             // 대 끝이 물 쪽으로 쿡 끌려간다
             _leanRate = 20;
@@ -651,9 +700,10 @@ namespace Hanjeopsi.App.Screens
             _field.Big = _big;
             _field.ClearTrail();
             Sound.Play("strike");
-            Haptics.Pulse(40, 0.8f);
+            Buzz(35, 0.6f);
             var s = G.Save;
-            _fight = G.Reel.StartFight(new FightSetup
+            _runOffset = 0;
+            _fight = G.Spot.StartTug(new FightSetup
             {
                 Species = _species,
                 Size = _size,
@@ -673,6 +723,8 @@ namespace Hanjeopsi.App.Screens
             _gauge.Showing = ReelGauge.Mode.Tension;
             Toast(perfect ? T["perfect"] : T["hooked"], perfect ? Palette.Gold : Palette.Paper, SafeTop + 420);
             Tell(T["reel"], _big ? T["bigSub"] : T["reelSub"]);
+            _field.FishStamina = 1;
+            _field.ShowStamina = true;
             // 화면이 살짝 다가간다. 큰 놈이면 조금 더
             ZoomTo(_big ? 1.08f : 1.05f, 0.5);
         }
@@ -686,31 +738,67 @@ namespace Hanjeopsi.App.Screens
         private void UpdateReel(float dt)
         {
             var f = _fight;
-            // 사진 모드 자동 감기. 버티기 포즈 사진은 줄이 터지지 않게 더 일찍 손을 뗀다
-            if (_autoHold) _holding = _shotPull ? f.Tension < (_holding ? 50 : 30) : f.Tension < (_holding ? 72 : 52);
-            var r = f.Step(_holding, dt, GameState.I.Rng);
-            double str = f.Strength();
             var b = G.Data.Balance.Reel;
-            Sound.Loop("reel", _holding, -6, 0.85f + (float)f.Tension / 260);
+            // 사진 모드 자동 감기: 잠잠하면 텐션을 지키고, 질주하면 반대쪽을 눌러 버틴다
+            if (_autoHold)
+            {
+                if (f.Phase == TugPhase.Calm) _holding = _shotPull ? f.Tension < (_holding ? 50 : 30) : f.Tension < (_holding ? 72 : 52);
+                else
+                {
+                    _side = -f.RunDir;
+                    _holding = f.Tension < (_holding ? 82 : 60);
+                }
+            }
+            var r = f.Step(_holding, _side, dt);
+            double str = f.Strength();
+            bool running = f.Phase == TugPhase.Run;
+            // 감는 소리. 질주 중 손을 떼면 줄이 풀려 나가는 높은 소리
+            if (running && !_holding) Sound.Loop("reel", true, -4, 1.5f);
+            else Sound.Loop("reel", _holding, -6, 0.85f + (float)f.Tension / 260);
+
+            if (r.WarnStart)
+            {
+                // 물고기가 한쪽으로 몸을 튼다: 그쪽에 물보라, 짧은 진동
+                Sound.Play("surge", -2);
+                Buzz(50, 0.5f);
+                Shake(0.08f);
+                _field.AddSplash(_field.ShadowAt + new Vector2(f.RunDir * 18, 0), 1.1f);
+                Tell(T[f.RunDir < 0 ? "runLeft" : "runRight"], T[f.RunDir < 0 ? "braceRight" : "braceLeft"], Palette.Gold);
+            }
+            if (r.RunStart)
+            {
+                Sound.Play("whoosh", 0, 0.8f);
+                Haptics.Pattern(((int)(50 + 60 * _feel), 0.35f + 0.55f * _feel, 40), ((int)(50 + 60 * _feel), 0.35f + 0.55f * _feel, 0));
+                if (GameState.I.Rng.Next() < (_big ? 0.7 : 0.4)) Thrash();
+            }
+            if (r.RunHeld)
+            {
+                Sound.Play("okay", -4, 1.3f);
+                Toast(T["held"], Palette.Gold, SafeTop + 420);
+                FloatText(T["held"], _stage.ToLocal(_field.ShadowAt) + new Vector2(0, -80), Palette.Gold);
+            }
+            if (r.Exhausted)
+            {
+                Sound.Play("good", -4);
+                Toast(T["tired"], Palette.GreenText, SafeTop + 420);
+                Buzz(40, 0.4f);
+            }
+            // 버티는 동안은 손에 꾹꾹 저항이, 잘못 당기면 날카롭게 떨린다
+            _braceBuzz -= dt;
+            if (_braceBuzz <= 0 && (r.Bracing || r.WrongSide))
+            {
+                _braceBuzz = r.WrongSide ? 0.12f : 0.26f;
+                Buzz(r.WrongSide ? 30 : 22, r.WrongSide ? 0.75f : 0.4f);
+            }
             // 줄이 위험하면 손에서 계속 떨린다
-            if (f.Tension >= b.Danger)
+            if (f.Tension >= b.Danger && !r.WrongSide)
             {
                 _buzz -= dt;
                 if (_buzz <= 0)
                 {
-                    _buzz = 0.16f;
-                    Haptics.Pulse(35, 0.5f + 0.5f * Mathf.Clamp((float)(f.Tension - b.Danger) / 15, 0, 1));
+                    _buzz = 0.18f;
+                    Buzz(28, 0.35f + 0.4f * Mathf.Clamp((float)(f.Tension - b.Danger) / 15, 0, 1));
                 }
-            }
-            if (r.Surge)
-            {
-                Shake(0.1f);
-                Sound.Play("surge");
-                Haptics.Pulse(110, 0.9f);
-                _field.AddSplash(_field.ShadowAt, 1.2f);
-                // 가끔은 물을 철썩 박찬다 (큰 놈은 더 자주)
-                if (GameState.I.Rng.Next() < (_big ? 0.6 : 0.35)) Thrash();
-                else Toast(T["surge"], Palette.RedText, SafeTop + 420);
             }
             // 튜토리얼: 줄이 터지거나 바늘이 빠질 뻔하면 구해 주고 알려 준다
             if (r.RescueSnap) Toast(T["rescueSnap"], Palette.RedText, SafeTop + 420);
@@ -718,14 +806,14 @@ namespace Hanjeopsi.App.Screens
             if (r.End == FightEnd.Snap)
             {
                 Sound.Play("snap");
-                Haptics.Pulse(260, 1f);
+                Buzz(200, 0.9f);
                 Lose(T["snap"], T["snapSub"]);
                 return;
             }
             if (r.End == FightEnd.Slack)
             {
                 Sound.Play("slip");
-                Haptics.Pulse(60, 0.4f);
+                Buzz(50, 0.3f);
                 Lose(T["slack"], T["slackSub"]);
                 return;
             }
@@ -735,29 +823,40 @@ namespace Hanjeopsi.App.Screens
                 return;
             }
 
-            // 그림자는 좌우로 몸부림치며 다가온다
+            // 물속 몸부림: 질주하면 그쪽으로 확 끌려간다
             float p = (float)f.Progress();
-            _wobble += dt * (float)(2 + str * 0.6 + f.SurgeKick * 20);
+            float runTarget = f.Phase == TugPhase.Run ? f.RunDir * 70 : f.Phase == TugPhase.Warn ? f.RunDir * 14 : 0;
+            _runOffset = Mathf.Lerp(_runOffset, runTarget, 1 - Mathf.Exp(-(running ? 3.2f : 2f) * dt));
+            _wobble += dt * (float)(2 + str * 0.6 + (running ? 6 : 0));
             var from = PosFor((float)_angle, (float)_dist01);
-            float fx = Mathf.Lerp(from.X, ArtStage.Logical.X / 2 + 10, p) + Mathf.Sin(_wobble) * (18 + (float)f.SurgeKick * 40) * (1 - p * 0.6f);
+            float fx = Mathf.Lerp(from.X, ArtStage.Logical.X / 2 + 10, p) + _runOffset * (1 - p * 0.5f) + Mathf.Sin(_wobble) * (16 + (running ? 10 : 0)) * (1 - p * 0.6f);
+            fx = Mathf.Clamp(fx, 30, ArtStage.Logical.X - 30);
             float fy = Mathf.Lerp(from.Y, Shore - 16, p);
             _field.ShadowAt = new Vector2(fx, fy);
             _field.ShadowWobble = _wobble;
-            _field.ShadowSize = ShadowScale(p);
+            _field.ShadowSize = ShadowScale(p) * (running ? 1.2f : 1f);
             _field.LineTo = _field.ShadowAt;
             _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1.1f);
             _field.Fighting = true;
-            // 팽팽할수록 대가 물고기 쪽으로 끌려가고, 저항이 오면 툭 끌려간다
-            _leanTarget = -6 + 15 * _field.Bend + (float)f.SurgeKick * 28;
-            // 세게 당기면 옆으로 돌아서서 다리를 벌리고 버틴다 (옆모습 포즈는 이미 뒤로 젖혀 있어서 덜 기울인다)
-            bool strain = _shotPull || f.SurgeKick > 0.15 || f.Tension >= b.Danger - 4;
+            _field.FishStamina = (float)f.Stamina;
+            _field.RunDir = f.Phase == TugPhase.Calm ? 0 : f.RunDir;
+            _field.RunWarn = f.Phase == TugPhase.Warn;
+            _field.Bracing = r.Bracing;
+            // 버틸 때는 반대쪽으로 몸을 젖히고, 아니면 텐션만큼 물고기 쪽으로 끌려간다
+            bool strain = _shotPull || r.Bracing || r.WrongSide || f.Tension >= b.Danger - 4;
             _pullHold = strain ? 0.5f : _pullHold - dt;
             SetPose(_pullHold > 0 ? "fish-pull" : "fish-reel");
-            if (_pullHold > 0) _leanTarget = 3 + (float)f.SurgeKick * 14;
+            if (r.Bracing) _leanTarget = -f.RunDir * 7;
+            else if (_pullHold > 0) _leanTarget = 3 + (running ? f.RunDir * 6 : 0);
+            else _leanTarget = -6 + 15 * _field.Bend + (running ? f.RunDir * 8 : 0);
             _gauge.Tension = (float)f.Tension;
-            _sub.Text = F("distance", Math.Max(0, f.Distance).ToString("0.0", CultureInfo.InvariantCulture));
+            if (f.Phase == TugPhase.Calm)
+            {
+                _msg.Text = T[f.Tired ? "tired" : "reel"];
+                _sub.Text = F("distance", Math.Max(0, f.Distance).ToString("0.0", CultureInfo.InvariantCulture));
+            }
             // 텐션이 위험하면 큰 글이 빨개진다
-            _msg.LabelSettings.FontColor = f.Tension >= b.Danger ? Palette.RedText : f.Tension < b.Slack ? Palette.BlueText : Palette.Paper;
+            _msg.LabelSettings.FontColor = f.Phase != TugPhase.Calm ? Palette.Gold : f.Tension >= b.Danger ? Palette.RedText : f.Tension < b.Slack ? Palette.BlueText : Palette.Paper;
         }
 
         /// <summary>물고기가 물을 철썩 박찬다: 줄 끝에 물기둥과 물방울 (물고기 모습은 보이지 않는다)</summary>
@@ -772,6 +871,8 @@ namespace Hanjeopsi.App.Screens
             _phase = Phase.Busy;
             Sound.Loop("reel", false);
             _gauge.Showing = ReelGauge.Mode.None;
+            _field.ShowStamina = false;
+            _field.RunDir = 0;
             _field.ShadowVisible = false;
             _field.AddSplash(_field.ShadowAt, 1.5f);
             _field.LineTo = null;
@@ -789,7 +890,9 @@ namespace Hanjeopsi.App.Screens
             _phase = Phase.Result;
             Sound.Loop("reel", false);
             Sound.Play("land");
-            Haptics.Pattern((40, 0.7f, 60), (40, 0.7f, 0));
+            Haptics.Pattern(((int)(25 + 30 * _feel), 0.2f + 0.5f * _feel, 60), ((int)(25 + 30 * _feel), 0.2f + 0.5f * _feel, 0));
+            _field.ShowStamina = false;
+            _field.RunDir = 0;
             _gauge.Showing = ReelGauge.Mode.None;
             _field.Bend = 0;
             _field.Fighting = false;
@@ -1080,7 +1183,7 @@ namespace Hanjeopsi.App.Screens
         private void Nibble()
         {
             Sound.Play("nibble");
-            Haptics.Pulse(18, 0.35f);
+            Haptics.Pulse(14, 0.15f);
             _nibbleTween?.Kill();
             _nibbleTween = CreateTween();
             _nibbleTween.TweenMethod(Callable.From<float>(v => _field.BobberSink = v), 0f, 0.45f, 0.06);
@@ -1171,6 +1274,10 @@ namespace Hanjeopsi.App.Screens
                 case "joy":
                     _phase = Phase.Result;
                     Celebrate(() => { });
+                    break;
+                case "run":
+                    // 물고기가 질주하는 순간 반대쪽을 눌러 버틴다 (첫 질주가 1.3~2초에 온다)
+                    ShotHook("noraemi", 32, false, 0.2, 1);
                     break;
                 case "pull":
                     // reel 과 같지만 세게 버티는 포즈로

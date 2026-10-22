@@ -68,8 +68,20 @@ namespace Hanjeopsi.App.Ui
         /// <summary>큰 놈이면 물이 더 크게 들끓는다</summary>
         public bool Big;
 
+        // 힘싸움: 물고기 힘 막대, 질주 방향(0 없음), 예고 중인지, 반대쪽을 눌러 버티는 중인지
+        public bool ShowStamina;
+        public float FishStamina = 1;
+        public int RunDir;
+        public bool RunWarn;
+        public bool Bracing;
+
         // 낚싯줄. 낚싯대는 SD 그림에 있고, 화면이 그림 속 대 끝 자리를 RodTip 에 넣어 준다
         public Vector2 RodTip;
+        // 감기·버티기 포즈는 그림에서 대를 지웠다. 여기서 손잡이부터 그리고 텐션만큼 물고기 쪽으로 휜다 (RodTip 은 그린 대 끝)
+        public bool RodDrawn;
+        public Vector2 RodGrip;
+        public Vector2 RodDir;
+        public float RodLen;
         /// <summary>텐션 0~1. 팽팽할수록 줄이 곧게 선다</summary>
         public float Bend;
         /// <summary>릴링 중이면 텐션에 따라 줄이 떨리고 색이 바뀐다</summary>
@@ -195,13 +207,17 @@ namespace Hanjeopsi.App.Ui
         public override void _Draw()
         {
             if (_stage == null) return;
+            if (RunDir != 0) DrawBraceZone();
             if (ShowFan && PosAt != null) DrawFan();
             if (ShowHint && PosAt != null) DrawHint();
             DrawTrail();
             foreach (var r in _rings) DrawRing(r);
             if (ShadowVisible) DrawShadow();
             if (BobberVisible) DrawBobber();
+            if (RodDrawn) DrawRod();
             DrawLine();
+            if (ShadowVisible && RunDir != 0) DrawRunArrow();
+            if (ShadowVisible && ShowStamina) DrawStamina();
             foreach (var d in _drops) DrawDrop(d);
             DrawCooler();
         }
@@ -397,6 +413,67 @@ namespace Hanjeopsi.App.Ui
             }
         }
 
+        /// <summary>질주 반대쪽 화면 절반: 금빛으로 일렁이며 "여기를 눌러" 하고 알린다. 버티는 중이면 더 밝다</summary>
+        private void DrawBraceZone()
+        {
+            float w = Size.X / 2;
+            float x0 = RunDir < 0 ? w : 0;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(_time * (RunWarn ? 14 : 8));
+            float a = Bracing ? 0.22f : RunWarn ? 0.1f + 0.08f * pulse : 0.12f + 0.1f * pulse;
+            // 바깥 가장자리가 가장 밝고 가운데로 갈수록 옅다
+            float outer = RunDir < 0 ? Size.X : 0;
+            const int n = 14;
+            for (int i = 0; i < n; i++)
+            {
+                float x = x0 + w * i / n;
+                float d = Mathf.Abs(x + w / n / 2 - outer) / w;
+                float k = (1 - d) * (1 - d);
+                DrawRect(new Rect2(x, 0, w / n + 1, Size.Y), new Color(Palette.Gold, a * (0.2f + 0.8f * k)));
+            }
+            // 가장자리 굵은 빛줄기
+            float edge = RunDir < 0 ? Size.X - 6 * K : 0;
+            DrawRect(new Rect2(edge, 0, 6 * K, Size.Y), new Color(Palette.Gold, Bracing ? 0.7f : 0.35f + 0.3f * pulse));
+        }
+
+        /// <summary>물고기 옆 화살표: 달아나는 쪽</summary>
+        private void DrawRunArrow()
+        {
+            var c = P(ShadowAt);
+            float u = K * 0.5f;
+            float pulse = Mathf.Sin(_time * 16) * 4 * u;
+            float dir = RunDir;
+            var basePt = c + new Vector2(dir * (34 * u + pulse), -6 * u);
+            var tip = basePt + new Vector2(dir * 26 * u, 0);
+            var col = new Color(RunWarn ? Palette.Gold : Palette.Red, 0.95f);
+            var shaft = new[]
+            {
+                basePt + new Vector2(0, -5 * u), tip + new Vector2(-dir * 12 * u, -5 * u),
+                tip + new Vector2(-dir * 12 * u, -13 * u), tip, tip + new Vector2(-dir * 12 * u, 13 * u),
+                tip + new Vector2(-dir * 12 * u, 5 * u), basePt + new Vector2(0, 5 * u),
+            };
+            var outline = new Vector2[shaft.Length + 1];
+            shaft.CopyTo(outline, 0);
+            outline[shaft.Length] = shaft[0];
+            DrawColoredPolygon(shaft, col);
+            DrawPolyline(outline, new Color(0.1f, 0.08f, 0.06f, 0.8f), 2 * u, true);
+        }
+
+        /// <summary>물고기 힘 막대: 몸부림 위에 떠 있다. 초록 → 노랑 → 빨강으로 줄어든다</summary>
+        private void DrawStamina()
+        {
+            var c = P(ShadowAt) + new Vector2(0, -34 * K * 0.5f * Mathf.Clamp(ShadowSize, 0.8f, 1.6f));
+            float u = K * 0.5f;
+            float w = 64 * u, h = 9 * u;
+            var r = new Rect2(c.X - w / 2, c.Y - h / 2, w, h);
+            DrawRect(r.Grow(2 * u), new Color(0.05f, 0.08f, 0.12f, 0.75f));
+            float v = Mathf.Clamp(FishStamina, 0, 1);
+            var col = v > 0.5f ? Palette.Green.Lerp(Palette.Gold, (1 - v) * 2) : Palette.Gold.Lerp(Palette.Red, (0.5f - v) * 2);
+            if (v > 0) DrawRect(new Rect2(r.Position, new Vector2(w * v, h)), col);
+            // 다 지치면 반짝
+            if (v <= 0) DrawRect(r, new Color(1, 1, 1, 0.3f + 0.3f * Mathf.Sin(_time * 10)));
+            DrawRect(new Rect2(r.Position, new Vector2(w * v, h * 0.4f)), new Color(1, 1, 1, 0.25f));
+        }
+
         /// <summary>납작한 원 위의 짧은 호 (거품 줄기)</summary>
         private void FoamArc(Vector2 c, float r, float from, float to, Color col, float width)
         {
@@ -443,6 +520,53 @@ namespace Hanjeopsi.App.Ui
             {
                 var cover = new Vector2[] { c + new Vector2(-r * 1.3f, 0), c + new Vector2(r * 1.3f, 0), c + new Vector2(r * 1.3f, r * 1.4f), c + new Vector2(-r * 1.3f, r * 1.4f) };
                 DrawColoredPolygon(cover, new Color(0.17f, 0.45f, 0.6f, 0.55f));
+            }
+        }
+
+        /// <summary>
+        /// 낚싯대: 손잡이에서 뻗어 나가다 끝이 줄 쪽으로 휜다. 텐션이 셀수록 크게 휘고(활처럼), 위험하면 떨린다.
+        /// 끝 자리를 RodTip 에 넣어 줄이 거기서 나가게 한다
+        /// </summary>
+        private void DrawRod()
+        {
+            float b = Mathf.Clamp(Bend, 0, 1.1f);
+            var g = RodGrip;
+            var d0 = RodDir;
+            // 줄이 가는 쪽 (없으면 대 방향)
+            var t = LineTo.HasValue ? (LineTo.Value - g).Normalized() : d0;
+            // 텐션 0 이어도 낚싯대 무게로 끝이 조금 숙인다
+            var droop = new Vector2(d0.X * 0.8f, d0.Y * 0.8f + 0.6f).Normalized();
+            float k = Fighting ? 0.18f + 0.62f * Mathf.Min(1, b) : 0.15f;
+            var tipDir = droop.Lerp(t, k).Normalized();
+            if (Fighting && b > 0.85f) tipDir = tipDir.Rotated(Mathf.Sin(_time * 55) * 0.02f);
+            float len = RodLen * (1 - 0.14f * Mathf.Min(1, b));
+            var tip = g + (d0 * 0.5f + tipDir * 0.5f).Normalized() * len;
+            var ctrl = g + d0 * len * 0.62f;
+            RodTip = tip;
+
+            const int n = 22;
+            var pts = Bezier(P(g), P(ctrl), P(tip), n);
+            float u = K / 2.4f;
+            // 굵은 손잡이 쪽에서 가는 끝으로 (조각마다 굵기를 줄인다)
+            for (int i = 0; i < n; i++)
+            {
+                float f = (float)i / n;
+                float w = Mathf.Lerp(6.5f, 1.8f, f) * u;
+                DrawLine(pts[i], pts[i + 1], new Color("231e1a"), w + 1.6f * u, true);
+                DrawLine(pts[i], pts[i + 1], new Color("3a322b"), w, true);
+            }
+            // 위쪽 빛 한 줄
+            for (int i = 2; i < n - 2; i++)
+            {
+                var dir = (pts[i + 1] - pts[i]).Normalized();
+                var off = new Vector2(dir.Y, -dir.X) * Mathf.Lerp(1.6f, 0.5f, (float)i / n) * u;
+                DrawLine(pts[i] + off, pts[i + 1] + off, new Color(1, 0.95f, 0.85f, 0.28f), 1.2f * u, true);
+            }
+            // 가이드 링 (금빛 작은 고리)
+            foreach (float f in new[] { 0.3f, 0.5f, 0.68f, 0.84f, 0.96f })
+            {
+                int i = Mathf.Clamp((int)(f * n), 0, n);
+                DrawArc(pts[i], Mathf.Lerp(3.2f, 1.6f, f) * u, 0, Mathf.Tau, 10, new Color("c9a24a"), 1.3f * u, true);
             }
         }
 

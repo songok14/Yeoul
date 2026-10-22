@@ -144,6 +144,8 @@ namespace Hanjeopsi.App
     public static class Haptics
     {
         private static ulong _lastMs;
+        /// <summary>전체 세기 (폰 진동은 생각보다 세다. 2026-10-22 사용자 의견으로 낮춤)</summary>
+        private const float Master = 0.7f;
 
         public static void Pulse(int ms, float amplitude = 0.5f)
         {
@@ -152,7 +154,7 @@ namespace Hanjeopsi.App
             ulong now = Time.GetTicksMsec();
             if (now - _lastMs < 40) return;
             _lastMs = now;
-            Input.VibrateHandheld(ms, Mathf.Clamp(amplitude, 0.05f, 1f));
+            Input.VibrateHandheld(ms, Mathf.Clamp(amplitude * Master, 0.04f, 1f));
         }
 
         /// <summary>(길이 ms, 세기, 다음까지 쉬는 ms) 를 차례로</summary>
@@ -163,8 +165,9 @@ namespace Hanjeopsi.App
             foreach (var s in steps)
             {
                 var step = s;
-                if (at <= 0) Input.VibrateHandheld(step.Ms, step.Amp);
-                else Sound.I.GetTree().CreateTimer(at).Timeout += () => Input.VibrateHandheld(step.Ms, step.Amp);
+                float amp = Mathf.Clamp(step.Amp * Master, 0.04f, 1f);
+                if (at <= 0) Input.VibrateHandheld(step.Ms, amp);
+                else Sound.I.GetTree().CreateTimer(at).Timeout += () => Input.VibrateHandheld(step.Ms, amp);
                 at += (step.Ms + step.Gap) / 1000.0;
             }
             _lastMs = Time.GetTicksMsec();
@@ -173,7 +176,7 @@ namespace Hanjeopsi.App
         /// <summary>버튼 누름: 아주 짧게</summary>
         public static void Tap()
         {
-            Pulse(12, 0.25f);
+            Pulse(8, 0.15f);
         }
     }
 }

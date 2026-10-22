@@ -90,5 +90,21 @@ namespace Hanjeopsi.Core.Systems
         {
             get { return B.ThiefWindow; }
         }
+
+        /// <summary>힘싸움 시작 (고닷 릴링)</summary>
+        public TugFight StartTug(FightSetup setup, IRandom rng)
+        {
+            return new TugFight(_data.Balance.Reel, _data.Balance.Tug, setup, rng);
+        }
+
+        /// <summary>
+        /// 손맛 세기 0.15~1 (진동 세기). 작고 흔한 고기는 약하게, 크고 귀하고 힘센 고기와 큰 놈은 세게
+        /// </summary>
+        public double Feel(Species sp, double size, bool big)
+        {
+            double s = sp.MaxSize > sp.MinSize ? JsMath.Clamp((size - sp.MinSize) / (sp.MaxSize - sp.MinSize), 0, 1) : 0.5;
+            double f = 0.18 + 0.16 * (sp.Strength - 1) / 4.0 + 0.3 * s + (sp.Rare ? 0.14 : 0) + (big ? 0.2 : 0);
+            return JsMath.Clamp(f, 0.15, 1);
+        }
     }
 }

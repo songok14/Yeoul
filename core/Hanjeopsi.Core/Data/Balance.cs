@@ -14,6 +14,7 @@ namespace Hanjeopsi.Core.Data
         public TruckBalance Truck = new TruckBalance();
         public ReelBalance Reel = new ReelBalance();
         public SpotBalance Spot = new SpotBalance();
+        public TugBalance Tug = new TugBalance();
     }
 
     public sealed class Chapter1Balance
@@ -137,6 +138,57 @@ namespace Hanjeopsi.Core.Data
         public double ThiefDelayMax;
         /// <summary>이 시간 안에 고등어를 누르면 막는다 (초)</summary>
         public double ThiefWindow;
+    }
+
+    /// <summary>고닷 힘싸움 (TugFight). 끊김·느슨 기준과 감기 속도는 ReelBalance 를 같이 쓴다</summary>
+    public sealed class TugBalance
+    {
+        /// <summary>첫 질주까지 (초)</summary>
+        public double FirstRunMin;
+        public double FirstRunMax;
+        public double FirstRunTutorial;
+        /// <summary>질주 예고 시간 (초)</summary>
+        public double WarnTime;
+        public double WarnTutorial;
+        /// <summary>질주 길이 (초). 지칠수록 RunTiredMul 쪽으로 짧아진다</summary>
+        public double RunMin;
+        public double RunMax;
+        public double RunTiredMul;
+        /// <summary>다음 질주까지 = 간격 / (GapBase + 힘 × GapPerStr)</summary>
+        public double GapMin;
+        public double GapMax;
+        public double GapBase;
+        public double GapPerStr;
+        /// <summary>질주 시간의 이만큼 반대쪽을 누르면 버텨 낸 것</summary>
+        public double HeldRatio;
+        /// <summary>질주 때 줄이 풀려 나가는 속도 (힘 1 당 m/초)</summary>
+        public double RunPull;
+        /// <summary>버틸 때도 이만큼은 풀린다 (RunPull 비율)</summary>
+        public double BraceLeak;
+        /// <summary>버틸 때 텐션 오름 (초당)</summary>
+        public double BraceRise;
+        public double BraceRisePerStr;
+        /// <summary>버틸 때 물고기 힘 빠짐 (초당) = (BraceDrain + 텐션/100 × BraceDrainPerTension) / max(1, 힘 × StaminaPerStr)</summary>
+        public double BraceDrain;
+        public double BraceDrainPerTension;
+        public double StaminaPerStr;
+        /// <summary>질주 쪽으로 당기면 텐션이 치솟는다 (초당)</summary>
+        public double WrongRise;
+        public double WrongRisePerStr;
+        /// <summary>질주 중 손을 떼도 텐션은 이 아래로 안 내려간다</summary>
+        public double RunFloor;
+        /// <summary>잠잠할 때 알맞게 팽팽하면 힘이 빠진다 (초당, 압력 1일 때)</summary>
+        public double CalmDrain;
+        /// <summary>손을 떼고 있으면 힘이 돌아온다 (초당)</summary>
+        public double Recover;
+        /// <summary>다 지쳐도 남는 힘 비율</summary>
+        public double TiredFloor;
+        /// <summary>완벽한 챔질이면 처음부터 힘이 이만큼 빠져 있다</summary>
+        public double PerfectStamina;
+        /// <summary>줄이 풀려 나가도 시작 거리 + 이만큼까지</summary>
+        public double MaxOverrun;
+        /// <summary>힘이 가득한 물고기는 감는 속도의 이만큼만 끌려온다 (다 지치면 1)</summary>
+        public double FreshReelMul;
     }
 
     /// <summary>간 맞추기 판정</summary>

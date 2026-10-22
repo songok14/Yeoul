@@ -64,7 +64,7 @@
     "big": "큰 놈이다!",
     "bigSub": "줄이 터지지 않게 살살 감기",
     "reel": "꾹 누르면 릴을 감아요",
-    "reelSub": "빨간색이면 손을 떼고 파란색이면 감기",
+    "reelSub": "팽팽하게 버티면 물고기가 지친다",
     "distance": "남은 거리 {0}m",
     "surge": "꾹꾹!",
     "jump": "철썩!",
@@ -107,7 +107,14 @@
     "rescueSnap": "손을 떼! 줄이 터질 뻔했다",
     "rescueSlack": "너무 느슨하다. 다시 감기",
     "tutorialCatch": "{0}cm\n손바닥만 한 볼락이다",
-    "tutorialGo": "구워 먹어 보자"
+    "tutorialGo": "구워 먹어 보자",
+    "runLeft": "← 왼쪽으로 달아난다!",
+    "runRight": "오른쪽으로 달아난다! →",
+    "braceLeft": "왼쪽을 꾹 눌러 버티기",
+    "braceRight": "오른쪽을 꾹 눌러 버티기",
+    "held": "버텼다!",
+    "tired": "지쳤다! 지금 감기",
+    "stamina": "힘"
   },
   "auction": {
     "title": "물비늘포 위판장",

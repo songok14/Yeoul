@@ -27,6 +27,8 @@ namespace Hanjeopsi.Core.Tests
         public double SeasonSd;
         /// <summary>고등어가 가리키는 쪽으로 던진다</summary>
         public bool FollowHint;
+        /// <summary>물고기가 질주할 때 반대쪽을 고를 확률</summary>
+        public double BraceSkill;
         /// <summary>쿨러를 노리는 고등어를 제때 누를 확률</summary>
         public double CatchThief;
         /// <summary>장사 판단(남길 고기, 장비, 상환)을 따진다. 아니면 아무렇게나</summary>
@@ -47,6 +49,7 @@ namespace Hanjeopsi.Core.Tests
                 SeasonSd = 0.06,
                 FollowHint = true,
                 CatchThief = 0.8,
+                BraceSkill = 0.85,
                 Thoughtful = true,
             };
         }
@@ -66,6 +69,7 @@ namespace Hanjeopsi.Core.Tests
                 SeasonSd = 0.12,
                 FollowHint = false,
                 CatchThief = 0.4,
+                BraceSkill = 0.55,
                 Thoughtful = false,
             };
         }
@@ -93,6 +97,8 @@ namespace Hanjeopsi.Core.Tests
         public double WaitTime;
         public double FightTime;
         public int Fights;
+        public int Runs;
+        public int RunsHeld;
         public int Dishes;
         public int AuctionIncome;
         public int TruckIncome;
@@ -286,7 +292,8 @@ namespace Hanjeopsi.Core.Tests
             }
             bool perfect = reel.IsPerfectStrike(elapsed);
 
-            var fight = reel.StartFight(new FightSetup
+            // 고닷 힘싸움: 질주가 오면 손이 늦게 알아채고, 실력만큼 반대쪽을 눌러 버틴다
+            var fight = _g.Spot.StartTug(new FightSetup
             {
                 Species = sp,
                 Size = size,
@@ -296,18 +303,28 @@ namespace Hanjeopsi.Core.Tests
                 Reel = D.Gear.Reels[S.Reel],
             }, _rng);
             bool holding = true;
+            int side = 1;
             double sinceLook = 0;
-            FightStep res = default;
+            TugPhase seen = TugPhase.Calm;
+            TugStep res = default;
             for (int i = 0; i < 60 * 300 && res.End == FightEnd.None; i++)
             {
                 sinceLook += Frame;
                 if (sinceLook >= _s.HandLag)
                 {
                     sinceLook = 0;
-                    holding = fight.Tension < _s.HoldBelow;
+                    if (fight.Phase != seen)
+                    {
+                        seen = fight.Phase;
+                        if (seen != TugPhase.Calm) side = _hand.Next() < _s.BraceSkill ? -fight.RunDir : fight.RunDir;
+                    }
+                    if (fight.Phase == TugPhase.Run) holding = fight.Tension < _s.HoldBelow + 12;
+                    else holding = fight.Tension < _s.HoldBelow;
                 }
-                res = fight.Step(holding, Frame, _rng);
+                res = fight.Step(holding, side, Frame);
+                if (res.RunHeld) _r.RunsHeld += 1;
             }
+            _r.Runs += fight.Runs;
             _r.FightTime += fight.FightTime;
             _r.Fights += 1;
             switch (res.End)

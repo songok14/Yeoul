@@ -126,6 +126,7 @@ jobs:
             "fishing-jump:--screen=fishing --shot-action=jump"
             "fishing-leap:--screen=fishing --shot-action=leap"
             "fishing-thief:--screen=fishing --shot-action=thief"
+            "fishing-run:--screen=fishing --demo=evening --shot-action=run"
             "fishing-tutorial:--screen=fishing --tutorial"
             "fishing-tutorial-catch:--screen=fishing --tutorial --shot-action=tutorialCatch"
             "story-p1:--screen=story --shot-action=p1:0"
