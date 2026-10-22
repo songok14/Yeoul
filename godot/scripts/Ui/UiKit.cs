@@ -130,6 +130,15 @@ namespace Hanjeopsi.App.Ui
             return word + (batchim ? "은" : "는");
         }
 
+        /// <summary>받침에 맞춘 을/를 ("왼쪽을", "앞바다를")</summary>
+        public static string Object(string word)
+        {
+            if (string.IsNullOrEmpty(word)) return word;
+            char c = word[word.Length - 1];
+            bool batchim = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 != 0;
+            return word + (batchim ? "을" : "를");
+        }
+
         /// <summary>천 단위 쉼표 원 (웹 won)</summary>
         public static string Won(long n)
         {

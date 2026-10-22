@@ -107,6 +107,16 @@ def fringe(path: str, top: float = 0.5, band: int = 30) -> None:
     thin = (alpha > 0) & ~ndimage.binary_dilation(solid, iterations=1) & near_out & rows
     f2 = np.clip((185 - mn) / 60.0, 0, 1)
     alpha = np.where(thin, alpha * f2, alpha)
+    # 머리 바로 옆 순백 조각(600px 미만, 바깥에서 10px 안). 후드처럼 큰 흰 덩어리는 크기로 거른다
+    white = (alpha > 24) & (mn > 212) & (mx - mn < 32) & rows
+    lab3, n3 = ndimage.label(white)
+    if n3:
+        idx = range(1, n3 + 1)
+        sz3 = ndimage.sum(white, lab3, idx)
+        near3 = ndimage.sum(white & ndimage.binary_dilation(hair, iterations=14), lab3, idx)
+        out3 = ndimage.sum(white & ndimage.binary_dilation(big, iterations=10), lab3, idx)
+        chips = [i + 1 for i in range(n3) if sz3[i] < 600 and out3[i] > 0 and near3[i] / sz3[i] > 0.5]
+        alpha = np.where(np.isin(lab3, chips), 0, alpha)
     # 떨어져 남은 작은 조각(150px 미만)은 지운다
     vis = alpha > 24
     lab2, n2 = ndimage.label(vis)

@@ -288,7 +288,7 @@ namespace Hanjeopsi.App.Screens
             if (_phase != Phase.Aim) return;
             HideCatBubble();
             string dir = _hintLane == -1 ? T["left"] : _hintLane == 1 ? T["right"] : T["front"];
-            _catBubble = Bubble(Art, F("catHint", dir), _stage.ToLocal(CatFoot + new Vector2(-8, -60)), 0);
+            _catBubble = Bubble(Art, F("catHint", UiKit.Object(dir)), _stage.ToLocal(CatFoot + new Vector2(-8, -60)), 0);
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + (_hintLane == 0 ? "sit-front" : "sit-side") + ".png"));
             _cat.FlipH = _hintLane == 1;
             Hop(_cat, 12);
@@ -343,6 +343,8 @@ namespace Hanjeopsi.App.Screens
             SetInfo();
             _gauge.Showing = ReelGauge.Mode.None;
             _field.ShowLanes = false;
+            _field.ShowHint = false;
+            HideCatBubble();
             _phase = Phase.Flying;
             _hot = _lane == _hotLane;
 

@@ -156,7 +156,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 
 ## 8. 그림 적용 방향
 
-- **배경**: `public/assets/bg-*.webp`를 PNG로 바꿔 `godot/art/backgrounds`에 (마을 4장 완료). 900×1600 원본이라 1.2배 확대된다. 원본 고해상도가 있으면 다시 뽑는다.
+- **배경**: `public/assets/bg-*.webp`를 PNG로 바꿔 `godot/art/backgrounds`에 (마을 4장, 방파제 완료. 물고기 그림 5장은 `godot/art/fish/`). 900×1600 원본이라 1.2배 확대된다. 원본 고해상도가 있으면 다시 뽑는다.
 - **인게임 SD**: 시트(#EDEDED 배경)를 `scripts/sd_sheet.py`로 칸마다 잘라 PNG로. 크기는 바꾸지 않아 같은 시트 프레임은 같은 비율이다. 여울 8장, 고등어 12장 완료.
   ```bash
   python3 scripts/sd_sheet.py <시트.png> 2 4 godot/art/yeoul front,three-quarter,side,back,idle,wave,walk-1,walk-2
@@ -169,7 +169,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
   | 누군가와 이야기하는 장면 | 대화창 + 감정 일러스트(상반신이 보이게 크게) | 여울식당 할머니, 새 게임 첫마디, 1장 클리어·차압 |
   | 감정이 터지는 순간 | 한 장짜리 컷신 일러스트 (9:16, 아래 30%는 글 상자) | 맛을 잃은 날, 처음 짠맛, 아버지 기억 |
 - **대화창** `Ui/DialogueBox`: 말하는 사람이 바뀌면 일러스트가 옆에서 미끄러져 들어오고, 감정만 바뀌면 살짝 바꿔 낀다. 이름표 색과 서는 쪽은 `dialogue.json speakers`. 글은 타자기처럼 찍히고 누르면 다음 줄, 마지막 줄에 선택지를 달 수 있다(여울식당의 갚기·잠자기).
-- **일러스트 정리**: 지금 감정 그림은 웹 `public/assets/y-*.webp`, `ch-*.webp`를 PNG로 옮긴 것(`godot/art/portraits/`). 머리카락 사이 흰 배경은 `scripts/clean_halo.py`로 지웠다. 새로 뽑을 대화용 표정 시트 프롬프트는 `docs/ART_PROMPTS.md`.
+- **일러스트 정리**: 지금 감정 그림은 웹 `public/assets/y-*.webp`, `ch-*.webp`를 PNG로 옮긴 것(`godot/art/portraits/`). 머리카락 사이 흰 배경은 `scripts/clean_halo.py`로 지웠다. 갈색 머리 여울 그림은 `--fringe`로 머리 둘레 가는 가닥 사이 분홍빛 바탕과 작은 흰 조각까지 풀었다. 새로 뽑을 대화용 표정 시트 프롬프트는 `docs/ART_PROMPTS.md`.
 - 프롬프트는 `docs/ART_PROMPTS.md`.
 
 ## 9. 단계별 일정
@@ -184,7 +184,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 | U3 | 릴링 물리를 웹에서 `reel.ts`로 빼고 C# `ReelFight`로 | `dotnet test` | ✅ (골든 260판 프레임 단위 일치) |
 | U4 | 코어 자동 플레이: 새 게임부터 30일을 규칙대로 돌려 예외가 없는지, 빚을 갚을 수 있는지 | `dotnet test` | ✅ (적당히 잘하면 20/20 클리어, 평균 22일. `GAME_DESIGN.md` 9절) |
 | U5 | 공통 UI(Theme, 버튼, 모달, HUD, 토스트, 화면 전환), Boot·Title·Town | 사진, 폰 | ✅ 사진 확인 (폰 확인 대기) |
-| U6 | Fishing (터치, 게이지, 찌, 그림자, 물보라, 결과) | 사진, 폰 | |
+| U6 | Fishing (터치, 게이지, 찌, 그림자, 물보라, 결과) | 사진, 폰 | ✅ 사진 확인 (폰 확인 대기). 마을 방파제에서 들어간다. 프롤로그 튜토리얼 낚시는 U9 |
 | U7 | Market·Shop·Notebook | 사진, 폰 | |
 | U8 | Truck (SD 손님, 간 맞추기, 반응) | 사진, 폰 | |
 | U9 | Story와 컷신, 프롤로그 튜토리얼, 클리어·차압 결말 | 사진, 폰 | |

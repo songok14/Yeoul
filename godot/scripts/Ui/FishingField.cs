@@ -122,7 +122,7 @@ namespace Hanjeopsi.App.Ui
                 var near = LanePos(lane, 0.05f);
                 var far = LanePos(lane, 0.95f);
                 bool on = SelectedLane == lane;
-                float a = SelectedLane == null ? 0.09f + 0.03f * Mathf.Sin(_time * 2.4f + lane) : on ? 0.24f : 0.04f;
+                float a = SelectedLane == null ? 0.12f + 0.04f * Mathf.Sin(_time * 2.4f + lane) : on ? 0.24f : 0.04f;
                 var pts = new[] { P(new Vector2(near.X - 40, near.Y)), P(new Vector2(near.X + 40, near.Y)), P(new Vector2(far.X, far.Y)) };
                 DrawColoredPolygon(pts, new Color(1, 1, 1, a));
             }
