@@ -266,7 +266,6 @@ namespace Hanjeopsi.App.Ui
             tail.Position = new Vector2(0, -26);
             tailIn.Position = new Vector2(0, -26);
 
-            if (GameState.I.ShotMode) GD.Print("말풍선 '" + text + "' 위치 " + root.GlobalPosition + " 크기 " + size);
             root.Scale = new Vector2(0.4f, 0.4f);
             root.Modulate = new Color(1, 1, 1, 0);
             var tw = root.CreateTween().SetParallel(true);
