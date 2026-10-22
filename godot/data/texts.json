@@ -100,7 +100,14 @@
     "thief": "고등어가 쿨러를 노린다!",
     "thiefSub": "고등어를 눌러서 말리기",
     "thiefStopped": "고등어를 말렸다",
-    "thiefStole": "고등어가 {0} 한 마리를 물고 갔다"
+    "thiefStole": "고등어가 {0} 한 마리를 물고 갔다",
+    "tutorialInfo": "처음 한 마리를 낚아 보자",
+    "aimTutorial": "금색 바늘이 앞바다를 지날 때 누르기",
+    "earlyTutorial": "톡톡은 속임수. 쑥 들어갈 때 누르기",
+    "rescueSnap": "손을 떼! 줄이 터질 뻔했다",
+    "rescueSlack": "너무 느슨하다. 다시 감기",
+    "tutorialCatch": "{0}cm\n손바닥만 한 볼락이다",
+    "tutorialGo": "구워 먹어 보자"
   },
   "auction": {
     "title": "물비늘포 위판장",

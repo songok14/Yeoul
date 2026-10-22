@@ -196,16 +196,12 @@ namespace Hanjeopsi.App.Screens
             if (outcome == ChapterOutcome.Clear)
             {
                 G.Persist();
-                TalkScene("chapterClear", () => Modal("1차 상환 완료!", "조황일지 1장을 얻었다.\n이야기는 다음 빌드에서 이어져요.", new[] { new ModalButton("좋아", Palette.Green) }));
+                gs.GoStory("clear");
                 return;
             }
             if (outcome == ChapterOutcome.Fail)
             {
-                TalkScene("chapterFail", () =>
-                {
-                    gs.DeleteSave();
-                    gs.GoTo("title");
-                });
+                gs.GoStory("fail");
                 return;
             }
             if (gs.PendingTalk != null)

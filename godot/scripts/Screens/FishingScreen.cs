@@ -112,17 +112,20 @@ namespace Hanjeopsi.App.Screens
         // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
         private float _pullHold;
         private bool _shotPull;
+        /// <summary>프롤로그 튜토리얼: 저녁 방파제, 볼락 한 마리, 고등어와 쿨러는 아직 없다, 줄이 터질 뻔하면 구해 준다</summary>
+        private bool _tutorial;
 
         protected override void Build()
         {
             var s = G.Save;
-            _castsLeft = G.Data.Balance.Chapter1.CastsPerTrip;
+            _tutorial = GameState.I.Tutorial;
+            _castsLeft = _tutorial ? 1 : G.Data.Balance.Chapter1.CastsPerTrip;
 
             // ── 그림: 방파제 배경, 여울 뒷모습(SD), 고등어 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/breakwater.png");
-            _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, 3)];
+            _stage.Tint = SlotTint[_tutorial ? 3 : Mathf.Clamp(s.Slot, 0, 3)];
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
@@ -131,8 +134,10 @@ namespace Hanjeopsi.App.Screens
             _field = new FishingField(_stage)
             {
                 PosAt = PosFor,
-                CoolerAt = CoolerFoot,
+                CoolerAt = _tutorial ? Vector2.Zero : CoolerFoot,
             };
+            // 고등어는 프롤로그 2부에서 처음 만난다
+            _cat.Visible = !_tutorial;
             _field.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _field.GuiInput += OnFieldInput;
             Art.AddChild(_field);
@@ -247,6 +252,12 @@ namespace Hanjeopsi.App.Screens
         private void SetInfo()
         {
             var s = G.Save;
+            if (_tutorial)
+            {
+                _info.Text = T["tutorialInfo"];
+                _exit.Visible = false;
+                return;
+            }
             _info.Text = F("info", _castsLeft, G.Data.Balance.Chapter1.CastsPerTrip, s.Bait, s.Cooler.Count, G.CoolerCapacity());
             _hud.Refresh();
         }
@@ -275,7 +286,7 @@ namespace Hanjeopsi.App.Screens
                 _holding = false;
                 return;
             }
-            bool onCat = _cat.GetRect().Grow(40).HasPoint(mb.Position);
+            bool onCat = !_tutorial && _cat.GetRect().Grow(40).HasPoint(mb.Position);
             switch (_phase)
             {
                 case Phase.Aim:
@@ -336,6 +347,11 @@ namespace Hanjeopsi.App.Screens
             _field.NeedleFixed = false;
             _field.Aiming = null;
             _field.Needle = (float)_angle;
+            if (_tutorial)
+            {
+                Tell(T["aim"], T["aimTutorial"]);
+                return;
+            }
             Tell(T["aim"], T["aimSub"]);
             ShowCatHint();
         }
@@ -374,7 +390,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>바늘을 멈춰 방향을 정하고 파워 게이지로. 반짝이는 지점은 계속 보인다</summary>
         private void StartPower()
         {
-            if (G.Save.Bait <= 0)
+            if (!_tutorial && G.Save.Bait <= 0)
             {
                 _phase = Phase.Busy;
                 Tell(T["noBait"], T["noBaitSub"]);
@@ -401,9 +417,12 @@ namespace Hanjeopsi.App.Screens
         private void Cast()
         {
             _dist01 = G.Reel.CastDistance(_gaugePos, Reach);
-            G.UseBait();
-            _castsLeft -= 1;
-            _castsDone += 1;
+            if (!_tutorial)
+            {
+                G.UseBait();
+                _castsLeft -= 1;
+                _castsDone += 1;
+            }
             SetInfo();
             _gauge.Showing = ReelGauge.Mode.None;
             _field.ShowFan = false;
@@ -464,8 +483,8 @@ namespace Hanjeopsi.App.Screens
             Haptics.Pulse(15, 0.3f);
             var rng = GameState.I.Rng;
             // 입질까지 기다리는 시간은 어디에 던지든 같다
-            _wait = G.Reel.StartWait(false, false, rng);
-            _thiefAt = G.Spot.RollThief(G.Save.Cooler.Count, rng);
+            _wait = G.Reel.StartWait(false, _tutorial, rng);
+            _thiefAt = _tutorial ? -1 : G.Spot.RollThief(G.Save.Cooler.Count, rng);
             _thiefDone = false;
             TellWait();
         }
@@ -480,6 +499,18 @@ namespace Hanjeopsi.App.Screens
 
         private void EarlyStrike()
         {
+            if (_tutorial)
+            {
+                // 튜토리얼은 놓쳐도 다시 기다린다
+                Tell(T["early"], T["earlyTutorial"], Palette.Gold);
+                Sound.Play("nibble", -4, 0.8f);
+                _wait.Retry();
+                Later(1.2, () =>
+                {
+                    if (_phase == Phase.Wait) Tell(T["wait"], T["earlyTutorial"]);
+                });
+                return;
+            }
             _phase = Phase.Busy;
             Tell(T["early"], T["earlySub"]);
             _field.AddSplash(_target, _targetScale * 0.8f);
@@ -564,10 +595,20 @@ namespace Hanjeopsi.App.Screens
             _biteElapsed = 0;
             var rng = GameState.I.Rng;
             int zone = G.Fishing.ZoneOf(_dist01);
-            _big = G.Spot.IsBigBite(_close, rng);
-            _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, _close, rng);
-            _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
-            _biteWindow = G.Reel.BiteWindow(G.Data.Gear.Rods[G.Save.Rod], _species, false);
+            if (_tutorial)
+            {
+                // 손바닥만 한 볼락 한 마리 (웹과 같다)
+                _big = false;
+                _species = G.Data.SpeciesById("bollak");
+                _size = 19.4;
+            }
+            else
+            {
+                _big = G.Spot.IsBigBite(_close, rng);
+                _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, _close, rng);
+                _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
+            }
+            _biteWindow = G.Reel.BiteWindow(G.Data.Gear.Rods[G.Save.Rod], _species, _tutorial);
             _nibbleTween?.Kill();
             _field.BobberSink = 1;
             _field.AddSplash(_target, _targetScale * (_big ? 2.2f : 1.4f));
@@ -616,9 +657,9 @@ namespace Hanjeopsi.App.Screens
                 Size = _size,
                 Dist01 = _dist01,
                 Perfect = perfect,
-                Rod = G.Data.Gear.Rods[s.Rod],
-                Reel = G.Data.Gear.Reels[s.Reel],
-                Tutorial = false,
+                Rod = G.Data.Gear.Rods[_tutorial ? 1 : s.Rod],
+                Reel = G.Data.Gear.Reels[_tutorial ? 1 : s.Reel],
+                Tutorial = _tutorial,
             }, GameState.I.Rng);
             _wobble = (float)GameState.I.Rng.Next() * 10;
             _field.ShadowSize = ShadowScale(0);
@@ -669,6 +710,9 @@ namespace Hanjeopsi.App.Screens
                 if (GameState.I.Rng.Next() < (_big ? 0.6 : 0.35)) Thrash();
                 else Toast(T["surge"], Palette.RedText, SafeTop + 420);
             }
+            // 튜토리얼: 줄이 터지거나 바늘이 빠질 뻔하면 구해 주고 알려 준다
+            if (r.RescueSnap) Toast(T["rescueSnap"], Palette.RedText, SafeTop + 420);
+            if (r.RescueSlack) Toast(T["rescueSlack"], Palette.BlueText, SafeTop + 420);
             if (r.End == FightEnd.Snap)
             {
                 Sound.Play("snap");
@@ -751,8 +795,25 @@ namespace Hanjeopsi.App.Screens
             Later(0.35, () =>
             {
                 _field.LineTo = null;
-                Celebrate(ShowResult);
+                Celebrate(_tutorial ? TutorialCatch : ShowResult);
             });
+        }
+
+        /// <summary>튜토리얼 볼락: 도감에 남기고 그림을 보여 준 뒤 프롤로그 2부로</summary>
+        private void TutorialCatch()
+        {
+            G.RecordCatch(_species.Id, _size, false);
+            G.Save.Flags["tutorialFish"] = true;
+            G.Persist();
+            Sound.Play("newfish");
+            Modal(_species.Name, F("tutorialCatch", _size.ToString("0.0", CultureInfo.InvariantCulture)), new[]
+            {
+                new ModalButton(T["tutorialGo"], Palette.Green, () =>
+                {
+                    GameState.I.Tutorial = false;
+                    GameState.I.GoStory("p2");
+                }),
+            }, FishPicture(_species.Id));
         }
 
         /// <summary>낚았다! 앞을 보고 대를 든 채 활짝 웃으며 톡 뛴다. 잠깐 뒤 결과를 띄운다</summary>
@@ -968,7 +1029,15 @@ namespace Hanjeopsi.App.Screens
                 {
                     _biteElapsed += dt;
                     _field.BobberAt = _target + new Vector2(0, Mathf.Sin((float)_biteElapsed * 30) * 2);
-                    if (G.Reel.BiteMissed(_biteElapsed, _biteWindow))
+                    if (G.Reel.BiteMissed(_biteElapsed, _biteWindow) && _tutorial)
+                    {
+                        // 튜토리얼은 늦어도 다시 기다린다
+                        _phase = Phase.Wait;
+                        _field.BobberSink = 0;
+                        _wait.Retry();
+                        Tell(T["missed"], T["earlyTutorial"], Palette.Gold);
+                    }
+                    else if (G.Reel.BiteMissed(_biteElapsed, _biteWindow))
                     {
                         _phase = Phase.Busy;
                         _field.BobberVisible = false;
@@ -1102,6 +1171,12 @@ namespace Hanjeopsi.App.Screens
                     // reel 과 같지만 세게 버티는 포즈로
                     _shotPull = true;
                     ShotSetup("reel");
+                    break;
+                case "tutorialCatch":
+                    _species = G.Data.SpeciesById("bollak");
+                    _size = 19.4;
+                    _phase = Phase.Result;
+                    TutorialCatch();
                     break;
                 case "new":
                     _species = G.Data.SpeciesById("gamseongdom");

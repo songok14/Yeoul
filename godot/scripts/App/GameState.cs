@@ -47,6 +47,7 @@ namespace Hanjeopsi.App
                 else if (a.StartsWith("--screen=")) ShotScreen = a.Substring("--screen=".Length);
                 else if (a.StartsWith("--shot-action=")) ShotAction = a.Substring("--shot-action=".Length);
                 else if (a.StartsWith("--demo=")) Demo = a.Substring("--demo=".Length);
+                else if (a == "--tutorial") Tutorial = true;
             }
             if (ShotMode) Rng = new Mulberry32(2026);
             AddChild(new Sound { Name = "Sound" });
@@ -165,6 +166,19 @@ namespace Hanjeopsi.App
             _fadeTween = CreateTween();
             _fadeTween.TweenProperty(_fade, "modulate:a", 0f, 0.42).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
             _fadeTween.TweenCallback(Callable.From(() => _fade.MouseFilter = Control.MouseFilterEnum.Ignore));
+        }
+
+        /// <summary>이야기 화면이 보여 줄 이야기 (story.json parts: p1, p2, clear, fail)</summary>
+        public string StoryPart { get; set; } = "p1";
+
+        /// <summary>다음 낚시는 프롤로그 튜토리얼 (볼락 한 마리를 낚으면 이야기 p2 로)</summary>
+        public bool Tutorial { get; set; }
+
+        /// <summary>이야기 화면으로 (fade)</summary>
+        public void GoStory(string part)
+        {
+            StoryPart = part;
+            GoTo("story");
         }
 
         /// <summary>다음 화면에 들어가자마자 할 대화 (dialogue.json scenes 이름)</summary>

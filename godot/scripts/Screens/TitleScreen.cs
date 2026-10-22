@@ -160,20 +160,23 @@ namespace Hanjeopsi.App.Screens
         {
             var gs = GameState.I;
             gs.NewGame();
-            // 이야기 화면(프롤로그)은 아직 옮기는 중이라 끝낸 것으로 하고 마을에서 시작한다
-            var g = gs.Game;
-            g.RecordCatch("bollak", 19.4, false);
-            g.Save.Flags["tutorialFish"] = true;
-            g.CompletePrologue();
-            gs.PendingTalk = "welcome";
-            gs.GoTo("town");
+            // 프롤로그 → 튜토리얼 낚시 → 프롤로그 2부 → 마을
+            gs.GoStory("p1");
         }
 
         private void OnContinue()
         {
             var gs = GameState.I;
-            if (gs.Continue()) gs.GoTo("town");
-            else Toast("기록을 읽지 못했어요", Palette.RedText);
+            if (!gs.Continue())
+            {
+                Toast("기록을 읽지 못했어요", Palette.RedText);
+                return;
+            }
+            // 프롤로그 중간에 껐으면 그 자리부터
+            var save = gs.Game.Save;
+            if (save.Flag("prologueDone")) gs.GoTo("town");
+            else if (save.Flag("tutorialFish")) gs.GoStory("p2");
+            else gs.GoStory("p1");
         }
     }
 }

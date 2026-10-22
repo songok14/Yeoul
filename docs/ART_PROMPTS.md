@@ -205,6 +205,105 @@ Style: soft anime illustration, delicate clean line art, subtle natural facial a
 Background: plain flat light gray #EDEDED in every panel. No glow or white outline around the hair. No text on the note, no labels, no numbers, no panel borders, no grid lines, no ground shadow, no checkerboard, no signature, no watermark.
 ```
 
+## 배경 다시 뽑기
+
+### 배경 1. 물비늘포 마을 (발 디딜 앞마당이 있는 구도)
+지금 마을 그림은 위에서 내려다보는 구도라 SD 여울·고등어·트럭이 꽃밭과 난간 위에 떠 보인다(2026-10-22 사용자 의견). 눈높이에서 본 항구 길을 아래쪽에 넓게 두고, 장소 네 곳(위판장, 미끼가게, 여울식당, 방파제)이 위쪽 절반에 보이게 다시 뽑는다.
+- 먼저 **1-1 낮**을 뽑고, 나머지 세 장은 1-1 결과를 같이 첨부해서 같은 구도로 시간만 바꾼다.
+- 받으면 `godot/art/backgrounds/village-<0~3>.png`(900×1600 PNG)로 넣고, `TownScreen` 간판 자리(`Pin`)와 발 높이(`_footY`)를 새 그림에 맞춘다. 웹은 `public/assets/bg-village-<n>.webp`.
+
+#### 배경 1-1. 마을 낮 (`village-2`, 먼저 뽑기)
+
+```
+Create one vertical background illustration for a mobile game. Attached: my current watercolor background illustrations (match their palette and painterly texture).
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, seen from eye level as if standing on the village harbor road (not a high bird's-eye view). Layout from left to right, all clearly readable as places:
+- left middle: a fish auction market shed with a blue metal roof, stacked blue and yellow fish crates
+- left of center, closer: a tiny bait and tackle shop with a green and white striped awning, fishing rods and floats by the door
+- right middle: a traditional Korean hanok restaurant with a dark tiled roof, wooden lattice doors and warm paper lanterns
+- far right in the distance: a breakwater lined with concrete tetrapods ending in a small red lighthouse
+- behind: calm sea, a few fishing boats at the pier, soft green islands on the horizon
+
+Very important composition for a game screen:
+- The lower half is a wide, flat, open paved harbor road and plaza made of worn concrete, seen almost straight on, with a clear walkable empty area from 55 percent to 85 percent of the image height across the whole width. Characters and a small truck will be placed standing on this ground later, so keep it flat, sunlit and empty: no flowers, no railings, no stairs, no crates, no people, no cars in that area.
+- The bottom 15 percent is simple ground (a menu panel will cover it).
+- The top 15 percent is calm sky (a status bar will cover it).
+- Light comes from the upper left.
+
+Time of day: Bright clear early afternoon, deep blue sea with sparkles, white clouds.
+
+Style: soft painterly watercolor illustration matching the attached background images (same palette, brush texture and level of detail), gentle anime background art, clean shapes. Vertical 9:16, at least 1080x1920. No people, no animals, no vehicles, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 1-2. 마을 새벽 (`village-0`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: my current watercolor background illustrations (match their palette and painterly texture) and the daytime version of this exact village scene (keep the same composition, buildings, camera and ground area exactly; change only the time of day and lighting).
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, seen from eye level as if standing on the village harbor road (not a high bird's-eye view). Layout from left to right, all clearly readable as places:
+- left middle: a fish auction market shed with a blue metal roof, stacked blue and yellow fish crates
+- left of center, closer: a tiny bait and tackle shop with a green and white striped awning, fishing rods and floats by the door
+- right middle: a traditional Korean hanok restaurant with a dark tiled roof, wooden lattice doors and warm paper lanterns
+- far right in the distance: a breakwater lined with concrete tetrapods ending in a small red lighthouse
+- behind: calm sea, a few fishing boats at the pier, soft green islands on the horizon
+
+Very important composition for a game screen:
+- The lower half is a wide, flat, open paved harbor road and plaza made of worn concrete, seen almost straight on, with a clear walkable empty area from 55 percent to 85 percent of the image height across the whole width. Characters and a small truck will be placed standing on this ground later, so keep it flat, sunlit and empty: no flowers, no railings, no stairs, no crates, no people, no cars in that area.
+- The bottom 15 percent is simple ground (a menu panel will cover it).
+- The top 15 percent is calm sky (a status bar will cover it).
+- Light comes from the upper left.
+
+Time of day: Blue hour dawn before sunrise: deep indigo and lavender sky with the last stars, a thin pale glow on the horizon, lanterns of the restaurant and street lamps still lit, lights on the fishing boats, calm dark water with soft reflections.
+
+Style: soft painterly watercolor illustration matching the attached background images (same palette, brush texture and level of detail), gentle anime background art, clean shapes. Vertical 9:16, at least 1080x1920. No people, no animals, no vehicles, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 1-3. 마을 아침 (`village-1`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: my current watercolor background illustrations (match their palette and painterly texture) and the daytime version of this exact village scene (keep the same composition, buildings, camera and ground area exactly; change only the time of day and lighting).
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, seen from eye level as if standing on the village harbor road (not a high bird's-eye view). Layout from left to right, all clearly readable as places:
+- left middle: a fish auction market shed with a blue metal roof, stacked blue and yellow fish crates
+- left of center, closer: a tiny bait and tackle shop with a green and white striped awning, fishing rods and floats by the door
+- right middle: a traditional Korean hanok restaurant with a dark tiled roof, wooden lattice doors and warm paper lanterns
+- far right in the distance: a breakwater lined with concrete tetrapods ending in a small red lighthouse
+- behind: calm sea, a few fishing boats at the pier, soft green islands on the horizon
+
+Very important composition for a game screen:
+- The lower half is a wide, flat, open paved harbor road and plaza made of worn concrete, seen almost straight on, with a clear walkable empty area from 55 percent to 85 percent of the image height across the whole width. Characters and a small truck will be placed standing on this ground later, so keep it flat, sunlit and empty: no flowers, no railings, no stairs, no crates, no people, no cars in that area.
+- The bottom 15 percent is simple ground (a menu panel will cover it).
+- The top 15 percent is calm sky (a status bar will cover it).
+- Light comes from the upper left.
+
+Time of day: Fresh morning just after sunrise: warm golden light from the left, long soft shadows on the road, light mist over the sea, pale sky with peach clouds.
+
+Style: soft painterly watercolor illustration matching the attached background images (same palette, brush texture and level of detail), gentle anime background art, clean shapes. Vertical 9:16, at least 1080x1920. No people, no animals, no vehicles, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 1-4. 마을 저녁 (`village-3`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: my current watercolor background illustrations (match their palette and painterly texture) and the daytime version of this exact village scene (keep the same composition, buildings, camera and ground area exactly; change only the time of day and lighting).
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, seen from eye level as if standing on the village harbor road (not a high bird's-eye view). Layout from left to right, all clearly readable as places:
+- left middle: a fish auction market shed with a blue metal roof, stacked blue and yellow fish crates
+- left of center, closer: a tiny bait and tackle shop with a green and white striped awning, fishing rods and floats by the door
+- right middle: a traditional Korean hanok restaurant with a dark tiled roof, wooden lattice doors and warm paper lanterns
+- far right in the distance: a breakwater lined with concrete tetrapods ending in a small red lighthouse
+- behind: calm sea, a few fishing boats at the pier, soft green islands on the horizon
+
+Very important composition for a game screen:
+- The lower half is a wide, flat, open paved harbor road and plaza made of worn concrete, seen almost straight on, with a clear walkable empty area from 55 percent to 85 percent of the image height across the whole width. Characters and a small truck will be placed standing on this ground later, so keep it flat, sunlit and empty: no flowers, no railings, no stairs, no crates, no people, no cars in that area.
+- The bottom 15 percent is simple ground (a menu panel will cover it).
+- The top 15 percent is calm sky (a status bar will cover it).
+- Light comes from the upper left.
+
+Time of day: Sunset evening: orange and pink sky, the sea glowing gold, warm lantern light starting in the restaurant, long blue shadows on the road.
+
+Style: soft painterly watercolor illustration matching the attached background images (same palette, brush texture and level of detail), gentle anime background art, clean shapes. Vertical 9:16, at least 1080x1920. No people, no animals, no vehicles, no text, no readable signs, no letters, no signature, no watermark.
+```
+
 ## 컷신 일러스트 다듬기 (여울 감정 연기)
 
 이야기 장면 전용. 지금 감정 그림 10장(`y-*.webp`)을 한 장 그림 컷신으로 다시 뽑는다. 붙여 넣을 때 지금 여울 그림과 해당 배경 그림을 같이 첨부한다.
