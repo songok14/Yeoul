@@ -136,7 +136,9 @@ jobs:
 
       - name: 결과를 ci-build 브랜치에 (Claude 확인용)
         run: |
-          mkdir out && cp "hanjeopsi-${{ github.run_number }}.apk" out/hanjeopsi.apk && cp shots/*.png out/
+          mkdir out && cp shots/*.png out/
+          # GitHub 파일 한도(100MB) 때문에 APK는 쪼개서 올린다. 합치기: cat hanjeopsi.apk.part-* > hanjeopsi.apk
+          split -b 90m "hanjeopsi-${{ github.run_number }}.apk" out/hanjeopsi.apk.part-
           echo "빌드 #${{ github.run_number }} · ${{ github.ref_name }} · ${{ github.sha }}" > out/BUILD.txt
           cd out
           git init -q && git checkout -q -b ci-build

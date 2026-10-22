@@ -32,7 +32,7 @@
 - 웹과 같은 결과인지 골든 테스트로 확인한다. 웹 수치나 계산을 바꾸면 `npm run golden`으로 `core/golden/`을 다시 만든다.
 - 이 환경에서는 고닷을 실행하지 못한다. 고닷 쪽 C#은 `dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true`로 진짜 GodotSharp에 대고 컴파일한다(프로젝트는 안드로이드 템플릿 때문에 net9.0, 여기엔 .NET 8만 있다).
 - **APK와 화면 사진은 GitHub Actions(`.github/workflows/android.yml`)가 만든다.** 비밀값은 필요 없다. `core/`나 `godot/`를 푸시하면 돌고, 사용자는 릴리스 `test-latest`에서 받아 폰에서 테스트한다.
-- 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인한다. 성공하면 `git fetch origin ci-build`로 `lab.png` 같은 화면 사진을 받아 **직접 열어 본다**(글자 겹침, 화면 밖 글자, 버튼 겹침). 실패하면 로그를 보고 고쳐서 다시 푸시한다.
+- 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인한다. 성공하면 `git fetch origin ci-build`로 `lab.png` 같은 화면 사진과 APK(`cat hanjeopsi.apk.part-* > hanjeopsi.apk`로 합친다)를 받아 **직접 열어 본다**(글자 겹침, 화면 밖 글자, 버튼 겹침). 실패하면 로그를 보고 고쳐서 다시 푸시한다.
 - `godot/Hanjeopsi.sln`은 지우지 않는다. 없으면 C#이 빠진 APK가 나와 켜자마자 꺼진다(워크플로가 검사한다).
 - 새 화면을 만들면 사진 모드(`-- --shot=<경로>`)에서 그 화면을 찍도록 워크플로에 한 줄 추가한다.
 - 그림: 배경은 수채화 일러스트 그대로, 인게임 캐릭터·물체는 SD(2~2.5등신), 일러스트는 컷신 전용. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).
