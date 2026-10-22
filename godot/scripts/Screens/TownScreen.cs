@@ -306,7 +306,7 @@ namespace Hanjeopsi.App.Screens
                 });
                 return;
             }
-            NotYet("방파제 낚시");
+            GameState.I.GoTo("fishing");
         }
 
         private void OpenMarket()

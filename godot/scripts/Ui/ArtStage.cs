@@ -40,6 +40,13 @@ namespace Hanjeopsi.App.Ui
             }
         }
 
+        /// <summary>배경 그림에만 색을 살짝 입힌다 (시간대 분위기). 위에 세운 그림은 그대로</summary>
+        public Color Tint
+        {
+            get { return _bg.SelfModulate; }
+            set { _bg.SelfModulate = value; }
+        }
+
         /// <summary>배경을 아주 천천히 숨 쉬듯 확대한다 (1이면 그대로)</summary>
         public float Zoom
         {

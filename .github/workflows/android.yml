@@ -115,10 +115,16 @@ jobs:
             "town-tall:--screen=town --demo=evening"
             "talk-welcome:--screen=town --shot-action=welcome"
             "talk-clear:--screen=town --demo=evening --shot-action=clear"
+            "fishing:--screen=fishing"
+            "fishing-power:--screen=fishing --shot-action=power"
+            "fishing-reel:--screen=fishing --demo=evening --shot-action=reel"
+            "fishing-result:--screen=fishing --shot-action=result"
+            "fishing-new:--screen=fishing --shot-action=new"
+            "fishing-tall:--screen=fishing --demo=summary"
           )
           for s in "${shots[@]}"; do
             name="${s%%:*}"; args="${s#*:}"
-            res=1080x1920; [ "$name" = town-tall ] && res=1080x2400
+            res=1080x1920; case "$name" in *-tall) res=1080x2400;; esac
             timeout 180 xvfb-run -a -s "-screen 0 ${res}x24" \
               "$GODOT" --path godot --rendering-driver opengl3 --resolution $res -- --shot="$PWD/shots/$name.png" $args
           done
