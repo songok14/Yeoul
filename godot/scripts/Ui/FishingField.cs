@@ -6,7 +6,7 @@ namespace Hanjeopsi.App.Ui
 {
     /// <summary>
     /// 방파제 바다 위에 그리는 것들: 던질 방향 부채꼴과 바늘, 고등어가 가리키는 반짝이는 지점, 찌,
-    /// 물고기 그림자(어종 그림을 어둡게 눌러 물속에서 몸을 흔든다)와 물살, 튀어 오르는 물고기, 물보라, 낚싯줄, 쿨러.
+    /// 줄 끝에서 물고기가 몸부림치는 물(물고기 모습은 그리지 않는다), 물살, 물보라와 물기둥, 낚싯줄, 쿨러.
     /// 좌표는 ArtStage 논리 좌표(450×800)로 받아 그릴 때 화면 픽셀로 바꾼다. 상태는 FishingScreen 이 정한다.
     /// </summary>
     public partial class FishingField : Control
@@ -60,20 +60,13 @@ namespace Hanjeopsi.App.Ui
         /// <summary>1이면 찌가 물속으로 들어갔다</summary>
         public float BobberSink;
 
-        // 물고기 그림자: 어종 그림을 어둡게 눌러 그린다
+        // 줄 끝 물속에서 몸부림치는 자리 (물고기 모습은 그리지 않고 물만 들끓는다)
         public bool ShadowVisible;
         public Vector2 ShadowAt;
         public float ShadowSize = 1;
         public float ShadowWobble;
-        public Texture2D FishTexture;
-        /// <summary>큰 놈이면 더 진하고 물살이 크다</summary>
+        /// <summary>큰 놈이면 물이 더 크게 들끓는다</summary>
         public bool Big;
-
-        // 물 위로 튀어 오르는 물고기 (저항, 끌어올리기)
-        public bool Jumping;
-        public Vector2 JumpAt;
-        public float JumpScale = 1;
-        public float JumpSpin;
 
         // 낚싯줄. 낚싯대는 SD 그림에 있고, 화면이 그림 속 대 끝 자리를 RodTip 에 넣어 준다
         public Vector2 RodTip;
@@ -110,6 +103,25 @@ namespace Hanjeopsi.App.Ui
                     Life = 0,
                     Max = 0.45f + 0.35f * (float)_rand.NextDouble(),
                     Size = (1.2f + 1.6f * (float)_rand.NextDouble()) * Mathf.Sqrt(scale),
+                });
+            }
+        }
+
+        /// <summary>물고기가 물을 박차는 물기둥: 물보라에 위로 높이 솟는 물방울을 더한다</summary>
+        public void AddBurst(Vector2 at, float scale)
+        {
+            AddSplash(at, scale);
+            int n = (int)(10 + 8 * scale);
+            for (int i = 0; i < n; i++)
+            {
+                float a = -Mathf.Pi / 2 + (float)(_rand.NextDouble() - 0.5) * 0.7f;
+                float sp = (70 + 70 * (float)_rand.NextDouble()) * Mathf.Sqrt(scale);
+                _drops.Add(new Drop
+                {
+                    P = at + new Vector2((float)(_rand.NextDouble() - 0.5) * 8 * scale, 0),
+                    V = new Vector2(Mathf.Cos(a) * sp * 0.6f, Mathf.Sin(a) * sp * 1.3f),
+                    Max = 0.6f + 0.35f * (float)_rand.NextDouble(),
+                    Size = (1.4f + 1.8f * (float)_rand.NextDouble()) * Mathf.Sqrt(scale),
                 });
             }
         }
@@ -188,7 +200,6 @@ namespace Hanjeopsi.App.Ui
             if (ShadowVisible) DrawShadow();
             if (BobberVisible) DrawBobber();
             DrawLine();
-            if (Jumping) DrawJump();
             foreach (var d in _drops) DrawDrop(d);
             DrawCooler();
         }
@@ -327,7 +338,7 @@ namespace Hanjeopsi.App.Ui
             DrawCircle(c - new Vector2(r * 0.3f, r * 0.3f), r * 0.4f, new Color(1, 1, 1, 0.9f * k));
         }
 
-        // ───────── 물고기 ─────────
+        // ───────── 물속 몸부림 ─────────
 
         /// <summary>그림자가 지나간 자리: 하얀 물살 V 와 거품</summary>
         private void DrawTrail()
@@ -347,82 +358,54 @@ namespace Hanjeopsi.App.Ui
         }
 
         /// <summary>
-        /// 물속 물고기: 어종 그림을 몸통 띠로 잘라 S자로 흔들고, 짙은 물빛으로 눌러 칠한다.
-        /// 여러 번 살짝 어긋나게 그려서 물에 번진 듯 흐리게 한다
+        /// 줄 끝 물속에서 무언가 몸부림친다: 물빛이 어둡게 가라앉고, 거품 고리가 좌우로 휘돌며, 물방울이 톡톡 솟는다.
+        /// 물고기 모습은 그리지 않는다
         /// </summary>
         private void DrawShadow()
         {
             var c = P(ShadowAt);
-            float len = 62 * ShadowSize * K * (Big ? 1.25f : 1);
-            if (FishTexture == null)
-            {
-                DrawSetTransform(c, 0, new Vector2(1, 0.34f));
-                DrawCircle(Vector2.Zero, len * 0.4f, new Color(0.04f, 0.1f, 0.16f, 0.5f));
-                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-                return;
-            }
-            // 좌우로 몸부림치는 방향에 따라 머리가 그쪽을 본다 (그림은 왼쪽을 본다)
-            float swim = Mathf.Cos(ShadowWobble);
-            bool faceRight = swim > 0;
-            float heading = Mathf.Sin(ShadowWobble * 1.7f) * 0.22f;
-            float alpha = Big ? 0.62f : 0.5f;
-            var tint = new Color(0.03f, 0.1f, 0.16f, alpha * 0.35f);
-            // 물 위로 비치는 밝은 테두리
-            Ellipse(c, len * 0.62f, 0.3f, new Color(Palette.Foam, 0.12f + 0.08f * Mathf.Sin(_time * 6)), 2);
-            for (int k = 0; k < 4; k++)
-            {
-                var off = new Vector2(Mathf.Cos(k * 1.57f), Mathf.Sin(k * 1.57f)) * 1.6f * K * 0.5f;
-                FishMesh(c + off, len, faceRight, heading, tint);
-            }
-            FishMesh(c, len * 0.94f, faceRight, heading, new Color(0.02f, 0.07f, 0.12f, alpha * 0.55f));
-        }
-
-        private void FishMesh(Vector2 c, float len, bool faceRight, float heading, Color tint)
-        {
-            const int n = 8;
-            float h = len * FishTexture.GetHeight() / FishTexture.GetWidth() * 0.55f;
-            var pts = new Vector2[2 * (n + 1)];
-            var uvs = new Vector2[2 * (n + 1)];
-            var cols = new Color[2 * (n + 1)];
-            float cos = Mathf.Cos(heading), sin = Mathf.Sin(heading);
-            for (int i = 0; i <= n; i++)
-            {
-                float u = (float)i / n;
-                // 꼬리 쪽일수록 크게 흔들린다 (그림의 오른쪽이 꼬리)
-                float bend = Mathf.Sin(ShadowWobble * 3 - u * 3.2f) * u * u * h * 0.55f;
-                float x = (u - 0.5f) * len * (faceRight ? -1 : 1);
-                var top = new Vector2(x, -h / 2 + bend);
-                var bot = new Vector2(x, h / 2 + bend);
-                pts[i] = c + Rot(top, cos, sin);
-                pts[2 * n + 1 - i] = c + Rot(bot, cos, sin);
-                uvs[i] = new Vector2(u, 0);
-                uvs[2 * n + 1 - i] = new Vector2(u, 1);
-            }
-            for (int i = 0; i < cols.Length; i++) cols[i] = tint;
-            DrawPolygon(pts, cols, uvs, FishTexture);
-        }
-
-        private static Vector2 Rot(Vector2 v, float cos, float sin)
-        {
-            return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
-        }
-
-        /// <summary>물 밖으로 튀어 오른 물고기 (제 색 그대로)</summary>
-        private void DrawJump()
-        {
-            if (FishTexture == null) return;
-            var c = P(JumpAt);
-            float len = 58 * JumpScale * K;
-            float h = len * FishTexture.GetHeight() / FishTexture.GetWidth();
-            DrawSetTransform(c, JumpSpin, Vector2.One);
-            DrawTextureRect(FishTexture, new Rect2(-len / 2, -h / 2, len, h), false);
+            float r = 22 * ShadowSize * K * (Big ? 1.3f : 1);
+            // 깊은 물빛 (가장자리로 갈수록 옅다)
+            DrawSetTransform(c, 0, new Vector2(1, 0.36f));
+            DrawCircle(Vector2.Zero, r * 1.25f, new Color(0.03f, 0.16f, 0.24f, 0.16f));
+            DrawCircle(Vector2.Zero, r * 0.8f, new Color(0.02f, 0.12f, 0.2f, 0.18f));
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-            // 몸에서 떨어지는 물방울 반짝
+            // 휘도는 거품 조각 세 개
+            float spin = ShadowWobble * 1.6f;
             for (int i = 0; i < 3; i++)
             {
-                float t = (_time * 3 + i / 3f) % 1f;
-                DrawCircle(c + new Vector2((i - 1) * len * 0.25f, h * 0.3f + t * 18 * K * 0.5f), 2.2f * K * 0.5f, new Color(1, 1, 1, 0.8f * (1 - t)));
+                float a0 = spin + i * Mathf.Tau / 3;
+                float rr = r * (0.75f + 0.18f * Mathf.Sin(ShadowWobble * 2 + i));
+                FoamArc(c, rr, a0, a0 + 1.3f, new Color(1, 1, 1, 0.75f), 3.5f);
+                FoamArc(c, rr * 0.55f, -a0, -a0 + 0.9f, new Color(Palette.Foam, 0.6f), 2.5f);
             }
+            // 바깥으로 번지는 물결
+            for (int i = 0; i < 2; i++)
+            {
+                float ph = (_time * 1.4f + i * 0.5f) % 1f;
+                Ellipse(c, r * (1 + 0.9f * ph), 0.34f, new Color(Palette.Foam, 0.5f * (1 - ph)), 2.5f);
+            }
+            // 거품 알갱이
+            for (int i = 0; i < 6; i++)
+            {
+                float t = (_time * 1.8f + i / 6f) % 1f;
+                float a = i * 2.1f + ShadowWobble;
+                var at = c + new Vector2(Mathf.Cos(a) * r * 0.7f, Mathf.Sin(a) * r * 0.25f - t * 10 * K * 0.5f);
+                DrawCircle(at, (1.4f + 1.4f * (1 - t)) * K * 0.5f, new Color(1, 1, 1, 0.8f * (1 - t)));
+            }
+        }
+
+        /// <summary>납작한 원 위의 짧은 호 (거품 줄기)</summary>
+        private void FoamArc(Vector2 c, float r, float from, float to, Color col, float width)
+        {
+            const int n = 10;
+            var pts = new Vector2[n + 1];
+            for (int i = 0; i <= n; i++)
+            {
+                float a = Mathf.Lerp(from, to, (float)i / n);
+                pts[i] = c + new Vector2(Mathf.Cos(a) * r, Mathf.Sin(a) * r * 0.34f);
+            }
+            DrawPolyline(pts, col, width, true);
         }
 
         // ───────── 찌와 줄 ─────────

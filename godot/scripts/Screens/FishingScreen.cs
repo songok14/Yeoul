@@ -87,7 +87,7 @@ namespace Hanjeopsi.App.Screens
         private bool _thiefActive, _thiefDone, _freezeThief;
         private float _waitT;
         private float _buzz;
-        private Tween _jumpTween;
+
         private double _gaugePos;
         private int _gaugeDir = 1;
         private double _dist01;
@@ -317,7 +317,6 @@ namespace Hanjeopsi.App.Screens
             _gauge.Showing = ReelGauge.Mode.None;
             _field.BobberVisible = false;
             _field.ShadowVisible = false;
-            _field.Jumping = false;
             _field.LineTo = null;
             _field.Bend = 0;
             SetPose("fish-ready");
@@ -606,7 +605,6 @@ namespace Hanjeopsi.App.Screens
             _leanRate = 12;
             _field.BobberVisible = false;
             _field.ShadowVisible = true;
-            _field.FishTexture = GD.Load<Texture2D>("res://art/fish/" + _species.Id + ".png");
             _field.Big = _big;
             _field.ClearTrail();
             Sound.Play("strike");
@@ -667,8 +665,8 @@ namespace Hanjeopsi.App.Screens
                 Sound.Play("surge");
                 Haptics.Pulse(110, 0.9f);
                 _field.AddSplash(_field.ShadowAt, 1.2f);
-                // 가끔은 물 위로 펄쩍 뛰어오른다 (큰 놈은 더 자주)
-                if (!_field.Jumping && GameState.I.Rng.Next() < (_big ? 0.6 : 0.35)) FishJump(false);
+                // 가끔은 물을 철썩 박찬다 (큰 놈은 더 자주)
+                if (GameState.I.Rng.Next() < (_big ? 0.6 : 0.35)) Thrash();
                 else Toast(T["surge"], Palette.RedText, SafeTop + 420);
             }
             if (r.End == FightEnd.Snap)
@@ -700,7 +698,7 @@ namespace Hanjeopsi.App.Screens
             _field.ShadowAt = new Vector2(fx, fy);
             _field.ShadowWobble = _wobble;
             _field.ShadowSize = ShadowScale(p);
-            if (!_field.Jumping) _field.LineTo = _field.ShadowAt;
+            _field.LineTo = _field.ShadowAt;
             _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1);
             // 팽팽할수록 대가 물고기 쪽으로 끌려가고, 저항이 오면 툭 끌려간다
             _leanTarget = -5 + 10 * _field.Bend + (float)f.SurgeKick * 25;
@@ -715,57 +713,17 @@ namespace Hanjeopsi.App.Screens
             _msg.LabelSettings.FontColor = f.Tension >= b.Danger ? Palette.RedText : f.Tension < b.Slack ? Palette.BlueText : Palette.Paper;
         }
 
-        /// <summary>
-        /// 물고기가 물 위로 튀어 오른다. landing 이면 여울 쪽으로 끌려 올라오고, 아니면 제자리에 떨어진다.
-        /// hold 면 사진용으로 공중에 멈춘다
-        /// </summary>
-        private void FishJump(bool landing, Action then = null, bool hold = false)
+        /// <summary>물고기가 물을 철썩 박찬다: 줄 끝에 물기둥과 물방울 (물고기 모습은 보이지 않는다)</summary>
+        private void Thrash()
         {
-            _jumpTween?.Kill();
-            var start = _field.ShadowAt;
-            var end = landing ? _field.RodTip + new Vector2(-30, 60) : start + new Vector2(Mathf.Cos(_wobble) * 26, 0);
-            float height = landing ? 150 : 46 * Mathf.Clamp(_field.ShadowSize, 0.8f, 1.6f);
-            float baseScale = Mathf.Clamp(_field.ShadowSize, 0.8f, 1.5f) * (_big ? 1.2f : 1f);
-            float dir = end.X >= start.X ? 1 : -1;
-            _field.Jumping = true;
-            _field.ShadowVisible = false;
-            _field.AddSplash(start, landing ? 1.8f : 1.3f);
-            if (!landing) Toast(T["jump"], Palette.Gold, SafeTop + 420);
-            Action<float> at = t =>
-            {
-                var pos = start.Lerp(end, t) + new Vector2(0, -Mathf.Sin(t * Mathf.Pi) * height);
-                _field.JumpAt = pos;
-                _field.JumpScale = landing ? Mathf.Lerp(baseScale, 2.2f, t) : baseScale * (1 + 0.15f * Mathf.Sin(t * Mathf.Pi));
-                // 머리를 위로 들었다가 숙이며 돈다 (그림은 왼쪽을 본다)
-                _field.JumpSpin = dir * (-0.9f + 1.8f * t) + (landing ? dir * t * Mathf.Tau * 0.5f : 0);
-                _field.LineTo = pos;
-            };
-            if (hold)
-            {
-                at(0.45f);
-                return;
-            }
-            _jumpTween = CreateTween();
-            _jumpTween.TweenMethod(Callable.From<float>(t => at(t)), 0f, 1f, landing ? 0.6 : 0.55).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
-            _jumpTween.TweenCallback(Callable.From(() =>
-            {
-                _field.Jumping = false;
-                if (!landing)
-                {
-                    _field.AddSplash(end, 1.4f);
-                    Sound.Play("plop", 0, 0.8f);
-                    if (_phase == Phase.Reel) _field.ShadowVisible = true;
-                }
-                then?.Invoke();
-            }));
+            _field.AddBurst(_field.ShadowAt, _big ? 2.2f : 1.6f);
+            Toast(T["jump"], Palette.Gold, SafeTop + 420);
         }
 
         private void Lose(string main, string sub)
         {
             _phase = Phase.Busy;
             Sound.Loop("reel", false);
-            _jumpTween?.Kill();
-            _field.Jumping = false;
             _gauge.Showing = ReelGauge.Mode.None;
             _field.ShadowVisible = false;
             _field.AddSplash(_field.ShadowAt, 1.5f);
@@ -777,7 +735,7 @@ namespace Hanjeopsi.App.Screens
             FinishCast();
         }
 
-        /// <summary>끌어올렸다! 물고기가 물을 박차고 여울 쪽으로 튀어 오른다</summary>
+        /// <summary>끌어올렸다! 발밑에서 물이 크게 솟고 줄을 거둔다</summary>
         private void LandFish()
         {
             _phase = Phase.Result;
@@ -788,7 +746,9 @@ namespace Hanjeopsi.App.Screens
             _field.Bend = 0;
             ZoomTo(1, 0.6);
             Tell("");
-            FishJump(true, () =>
+            _field.ShadowVisible = false;
+            _field.AddBurst(_field.ShadowAt, 2.4f);
+            Later(0.35, () =>
             {
                 _field.LineTo = null;
                 Celebrate(ShowResult);
@@ -1101,19 +1061,21 @@ namespace Hanjeopsi.App.Screens
                     break;
                 case "jump":
                     ShotHook("noraemi", 30, false, -0.2, 1);
-                    Later(1.2, () =>
+                    // 사진 찍기 직전에 철썩
+                    Later(2.35, () =>
                     {
                         _phase = Phase.Busy;
-                        FishJump(false, null, true);
+                        Thrash();
                     });
                     break;
                 case "leap":
                     ShotHook("godeungeo", 34, false, 0.1, 1);
-                    Later(1.2, () =>
+                    Later(2.35, () =>
                     {
                         _phase = Phase.Result;
                         _gauge.Showing = ReelGauge.Mode.None;
-                        FishJump(true, null, true);
+                        _field.ShadowVisible = false;
+                        _field.AddBurst(_field.ShadowAt, 2.4f);
                     });
                     break;
                 case "thief":
