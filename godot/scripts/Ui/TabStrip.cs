@@ -46,6 +46,7 @@ namespace Hanjeopsi.App.Ui
                 b.Pressed += () =>
                 {
                     if (idx == _selected) return;
+                    Sound.Play("page", -3);
                     _onPick(idx);
                 };
                 _row.AddChild(b);

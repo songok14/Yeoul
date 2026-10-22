@@ -12,6 +12,11 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class ShopScreen : PlaceScreen
     {
+        protected override string Music
+        {
+            get { return "town"; }
+        }
+
         private int _line = -1;
 
         private Dictionary<string, string> T
@@ -37,6 +42,7 @@ namespace Hanjeopsi.App.Screens
         protected override void BuildHeader()
         {
             HeaderRight.AddChild(Avatar("nossi", 116, NossiTalk));
+            Sound.Play("door", -4);
             CallDeferred(MethodName.Greet);
         }
 
@@ -187,6 +193,7 @@ namespace Hanjeopsi.App.Screens
             }
             HudBar.Refresh();
             FloatText(F("baitPlus", G.Data.Gear.Bait.Amount), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 560), Palette.GreenText);
+            Sound.Play("coin");
             Redraw();
         }
 
@@ -200,6 +207,8 @@ namespace Hanjeopsi.App.Screens
             }
             HudBar.Refresh();
             Toast(F("bought", GearName(slot, next)), Palette.Gold);
+            Sound.Play("coin");
+            Sound.Play("good", -6);
             Redraw();
             var says = G.Data.Dialogue.NossiSays;
             // 노씨 감성돔대(마지막 대)를 사면 아끼던 거라고 한마디

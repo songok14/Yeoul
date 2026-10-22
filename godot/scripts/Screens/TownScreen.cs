@@ -14,6 +14,11 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class TownScreen : Screen
     {
+        protected override string Music
+        {
+            get { return "town"; }
+        }
+
         private static readonly string[] YeoulPoses = { "front", "wave", "three-quarter", "idle", "side" };
         private static readonly string[] CatRest = { "sit-front", "sit-side", "loaf" };
 
@@ -264,12 +269,13 @@ namespace Hanjeopsi.App.Screens
             int bad = G.SpoiledFish().Count;
             if (bad > 0)
             {
-                Modal("고등어가 쿨러를 쳐다본다", "상한 생선 " + bad + "마리를 고등어에게 줄까?\n친해지면 입질 방향을 더 정확히 알려 준다.", new[]
+                Modal("고등어가 쿨러를 쳐다본다", "상한 생선 " + bad + "마리를 고등어에게 줄까?\n친해지면 좋은 자리를 더 정확히 알려 준다.", new[]
                 {
                     new ModalButton("아니", Palette.GrayDark),
                     new ModalButton("주기", Palette.Green, () =>
                     {
                         G.FeedCat();
+                        Sound.Play("meow");
                         _stage.Swap(_cat, Tex("cat/eat"));
                         _catTimer = 3;
                         Toast("고등어가 골골거린다 (호감 " + G.Save.CatAffinity + "/" + G.Data.Balance.Cat.MaxAffinity + ")");

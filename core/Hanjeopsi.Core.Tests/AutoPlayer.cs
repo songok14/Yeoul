@@ -27,6 +27,8 @@ namespace Hanjeopsi.Core.Tests
         public double SeasonSd;
         /// <summary>고등어가 가리키는 쪽으로 던진다</summary>
         public bool FollowHint;
+        /// <summary>쿨러를 노리는 고등어를 제때 누를 확률</summary>
+        public double CatchThief;
         /// <summary>장사 판단(남길 고기, 장비, 상환)을 따진다. 아니면 아무렇게나</summary>
         public bool Thoughtful;
 
@@ -44,6 +46,7 @@ namespace Hanjeopsi.Core.Tests
                 HandLag = 0.12,
                 SeasonSd = 0.06,
                 FollowHint = true,
+                CatchThief = 0.8,
                 Thoughtful = true,
             };
         }
@@ -62,6 +65,7 @@ namespace Hanjeopsi.Core.Tests
                 HandLag = 0.22,
                 SeasonSd = 0.12,
                 FollowHint = false,
+                CatchThief = 0.4,
                 Thoughtful = false,
             };
         }
@@ -81,6 +85,14 @@ namespace Hanjeopsi.Core.Tests
         public int Snapped;
         public int Slipped;
         public int MissedBites;
+        /// <summary>고닷 낚시 기록: 지점에 가까운 정도 합, 큰 놈, 고등어 도둑, 기다린 시간과 릴링 시간 (초)</summary>
+        public double Closeness;
+        public int BigBites;
+        public int Thieves;
+        public int Stolen;
+        public double WaitTime;
+        public double FightTime;
+        public int Fights;
         public int Dishes;
         public int AuctionIncome;
         public int TruckIncome;
@@ -221,20 +233,31 @@ namespace Hanjeopsi.Core.Tests
         {
             _r.Casts += 1;
             var reel = _g.Reel;
-            var (hot, hint) = reel.RollLanes(S.CatAffinity, _rng);
-            int lane = _s.FollowHint ? hint : (int)Math.Floor(_hand.Next() * 3) - 1;
-
+            var spot = _g.Spot;
             var rod = D.Gear.Rods[S.Rod];
-            double want = _s.Thoughtful ? BestDistance(rod.Reach, lane == hint) : _hand.Next();
+            var (hot, hint) = spot.RollSpots(S.CatAffinity, rod.Reach, _rng);
+
+            // 방향 바늘을 멈추고 파워 게이지로 거리를 정한다. 힌트를 따르면 고등어가 가리킨 지점을 노린다
+            double angle = _s.FollowHint ? JsMath.Clamp(Gauss(hint.Angle, _s.PowerSd * 1.5), -1, 1) : _hand.Next() * 2 - 1;
+            double want = _s.FollowHint ? hint.Dist : _s.Thoughtful ? BestDistance(rod.Reach, false) : _hand.Next();
             double power = JsMath.Clamp(Gauss(want / rod.Reach, _s.PowerSd), 0, 1);
             double dist01 = reel.CastDistance(power, rod.Reach);
-            bool isHot = lane == hot;
+            double close = spot.Closeness(new CastSpot(angle, dist01), hot);
+            _r.Closeness += close;
 
-            // 입질 대기: 속임 입질에 속으면 헛챔질
-            var wait = reel.StartWait(isHot, false, _rng);
+            // 고등어 도둑: 제때 누르면 막는다
+            if (spot.RollThief(S.Cooler.Count, _rng) >= 0)
+            {
+                _r.Thieves += 1;
+                if (_hand.Next() >= _s.CatchThief && _g.CatSteal() != null) _r.Stolen += 1;
+            }
+
+            // 입질 대기: 어디에 던지든 같다. 속임 입질에 속으면 헛챔질
+            var wait = reel.StartWait(false, false, _rng);
             for (int i = 0; i < 100000; i++)
             {
                 var w = wait.Step(Frame, _rng);
+                _r.WaitTime += Frame;
                 if (w.Nibble && _hand.Next() < _s.FooledByNibble)
                 {
                     _r.MissedBites += 1;
@@ -244,8 +267,10 @@ namespace Hanjeopsi.Core.Tests
             }
 
             int zone = _g.Fishing.ZoneOf(dist01);
-            var sp = _g.Fishing.RollSpecies(zone, S.Slot, isHot, _rng);
-            double size = _g.Fishing.RollSize(sp, isHot, _rng);
+            bool big = spot.IsBigBite(close, _rng);
+            if (big) _r.BigBites += 1;
+            var sp = _g.Fishing.RollSpeciesNear(zone, S.Slot, close, _rng);
+            double size = _g.Fishing.RollSizeNear(sp, close, big, _rng);
             double window = reel.BiteWindow(rod, sp, false);
             double react = Math.Max(0.12, Gauss(_s.ReactMean, _s.ReactSd));
             // 프레임 단위로 재서 웹과 같은 방식으로 판정한다
@@ -283,6 +308,8 @@ namespace Hanjeopsi.Core.Tests
                 }
                 res = fight.Step(holding, Frame, _rng);
             }
+            _r.FightTime += fight.FightTime;
+            _r.Fights += 1;
             switch (res.End)
             {
                 case FightEnd.Snap: _r.Snapped += 1; return;

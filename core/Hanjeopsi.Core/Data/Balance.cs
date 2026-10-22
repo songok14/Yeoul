@@ -13,6 +13,7 @@ namespace Hanjeopsi.Core.Data
         public SeasonBalance Season = new SeasonBalance();
         public TruckBalance Truck = new TruckBalance();
         public ReelBalance Reel = new ReelBalance();
+        public SpotBalance Spot = new SpotBalance();
     }
 
     public sealed class Chapter1Balance
@@ -106,6 +107,36 @@ namespace Hanjeopsi.Core.Data
         public double RareColdMul;
         public double SizePow;
         public double HotSizePow;
+    }
+
+    /// <summary>
+    /// 고닷 낚시: 부채꼴 방향 고르기, 고등어가 가리키는 지점, 큰 놈 입질, 고등어 도둑.
+    /// 지점에 가까이 던질수록 귀한 고기와 큰 고기가 잘 나온다. 입질까지 기다리는 시간은 어디든 같다
+    /// </summary>
+    public sealed class SpotBalance
+    {
+        /// <summary>부채꼴 바늘이 1초에 움직이는 양 (방향 -1~1 사이를 왕복)</summary>
+        public double AimSpeed;
+        /// <summary>물 좋은 지점의 방향 범위 (±)</summary>
+        public double HotAngleMax;
+        /// <summary>물 좋은 지점의 거리 범위 (낚싯대가 닿는 거리에 곱한다)</summary>
+        public double HotDistMin;
+        public double HotDistMax;
+        /// <summary>지점에서 이만큼 벗어나면 효과가 없다 (방향, 거리)</summary>
+        public double AngleRange;
+        public double DistRange;
+        /// <summary>큰 놈 입질 확률 = BigBase + BigPerClose × 가까운 정도</summary>
+        public double BigBase;
+        public double BigPerClose;
+        /// <summary>큰 놈은 크기 범위의 이 지점부터 위에서 나온다 (0~1)</summary>
+        public double BigSizeFrom;
+        /// <summary>쿨러에 고기가 있으면 던질 때마다 고등어가 노릴 확률</summary>
+        public double ThiefChance;
+        /// <summary>찌가 떨어지고 고등어가 움직이기까지 (초)</summary>
+        public double ThiefDelayMin;
+        public double ThiefDelayMax;
+        /// <summary>이 시간 안에 고등어를 누르면 막는다 (초)</summary>
+        public double ThiefWindow;
     }
 
     /// <summary>간 맞추기 판정</summary>

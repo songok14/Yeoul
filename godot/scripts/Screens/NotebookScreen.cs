@@ -14,6 +14,11 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class NotebookScreen : PlaceScreen
     {
+        protected override string Music
+        {
+            get { return "town"; }
+        }
+
         private const int CoolerPage = 8;
         private int _coolerPage;
         private TextureRect _cat;
@@ -40,7 +45,7 @@ namespace Hanjeopsi.App.Screens
 
         protected override IList<string> Tabs
         {
-            get { return new[] { T["tabCooler"], T["tabDex"], T["tabTaste"], T["tabJournal"] }; }
+            get { return new[] { T["tabCooler"], T["tabDex"], T["tabTaste"], T["tabJournal"], T["tabSettings"] }; }
         }
 
         protected override void Decorate(ArtStage stage)
@@ -91,7 +96,8 @@ namespace Hanjeopsi.App.Screens
                 case 0: Cooler(col); break;
                 case 1: Dex(col); break;
                 case 2: Taste(col); break;
-                default: Journal(col); break;
+                case 3: Journal(col); break;
+                default: SettingsPage(col); break;
             }
             return paper;
         }
@@ -319,6 +325,47 @@ namespace Hanjeopsi.App.Screens
             }
         }
 
+        // ───────── 설정 ─────────
+
+        private void SettingsPage(VBoxContainer col)
+        {
+            col.AddChild(Heading(T["settings"], T["settingsSub"]));
+            col.AddChild(Rule());
+            col.AddChild(Toggle(T["sfx"], T["sfxSub"], Settings.Sfx, on => Settings.Sfx = on));
+            col.AddChild(Rule());
+            col.AddChild(Toggle(T["music"], T["musicSub"], Settings.Music, on =>
+            {
+                Settings.Music = on;
+                Sound.RefreshMusic();
+            }));
+            col.AddChild(Rule());
+            col.AddChild(Toggle(T["vibrate"], T["vibrateSub"], Settings.Vibrate, on =>
+            {
+                Settings.Vibrate = on;
+                if (on) Haptics.Pulse(60, 0.6f);
+            }));
+        }
+
+        /// <summary>이름, 설명, 오른쪽에 켜짐/꺼짐 단추</summary>
+        private Control Toggle(string title, string sub, bool on, Action<bool> set)
+        {
+            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 20);
+            var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 4);
+            text.AddChild(UiKit.Text(title, TextSize.Body, Palette.Ink, true));
+            text.AddChild(UiKit.Text(sub, TextSize.Small, Palette.InkSoft, false, true));
+            row.AddChild(text);
+            var b = SmallButton(on ? T["on"] : T["off"], on ? Palette.Green : Palette.GrayDark, () =>
+            {
+                set(!on);
+                Redraw();
+            }, 200, 96);
+            b.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+            row.AddChild(b);
+            return row;
+        }
+
         // ───────── CI 사진 ─────────
 
         public override void ShotSetup(string action)
@@ -338,6 +385,9 @@ namespace Hanjeopsi.App.Screens
                 case "journal":
                     G.Save.JournalPages = 1;
                     ShowTab(3);
+                    break;
+                case "settings":
+                    ShowTab(4);
                     break;
             }
         }

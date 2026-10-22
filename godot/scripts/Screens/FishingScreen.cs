@@ -12,12 +12,18 @@ using CoreGame = Hanjeopsi.Core.Game;
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 방파제 찌낚시 (웹 FishingScene). 방향 고르기 → 파워 게이지 → 입질 대기(속임 입질) → 챔질 → 릴링 → 결과 → 철수.
-    /// 판정은 코어 ReelRules·BiteWait·ReelFight 가 하고, 여기서는 그리기와 입력만 한다.
+    /// 방파제 찌낚시 (웹 FishingScene). 부채꼴 방향 바늘 → 파워 게이지 → 입질 대기(속임 입질, 고등어 도둑) → 챔질 → 릴링 → 결과 → 철수.
+    /// 고등어가 가리키는 반짝이는 지점에 가까이 던질수록 귀한 고기와 큰 놈이 잘 온다. 입질 시간은 어디든 같다.
+    /// 판정은 코어 SpotRules·ReelRules·BiteWait·ReelFight 가 하고, 여기서는 그리기, 소리, 진동, 입력만 한다.
     /// 여울은 SD 뒷모습, 처음 낚은 어종은 감정 일러스트 대화로 기뻐한다.
     /// </summary>
     public partial class FishingScreen : Screen
     {
+        protected override string Music
+        {
+            get { return "sea"; }
+        }
+
         private enum Phase
         {
             Aim,
@@ -38,6 +44,9 @@ namespace Hanjeopsi.App.Screens
         private static readonly Vector2 YeoulFoot = new Vector2(150, 690);
         private const float YeoulHeight = 168;
         private static readonly Vector2 CatFoot = new Vector2(80, 686);
+        // 쿨러는 고등어 왼쪽. 고등어는 쿨러 옆까지 살금살금 다가간다
+        private static readonly Vector2 CoolerFoot = new Vector2(30, 690);
+        private static readonly Vector2 CatThiefFoot = new Vector2(60, 688);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
         private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2") };
 
@@ -65,15 +74,25 @@ namespace Hanjeopsi.App.Screens
         private int _castsLeft;
         private int _castsDone;
         private int _caught;
-        private int _lane;
-        private int _hotLane;
-        private int _hintLane;
+        // 방향 바늘 (-1 왼쪽 ~ 1 오른쪽)
+        private double _angle;
+        private int _aimDir = 1;
+        private CastSpot _hotSpot, _hintSpot;
+        /// <summary>찌가 떨어진 자리가 물 좋은 지점에 가까운 정도 (0~1)</summary>
+        private double _close;
+        private bool _big;
+        // 고등어 도둑: 찌가 떨어지고 몇 초 뒤 (없으면 -1), 진행 시간
+        private double _thiefAt = -1;
+        private float _thiefT;
+        private bool _thiefActive, _thiefDone, _freezeThief;
+        private float _waitT;
+        private float _buzz;
+        private Tween _jumpTween;
         private double _gaugePos;
         private int _gaugeDir = 1;
         private double _dist01;
         private Vector2 _target;
         private float _targetScale;
-        private bool _hot;
         private BiteWait _wait;
         private double _biteWindow;
         private double _biteElapsed;
@@ -111,7 +130,8 @@ namespace Hanjeopsi.App.Screens
 
             _field = new FishingField(_stage)
             {
-                LanePos = (lane, d) => PosFor(lane, d),
+                PosAt = PosFor,
+                CoolerAt = CoolerFoot,
             };
             _field.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _field.GuiInput += OnFieldInput;
@@ -182,11 +202,11 @@ namespace Hanjeopsi.App.Screens
 
         // ───────── 좌표와 글 ─────────
 
-        /// <summary>방향과 거리(0 가까이, 1 수평선)로 물 위 자리. z 는 그 거리에서의 크기</summary>
-        private static Vector3 PosFor(int lane, float d)
+        /// <summary>방향(-1~1)과 거리(0 가까이, 1 수평선)로 물 위 자리. z 는 그 거리에서의 크기</summary>
+        private static Vector3 PosFor(float angle, float d)
         {
             return new Vector3(
-                ArtStage.Logical.X / 2 + lane * (44 + 74 * (1 - d)),
+                ArtStage.Logical.X / 2 + angle * (70 + 115 * (1 - d)),
                 Shore - 14 - d * (Shore - Horizon - 40),
                 1.6f - d * 0.9f);
         }
@@ -255,23 +275,29 @@ namespace Hanjeopsi.App.Screens
                 _holding = false;
                 return;
             }
-            var p = _stage.ToLogical(mb.Position);
+            bool onCat = _cat.GetRect().Grow(40).HasPoint(mb.Position);
             switch (_phase)
             {
                 case Phase.Aim:
-                    if (_cat.GetRect().HasPoint(mb.Position))
+                    if (onCat)
                     {
                         ShowCatHint();
                         return;
                     }
-                    if (p.Y > Shore + 10 || p.Y < Horizon) return;
-                    _lane = p.X < 150 ? -1 : p.X > 300 ? 1 : 0;
+                    // 하늘(위쪽 정보 줄 근처)을 누른 건 무시한다
+                    if (_stage.ToLogical(mb.Position).Y < Horizon - 60) return;
                     StartPower();
                     break;
                 case Phase.Power:
                     Cast();
                     break;
                 case Phase.Wait:
+                    // 고등어가 쿨러를 노리는 동안에는 고등어만 누른다 (헛챔질 하지 않게)
+                    if (_thiefActive)
+                    {
+                        if (onCat) StopThief();
+                        return;
+                    }
                     EarlyStrike();
                     break;
                 case Phase.Bite:
@@ -291,33 +317,44 @@ namespace Hanjeopsi.App.Screens
             _gauge.Showing = ReelGauge.Mode.None;
             _field.BobberVisible = false;
             _field.ShadowVisible = false;
+            _field.Jumping = false;
             _field.LineTo = null;
             _field.Bend = 0;
-            _field.ShowLanes = true;
             SetPose("fish-ready");
             _leanTarget = 0;
-            _field.SelectedLane = null;
             _exit.SetEnabled(true);
             SetInfo();
 
-            var lanes = G.Reel.RollLanes(G.Save.CatAffinity, GameState.I.Rng);
-            _hotLane = lanes.Hot;
-            _hintLane = lanes.Hint;
+            var rng = GameState.I.Rng;
+            var spots = G.Spot.RollSpots(G.Save.CatAffinity, Reach, rng);
+            _hotSpot = spots.Hot;
+            _hintSpot = spots.Hint;
+            // 바늘은 한쪽 끝에서 출발한다
+            _aimDir = rng.Next() < 0.5 ? 1 : -1;
+            _angle = -_aimDir;
+            _field.ShowFan = true;
+            _field.FanReach = (float)Reach;
+            _field.NeedleFixed = false;
+            _field.Aiming = null;
+            _field.Needle = (float)_angle;
             Tell(T["aim"], T["aimSub"]);
             ShowCatHint();
         }
 
-        /// <summary>고등어가 울며 한쪽을 본다. 그쪽 물결이 일렁인다</summary>
+        /// <summary>고등어가 울며 반짝이는 지점 쪽을 본다</summary>
         private void ShowCatHint()
         {
-            if (_phase != Phase.Aim) return;
+            if (_phase != Phase.Aim && _phase != Phase.Power) return;
             HideCatBubble();
-            string dir = _hintLane == -1 ? T["left"] : _hintLane == 1 ? T["right"] : T["front"];
-            _catBubble = Bubble(Art, F("catHint", UiKit.Object(dir)), _stage.ToLocal(CatFoot + new Vector2(-8, -60)), 0);
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + (_hintLane == 0 ? "sit-front" : "sit-side") + ".png"));
-            _cat.FlipH = _hintLane == 1;
+            double a = _hintSpot.Angle;
+            string dir = a < -0.3 ? T["left"] : a > 0.3 ? T["right"] : T["front"];
+            _catBubble = Bubble(Art, F("catHint", dir), _stage.ToLocal(CatFoot + new Vector2(-8, -60)), 0);
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + (Math.Abs(a) <= 0.3 ? "sit-front" : "sit-side") + ".png"));
+            _cat.FlipH = a > 0.3;
             Hop(_cat, 12);
-            _field.HintLane = _hintLane;
+            Sound.Play("meow-short", -4);
+            _field.HintAngle = (float)_hintSpot.Angle;
+            _field.HintDist = (float)_hintSpot.Dist;
             _field.ShowHint = true;
         }
 
@@ -335,6 +372,7 @@ namespace Hanjeopsi.App.Screens
             tw.TweenProperty(c, "position:y", y, 0.2).SetTrans(Tween.TransitionType.Bounce).SetEase(Tween.EaseType.Out);
         }
 
+        /// <summary>바늘을 멈춰 방향을 정하고 파워 게이지로. 반짝이는 지점은 계속 보인다</summary>
         private void StartPower()
         {
             if (G.Save.Bait <= 0)
@@ -347,8 +385,10 @@ namespace Hanjeopsi.App.Screens
             _phase = Phase.Power;
             _exit.SetEnabled(false);
             HideCatBubble();
-            _field.ShowHint = false;
-            _field.SelectedLane = _lane;
+            _field.NeedleFixed = true;
+            _field.Aiming = 0;
+            Sound.Play("tap");
+            Haptics.Tap();
             _gaugePos = 0;
             _gaugeDir = 1;
             float reach = (float)Reach;
@@ -367,18 +407,20 @@ namespace Hanjeopsi.App.Screens
             _castsDone += 1;
             SetInfo();
             _gauge.Showing = ReelGauge.Mode.None;
-            _field.ShowLanes = false;
+            _field.ShowFan = false;
             _field.ShowHint = false;
+            _field.Aiming = null;
             HideCatBubble();
             _phase = Phase.Flying;
-            _hot = _lane == _hotLane;
+            _close = G.Spot.Closeness(new CastSpot(_angle, _dist01), _hotSpot);
+            Sound.Play("whoosh");
+            Haptics.Pulse(25, 0.4f);
 
-            var to = PosFor(_lane, (float)_dist01);
+            var to = PosFor((float)_angle, (float)_dist01);
             _target = new Vector2(to.X, to.Y);
             _targetScale = to.Z;
             Tell(F("cast", G.Data.Texts.Zones[G.Fishing.ZoneOf(_dist01)]));
 
-            // 찌가 포물선을 그리며 날아간다
             // 대를 머리 위로 휘둘러 던지고, 찌가 날아가는 동안 앞으로 내민다
             SetPose("fish-cast");
             _lean = -6;
@@ -391,6 +433,7 @@ namespace Hanjeopsi.App.Screens
                 _leanRate = 8;
                 _leanTarget = 0;
             });
+            // 찌가 포물선을 그리며 날아간다
             var from = _field.RodTip;
             float peak = Mathf.Min(from.Y, to.Y) - 120;
             _field.BobberVisible = true;
@@ -417,8 +460,23 @@ namespace Hanjeopsi.App.Screens
             _field.LineTo = _target;
             _phase = Phase.Wait;
             _bobT = 0;
-            _wait = G.Reel.StartWait(_hot, false, GameState.I.Rng);
-            Tell(T["wait"], _hot ? T["waitHot"] : T["waitSub"]);
+            _waitT = 0;
+            Sound.Play("plop");
+            Haptics.Pulse(15, 0.3f);
+            var rng = GameState.I.Rng;
+            // 입질까지 기다리는 시간은 어디에 던지든 같다
+            _wait = G.Reel.StartWait(false, false, rng);
+            _thiefAt = G.Spot.RollThief(G.Save.Cooler.Count, rng);
+            _thiefDone = false;
+            TellWait();
+        }
+
+        /// <summary>떨어진 자리가 좋은지 알려 준다</summary>
+        private void TellWait()
+        {
+            if (_close >= 0.6) Tell(T["wait"], T["waitHot"], Palette.Gold);
+            else if (_close >= 0.25) Tell(T["wait"], T["waitNear"]);
+            else Tell(T["wait"], T["waitSub"]);
         }
 
         private void EarlyStrike()
@@ -428,25 +486,104 @@ namespace Hanjeopsi.App.Screens
             _field.AddSplash(_target, _targetScale * 0.8f);
             _field.BobberVisible = false;
             _field.LineTo = null;
+            Sound.Play("slip", -4);
             Settle(-10);
             FinishCast();
         }
+
+        // ───────── 고등어 도둑 ─────────
+
+        /// <summary>고등어가 살금살금 쿨러 쪽으로 간다. 제때 누르면 말린다</summary>
+        private void StartThief()
+        {
+            _thiefActive = true;
+            _thiefT = 0;
+            Sound.Play("sneak", -2);
+            Haptics.Pulse(30, 0.4f);
+            _cat.FlipH = false;
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/walk-1.png"));
+            Tell(T["thief"], T["thiefSub"], Palette.Gold);
+        }
+
+        private void UpdateThief(float dt)
+        {
+            if (!_freezeThief) _thiefT += dt;
+            float window = (float)G.Spot.ThiefWindow;
+            float k = Mathf.Clamp(_thiefT / window, 0, 1);
+            _stage.Move(_cat, CatFoot.Lerp(CatThiefFoot, Mathf.SmoothStep(0, 1, k)));
+            int frame = (int)(_thiefT / 0.2f) % 2;
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/walk-" + (frame + 1) + ".png"));
+            _field.CoolerLid = k > 0.7f ? Mathf.Abs(Mathf.Sin(_thiefT * 18)) : 0;
+            if (_thiefT >= window) Steal();
+        }
+
+        private void StopThief()
+        {
+            _thiefActive = false;
+            _thiefDone = true;
+            _field.CoolerLid = 0;
+            Sound.Play("hiss");
+            Haptics.Tap();
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/jump.png"));
+            Hop(_cat, 20);
+            Toast(T["thiefStopped"], Palette.Paper, SafeTop + 420);
+            Later(0.5, ReturnCat);
+            TellWait();
+        }
+
+        private void Steal()
+        {
+            _thiefActive = false;
+            _thiefDone = true;
+            _field.CoolerLid = 0;
+            var fish = G.CatSteal();
+            SetInfo();
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/eat.png"));
+            Sound.Play("steal");
+            Haptics.Pulse(80, 0.5f);
+            if (fish != null) Toast(F("thiefStole", G.Data.SpeciesById(fish.Species).Name), Palette.RedText, SafeTop + 420);
+            Later(1.2, ReturnCat);
+            TellWait();
+        }
+
+        /// <summary>고등어가 제자리로 돌아와 앉는다</summary>
+        private void ReturnCat()
+        {
+            _stage.Move(_cat, CatFoot);
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/sit-side.png"));
+            _cat.FlipH = false;
+        }
+
+        // ───────── 입질과 챔질 ─────────
 
         private void StartBite()
         {
             _phase = Phase.Bite;
             _biteElapsed = 0;
+            var rng = GameState.I.Rng;
             int zone = G.Fishing.ZoneOf(_dist01);
-            _species = G.Fishing.RollSpecies(zone, G.Save.Slot, _hot, GameState.I.Rng);
-            _size = G.Fishing.RollSize(_species, _hot, GameState.I.Rng);
+            _big = G.Spot.IsBigBite(_close, rng);
+            _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, _close, rng);
+            _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
             _biteWindow = G.Reel.BiteWindow(G.Data.Gear.Rods[G.Save.Rod], _species, false);
             _nibbleTween?.Kill();
             _field.BobberSink = 1;
-            _field.AddSplash(_target, _targetScale * 1.4f);
-            Shake(0.12f);
+            _field.AddSplash(_target, _targetScale * (_big ? 2.2f : 1.4f));
+            Shake(_big ? 0.3f : 0.12f);
+            Sound.Play("bite");
+            if (_big)
+            {
+                Sound.Play("big");
+                Haptics.Pattern((90, 1f, 60), (90, 1f, 60), (160, 1f, 0));
+                Toast(T["big"], Palette.Gold, SafeTop + 420);
+            }
+            else
+            {
+                Haptics.Pattern((60, 0.9f, 50), (80, 1f, 0));
+            }
             // 대 끝이 물 쪽으로 쿡 끌려간다
             _leanRate = 20;
-            _leanTarget = 5;
+            _leanTarget = _big ? 9 : 5;
             Tell(T["bite"], T["biteSub"], Palette.Gold);
         }
 
@@ -466,6 +603,11 @@ namespace Hanjeopsi.App.Screens
             _leanRate = 12;
             _field.BobberVisible = false;
             _field.ShadowVisible = true;
+            _field.FishTexture = GD.Load<Texture2D>("res://art/fish/" + _species.Id + ".png");
+            _field.Big = _big;
+            _field.ClearTrail();
+            Sound.Play("strike");
+            Haptics.Pulse(40, 0.8f);
             var s = G.Save;
             _fight = G.Reel.StartFight(new FightSetup
             {
@@ -478,7 +620,7 @@ namespace Hanjeopsi.App.Screens
                 Tutorial = false,
             }, GameState.I.Rng);
             _wobble = (float)GameState.I.Rng.Next() * 10;
-            _field.ShadowSize = Mathf.Clamp((float)(_size / _species.AvgSize), 0.7f, 1.6f);
+            _field.ShadowSize = ShadowScale(0);
             var b = G.Data.Balance.Reel;
             _gauge.Slack = (float)b.Slack;
             _gauge.Danger = (float)b.Danger;
@@ -486,9 +628,15 @@ namespace Hanjeopsi.App.Screens
             _gauge.Tension = (float)_fight.Tension;
             _gauge.Showing = ReelGauge.Mode.Tension;
             Toast(perfect ? T["perfect"] : T["hooked"], perfect ? Palette.Gold : Palette.Paper, SafeTop + 420);
-            Tell(T["reel"], T["reelSub"]);
-            // 화면이 살짝 다가간다
-            ZoomTo(1.05f, 0.5);
+            Tell(T["reel"], _big ? T["bigSub"] : T["reelSub"]);
+            // 화면이 살짝 다가간다. 큰 놈이면 조금 더
+            ZoomTo(_big ? 1.08f : 1.05f, 0.5);
+        }
+
+        /// <summary>그림자 크기: 고기 크기에 따라, 가까이 올수록 크게</summary>
+        private float ShadowScale(float progress)
+        {
+            return Mathf.Clamp((float)(_size / _species.AvgSize), 0.7f, 1.7f) * Mathf.Lerp(0.6f, 1.3f, progress);
         }
 
         private void UpdateReel(float dt)
@@ -498,19 +646,39 @@ namespace Hanjeopsi.App.Screens
             if (_autoHold) _holding = _shotPull ? f.Tension < (_holding ? 50 : 30) : f.Tension < (_holding ? 72 : 52);
             var r = f.Step(_holding, dt, GameState.I.Rng);
             double str = f.Strength();
+            var b = G.Data.Balance.Reel;
+            Sound.Loop("reel", _holding, -6, 0.85f + (float)f.Tension / 260);
+            // 줄이 위험하면 손에서 계속 떨린다
+            if (f.Tension >= b.Danger)
+            {
+                _buzz -= dt;
+                if (_buzz <= 0)
+                {
+                    _buzz = 0.16f;
+                    Haptics.Pulse(35, 0.5f + 0.5f * Mathf.Clamp((float)(f.Tension - b.Danger) / 15, 0, 1));
+                }
+            }
             if (r.Surge)
             {
                 Shake(0.1f);
-                Toast(T["surge"], Palette.RedText, SafeTop + 420);
+                Sound.Play("surge");
+                Haptics.Pulse(110, 0.9f);
                 _field.AddSplash(_field.ShadowAt, 1.2f);
+                // 가끔은 물 위로 펄쩍 뛰어오른다 (큰 놈은 더 자주)
+                if (!_field.Jumping && GameState.I.Rng.Next() < (_big ? 0.6 : 0.35)) FishJump(false);
+                else Toast(T["surge"], Palette.RedText, SafeTop + 420);
             }
             if (r.End == FightEnd.Snap)
             {
+                Sound.Play("snap");
+                Haptics.Pulse(260, 1f);
                 Lose(T["snap"], T["snapSub"]);
                 return;
             }
             if (r.End == FightEnd.Slack)
             {
+                Sound.Play("slip");
+                Haptics.Pulse(60, 0.4f);
                 Lose(T["slack"], T["slackSub"]);
                 return;
             }
@@ -523,30 +691,78 @@ namespace Hanjeopsi.App.Screens
             // 그림자는 좌우로 몸부림치며 다가온다
             float p = (float)f.Progress();
             _wobble += dt * (float)(2 + str * 0.6 + f.SurgeKick * 20);
-            var from = PosFor(_lane, (float)_dist01);
+            var from = PosFor((float)_angle, (float)_dist01);
             float fx = Mathf.Lerp(from.X, ArtStage.Logical.X / 2 + 10, p) + Mathf.Sin(_wobble) * (18 + (float)f.SurgeKick * 40) * (1 - p * 0.6f);
             float fy = Mathf.Lerp(from.Y, Shore - 16, p);
             _field.ShadowAt = new Vector2(fx, fy);
             _field.ShadowWobble = _wobble;
-            _field.ShadowSize = Mathf.Clamp((float)(_size / _species.AvgSize), 0.7f, 1.6f) * Mathf.Lerp(0.6f, 1.3f, p);
-            _field.LineTo = _field.ShadowAt;
+            _field.ShadowSize = ShadowScale(p);
+            if (!_field.Jumping) _field.LineTo = _field.ShadowAt;
             _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1);
             // 팽팽할수록 대가 물고기 쪽으로 끌려가고, 저항이 오면 툭 끌려간다
             _leanTarget = -5 + 10 * _field.Bend + (float)f.SurgeKick * 25;
             // 세게 당기면 옆으로 돌아서서 다리를 벌리고 버틴다 (옆모습 포즈는 이미 뒤로 젖혀 있어서 덜 기울인다)
-            bool strain = _shotPull || f.SurgeKick > 0.15 || f.Tension >= G.Data.Balance.Reel.Danger - 4;
+            bool strain = _shotPull || f.SurgeKick > 0.15 || f.Tension >= b.Danger - 4;
             _pullHold = strain ? 0.5f : _pullHold - dt;
             SetPose(_pullHold > 0 ? "fish-pull" : "fish-reel");
             if (_pullHold > 0) _leanTarget = 3 + (float)f.SurgeKick * 14;
             _gauge.Tension = (float)f.Tension;
             _sub.Text = F("distance", Math.Max(0, f.Distance).ToString("0.0", CultureInfo.InvariantCulture));
             // 텐션이 위험하면 큰 글이 빨개진다
-            _msg.LabelSettings.FontColor = f.Tension >= G.Data.Balance.Reel.Danger ? Palette.RedText : f.Tension < G.Data.Balance.Reel.Slack ? Palette.BlueText : Palette.Paper;
+            _msg.LabelSettings.FontColor = f.Tension >= b.Danger ? Palette.RedText : f.Tension < b.Slack ? Palette.BlueText : Palette.Paper;
+        }
+
+        /// <summary>
+        /// 물고기가 물 위로 튀어 오른다. landing 이면 여울 쪽으로 끌려 올라오고, 아니면 제자리에 떨어진다.
+        /// hold 면 사진용으로 공중에 멈춘다
+        /// </summary>
+        private void FishJump(bool landing, Action then = null, bool hold = false)
+        {
+            _jumpTween?.Kill();
+            var start = _field.ShadowAt;
+            var end = landing ? _field.RodTip + new Vector2(-30, 60) : start + new Vector2(Mathf.Cos(_wobble) * 26, 0);
+            float height = landing ? 150 : 46 * Mathf.Clamp(_field.ShadowSize, 0.8f, 1.6f);
+            float baseScale = Mathf.Clamp(_field.ShadowSize, 0.8f, 1.5f) * (_big ? 1.2f : 1f);
+            float dir = end.X >= start.X ? 1 : -1;
+            _field.Jumping = true;
+            _field.ShadowVisible = false;
+            _field.AddSplash(start, landing ? 1.8f : 1.3f);
+            if (!landing) Toast(T["jump"], Palette.Gold, SafeTop + 420);
+            Action<float> at = t =>
+            {
+                var pos = start.Lerp(end, t) + new Vector2(0, -Mathf.Sin(t * Mathf.Pi) * height);
+                _field.JumpAt = pos;
+                _field.JumpScale = landing ? Mathf.Lerp(baseScale, 2.2f, t) : baseScale * (1 + 0.15f * Mathf.Sin(t * Mathf.Pi));
+                // 머리를 위로 들었다가 숙이며 돈다 (그림은 왼쪽을 본다)
+                _field.JumpSpin = dir * (-0.9f + 1.8f * t) + (landing ? dir * t * Mathf.Tau * 0.5f : 0);
+                _field.LineTo = pos;
+            };
+            if (hold)
+            {
+                at(0.45f);
+                return;
+            }
+            _jumpTween = CreateTween();
+            _jumpTween.TweenMethod(Callable.From<float>(t => at(t)), 0f, 1f, landing ? 0.6 : 0.55).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+            _jumpTween.TweenCallback(Callable.From(() =>
+            {
+                _field.Jumping = false;
+                if (!landing)
+                {
+                    _field.AddSplash(end, 1.4f);
+                    Sound.Play("plop", 0, 0.8f);
+                    if (_phase == Phase.Reel) _field.ShadowVisible = true;
+                }
+                then?.Invoke();
+            }));
         }
 
         private void Lose(string main, string sub)
         {
             _phase = Phase.Busy;
+            Sound.Loop("reel", false);
+            _jumpTween?.Kill();
+            _field.Jumping = false;
             _gauge.Showing = ReelGauge.Mode.None;
             _field.ShadowVisible = false;
             _field.AddSplash(_field.ShadowAt, 1.5f);
@@ -558,17 +774,22 @@ namespace Hanjeopsi.App.Screens
             FinishCast();
         }
 
+        /// <summary>끌어올렸다! 물고기가 물을 박차고 여울 쪽으로 튀어 오른다</summary>
         private void LandFish()
         {
             _phase = Phase.Result;
+            Sound.Loop("reel", false);
+            Sound.Play("land");
+            Haptics.Pattern((40, 0.7f, 60), (40, 0.7f, 0));
             _gauge.Showing = ReelGauge.Mode.None;
-            _field.ShadowVisible = false;
-            _field.AddSplash(_field.ShadowAt, 1.6f);
-            _field.LineTo = null;
             _field.Bend = 0;
             ZoomTo(1, 0.6);
             Tell("");
-            Celebrate(ShowResult);
+            FishJump(true, () =>
+            {
+                _field.LineTo = null;
+                Celebrate(ShowResult);
+            });
         }
 
         /// <summary>낚았다! 앞을 보고 대를 든 채 활짝 웃으며 톡 뛴다. 잠깐 뒤 결과를 띄운다</summary>
@@ -576,6 +797,7 @@ namespace Hanjeopsi.App.Screens
         {
             HideCatBubble();
             SetPose("fish-joy");
+            Sound.Play("catch");
             _lean = 0;
             _leanTarget = 0;
             _leanRate = 10;
@@ -593,6 +815,7 @@ namespace Hanjeopsi.App.Screens
             bool isNew = !G.Save.Dex.TryGetValue(_species.Id, out e) || e.Count == 0;
             if (isNew)
             {
+                Sound.Play("newfish");
                 Say("yeoul", "peace", T["newSpecies"], null, () =>
                 {
                     Toast(T["dexNew"], Palette.Gold, SafeTop + 300);
@@ -611,7 +834,10 @@ namespace Hanjeopsi.App.Screens
             bool full = G.CoolerFull();
             // 금지체장 미달이거나 금어기면 챙길 수 없다
             string rule = G.ReleaseReason(sp.Id, size);
-            var body = new List<string> { size.ToString("0.0", CultureInfo.InvariantCulture) + "cm" + (sp.Rare ? " · " + T["rare"] : "") };
+            var tags = new List<string> { size.ToString("0.0", CultureInfo.InvariantCulture) + "cm" };
+            if (_big) tags.Add(T["big"].TrimEnd('!'));
+            if (sp.Rare) tags.Add(T["rare"]);
+            var body = new List<string> { string.Join(" · ", tags) };
             body.Add(F("value", UiKit.Won(value)));
             if (rule != null) body.Add(rule);
             else if (full) body.Add(T["full"]);
@@ -651,6 +877,7 @@ namespace Hanjeopsi.App.Screens
             _caught += 1;
             if (!released) G.AddToCooler(_species.Id, _size);
             else s.Flags["released"] = true;
+            Sound.Play(released ? "plop" : "coin", -3);
             SetInfo();
             var unlocked = G.CheckTasteUnlock();
             G.Persist();
@@ -665,7 +892,7 @@ namespace Hanjeopsi.App.Screens
         private void FinishCast()
         {
             _phase = Phase.Busy;
-            Later(1.2, () =>
+            Later(0.7, () =>
             {
                 if (_castsLeft <= 0 || G.Save.Bait <= 0) EndTrip();
                 else StartAim();
@@ -695,6 +922,7 @@ namespace Hanjeopsi.App.Screens
         private void Leave()
         {
             _phase = Phase.Busy;
+            Sound.StopLoops();
             if (_castsDone > 0) G.UseSlot();
             GameState.I.GoTo("town");
         }
@@ -719,7 +947,7 @@ namespace Hanjeopsi.App.Screens
             _time += dt;
             // 숨 쉬기
             _yeoul.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.2f) * 0.01f);
-            if (_phase != Phase.Aim) _cat.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.8f + 1) * 0.02f);
+            if (_phase != Phase.Aim && !_thiefActive) _cat.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.8f + 1) * 0.02f);
 
             if (_shake > 0)
             {
@@ -730,12 +958,24 @@ namespace Hanjeopsi.App.Screens
 
             switch (_phase)
             {
+                case Phase.Aim:
+                {
+                    var a = G.Spot.StepAim(_angle, _aimDir, dt);
+                    _angle = a.Angle;
+                    _aimDir = a.Dir;
+                    _field.Needle = (float)_angle;
+                    // 바늘 쪽으로 대를 살짝 돌린다
+                    _leanRate = 6;
+                    _leanTarget = (float)_angle * 4;
+                    break;
+                }
                 case Phase.Power:
                 {
                     var g = G.Reel.StepPower(_gaugePos, _gaugeDir, dt);
                     _gaugePos = g.Pos;
                     _gaugeDir = g.Dir;
                     _gauge.Needle = (float)_gaugePos;
+                    _field.Aiming = (float)G.Reel.CastDistance(_gaugePos, Reach);
                     // 게이지가 찰수록 대를 뒤로 젖힌다
                     _leanRate = 14;
                     _leanTarget = -16 * (float)_gaugePos;
@@ -745,6 +985,17 @@ namespace Hanjeopsi.App.Screens
                 {
                     _bobT += dt;
                     _field.BobberAt = _target + new Vector2(0, Mathf.Sin(_bobT * 3) * 2);
+                    if (_thiefActive)
+                    {
+                        UpdateThief(dt);
+                        break;
+                    }
+                    _waitT += dt;
+                    if (!_thiefDone && _thiefAt >= 0 && _waitT >= _thiefAt)
+                    {
+                        StartThief();
+                        break;
+                    }
                     var w = _wait.Step(dt, GameState.I.Rng);
                     if (w.Nibble) Nibble();
                     if (w.Bite) StartBite();
@@ -760,6 +1011,7 @@ namespace Hanjeopsi.App.Screens
                         _field.BobberVisible = false;
                         _field.LineTo = null;
                         Settle(-8);
+                        Sound.Play("slip", -4);
                         Tell(T["missed"], T["missedSub"]);
                         FinishCast();
                     }
@@ -790,6 +1042,8 @@ namespace Hanjeopsi.App.Screens
         /// <summary>속임 입질: 찌가 톡 잠겼다 올라온다</summary>
         private void Nibble()
         {
+            Sound.Play("nibble");
+            Haptics.Pulse(18, 0.35f);
             _nibbleTween?.Kill();
             _nibbleTween = CreateTween();
             _nibbleTween.TweenMethod(Callable.From<float>(v => _field.BobberSink = v), 0f, 0.45f, 0.06);
@@ -806,26 +1060,66 @@ namespace Hanjeopsi.App.Screens
 
         // ───────── CI 사진 ─────────
 
+        /// <summary>사진용: 방향과 거리를 정해 던지고 바로 입질을 받아 챔질한다</summary>
+        private void ShotHook(string species, double size, bool big, double angle, double power)
+        {
+            _angle = angle;
+            _gaugePos = power;
+            Cast();
+            _phase = Phase.Flying;
+            Landed();
+            _thiefAt = -1;
+            StartBite();
+            _species = G.Data.SpeciesById(species);
+            _size = size;
+            _big = big;
+            _autoHold = true;
+            StartReel(true);
+        }
+
         public override void ShotSetup(string action)
         {
             switch (action)
             {
                 case "power":
-                    _lane = 1;
+                    // 반짝이는 지점 쪽으로 바늘을 멈추고 파워를 모으는 중
+                    _angle = _hintSpot.Angle;
+                    _field.Needle = (float)_angle;
                     StartPower();
                     break;
                 case "reel":
                     // 던지고, 물고, 챔질한 뒤 텐션을 알맞게 유지하며 감는다
-                    _lane = 0;
-                    _gaugePos = 0.62;
+                    ShotHook("godeungeo", 33.5, false, 0, 1);
+                    break;
+                case "big":
+                    ShotHook("gamseongdom", 52, true, 0.3, 1);
+                    break;
+                case "jump":
+                    ShotHook("noraemi", 30, false, -0.2, 1);
+                    Later(1.2, () =>
+                    {
+                        _phase = Phase.Busy;
+                        FishJump(false, null, true);
+                    });
+                    break;
+                case "leap":
+                    ShotHook("godeungeo", 34, false, 0.1, 1);
+                    Later(1.2, () =>
+                    {
+                        _phase = Phase.Result;
+                        _gauge.Showing = ReelGauge.Mode.None;
+                        FishJump(true, null, true);
+                    });
+                    break;
+                case "thief":
+                    _angle = 0.2;
+                    _gaugePos = 0.6;
                     Cast();
                     _phase = Phase.Flying;
                     Landed();
-                    StartBite();
-                    _species = G.Data.SpeciesById("godeungeo");
-                    _size = 33.5;
-                    _autoHold = true;
-                    StartReel(true);
+                    _freezeThief = true;
+                    StartThief();
+                    _thiefT = (float)G.Spot.ThiefWindow * 0.55f;
                     break;
                 case "result":
                     _species = G.Data.SpeciesById("noraemi");

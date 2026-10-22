@@ -48,7 +48,12 @@ namespace Hanjeopsi.App.Ui
             }
             AddChild(col);
 
-            ButtonDown += () => Squash(0.94f, 0.07);
+            ButtonDown += () =>
+            {
+                Squash(0.94f, 0.07);
+                Sound.Play("tap", -3);
+                Haptics.Tap();
+            };
             ButtonUp += () => Squash(1f, 0.28);
             Pressed += () => _onPress?.Invoke();
             Resized += () => PivotOffset = Size / 2;

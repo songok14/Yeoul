@@ -16,6 +16,11 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class TruckScreen : Screen
     {
+        protected override string Music
+        {
+            get { return "truck"; }
+        }
+
         // 배경(노을 포차) 기준 논리 좌표. 손님은 트럭 앞 왼쪽에 선다
         private const float CustomerX = 150;
         private const float CustomerHeight = 150;
@@ -243,14 +248,24 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>논리 x 를 따라 걷는다. 걸음마다 통통 튀고 몸이 살짝 기운다</summary>
+        private int _stepCount;
+
         private void Walk(float from, float to, double seconds, Action then)
         {
             _walking = true;
+            _stepCount = 0;
             var tw = CreateTween();
             tw.TweenMethod(Callable.From<float>(t =>
             {
                 float x = Mathf.Lerp(from, to, t);
                 float bob = Mathf.Abs(Mathf.Sin(t * Mathf.Pi * 5)) * 7;
+                // 발이 땅에 닿을 때마다 사뿐
+                int stepNow = (int)(t * 5 + 0.5f);
+                if (stepNow != _stepCount)
+                {
+                    _stepCount = stepNow;
+                    Sound.Play("step", -6, 1, 0.12f);
+                }
                 _stage.Move(_customer, new Vector2(x, _footY - bob));
                 _customer.RotationDegrees = Mathf.Sin(t * Mathf.Pi * 5) * 2.5f;
             }), 0f, 1f, seconds).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
@@ -293,6 +308,7 @@ namespace Hanjeopsi.App.Screens
             }
             ClearBody();
             var st = recipe.Steps[step];
+            if (step == 0) Sound.Play("sizzle", -4);
             var flavor = G.Data.FlavorById(st.Flavor);
             bool visible = G.Taste.CanTaste(G.Save, st.Flavor);
             var rng = GameState.I.Rng;
@@ -320,6 +336,8 @@ namespace Hanjeopsi.App.Screens
                 var r = G.Truck.Judge(gauge.Pos, target);
                 Color c = r.Quality >= 0.8 ? Palette.Green : r.Quality >= 0.45 ? Palette.Gold : Palette.Red;
                 gauge.Stop(c);
+                Sound.Play(r.Quality >= 0.8 ? "okay" : "tick", -4, r.Quality >= 0.8 ? 1.2f : 0.8f);
+                Haptics.Pulse(20, 0.4f);
                 // 아는 맛이면 바로 느낌이 온다
                 if (visible) FloatText(r.Quality >= 0.8 ? T["good"] : r.Quality >= 0.45 ? T["near"] : T["bad"], gauge.GetGlobalRect().GetCenter() - new Vector2(0, 90), c);
                 var next = new List<SeasonResult>(results) { r };
@@ -355,6 +373,8 @@ namespace Hanjeopsi.App.Screens
             var lines = G.Truck.ReviewLines(G.Save, recipe, results, dish.Stage, mood);
             _stage.Swap(_customer, Tex(_who.Id + (mood == 2 ? "-happy" : mood == 0 ? "-sad" : "-stand")));
             React(mood);
+            Sound.Play(mood == 2 ? "good" : mood == 0 ? "bad" : "okay", -2);
+            Sound.Play("coin", -3);
             SetBubble(string.Join("\n", lines.Select(l => "“" + l + "”")));
             FloatText("+" + UiKit.Won(dish.Pay), OverHead() - new Vector2(0, 260), Palette.Gold);
 

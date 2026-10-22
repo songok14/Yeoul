@@ -94,10 +94,10 @@
   "reel": {
     "gaugeSpeed": 1.25,
     "minCast": 0.05,
-    "waitMin": 2.2,
-    "waitMax": 5.2,
+    "waitMin": 1.4,
+    "waitMax": 3.0,
     "waitTutorial": 2.2,
-    "hotWaitMul": 0.55,
+    "hotWaitMul": 1,
     "nibbleFirstMin": 0.6,
     "nibbleFirstMax": 1.4,
     "nibbleMin": 0.7,
@@ -107,8 +107,8 @@
     "rareBitePenalty": 0.08,
     "perfectBelow": 0.28,
     "missWaitTutorial": 2,
-    "startDistanceBase": 8,
-    "startDistancePerDist": 26,
+    "startDistanceBase": 6,
+    "startDistancePerDist": 16,
     "perfectBonus": 3,
     "startTension": 35,
     "surgeFirstMin": 0.8,
@@ -141,10 +141,25 @@
       "hakgongchi"
     ],
     "tiredMax": 0.55,
-    "tiredTime": 18,
+    "tiredTime": 10,
     "sizeMin": 0.8,
     "sizeMax": 1.5,
     "strengthTutorial": 0.8,
     "rescueTension": 70
+  },
+  "spot": {
+    "aimSpeed": 0.95,
+    "hotAngleMax": 0.8,
+    "hotDistMin": 0.2,
+    "hotDistMax": 0.95,
+    "angleRange": 0.45,
+    "distRange": 0.24,
+    "bigBase": 0.04,
+    "bigPerClose": 0.2,
+    "bigSizeFrom": 0.72,
+    "thiefChance": 0.16,
+    "thiefDelayMin": 0.5,
+    "thiefDelayMax": 1.0,
+    "thiefWindow": 1.7
   }
 }

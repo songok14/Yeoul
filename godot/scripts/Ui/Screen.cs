@@ -61,11 +61,19 @@ namespace Hanjeopsi.App.Ui
             ApplySafeArea();
             GetViewport().SizeChanged += ApplySafeArea;
             Build();
+            Sound.Music(Music);
             GameState.I.ScreenReady(this);
+        }
+
+        /// <summary>이 화면 배경음 (godot/audio/bgm 이름). null 이면 이전 곡을 그대로 둔다</summary>
+        protected virtual string Music
+        {
+            get { return null; }
         }
 
         public override void _ExitTree()
         {
+            Sound.StopLoops();
             GetViewport().SizeChanged -= ApplySafeArea;
         }
 
@@ -182,6 +190,7 @@ namespace Hanjeopsi.App.Ui
             _modals.Add(root);
 
             // 어두운 막이 깔리고 종이가 톡 튀어나온다
+            Sound.Play("pop", -4);
             dim.Modulate = new Color(1, 1, 1, 0);
             panel.Modulate = new Color(1, 1, 1, 0);
             panel.Scale = new Vector2(0.9f, 0.9f);

@@ -9,6 +9,11 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class TitleScreen : Screen
     {
+        protected override string Music
+        {
+            get { return "title"; }
+        }
+
         private ArtStage _stage;
         private TextureRect _cat;
         private GameButton _newBtn, _contBtn;

@@ -50,6 +50,36 @@ namespace Hanjeopsi.Core.Systems
             return JsMath.Round((sp.MinSize + (sp.MaxSize - sp.MinSize) * r) * 10) / 10;
         }
 
+        /// <summary>
+        /// 고닷 낚시: 지점에 가까운 정도(0~1)만큼 귀한 고기 가중치가 RareColdMul 에서 RareHotMul 로 오른다
+        /// </summary>
+        public Species RollSpeciesNear(int zone, int slot, double closeness, IRandom rng)
+        {
+            var list = _data.Species;
+            var weights = new double[list.Count];
+            double rareMul = B.RareColdMul + (B.RareHotMul - B.RareColdMul) * closeness;
+            for (int i = 0; i < list.Count; i++)
+            {
+                double w = list[i].Zone[zone] * list[i].Slot[slot];
+                if (list[i].Rare) w *= rareMul;
+                weights[i] = w;
+            }
+            return WeightedPick(list, weights, rng.Next());
+        }
+
+        /// <summary>고닷 낚시: 가까울수록 조금 크고, 큰 놈이면 크기 범위 윗부분(BigSizeFrom~1)에서 나온다</summary>
+        public double RollSizeNear(Species sp, double closeness, bool big, IRandom rng)
+        {
+            double r = Math.Pow(rng.Next(), B.SizePow);
+            r = Math.Pow(r, 1 + (B.HotSizePow - 1) * closeness);
+            if (big)
+            {
+                double from = _data.Balance.Spot.BigSizeFrom;
+                r = from + (1 - from) * Math.Max(r, rng.Next());
+            }
+            return JsMath.Round((sp.MinSize + (sp.MaxSize - sp.MinSize) * r) * 10) / 10;
+        }
+
         /// <summary>고등어가 물 좋은 곳을 제대로 가리킬 확률. 호감 1마다 3.5%씩, 최대 95%</summary>
         public double CatHintAccuracy(int affinity)
         {

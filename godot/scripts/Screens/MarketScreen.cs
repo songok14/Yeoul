@@ -15,6 +15,11 @@ namespace Hanjeopsi.App.Screens
     /// </summary>
     public partial class MarketScreen : PlaceScreen
     {
+        protected override string Music
+        {
+            get { return "market"; }
+        }
+
         /// <summary>쿨러 한 줄 높이(사이 간격 포함)와 줄 말고 쿨러 상자가 쓰는 높이 (시세판, 제목, 쪽 넘김)</summary>
         private const float RowHeight = 126;
         private const float FixedHeight = 640;
@@ -291,6 +296,7 @@ namespace Hanjeopsi.App.Screens
                 steps.TweenCallback(Callable.From(() =>
                 {
                     price.Text = UiKit.Won(Round100(baseValue * v));
+                    Sound.Play("tick", -2, 1 + (float)(v - 0.8));
                     price.PivotOffset = price.Size / 2;
                     price.Scale = new Vector2(1.06f, 1.06f);
                     price.CreateTween().TweenProperty(price, "scale", Vector2.One, 0.12);
@@ -299,6 +305,9 @@ namespace Hanjeopsi.App.Screens
             steps.TweenCallback(Callable.From(() =>
             {
                 int total = G.SellFish(uids, finalMul);
+                Sound.Play("stamp");
+                Sound.Play("sold", -3);
+                Haptics.Pulse(40, 0.7f);
                 price.Text = UiKit.Won(total);
                 stamp.Scale = new Vector2(2.4f, 2.4f);
                 stamp.RotationDegrees = -16;
@@ -316,6 +325,7 @@ namespace Hanjeopsi.App.Screens
                     _selling = false;
                     HudBar.Refresh();
                     FloatText("+" + UiKit.Won(total), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 420), Palette.Gold);
+                    Sound.Play("coin");
                     Redraw();
                 };
             }));
@@ -411,6 +421,7 @@ namespace Hanjeopsi.App.Screens
                     if (reward <= 0) return;
                     HudBar.Refresh();
                     FloatText("+" + UiKit.Won(reward), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 420), Palette.Gold);
+                    Sound.Play("coin");
                     Redraw();
                     // 노씨는 대화창으로, 다른 손님은 짧은 알림으로
                     if (!string.IsNullOrEmpty(t.Flag) && t.Client == G.Data.Dialogue.SpeakerById("nossi").Name)

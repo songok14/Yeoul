@@ -23,6 +23,23 @@ namespace Hanjeopsi.Core.Tests
             }
         }
 
+        private static GameData _webReel;
+
+        /// <summary>
+        /// 낚시 손맛 수치만 웹 REEL_TUNING(core/golden/reel.json tuning)으로 되돌린 게임 데이터.
+        /// 고닷은 낚시 시간을 줄이려고 수치를 바꿨으므로 웹과 같은 계산인지는 웹 수치로 확인한다
+        /// </summary>
+        public static GameData WebReel
+        {
+            get
+            {
+                if (_webReel != null) return _webReel;
+                var d = GameData.Load(name => File.ReadAllText(Path.Combine(Dir, "data", name + ".json")));
+                d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
+                return _webReel = d;
+            }
+        }
+
         /// <summary>scripts/export-golden.mjs 가 웹 코드로 만든 시세·신선도 기준값</summary>
         public static JObject MarketGolden
         {

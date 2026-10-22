@@ -49,6 +49,7 @@ namespace Hanjeopsi.App
                 else if (a.StartsWith("--demo=")) Demo = a.Substring("--demo=".Length);
             }
             if (ShotMode) Rng = new Mulberry32(2026);
+            AddChild(new Sound { Name = "Sound" });
 
             // 화면 전환용 막. 앱이 켜질 때는 덮인 채로 시작해서 첫 화면이 스르륵 나타난다
             _fadeLayer = new CanvasLayer { Layer = 100 };

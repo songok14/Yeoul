@@ -9,24 +9,22 @@ using Xunit;
 
 namespace Hanjeopsi.Core.Tests
 {
-    /// <summary>낚시 미니게임이 웹 systems/reel.ts 와 같은 입력이면 같은 결과를 내는지 (core/golden/reel.json)</summary>
+    /// <summary>
+    /// 낚시 미니게임이 웹 systems/reel.ts 와 같은 입력이면 같은 결과를 내는지 (core/golden/reel.json).
+    /// 고닷 수치(godot/data/balance.json reel)는 낚시 시간을 줄이려고 바꿨으니 계산은 웹 수치로 비교한다
+    /// </summary>
     public class ReelFightTests
     {
-        private static readonly GameData D = TestData.Game;
+        private static readonly GameData D = TestData.WebReel;
         private readonly ReelRules _r = new ReelRules(D);
         private static JObject G { get { return TestData.ReelGolden; } }
 
         [Fact]
-        public void 수치가_웹과_같다()
+        public void 고닷_수치가_웹과_같은_키를_가진다()
         {
             var web = (JObject)G["tuning"];
-            var mine = JObject.FromObject(D.Balance.Reel, Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
+            var mine = JObject.FromObject(TestData.Game.Balance.Reel, Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
             Assert.Equal(web.Properties().Select(p => p.Name).OrderBy(n => n), mine.Properties().Select(p => p.Name).OrderBy(n => n));
-            foreach (var p in web.Properties())
-            {
-                if (p.Value.Type == JTokenType.Array) Assert.Equal(p.Value.ToObject<string[]>(), mine[p.Name].ToObject<string[]>());
-                else Assert.True((double)p.Value == (double)mine[p.Name], p.Name + " 이 웹 REEL_TUNING 과 다르다");
-            }
         }
 
         [Fact]

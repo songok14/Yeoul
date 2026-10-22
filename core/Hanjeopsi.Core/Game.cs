@@ -51,6 +51,7 @@ namespace Hanjeopsi.Core
         public Taste Taste { get; }
         public FishingRoll Fishing { get; }
         public ReelRules Reel { get; }
+        public SpotRules Spot { get; }
         public Truck Truck { get; }
 
         /// <summary>상태가 바뀌어 저장할 때 (웹 persist)</summary>
@@ -64,6 +65,7 @@ namespace Hanjeopsi.Core
             Taste = new Taste(data);
             Fishing = new FishingRoll(data);
             Reel = new ReelRules(data);
+            Spot = new SpotRules(data);
             Truck = new Truck(data, Fresh, Taste);
             Load(save);
         }
@@ -224,6 +226,16 @@ namespace Hanjeopsi.Core
             Save.Cooler.Add(item);
             Persist();
             return item;
+        }
+
+        /// <summary>고등어가 쿨러에서 제일 값싼 고기 한 마리를 물고 간다. 없으면 null</summary>
+        public FishItem CatSteal()
+        {
+            if (Save.Cooler.Count == 0) return null;
+            var fish = Save.Cooler.OrderBy(f => FishValue(f)).ThenBy(f => f.Uid).First();
+            Save.Cooler.Remove(fish);
+            Persist();
+            return fish;
         }
 
         public void RemoveFish(IEnumerable<int> uids)

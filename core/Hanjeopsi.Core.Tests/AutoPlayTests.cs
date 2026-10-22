@@ -63,6 +63,10 @@ namespace Hanjeopsi.Core.Tests
                     "  시드 {0,3}: {1,-5} {2,2}일  빚 {3,9:N0}  번 돈 {4,9:N0} (경매 {5:N0}, 트럭 {6:N0}, 의뢰 {7:N0})  장비 {8:N0}  캐스팅 {9} 낚음 {10} 터짐 {11} 빠짐 {12} 놓침 {13}  요리 {14}  {15}",
                     r.Seed, r.Outcome, r.ClearDay, r.Debt, r.TotalEarned, r.AuctionIncome, r.TruckIncome, r.RequestIncome, r.GearSpent,
                     r.Casts, r.Landed, r.Snapped, r.Slipped, r.MissedBites, r.Dishes, r.Gear));
+            double casts = rs.Sum(r => r.Casts), fights = rs.Sum(r => r.Fights);
+            _out.WriteLine(string.Format("  평균: 가까움 {0:0.00}, 큰 놈 {1:0.0}%, 기다림 {2:0.0}초, 릴링 {3:0.0}초, 도둑 {4}번 중 {5}번 뺏김",
+                rs.Sum(r => r.Closeness) / casts, 100 * rs.Sum(r => r.BigBites) / casts, rs.Sum(r => r.WaitTime) / casts,
+                rs.Sum(r => r.FightTime) / Math.Max(1, fights), rs.Sum(r => r.Thieves), rs.Sum(r => r.Stolen)));
         }
 
         [Fact]
