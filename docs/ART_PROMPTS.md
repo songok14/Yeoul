@@ -209,6 +209,7 @@ Background: plain flat light gray #EDEDED in every panel. No glow or white outli
 
 ### 배경 1. 물비늘포 마을 (발 디딜 앞마당이 있는 구도)
 지금 마을 그림은 위에서 내려다보는 구도라 SD 여울·고등어·트럭이 꽃밭과 난간 위에 떠 보인다(2026-10-22 사용자 의견). 눈높이에서 본 항구 길을 아래쪽에 넓게 두고, 장소 네 곳(위판장, 미끼가게, 여울식당, 방파제)이 위쪽 절반에 보이게 다시 뽑는다.
+- **받음 (2026-10-22)**: 밤과 낮 두 장. 새벽(`village-0`)은 밤 그림, 낮(`village-2`)은 낮 그림 그대로, 아침(`village-1`)과 저녁(`village-3`)은 낮 그림에 색을 입혀 만들었다. 진짜 아침·저녁 그림을 뽑으면 바꿔 넣는다.
 - 먼저 **1-1 낮**을 뽑고, 나머지 세 장은 1-1 결과를 같이 첨부해서 같은 구도로 시간만 바꾼다.
 - 받으면 `godot/art/backgrounds/village-<0~3>.png`(900×1600 PNG)로 넣고, `TownScreen` 간판 자리(`Pin`)와 발 높이(`_footY`)를 새 그림에 맞춘다. 웹은 `public/assets/bg-village-<n>.webp`.
 

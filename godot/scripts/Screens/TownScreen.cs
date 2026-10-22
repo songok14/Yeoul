@@ -48,10 +48,11 @@ namespace Hanjeopsi.App.Screens
             _stage.Background = Tex("backgrounds/village-" + Mathf.Clamp(s.Slot, 0, 3));
             Art.AddChild(_stage);
 
-            _stage.Pin(new SignButton("위판장", OpenMarket), new Vector2(70, 300));
-            _stage.Pin(new SignButton("미끼가게", OpenShop), new Vector2(118, 448));
-            _stage.Pin(new SignButton("여울식당", Restaurant), new Vector2(372, 352));
-            _stage.Pin(new SignButton("방파제 →", GoFishing), new Vector2(365, 262));
+            // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
+            _stage.Pin(new SignButton("위판장", OpenMarket), new Vector2(150, 222));
+            _stage.Pin(new SignButton("미끼가게", OpenShop), new Vector2(96, 318));
+            _stage.Pin(new SignButton("여울식당", Restaurant), new Vector2(370, 262));
+            _stage.Pin(new SignButton("방파제 →", GoFishing), new Vector2(330, 196));
 
             _truck = _stage.Place(Tex("props/truck"), new Vector2(300, 600), 78);
             Tappable(_truck, OpenTruck);

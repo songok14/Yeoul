@@ -39,6 +39,11 @@ def main():
         _, x = wavfile.read(wav)
         x = x.astype(np.float64) / 32768.0
 
+        # 앞뒤 무음을 잘라 반복될 때 빈 틈이 없게 (-50dB 아래)
+        loud = np.where(np.max(np.abs(x), axis=1) > 10 ** (-50 / 20))[0]
+        if len(loud):
+            x = x[loud[0]:loud[-1] + 1]
+
         # 끝 XFADE 초를 처음에 같은 힘으로 겹친다 → 반복될 때 툭 끊기지 않는다
         n = int(XFADE * SR)
         if len(x) > 4 * n:
@@ -58,7 +63,7 @@ def main():
         wavfile.write(out_wav, SR, (x * 32767).astype(np.int16))
         os.makedirs(OUT, exist_ok=True)
         out = os.path.join(OUT, name + '.ogg')
-        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', out_wav, '-c:a', 'libvorbis', '-q:a', '4', out], check=True)
+        subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', out_wav, '-c:a', 'libvorbis', '-q:a', '3', out], check=True)
         print('저장', os.path.relpath(out), f'{len(x) / SR:.1f}초', f'{os.path.getsize(out) // 1024}KB')
 
 

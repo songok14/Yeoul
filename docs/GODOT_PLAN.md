@@ -172,6 +172,19 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 - **일러스트 정리**: 지금 감정 그림은 웹 `public/assets/y-*.webp`, `ch-*.webp`를 PNG로 옮긴 것(`godot/art/portraits/`). 머리카락 사이 흰 배경은 `scripts/clean_halo.py`로 지웠다. 갈색 머리 여울 그림은 `--fringe`로 머리 둘레 가는 가닥 사이 분홍빛 바탕과 작은 흰 조각까지 풀었다. 새로 뽑을 대화용 표정 시트 프롬프트는 `docs/ART_PROMPTS.md`.
 - 프롬프트는 `docs/ART_PROMPTS.md`.
 
+### 8-1. 소리
+
+| 파일 | 쓰는 곳 | 출처 |
+|---|---|---|
+| `godot/audio/sfx/*.ogg` (31개) | 효과음 | `scripts/sound.py` 합성 |
+| `godot/audio/bgm/title.ogg` | 타이틀, 프롤로그, 차압 결말 | 사용자 제공 무료 곡 "Title" (2026-10-22). 출처·라이선스 확인 필요 |
+| `godot/audio/bgm/town.ogg` | 마을, 미끼가게, 수첩, 클리어 결말 | 사용자 제공 "Town". 출처 확인 필요 |
+| `godot/audio/bgm/sea.ogg` | 낚시 | 사용자 제공 "Sea". 출처 확인 필요 |
+| `godot/audio/bgm/market.ogg` | 위판장 | 사용자 제공 "Market". 출처 확인 필요 |
+| `godot/audio/bgm/truck.ogg` | 트럭 장사 | 사용자 제공 "restaurant". 출처 확인 필요 |
+
+곡은 `python3 scripts/bgm.py <원본> <이름>`으로 넣는다(앞뒤 무음 자르기, 음량 −18dB RMS, 끝 3초를 처음에 겹쳐 반복, Vorbis q3). 원본 mp3는 레포에 넣지 않는다.
+
 ## 9. 단계별 일정
 
 한 단계가 끝날 때마다 `dotnet test` 통과, CI APK 빌드와 화면 사진 확인, 폰 테스트, 이 표 체크.
