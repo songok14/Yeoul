@@ -160,7 +160,7 @@ namespace Hanjeopsi.App.Screens
             g.RecordCatch("bollak", 19.4, false);
             g.Save.Flags["tutorialFish"] = true;
             g.CompletePrologue();
-            gs.PendingToast = "이야기 화면은 옮기는 중이라 마을에서 시작해요";
+            gs.PendingTalk = "welcome";
             gs.GoTo("town");
         }
 

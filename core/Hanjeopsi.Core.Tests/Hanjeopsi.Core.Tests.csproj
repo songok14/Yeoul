@@ -18,5 +18,7 @@
     <!-- 게임 데이터와 웹 버전 기준값을 출력 폴더로 복사 -->
     <None Include="../../godot/data/*.json" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../golden/*.json" LinkBase="golden" CopyToOutputDirectory="PreserveNewest" />
+    <!-- 대화 일러스트가 실제로 있는지 확인용 -->
+    <None Include="../../godot/art/portraits/*.png" LinkBase="portraits" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

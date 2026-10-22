@@ -191,19 +191,23 @@ namespace Hanjeopsi.App.Screens
             if (outcome == ChapterOutcome.Clear)
             {
                 G.Persist();
-                Modal("1차 상환 완료!", "할머니 식당의 빨간 딱지는 붙지 않는다.\n조황일지 1장을 얻었다.", new[] { new ModalButton("좋아", Palette.Green) });
+                TalkScene("chapterClear", () => Modal("1차 상환 완료!", "조황일지 1장을 얻었다.\n이야기는 다음 빌드에서 이어져요.", new[] { new ModalButton("좋아", Palette.Green) }));
                 return;
             }
             if (outcome == ChapterOutcome.Fail)
             {
-                Modal("빨간 딱지", "30일이 지났다.\n여울식당 문에 빨간 딱지가 붙었다.", new[]
+                TalkScene("chapterFail", () =>
                 {
-                    new ModalButton("처음부터", Palette.Red, () =>
-                    {
-                        gs.DeleteSave();
-                        gs.GoTo("title");
-                    }),
+                    gs.DeleteSave();
+                    gs.GoTo("title");
                 });
+                return;
+            }
+            if (gs.PendingTalk != null)
+            {
+                string talk = gs.PendingTalk;
+                gs.PendingTalk = null;
+                TalkScene(talk);
                 return;
             }
             var s = G.Save;
@@ -228,6 +232,12 @@ namespace Hanjeopsi.App.Screens
             {
                 case "restaurant":
                     Restaurant();
+                    break;
+                case "welcome":
+                    TalkScene("welcome");
+                    break;
+                case "clear":
+                    TalkScene("chapterClear");
                     break;
                 case "yeoul":
                     TapYeoul();
@@ -329,6 +339,7 @@ namespace Hanjeopsi.App.Screens
             Toast(UiKit.Topic(what) + " 다음 빌드에서 열려요");
         }
 
+        /// <summary>여울식당: 할머니가 한마디 하고, 대화창 위에 갚기·잠자기 선택지가 뜬다</summary>
         private void Restaurant()
         {
             var s = G.Save;
@@ -336,12 +347,12 @@ namespace Hanjeopsi.App.Screens
             int step = G.Data.Balance.Chapter1.RepayStep;
             var lines = G.Data.Dialogue.Grandma;
             string line = lines[(int)(GameState.I.Rng.Next() * lines.Count)];
-            Modal("여울식당", "막순 할머니\n\"" + line + "\"\n\n남은 빚 " + UiKit.Won(s.Debt) + "\n소지금 " + UiKit.Won(s.Money), new[]
+            Say("grandma", "default", line, new[]
             {
                 new ModalButton("10만 원 갚기", Palette.GoldDark, () => Pay(step), s.Debt <= 0 || s.Money < step),
                 new ModalButton("있는 돈 전부 갚기 (" + UiKit.Won(canPay) + ")", Palette.Red, () => Pay(canPay), canPay <= 0),
                 new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep),
-                new ModalButton("닫기", Palette.GrayDark),
+                new ModalButton("나가기", Palette.GrayDark),
             });
         }
 

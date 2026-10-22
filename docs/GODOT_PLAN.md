@@ -47,12 +47,12 @@ Yeoul/
 ├─ godot/                             ② 고닷 프로젝트
 │  ├─ project.godot, Hanjeopsi.csproj, export_presets.cfg, icon.png
 │  ├─ data/                           species, gear, balance, texts, recipes, requests, taste, dialogue .json
-│  ├─ art/                            backgrounds/, yeoul/, cat/, props/ (PNG)
+│  ├─ art/                            backgrounds/, yeoul/, cat/ (SD), props/, portraits/ (대화 일러스트) (PNG)
 │  ├─ fonts/                          고운돋움(본문), 고운바탕 굵게(제목) (OFL)
 │  ├─ scenes/                         boot(첫 장면), title, town, core_lab .tscn (뿌리 노드에 스크립트만 붙인다)
 │  ├─ scripts/
 │  │  ├─ App/                         GameState(자동 로드: 데이터·판·전환·사진 모드), BootLoader
-│  │  ├─ Ui/                          Palette·Fonts·TextSize, UiKit, GameButton, Screen(모달·토스트·말풍선),
+│  │  ├─ Ui/                          Palette·Fonts·TextSize, UiKit, GameButton, Screen(모달·토스트·말풍선·대화), DialogueBox,
 │  │  │                               Hud, ArtStage(배경 좌표계), SignButton
 │  │  ├─ Screens/                     TitleScreen, TownScreen
 │  │  ├─ Boot/                        GameDataLoader, SaveStore, SystemRandom
@@ -162,7 +162,14 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
   python3 scripts/sd_sheet.py <시트.png> 2 4 godot/art/yeoul front,three-quarter,side,back,idle,wave,walk-1,walk-2
   ```
 - **애니메이션**: 숨쉬기·통통 튀기는 `Tween`, 걷기·낚시 동작은 `AnimatedSprite2D` 프레임, 부품 분리 그림이 오면 `Skeleton2D` + `Polygon2D` 뼈대. 표정은 눈·입 스프라이트 교체.
-- **컷신**: 다듬은 감정 일러스트를 `story.tscn`에서만 쓴다. 세로 9:16, 아래 30%는 글 상자 자리.
+- **역할 나누기 (2026-10-22 정함)**: 화면 위에서 움직이는 캐릭터는 **SD**, 대화와 감정은 **일러스트**.
+  | 상황 | 그림 | 예 |
+  |---|---|---|
+  | 마을·낚시·트럭에서 걷기, 낚시, 요리, 짧은 반응 | SD + 한 줄 말풍선 | 여울을 누르면 손 흔들기, 고등어 "냐옹" |
+  | 누군가와 이야기하는 장면 | 대화창 + 감정 일러스트(상반신이 보이게 크게) | 여울식당 할머니, 새 게임 첫마디, 1장 클리어·차압 |
+  | 감정이 터지는 순간 | 한 장짜리 컷신 일러스트 (9:16, 아래 30%는 글 상자) | 맛을 잃은 날, 처음 짠맛, 아버지 기억 |
+- **대화창** `Ui/DialogueBox`: 말하는 사람이 바뀌면 일러스트가 옆에서 미끄러져 들어오고, 감정만 바뀌면 살짝 바꿔 낀다. 이름표 색과 서는 쪽은 `dialogue.json speakers`. 글은 타자기처럼 찍히고 누르면 다음 줄, 마지막 줄에 선택지를 달 수 있다(여울식당의 갚기·잠자기).
+- **일러스트 정리**: 지금 감정 그림은 웹 `public/assets/y-*.webp`, `ch-*.webp`를 PNG로 옮긴 것(`godot/art/portraits/`). 머리카락 사이 흰 배경은 `scripts/clean_halo.py`로 지웠다. 새로 뽑을 대화용 표정 시트 프롬프트는 `docs/ART_PROMPTS.md`.
 - 프롬프트는 `docs/ART_PROMPTS.md`.
 
 ## 9. 단계별 일정
@@ -203,7 +210,9 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 - 새로 시작 → 마을. 위쪽 HUD(날짜, 시간대 칩, D-day, 소지금, 상환 막대)와 아래 메뉴 여섯 개.
 - 버튼을 누르면 살짝 눌렸다 튕기는지. 아직 없는 화면은 "…는 다음 빌드에서 열려요" 알림.
 - 간판, 여울, 고등어, 트럭을 눌러 본다. 여울은 손을 흔들고 말풍선, 고등어는 냐옹.
-- 여울식당: 빚 갚기(돈이 굴러가며 줄고 상환 막대가 찬다, 빨간 숫자가 떠오른다), 잠자기 → 다음 날 새벽과 어제 요약.
+- 새로 시작하면 여울 일러스트가 들어오며 첫마디 대화. 누르면 다음 줄, 다 읽으면 닫힌다.
+- 여울식당: 할머니 일러스트와 한마디, 그 위에 선택지. 빚 갚기(돈이 굴러가며 줄고 상환 막대가 찬다, 빨간 숫자가 떠오른다), 잠자기 → 다음 날 새벽과 어제 요약.
+- 대화 일러스트의 머리카락 둘레에 흰 테두리가 보이지 않는지.
 - 앱을 껐다 켜서 이어하기. 노치나 제스처 바에 글자가 가리지 않는지, 긴 화면에서 간판이 잘리지 않는지.
 
 점검 화면 (타이틀 아래 '점검')

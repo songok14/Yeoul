@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Hanjeopsi.Core.Data;
 
 namespace Hanjeopsi.App.Ui
 {
@@ -207,6 +208,28 @@ namespace Hanjeopsi.App.Ui
             tw.TweenProperty(root, "modulate:a", 0f, 0.14);
             tw.TweenCallback(Callable.From(root.QueueFree));
             then?.Invoke();
+        }
+
+        // ───────── 대화 (일러스트) ─────────
+
+        /// <summary>대화창을 띄운다. 다 읽으면 onDone. choices 가 있으면 마지막 줄에 선택지</summary>
+        public DialogueBox Talk(IList<DialogueLine> lines, IList<ModalButton> choices = null, Action onDone = null)
+        {
+            var box = new DialogueBox(GameState.I.Data.Dialogue, lines, choices, onDone, SafeBottom);
+            Popups.AddChild(box);
+            return box;
+        }
+
+        /// <summary>dialogue.json scenes 의 이름 붙은 대화</summary>
+        public DialogueBox TalkScene(string scene, Action onDone = null)
+        {
+            return Talk(GameState.I.Data.Dialogue.Scenes[scene], null, onDone);
+        }
+
+        /// <summary>한 사람의 한 줄</summary>
+        public DialogueBox Say(string speaker, string face, string text, IList<ModalButton> choices = null, Action onDone = null)
+        {
+            return Talk(new[] { new DialogueLine { Speaker = speaker, Face = face, Text = text } }, choices, onDone);
         }
 
         // ───────── 토스트, 말풍선, 떠오르는 글자 ─────────

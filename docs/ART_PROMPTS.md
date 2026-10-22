@@ -7,8 +7,11 @@
 | 쓰임 | 그림체 | 비고 |
 |---|---|---|
 | 배경 | 수채화풍 일러스트 (`public/assets/bg-*.webp`) | 지금 그림을 그대로 쓴다 |
-| 인게임 캐릭터·물체 | 귀여운 SD (2~2.5등신) | 여울, 고양이 고등어, 막순 할머니, 노씨, 차세라, 손님, 트럭 여울호, 물고기, 요리 |
-| 컷신 | 애니메이션 채색 일러스트 | 이야기 장면에서만. 여울 감정 연기를 더 섬세하게 다듬는다 |
+| 인게임 캐릭터·물체 | 귀여운 SD (2~2.5등신) | 화면 위에서 움직이는 것. 여울, 고양이 고등어, 막순 할머니, 노씨, 차세라, 손님, 트럭 여울호, 물고기, 요리 |
+| 대화 | 애니메이션 채색 일러스트 (스탠딩, 감정별) | 누군가와 이야기할 때 대화창 옆에 크게. 머리부터 허리까지 보인다 |
+| 컷신 | 애니메이션 채색 일러스트 (9:16 한 장) | 감정이 터지는 순간. 여울 감정 연기를 더 섬세하게 다듬는다 |
+
+**정한 것 (2026-10-22)**: 인게임 캐릭터는 SD, 감정과 대화는 일러스트. 그래서 SD 3(여울 표정 시트)은 뒤로 미루고, 아래 "대화 일러스트" 시트를 먼저 뽑는다.
 
 ### 주는 방식 (규칙)
 - 그림 **한 장당 코드 블록 하나**. 블록 하나만 복사해서 붙여 넣으면 되도록 매번 모든 조건을 다시 적는다.
@@ -141,6 +144,63 @@ Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters
 막순 할머니 → 노씨 → 손님 6명(위 디자인) → 트럭 여울호 → 물고기 5종 → 요리 5종 → 차세라. 여울·고등어 기본 시트는 받았다. 다음은 SD 2(여울 동작), SD 3(표정)이고 그 뒤 같은 형식으로 준다.
 
 ---
+
+## 대화 일러스트 (스탠딩 표정 시트)
+
+대화창 옆에 크게 서는 그림. 같은 옷, 같은 자세 틀에서 표정과 손만 바뀌어야 대화 중에 바꿔 껴도 자연스럽다. 한 시트에 표정 4칸(2×2), 칸마다 머리부터 무릎 위까지.
+받으면 `scripts/sd_sheet.py`로 칸을 자르고 `scripts/clean_halo.py`로 머리카락 사이 흰 테두리를 정리해 `godot/art/portraits/`에 넣고 `dialogue.json`의 `faces`에 이름을 붙인다.
+머리카락 사이로 배경이 갇히면 지우기 어렵다. 프롬프트에 잔머리 사이를 비우지 말라는 말을 넣었다.
+
+### 대화 1. 여울 표정 시트 (기본·웃음·걱정·놀람)
+
+```
+Create a 2x2 character expression sheet of standing dialogue illustrations for a mobile game visual novel scene. Attached: the current illustration of the heroine (keep her design exactly) and my watercolor background illustrations (match their palette).
+
+Character: Han Yeoul, 29-year-old Korean woman, former sous-chef who lost her sense of taste. Long brown hair in a high messy bun with a few loose strands, brown eyes, oversized cream-white hooded jacket with toggle buttons, white t-shirt, black crossbody harness bag with blue accents, dark brown cargo jogger pants.
+
+Layout: four panels of exactly the same size, same framing from the top of the head to just above the knees, same three-quarter pose facing slightly right, same scale and same position in every panel so the panels can be swapped during dialogue.
+Panel 1: calm neutral face, slightly tired, hands relaxed.
+Panel 2: small warm smile, eyes a little narrowed, one hand touching the strap of her bag.
+Panel 3: worried, eyebrows drawn together, lips pressed, hand on her chest.
+Panel 4: surprised, eyes wide, mouth slightly open, one hand raised near her mouth.
+
+Style: soft anime illustration, delicate clean line art, subtle natural facial acting, soft cel shading with a light watercolor texture, light from the upper left.
+Background: plain flat light gray #EDEDED in every panel. Keep loose hair strands as clean separate lines without the gray background trapped between strands, no glow or white outline around the hair. No text, no labels, no numbers, no panel borders, no grid lines, no ground shadow, no checkerboard, no signature, no watermark.
+```
+
+### 대화 2. 막순 할머니 표정 시트 (기본·웃음·걱정·말없이 내밀기)
+
+```
+Create a 2x2 character expression sheet of standing dialogue illustrations for a mobile game visual novel scene. Attached: the current illustration of the grandmother (keep her design exactly) and my watercolor background illustrations (match their palette).
+
+Character: Grandma Maksun, Korean grandmother in her late 70s who runs the small harbor restaurant Yeoul Sikdang, blunt but always on her granddaughter's side. Short curly gray-white hair with a red patterned bandana, warm wrinkled face, pink floral blouse with rolled sleeves, dark brown work apron with a white towel tucked in, dark loose pants, black rubber boots.
+
+Layout: four panels of exactly the same size, same framing from the top of the head to just above the knees, same three-quarter pose facing slightly left, same scale and same position in every panel.
+Panel 1: calm, gruff but kind face, hands on her hips.
+Panel 2: big crinkly laugh, eyes closed, one hand on her bandana.
+Panel 3: quiet worry, looking down, hands clasped in front of her apron.
+Panel 4: no words, gently holding out a plate of grilled rockfish with both hands, soft eyes.
+
+Style: soft anime illustration, delicate clean line art, subtle natural facial acting, soft cel shading with a light watercolor texture, light from the upper left.
+Background: plain flat light gray #EDEDED in every panel. Keep curly hair as clean lines without the gray background trapped inside, no glow or white outline around the hair. No text, no labels, no numbers, no panel borders, no grid lines, no ground shadow, no checkerboard, no signature, no watermark.
+```
+
+### 대화 3. 노씨 표정 시트 (기본·웃음·무뚝뚝·쪽지)
+
+```
+Create a 2x2 character expression sheet of standing dialogue illustrations for a mobile game visual novel scene. Attached: the current illustration of Mr. No (keep his design exactly) and my watercolor background illustrations (match their palette).
+
+Character: Mr. No, an old Korean man in his sixties who runs the bait shop at the harbor and was once the fishing partner of the heroine's father. Tanned skin, short graying hair under a navy bandana, stubble, dark navy work shirt with rolled sleeves, worn dark canvas apron, dark pants, rubber boots. Almost never talks, gruff, hiding something.
+
+Layout: four panels of exactly the same size, same framing from the top of the head to just above the knees, same three-quarter pose facing slightly left, same scale and same position in every panel.
+Panel 1: arms crossed, flat expression, looking aside.
+Panel 2: rare wide grin, eyes closed, arms still crossed.
+Panel 3: frowning, one eyebrow raised, scratching the back of his neck.
+Panel 4: quietly holding out a folded old paper note between two fingers, not looking at the viewer.
+
+Style: soft anime illustration, delicate clean line art, subtle natural facial acting, soft cel shading with a light watercolor texture, light from the upper left.
+Background: plain flat light gray #EDEDED in every panel. No glow or white outline around the hair. No text on the note, no labels, no numbers, no panel borders, no grid lines, no ground shadow, no checkerboard, no signature, no watermark.
+```
 
 ## 컷신 일러스트 다듬기 (여울 감정 연기)
 

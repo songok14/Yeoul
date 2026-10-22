@@ -6,12 +6,105 @@
     "고등어 그놈, 니 트럭을 지 집인 줄 안다.",
     "생선은 손으로 만져 보면 안다. 맛 몰라도 된다."
   ],
-  "catIdle": ["냐옹", "냐아...", "(하품)", "(꼬리를 흔든다)"],
+  "catIdle": [
+    "냐옹",
+    "냐아...",
+    "(하품)",
+    "(꼬리를 흔든다)"
+  ],
   "yeoulIdle": [
     "오늘은 물때가 좋대.",
     "할머니 된장국 냄새가 나는 것 같아.",
     "고등어야, 오늘도 따라올 거지?",
     "빚은 빚이고 밥은 밥이야.",
     "손맛만큼은 아직 기억나."
-  ]
+  ],
+  "speakers": [
+    {
+      "id": "yeoul",
+      "name": "여울",
+      "color": "#4a7fc1",
+      "side": "left",
+      "faces": {
+        "default": "yeoul",
+        "peace": "yeoul-peace",
+        "cheer": "yeoul-chef-cheer",
+        "nervous": "yeoul-chef-nervous",
+        "journal": "yeoul-journal",
+        "knees": "yeoul-knees",
+        "saltyTear": "yeoul-salty-tear",
+        "notaste": "yeoul-notaste",
+        "phone": "yeoul-phone",
+        "backBag": "yeoul-back-bag",
+        "rodBroken": "yeoul-rod-broken"
+      }
+    },
+    {
+      "id": "grandma",
+      "name": "막순 할머니",
+      "color": "#8a5a3b",
+      "side": "right",
+      "faces": {
+        "default": "grandma",
+        "stew": "grandma-stew"
+      }
+    },
+    {
+      "id": "nossi",
+      "name": "노씨",
+      "color": "#3f7a8a",
+      "side": "right",
+      "faces": {
+        "default": "nossi"
+      }
+    }
+  ],
+  "scenes": {
+    "welcome": [
+      {
+        "speaker": "yeoul",
+        "face": "journal",
+        "text": "내 손으로 낚은 물고기라면.\n어쩌면 맛을 되찾을 수 있을지도 모른다."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "30일 안에 300만 원.\n일단 방파제부터 가 보자."
+      }
+    ],
+    "chapterClear": [
+      {
+        "speaker": "yeoul",
+        "face": "cheer",
+        "text": "1차 상환금 300만 원을 모두 갚았다!"
+      },
+      {
+        "speaker": "grandma",
+        "face": "stew",
+        "text": "(말없이 볼락구이 한 접시를 내민다)"
+      },
+      {
+        "speaker": "yeoul",
+        "face": "saltyTear",
+        "text": "이번엔 짠맛 말고 다른 맛도 조금 났다."
+      }
+    ],
+    "chapterFail": [
+      {
+        "speaker": "",
+        "face": "",
+        "text": "30일이 지났다.\n여울식당 문에 빨간 딱지가 붙었다."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "knees",
+        "text": "할머니는 괜찮다고 했다.\n괜찮지 않다는 걸 나는 맛이 아니라 얼굴로 알았다."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "아직 바다에는 물고기가 있다.\n처음부터 다시 해 보자."
+      }
+    ]
+  }
 }

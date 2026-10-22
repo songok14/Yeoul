@@ -113,6 +113,8 @@ jobs:
             "town-summary:--screen=town --demo=summary"
             "town-evening:--screen=town --demo=evening --shot-action=yeoul"
             "town-tall:--screen=town --demo=evening"
+            "talk-welcome:--screen=town --shot-action=welcome"
+            "talk-clear:--screen=town --demo=evening --shot-action=clear"
           )
           for s in "${shots[@]}"; do
             name="${s%%:*}"; args="${s#*:}"

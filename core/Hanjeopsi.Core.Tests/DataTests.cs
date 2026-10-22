@@ -61,6 +61,33 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 대화_장면의_화자와_감정_그림이_있다()
+        {
+            var d = TestData.Game.Dialogue;
+            var portraits = System.IO.Path.Combine(System.AppContext.BaseDirectory, "portraits");
+            foreach (var sp in d.Speakers)
+            {
+                Assert.True(sp.Faces.ContainsKey("default"), sp.Id + " 에 default 그림이 없다");
+                Assert.Contains(sp.Side, new[] { "left", "right" });
+                foreach (var file in sp.Faces.Values)
+                    Assert.True(System.IO.File.Exists(System.IO.Path.Combine(portraits, file + ".png")), "그림이 없다: portraits/" + file + ".png");
+            }
+            foreach (var scene in new[] { "welcome", "chapterClear", "chapterFail" })
+            {
+                Assert.True(d.Scenes.ContainsKey(scene), "대화 장면이 없다: " + scene);
+                foreach (var line in d.Scenes[scene])
+                {
+                    Assert.False(string.IsNullOrWhiteSpace(line.Text));
+                    if (string.IsNullOrEmpty(line.Speaker)) continue;
+                    var sp = d.SpeakerById(line.Speaker);
+                    Assert.True(string.IsNullOrEmpty(line.Face) || sp.Faces.ContainsKey(line.Face), scene + ": " + line.Speaker + " 의 감정 " + line.Face + " 이 없다");
+                }
+            }
+            // 아버지 말과 1장 기준은 STORY.md 그대로
+            Assert.Contains(d.Scenes["welcome"], l => l.Text.Contains("30일 안에 300만 원"));
+        }
+
+        [Fact]
         public void 규정이_FishingPlan_기본표와_같다()
         {
             // FishingPlan core/catches/Limits.kt: 볼락 15cm 이하, 감성돔 25cm 이하 · 5/1~5/31

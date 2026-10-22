@@ -166,6 +166,9 @@ namespace Hanjeopsi.App
             _fadeTween.TweenCallback(Callable.From(() => _fade.MouseFilter = Control.MouseFilterEnum.Ignore));
         }
 
+        /// <summary>다음 화면에 들어가자마자 할 대화 (dialogue.json scenes 이름)</summary>
+        public string PendingTalk { get; set; }
+
         /// <summary>다음 화면에서 띄울 토스트 (화면을 옮기면서 알릴 때)</summary>
         public string PendingToast { get; set; }
 
