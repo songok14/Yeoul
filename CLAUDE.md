@@ -40,7 +40,7 @@
 - 그림 역할: **화면 위에서 움직이는 캐릭터는 SD(2~2.5등신)**, **대화와 감정은 일러스트**. 마을·낚시·트럭에서 걷고 반응하는 건 SD와 한 줄 말풍선(`Screen.Bubble`). 누군가와 이야기하는 장면은 대화창(`Screen.Talk`/`Say`/`TalkScene`)에 감정 일러스트(`godot/art/portraits/`)가 들어온다. 감정이 터지는 장면은 한 장짜리 컷신 일러스트. 배경은 수채화 그대로. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).
 - 대화 내용은 `godot/data/dialogue.json`: `speakers`(이름, 이름표 색, 서는 쪽, 감정별 그림)와 `scenes`(이름 붙은 대화). 새 감정 그림은 `faces`에 이름을 붙여 넣는다.
 - 배경을 지운 일러스트는 `python3 scripts/clean_halo.py <그림들>`로 머리카락 사이 흰 테두리를 정리한다(제자리에서 고친다, 흰 옷은 남긴다). 머리색이 비친 크림빛 테두리가 남으면 머리 둘레에 흰 옷이 없는 그림에만 `--strong=0.45`를 준다(요리복 두 장에 썼다. 후드 그림에 쓰면 후드가 먹힌다). 갈색 머리 둘레에 가는 가닥과 분홍빛 바탕이 남으면 `--fringe`를 준다(흰머리·회색 머리 그림에는 쓰지 않는다). 정리한 뒤 어두운 바탕 위에 올려 눈으로 확인한다.
-- 그림은 PNG로 `godot/art/`에 넣는다(웹은 WebP). SD 시트는 `python3 scripts/sd_sheet.py <시트> <행> <열> <폴더> <이름들>`로 자른다. 원본 시트는 커밋하지 않는다.
+- 그림은 PNG로 `godot/art/`에 넣는다(웹은 WebP). SD 시트는 `python3 scripts/sd_sheet.py <시트> <행> <열> <폴더> <이름들>`로 자른다. 원본 시트는 커밋하지 않는다. 배경이 이미 투명한 SD 포즈 한 장(낚싯대 든 여울 등)은 `python3 scripts/sd_pose.py <원본> <이름> --body=<몸 오른쪽 끝 x> [--erase=x,y]`로 줄을 지우고 줄여서 `godot/art/yeoul/`에 넣는다. 발과 낚싯대 끝 위치는 `godot/data/poses.json`에 기록되고 화면은 `SdPoses`로 읽는다(키를 기준으로 크기를 맞춘다).
 
 ```bash
 dotnet test core/Hanjeopsi.sln              # 코어 빌드 + 테스트. 모두 통과해야 한다

@@ -34,9 +34,10 @@ namespace Hanjeopsi.App.Screens
         private const float Horizon = 290;
         private const float Shore = 560;
         private const float PanelHeight = 300;
-        private static readonly Vector2 YeoulFoot = new Vector2(186, 684);
+        // 여울은 왼쪽 앞에서 오른쪽 바다로 대를 내민다. 고등어는 왼쪽 끝
+        private static readonly Vector2 YeoulFoot = new Vector2(150, 690);
         private const float YeoulHeight = 168;
-        private static readonly Vector2 CatFoot = new Vector2(362, 684);
+        private static readonly Vector2 CatFoot = new Vector2(80, 686);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
         private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2") };
 
@@ -86,6 +87,9 @@ namespace Hanjeopsi.App.Screens
         private float _bobT;
         private float _shake;
         private Tween _zoomTween, _nibbleTween;
+        // SD 포즈와 기울기(도). 기울기는 목표값을 부드럽게 따라간다
+        private string _pose;
+        private float _lean, _leanTarget, _leanRate = 10;
 
         protected override void Build()
         {
@@ -98,16 +102,12 @@ namespace Hanjeopsi.App.Screens
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/breakwater.png");
             _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, 3)];
             Art.AddChild(_stage);
-            _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/back.png"), YeoulFoot, YeoulHeight);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
+            _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
+            SetPose("fish-ready");
 
-            // 손 위치는 SD 뒷모습 그림에서 오른손 자리
-            float w = YeoulHeight * 222f / 491f;
-            var hand = new Vector2(YeoulFoot.X - w / 2 + w * 0.86f, YeoulFoot.Y - YeoulHeight * 0.31f);
             _field = new FishingField(_stage)
             {
-                Hand = hand,
-                TipIdle = new Vector2(276, 486),
                 LanePos = (lane, d) => PosFor(lane, d),
             };
             _field.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
@@ -193,6 +193,26 @@ namespace Hanjeopsi.App.Screens
             return string.Format(CultureInfo.InvariantCulture, T[key], args);
         }
 
+        /// <summary>SD 포즈를 바꾼다. 포즈마다 그림 크기가 달라도 키와 발 위치는 그대로</summary>
+        private void SetPose(string name)
+        {
+            if (_pose == name) return;
+            _pose = name;
+            var p = SdPoses.Get(name);
+            var tex = GD.Load<Texture2D>("res://art/yeoul/" + name + ".png");
+            float height = tex.GetHeight() * YeoulHeight / p.Body;
+            _stage.Swap(_yeoul, tex, height, new Vector2(p.Foot[0] / tex.GetWidth(), p.Foot[1] / tex.GetHeight()));
+        }
+
+        /// <summary>그림 속 낚싯대 끝 (논리 좌표). 기울기와 숨쉬기까지 반영한다</summary>
+        private Vector2 RodTip()
+        {
+            var tex = _yeoul.Texture;
+            var p = SdPoses.Get(_pose);
+            var local = p.TipPx * (_yeoul.Size / tex.GetSize());
+            return _stage.ToLogical(_yeoul.GetTransform() * local);
+        }
+
         private void Tell(string main, string sub = "", Color? color = null)
         {
             _msg.Text = main;
@@ -271,6 +291,8 @@ namespace Hanjeopsi.App.Screens
             _field.LineTo = null;
             _field.Bend = 0;
             _field.ShowLanes = true;
+            SetPose("fish-ready");
+            _leanTarget = 0;
             _field.SelectedLane = null;
             _exit.SetEnabled(true);
             SetInfo();
@@ -354,7 +376,17 @@ namespace Hanjeopsi.App.Screens
             Tell(F("cast", G.Data.Texts.Zones[G.Fishing.ZoneOf(_dist01)]));
 
             // 찌가 포물선을 그리며 날아간다
-            var from = _field.TipIdle;
+            // 뒤로 젖혔던 대를 앞으로 휘두른다
+            _leanRate = 26;
+            _leanTarget = 12;
+            Later(0.16, () =>
+            {
+                if (_phase != Phase.Flying && _phase != Phase.Wait) return;
+                SetPose("fish-wait");
+                _leanRate = 8;
+                _leanTarget = 0;
+            });
+            var from = _field.RodTip;
             float peak = Mathf.Min(from.Y, to.Y) - 120;
             _field.BobberVisible = true;
             _field.BobberFloating = false;
@@ -391,6 +423,7 @@ namespace Hanjeopsi.App.Screens
             _field.AddSplash(_target, _targetScale * 0.8f);
             _field.BobberVisible = false;
             _field.LineTo = null;
+            Settle(-10);
             FinishCast();
         }
 
@@ -406,6 +439,9 @@ namespace Hanjeopsi.App.Screens
             _field.BobberSink = 1;
             _field.AddSplash(_target, _targetScale * 1.4f);
             Shake(0.12f);
+            // 대 끝이 물 쪽으로 쿡 끌려간다
+            _leanRate = 20;
+            _leanTarget = 5;
             Tell(T["bite"], T["biteSub"], Palette.Gold);
         }
 
@@ -418,6 +454,10 @@ namespace Hanjeopsi.App.Screens
         private void StartReel(bool perfect)
         {
             _phase = Phase.Reel;
+            // 대를 확 들어 올려 챔질한다
+            SetPose("fish-reel");
+            _lean = -12;
+            _leanRate = 12;
             _field.BobberVisible = false;
             _field.ShadowVisible = true;
             var s = G.Save;
@@ -484,6 +524,8 @@ namespace Hanjeopsi.App.Screens
             _field.ShadowSize = Mathf.Clamp((float)(_size / _species.AvgSize), 0.7f, 1.6f) * Mathf.Lerp(0.6f, 1.3f, p);
             _field.LineTo = _field.ShadowAt;
             _field.Bend = Mathf.Clamp((float)f.Tension / 100, 0, 1);
+            // 팽팽할수록 대가 물고기 쪽으로 끌려가고, 저항이 오면 툭 끌려간다
+            _leanTarget = -5 + 10 * _field.Bend + (float)f.SurgeKick * 25;
             _gauge.Tension = (float)f.Tension;
             _sub.Text = F("distance", Math.Max(0, f.Distance).ToString("0.0", CultureInfo.InvariantCulture));
             // 텐션이 위험하면 큰 글이 빨개진다
@@ -499,6 +541,7 @@ namespace Hanjeopsi.App.Screens
             _field.LineTo = null;
             _field.Bend = 0;
             ZoomTo(1, 0.6);
+            Settle(-14);
             Tell(main, sub);
             FinishCast();
         }
@@ -512,6 +555,7 @@ namespace Hanjeopsi.App.Screens
             _field.LineTo = null;
             _field.Bend = 0;
             ZoomTo(1, 0.6);
+            Settle(-16);
             Tell("");
             ShowResult();
         }
@@ -666,6 +710,9 @@ namespace Hanjeopsi.App.Screens
                     _gaugePos = g.Pos;
                     _gaugeDir = g.Dir;
                     _gauge.Needle = (float)_gaugePos;
+                    // 게이지가 찰수록 대를 뒤로 젖힌다
+                    _leanRate = 14;
+                    _leanTarget = -16 * (float)_gaugePos;
                     break;
                 }
                 case Phase.Wait:
@@ -686,6 +733,7 @@ namespace Hanjeopsi.App.Screens
                         _phase = Phase.Busy;
                         _field.BobberVisible = false;
                         _field.LineTo = null;
+                        Settle(-8);
                         Tell(T["missed"], T["missedSub"]);
                         FinishCast();
                     }
@@ -695,6 +743,22 @@ namespace Hanjeopsi.App.Screens
                     UpdateReel(dt);
                     break;
             }
+
+            // 포즈 기울기: 목표를 부드럽게 따라가고, 기다릴 때는 살랑인다
+            float sway = _phase == Phase.Wait ? Mathf.Sin(_time * 1.3f) * 1.2f : 0;
+            if (_phase == Phase.Reel && _fight != null && _fight.Tension >= G.Data.Balance.Reel.Danger) sway = Mathf.Sin(_time * 40) * 1.5f;
+            _lean = Mathf.Lerp(_lean, _leanTarget + sway, 1 - Mathf.Exp(-_leanRate * dt));
+            _yeoul.RotationDegrees = _lean;
+            _field.RodTip = RodTip();
+        }
+
+        /// <summary>줄을 거두고 대를 세운 포즈로 돌아간다. kick 만큼 뒤로 젖혔다가 천천히 바로 선다</summary>
+        private void Settle(float kick)
+        {
+            SetPose("fish-ready");
+            _lean = kick;
+            _leanRate = 6;
+            _leanTarget = 0;
         }
 
         /// <summary>속임 입질: 찌가 톡 잠겼다 올라온다</summary>

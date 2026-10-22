@@ -5,7 +5,7 @@ using Godot;
 namespace Hanjeopsi.App.Ui
 {
     /// <summary>
-    /// 방파제 바다 위에 그리는 것들: 던질 방향 띠, 고등어가 가리키는 물결, 찌, 물고기 그림자, 물보라, 낚싯대 끝과 낚싯줄.
+    /// 방파제 바다 위에 그리는 것들: 던질 방향 띠, 고등어가 가리키는 물결, 찌, 물고기 그림자, 물보라, 낚싯줄.
     /// 좌표는 ArtStage 논리 좌표(450×800)로 받아 그릴 때 화면 픽셀로 바꾼다. 상태는 FishingScreen 이 정한다.
     /// </summary>
     public partial class FishingField : Control
@@ -47,10 +47,9 @@ namespace Hanjeopsi.App.Ui
         public float ShadowSize = 1;
         public float ShadowWobble;
 
-        // 낚싯대와 줄
-        public Vector2 Hand;
-        public Vector2 TipIdle;
-        /// <summary>텐션 0~1. 낚싯대가 줄 쪽으로 휘고 줄이 팽팽해진다</summary>
+        // 낚싯줄. 낚싯대는 SD 그림에 있고, 화면이 그림 속 대 끝 자리를 RodTip 에 넣어 준다
+        public Vector2 RodTip;
+        /// <summary>텐션 0~1. 팽팽할수록 줄이 곧게 선다</summary>
         public float Bend;
         public Vector2? LineTo;
 
@@ -72,14 +71,6 @@ namespace Hanjeopsi.App.Ui
                 drops[i] = new Vector2(Mathf.Cos(a) * (14 + 16 * (float)_rand.NextDouble()), Mathf.Sin(a) * (26 + 18 * (float)_rand.NextDouble()));
             }
             _splashes.Add(new Splash { At = at, Scale = scale, T = 0, Drops = drops });
-        }
-
-        /// <summary>낚싯대 끝. 텐션이 걸리면 줄 쪽으로 끌려가며 아래로 휜다</summary>
-        public Vector2 Tip()
-        {
-            if (LineTo == null || Bend <= 0) return TipIdle;
-            var to = LineTo.Value;
-            return new Vector2(Mathf.Lerp(TipIdle.X, to.X, Bend * 0.22f), Mathf.Lerp(TipIdle.Y, to.Y, Bend * 0.12f) + Bend * 22);
         }
 
         public override void _Process(double delta)
@@ -112,7 +103,7 @@ namespace Hanjeopsi.App.Ui
             foreach (var s in _splashes) DrawSplash(s);
             if (ShadowVisible) DrawShadow();
             if (BobberVisible) DrawBobber();
-            DrawRodAndLine();
+            DrawLine();
         }
 
         private void DrawLanes()
@@ -202,23 +193,12 @@ namespace Hanjeopsi.App.Ui
             }
         }
 
-        private void DrawRodAndLine()
+        private void DrawLine()
         {
-            var hand = P(Hand);
-            var tip = P(Tip());
-            // 낚싯대: 손에서 끝까지 휘어진 곡선. 텐션이 걸릴수록 많이 휜다
-            var mid = (hand + tip) / 2;
-            var dir = (tip - hand).Normalized();
-            var normal = new Vector2(dir.Y, -dir.X);
-            var ctrl = mid + normal * (6 + Bend * 46) * (K / 2.4f);
-            var rod = Bezier(hand, ctrl, tip, 20);
-            DrawPolyline(rod, new Color("2a1e17"), 7, true);
-            DrawPolyline(rod, new Color("6b4a35"), 3, true);
-            DrawCircle(hand + dir * 18, 7, new Color("2a1e17"));
-
             if (LineTo == null) return;
+            var tip = P(RodTip);
             var to = P(LineTo.Value);
-            // 낚싯줄: 느슨하면 아래로 처진다
+            // 느슨하면 아래로 처진다
             var lm = (tip + to) / 2 + new Vector2(0, (1 - Bend) * 34 * (K / 2.4f));
             DrawPolyline(Bezier(tip, lm, to, 18), new Color(1, 1, 1, 0.85f), 2.2f, true);
         }

@@ -84,6 +84,19 @@ namespace Hanjeopsi.App.Ui
             Layout();
         }
 
+        /// <summary>포즈가 바뀌어 그림 크기와 기준점이 다를 때 (높이와 기준점도 새로)</summary>
+        public void Swap(TextureRect r, Texture2D tex, float height, Vector2 origin)
+        {
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if (_items[i].Node != r) continue;
+                var it = _items[i];
+                _items[i] = (it.Node, it.At, origin, height);
+            }
+            r.Texture = tex;
+            Layout();
+        }
+
         /// <summary>세운 그림을 다른 자리로 (발밑 기준)</summary>
         public void Move(Control node, Vector2 at)
         {

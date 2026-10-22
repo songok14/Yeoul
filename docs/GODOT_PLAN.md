@@ -157,7 +157,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 ## 8. 그림 적용 방향
 
 - **배경**: `public/assets/bg-*.webp`를 PNG로 바꿔 `godot/art/backgrounds`에 (마을 4장, 방파제 완료. 물고기 그림 5장은 `godot/art/fish/`). 900×1600 원본이라 1.2배 확대된다. 원본 고해상도가 있으면 다시 뽑는다.
-- **인게임 SD**: 시트(#EDEDED 배경)를 `scripts/sd_sheet.py`로 칸마다 잘라 PNG로. 크기는 바꾸지 않아 같은 시트 프레임은 같은 비율이다. 여울 8장, 고등어 12장 완료.
+- **인게임 SD**: 시트(#EDEDED 배경)를 `scripts/sd_sheet.py`로 칸마다 잘라 PNG로. 크기는 바꾸지 않아 같은 시트 프레임은 같은 비율이다. 여울 8장, 고등어 12장 완료. 낚시 포즈 3장(`fish-ready` 대 세움, `fish-wait` 기다림, `fish-reel` 감기)은 `scripts/sd_pose.py`로 넣었다. 낚싯대는 그림에 있고 게임은 그림 속 대 끝에서 줄만 그린다. 던질 때 젖혔다 휘두르기, 챔질 때 확 들기, 텐션·저항에 끌려가기는 포즈 기울기로 한다.
   ```bash
   python3 scripts/sd_sheet.py <시트.png> 2 4 godot/art/yeoul front,three-quarter,side,back,idle,wave,walk-1,walk-2
   ```
