@@ -28,6 +28,8 @@ namespace Hanjeopsi.App
         public string ShotScreen { get; private set; }
         public string ShotAction { get; private set; }
         public string Demo { get; private set; }
+        /// <summary>화면 확인용 날씨 인자: night, rain 또는 rain-dusk</summary>
+        public string Weather { get; private set; }
         public bool ShotMode
         {
             get { return ShotPath != null; }
@@ -47,6 +49,7 @@ namespace Hanjeopsi.App
                 else if (a.StartsWith("--screen=")) ShotScreen = a.Substring("--screen=".Length);
                 else if (a.StartsWith("--shot-action=")) ShotAction = a.Substring("--shot-action=".Length);
                 else if (a.StartsWith("--demo=")) Demo = a.Substring("--demo=".Length);
+                else if (a.StartsWith("--weather=")) Weather = a.Substring("--weather=".Length);
                 else if (a == "--tutorial") Tutorial = true;
             }
             if (ShotMode) Rng = new Mulberry32(2026);
