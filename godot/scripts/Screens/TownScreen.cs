@@ -46,6 +46,21 @@ namespace Hanjeopsi.App.Screens
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = Tex("backgrounds/village-" + Mathf.Clamp(s.Slot, 0, 3));
+            string weather = GameState.I.Weather;
+            bool rainy = weather == "rain" || weather == "rain-dusk";
+            if (rainy)
+            {
+                string rainBackground = weather == "rain-dusk"
+                    ? "backgrounds/village-rain-dusk"
+                    : "backgrounds/village-rain";
+                Texture2D rainTexture = Tex(rainBackground);
+                if (rainTexture != null) _stage.Background = rainTexture;
+
+                // 배경 바로 위, 간판·캐릭터 아래에 둬서 비가 장면에 자연스럽게 겹친다.
+                var rain = new RainOverlay { Name = "RainOverlay" };
+                rain.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+                _stage.AddChild(rain);
+            }
             Art.AddChild(_stage);
 
             // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
