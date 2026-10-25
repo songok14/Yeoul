@@ -168,7 +168,9 @@ namespace Hanjeopsi.App.Screens
             Texture2D t;
             if (!_tex.TryGetValue(path, out t))
             {
-                t = GD.Load<Texture2D>("res://art/" + path + ".png");
+                // Prefer optimized WebP backgrounds; keep PNG fallback for existing assets.
+                t = GD.Load<Texture2D>("res://art/" + path + ".webp");
+                if (t == null) t = GD.Load<Texture2D>("res://art/" + path + ".png");
                 _tex[path] = t;
             }
             return t;
