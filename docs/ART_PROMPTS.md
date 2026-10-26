@@ -428,6 +428,7 @@ Style: the same soft painterly watercolor anime background as the attached image
 ```
 
 #### 배경 2-3. 태풍 오는 날 (`village-typhoon`)
+**받음 (2026-10-26)**: `village-typhoon.webp`, `village-typhoon-night.webp`. 트럭 자리가 맑은 날과 같다. 사진 확인용 `--weather=typhoon`(비 효과를 얹는다).
 방파제 태풍 그림은 뽑지 않는다. 태풍 날은 방파제 출입이 막혀 낚시를 못 하는 날로 둔다.
 
 ```

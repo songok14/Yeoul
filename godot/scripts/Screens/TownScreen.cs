@@ -53,11 +53,13 @@ namespace Hanjeopsi.App.Screens
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             string art = G.TownArt();
-            // 비·눈은 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk, snow 로만 본다
+            // 비·눈·태풍은 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk, snow, typhoon 으로만 본다
             string weather = GameState.I.Weather;
-            if (weather == "rain" || weather == "rain-dusk")
+            bool night = s.Slot == G.Data.Balance.Time.SlotsPerDay - 1;
+            if (weather == "rain" || weather == "rain-dusk" || weather == "typhoon")
             {
-                art = weather == "rain-dusk" ? "village-rain-dusk" : "village-rain";
+                art = weather == "typhoon" ? (night ? "village-typhoon-night" : "village-typhoon")
+                    : weather == "rain-dusk" ? "village-rain-dusk" : "village-rain";
 
                 // 배경 바로 위, 간판·캐릭터 아래에 둬서 비가 장면에 자연스럽게 겹친다. 누르기는 그냥 지나간다
                 var rain = new RainOverlay { Name = "RainOverlay" };
@@ -65,7 +67,7 @@ namespace Hanjeopsi.App.Screens
                 _stage.AddChild(rain);
             }
             // 눈 그림도 아직 사진 확인용 --weather=snow 로만 (밤이면 밤 눈 그림)
-            if (weather == "snow") art = s.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "village-snow-night" : "village-snow";
+            if (weather == "snow") art = night ? "village-snow-night" : "village-snow";
             _stage.Background = ArtStage.LoadBackground(art);
             Art.AddChild(_stage);
 
