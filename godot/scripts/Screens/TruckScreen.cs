@@ -185,8 +185,9 @@ namespace Hanjeopsi.App.Screens
                 bool known = s.Dex.ContainsKey(r.Species) && s.Dex[r.Species].Count > 0;
                 var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
                 row.AddThemeConstantOverride("separation", 20);
-                var icon = PlaceScreen.FishIcon(r.Species, 120);
-                if (n == 0) icon.Modulate = new Color(1, 1, 1, 0.35f);
+                // 아직 못 낚은 고기의 요리는 그림자로
+                var icon = PlaceScreen.DishIcon(r, 120, !known);
+                if (known && n == 0) icon.Modulate = new Color(1, 1, 1, 0.35f);
                 row.AddChild(icon);
                 var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
                 text.AddThemeConstantOverride("separation", 0);
@@ -316,6 +317,9 @@ namespace Hanjeopsi.App.Screens
             var rng = GameState.I.Rng;
             double target = G.Truck.RollTarget(st, rng);
 
+            var dishArt = PlaceScreen.DishIcon(recipe, 230);
+            dishArt.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+            _body.AddChild(dishArt);
             _body.AddChild(UiKit.Text(F("step", recipe.Name, step + 1, recipe.Steps.Count), TextSize.H1, Palette.Gold, true, false, 0, null, HorizontalAlignment.Center));
             _body.AddChild(UiKit.Text(visible ? T["hint"] : T["hintBlind"], TextSize.Small, Palette.GrayText, false, false, 0, null, HorizontalAlignment.Center));
             _body.AddChild(UiKit.Text(visible ? F("addFlavor", flavor.Tool, flavor.Name) : F("addFlavor", flavor.Tool, T["unknown"]), TextSize.Body, Palette.Paper, true));
@@ -383,7 +387,7 @@ namespace Hanjeopsi.App.Screens
             ClearBody();
             var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             row.AddThemeConstantOverride("separation", 28);
-            row.AddChild(PlaceScreen.FishIcon(recipe.Species, 240));
+            row.AddChild(PlaceScreen.DishIcon(recipe, 260));
             var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
             text.AddThemeConstantOverride("separation", 6);
             text.AddChild(UiKit.Text(F("done", recipe.Name), TextSize.H1, Palette.Paper, true));

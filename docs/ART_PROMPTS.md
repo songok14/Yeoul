@@ -371,7 +371,7 @@ Style: the same soft painterly watercolor anime background as the attached image
 ```
 
 ## 요리 시트 (트럭 메뉴·결과창용, 2026-10-26)
-고닷에는 아직 요리 그림이 없다. 받으면 칸마다 잘라 `godot/art/dishes/<요리 id>.png`(예: `chamdom-hoe.png`)로 넣는다. 붙여 넣을 때 마을 배경 그림 한 장(색감과 빛)을 같이 첨부한다. 두 시트는 같은 접시 크기와 같은 각도로 맞춘다(요리 2를 뽑을 때 요리 1 결과도 첨부).
+**받음 (2026-10-26)**: 두 장 모두. `python3 scripts/dish_sheet.py <시트> <이름들>`로 잘라 `godot/art/dishes/<요리 id>.png`(예: `chamdom-hoe.png`)에 넣었다. 트럭 메뉴판·간 맞추기·결과에 나온다(`PlaceScreen.DishIcon`). 붙여 넣을 때 마을 배경 그림 한 장(색감과 빛)을 같이 첨부한다. 두 시트는 같은 접시 크기와 같은 각도로 맞춘다(요리 2를 뽑을 때 요리 1 결과도 첨부).
 
 ### 요리 1. 새 요리 다섯 (참돔회, 도다리쑥국, 갑오징어숙회, 우럭매운탕, 농어구이)
 

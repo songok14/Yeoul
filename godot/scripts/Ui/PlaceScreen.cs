@@ -227,6 +227,23 @@ namespace Hanjeopsi.App.Ui
             return r;
         }
 
+        /// <summary>요리 그림 (godot/art/dishes/요리 id). 그림이 없으면 재료 물고기 그림</summary>
+        public static TextureRect DishIcon(Hanjeopsi.Core.Data.Recipe recipe, float width, bool dark = false)
+        {
+            string path = "res://art/dishes/" + recipe.Id + ".png";
+            if (!ResourceLoader.Exists(path)) return FishIcon(recipe.Species, width, dark);
+            var r = new TextureRect
+            {
+                Texture = GD.Load<Texture2D>(path),
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2(width, width * 0.7f),
+                MouseFilter = MouseFilterEnum.Ignore,
+            };
+            if (dark) r.Modulate = new Color(0.22f, 0.19f, 0.17f, 0.85f);
+            return r;
+        }
+
         /// <summary>작은 둥근 알약 글자 (상태 표시)</summary>
         public static PanelContainer Pill(string text, Color bg, Color fg, int size = TextSize.Small - 4)
         {
