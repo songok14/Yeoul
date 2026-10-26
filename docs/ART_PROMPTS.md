@@ -438,6 +438,7 @@ Style: the same soft painterly watercolor anime background as the attached image
 ```
 
 ### 배경 3. 방파제 밤 (`breakwater-night`, 밤낚시용)
+**받음 (2026-10-26)**: `godot/art/backgrounds/breakwater-night.png`(900×1600). 밤 칸 낚시에서 색을 입히지 않고 그대로 쓴다.
 지금 밤낚시는 낮 방파제 그림(`breakwater.png`)에 푸른 색만 입힌다. 이 그림을 받으면 밤 칸에서 바꿔 쓴다. `breakwater.png`를 꼭 같이 첨부한다.
 
 ```
