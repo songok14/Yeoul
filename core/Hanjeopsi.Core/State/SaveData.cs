@@ -41,6 +41,9 @@ namespace Hanjeopsi.Core.State
         /// <summary>고닷 장비·미끼 (고닷만)</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public KitState Kit;
+        /// <summary>1장 주간 상환 (고닷만)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public WeekState Week;
 
         public bool Flag(string name)
         {
@@ -74,6 +77,25 @@ namespace Hanjeopsi.Core.State
         public List<string> Gifts = new List<string>();
     }
 
+    /// <summary>이번 주 상환과 목표</summary>
+    public sealed class WeekState
+    {
+        /// <summary>몇째 주 (1부터)</summary>
+        public int No = 1;
+        /// <summary>상환일까지 남은 빚을 이 아래로 낮춰야 한다</summary>
+        public int Target;
+        /// <summary>이번 주 붙은 이자</summary>
+        public int Interest;
+        /// <summary>연체한 횟수</summary>
+        public int Late;
+        /// <summary>이번 주 기록 (catch, happy, request, earn, sp:어종)</summary>
+        public Dictionary<string, int> Count = new Dictionary<string, int>();
+        /// <summary>이번 주 마친 목표 (목표 순서)</summary>
+        public List<int> Done = new List<int>();
+        /// <summary>대결 날 가장 큰 고기 (cm)</summary>
+        public double RivalBest;
+    }
+
     /// <summary>도감 한 칸</summary>
     public sealed class DexEntry
     {
@@ -103,5 +125,25 @@ namespace Hanjeopsi.Core.State
         /// <summary>밤새 통발에 든 어종 (고닷만)</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<string> Trap;
+        /// <summary>상환일 결과 (고닷만)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public WeekResult Week;
+        /// <summary>대결 결과: 이긴 고기 길이, 졌으면 0 (대결 날만)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public double? Rival;
+    }
+
+    /// <summary>상환일 정산</summary>
+    public sealed class WeekResult
+    {
+        public int No;
+        public bool Paid;
+        /// <summary>모자란 돈과 연체료</summary>
+        public int Short;
+        public int LateFee;
+        /// <summary>새 주의 이자와 갚을 돈</summary>
+        public int NextInterest;
+        public int NextDue;
+        public bool Seized;
     }
 }

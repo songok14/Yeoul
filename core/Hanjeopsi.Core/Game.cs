@@ -73,6 +73,7 @@ namespace Hanjeopsi.Core
             Truck = new Truck(data, Fresh, Taste);
             if (data.Diner != null) Diner = new Diner(data.Diner);
             Load(save);
+            if (save.Day > 1 || save.Flag("prologueDone")) BeginWeeks();
         }
 
         /// <summary>새 세이브 기본값 (웹 createSave)</summary>
@@ -98,6 +99,7 @@ namespace Hanjeopsi.Core
         public static Game NewGame(GameData data, int seed)
         {
             var g = new Game(data, CreateSave(data, seed));
+            g.BeginWeeks();
             g.RefreshRequests();
             g.Persist();
             return g;
@@ -125,6 +127,7 @@ namespace Hanjeopsi.Core
 
         public int DaysLeft()
         {
+            if (IsWeekly) return W.Weeks.Count * W.DaysPerWeek - Save.Day;
             return Data.Balance.Chapter1.DeadlineDays - Save.Day;
         }
 
@@ -150,7 +153,7 @@ namespace Hanjeopsi.Core
         public int CustomersNow()
         {
             if (Diner == null) return Data.Balance.Truck.CustomersPerShift;
-            return Diner.GuestCount(Save, Save.Slot, WeatherToday().GuestAdd);
+            return Diner.GuestCount(Save, Save.Slot, WeatherToday().GuestAdd + EventGuests());
         }
 
         // ───────── 날씨 (고닷만) ─────────
@@ -180,7 +183,7 @@ namespace Hanjeopsi.Core
         /// <summary>이번 장사 손님 차례 (날씨 반영)</summary>
         public List<string> PlanGuests(IRandom rng)
         {
-            return Diner.PlanGuests(Save, Save.Slot, rng, WeatherToday().GuestAdd);
+            return Diner.PlanGuests(Save, Save.Slot, rng, WeatherToday().GuestAdd + EventGuests());
         }
 
         /// <summary>고등어 힌트 정확도 빼기 (안개)</summary>
@@ -192,7 +195,7 @@ namespace Hanjeopsi.Core
         /// <summary>큰 놈 입질 확률 더하기 (안개)</summary>
         public double BigAdd()
         {
-            return WeatherToday().BigAdd;
+            return WeatherToday().BigAdd + EventBig();
         }
 
         /// <summary>오늘 방파제에 나갈 수 있나 (태풍이면 출입 금지)</summary>
@@ -220,6 +223,7 @@ namespace Hanjeopsi.Core
             var dish = ServeDish(recipe, results);
             if (dish == null || Diner == null) return dish;
             dish.Guest = Diner.AfterServe(Save, guest, recipe, Truck.MoodOf(dish.Avg));
+            if (Truck.MoodOf(dish.Avg) == 2) Tally("happy");
             Persist();
             return dish;
         }
@@ -252,6 +256,7 @@ namespace Hanjeopsi.Core
         public void EndDay()
         {
             var summary = new DaySummary { Day = Save.Day, Earned = Save.EarnedToday };
+            WeekEndOfDay(summary, Save.Day);
             Save.Day += 1;
             Save.Slot = 0;
             Save.EarnedToday = 0;
@@ -299,6 +304,7 @@ namespace Hanjeopsi.Core
             Save.Money += amount;
             Save.EarnedToday += amount;
             Save.TotalEarned += amount;
+            Tally("earn", amount);
         }
 
         /// <summary>도감 기록. 처음 낚은 어종이면 true</summary>
@@ -312,6 +318,7 @@ namespace Hanjeopsi.Core
             e.Best = Math.Max(e.Best, size);
             if (released) e.Released += 1;
             Save.Dex[species] = e;
+            TallyCatch(species, size);
             Persist();
             return isNew;
         }
@@ -466,6 +473,7 @@ namespace Hanjeopsi.Core
             var flag = Data.RequestTemplates[req.Template].Flag;
             if (!string.IsNullOrEmpty(flag)) Save.Flags[flag] = true;
             if (Diner != null) Diner.AddRequestRep(Save);
+            Tally("request");
             if (Save.Kit != null) Save.Kit.Requests += 1;
             Persist();
             return req.Reward;
@@ -575,6 +583,12 @@ namespace Hanjeopsi.Core
                 Save.Flags["ch1Clear"] = true;
                 Save.JournalPages = Math.Max(1, Save.JournalPages);
                 return ChapterOutcome.Clear;
+            }
+            if (IsWeekly)
+            {
+                // 주간 상환: 연체를 두 번 하거나 마지막 상환일에 빚이 남으면 차압
+                if (Save.Flag("ch1Seized") && !Save.Flag("ch1Clear")) return ChapterOutcome.Fail;
+                return ChapterOutcome.None;
             }
             if (Save.Day > Data.Balance.Chapter1.DeadlineDays && Save.Debt > 0 && !Save.Flag("ch1Clear")) return ChapterOutcome.Fail;
             return ChapterOutcome.None;

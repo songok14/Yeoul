@@ -41,6 +41,7 @@ namespace Hanjeopsi.Core.Tests
                 d.Balance.Time.ShopLastSlot = 99;
                 d.Diner = null;
                 d.Weather = null;
+                d.Weekly = null;
                 // 고닷이 늘린 장비(10단계, 새 장비, 미끼)도 웹 세 단계로
                 d.Gear.Rods.RemoveRange(3, d.Gear.Rods.Count - 3);
                 d.Gear.Reels.RemoveRange(3, d.Gear.Reels.Count - 3);

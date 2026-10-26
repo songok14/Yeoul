@@ -85,7 +85,7 @@ namespace Hanjeopsi.Core.Tests
                 }
             }
             // 아버지 말과 1장 기준은 STORY.md 그대로
-            Assert.Contains(d.Scenes["welcome"], l => l.Text.Contains("30일 안에 300만 원"));
+            Assert.Contains(d.Scenes["welcome"], l => l.Text.Contains("4주 동안 매주 나눠 갚는다"));
         }
 
         [Fact]

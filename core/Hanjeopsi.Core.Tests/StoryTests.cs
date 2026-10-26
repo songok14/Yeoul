@@ -54,7 +54,7 @@ namespace Hanjeopsi.Core.Tests
         {
             var p1 = TestData.Full.Story.Parts["p1"];
             Assert.Contains(p1, p => p.Text.Contains("고기는 먼저 낚은 사람 게 아니야. 제일 맛있게 먹어주는 사람 거지."));
-            Assert.Contains(p1, p => p.Text.Contains("90일 뒤 차압 예정") && p.Text.Contains("30일 안에 1차 상환금 300만 원"));
+            Assert.Contains(p1, p => p.Text.Contains("90일 뒤 차압 예정") && p.Text.Contains("1차 상환금 300만 원을 4주 동안 매주 나눠"));
             Assert.Contains(TestData.Full.Story.Parts["p2"], p => p.Event == "salt");
         }
     }

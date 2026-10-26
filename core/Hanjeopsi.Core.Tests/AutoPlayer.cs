@@ -157,7 +157,7 @@ namespace Hanjeopsi.Core.Tests
         public PlayResult Play()
         {
             Prologue();
-            int lastDay = D.Balance.Chapter1.DeadlineDays;
+            int lastDay = _g.IsWeekly ? _g.DaysLeft() + S.Day : D.Balance.Chapter1.DeadlineDays;
             while (true)
             {
                 // 마을에 들어올 때마다 결말 확인 (웹 TownScene.create)
@@ -178,7 +178,7 @@ namespace Hanjeopsi.Core.Tests
             _r.Debt = S.Debt;
             _r.TotalEarned = S.TotalEarned;
             _r.Dishes = S.DishesCooked;
-            _r.Gear = "낚싯대 " + S.Rod + " · 릴 " + S.Reel + " · 쿨러 " + S.Tackle + " · " + _g.Diner.Rank(S).Name + " 평판 " + S.Diner.Rep + " 단골 " + D.Diner.Guests.Count(gu => _g.Diner.IsRegular(S, gu.Id));
+            _r.Gear = "낚싯대 " + S.Rod + " · 릴 " + S.Reel + " · 쿨러 " + S.Tackle + " · " + _g.Diner.Rank(S).Name + " 평판 " + S.Diner.Rep + " 단골 " + D.Diner.Guests.Count(gu => _g.Diner.IsRegular(S, gu.Id)) + (S.Week != null ? " 연체 " + S.Week.Late + " 주 " + S.Week.No + " 목표 " + _goals : "");
             return _r;
         }
 
@@ -192,6 +192,8 @@ namespace Hanjeopsi.Core.Tests
             Check("프롤로그");
         }
 
+        private int _goals;
+
         private void PlayDay()
         {
             int day0 = S.Day;
@@ -203,12 +205,15 @@ namespace Hanjeopsi.Core.Tests
             TruckShift();
             if (S.Slot <= 2) FishingTrip();
             if (S.Slot <= 3 && S.Slot >= D.Balance.Time.TruckFirstSlot) TruckShift();
+            // 상환일이면 밤이 지나기 전에 식당에서 이번 주 몫을 낸다
+            Repay();
             if (S.Day == day0 && S.Slot <= 4) FishingTrip();
             // 밤낚시가 끝나면 시간이 다 가서 날이 저절로 바뀐다. 아니면 식당에서 잠자기.
             // 미끼가게가 밤에 닫혀 있었으면 다음 날 새벽에 장을 본다
             Town();
             if (S.Day == day0) _g.EndDay();
             _g.CheckGifts();
+            _goals += _g.CheckGoals().Count;
             if (_s.Thoughtful) Upgrade();
             BuyBait(3 * D.Balance.Chapter1.CastsPerTrip);
             Check("잠 " + day0);
@@ -543,9 +548,16 @@ namespace Hanjeopsi.Core.Tests
         /// <summary>미끼값만 남기고 갚는다. 서툰 사람은 10만 원 단위로만 (식당 "10만 원 갚기" 버튼)</summary>
         private void Repay()
         {
-            if (!_g.IsShopOpen()) return;
             int reserve = 2 * D.Gear.Bait.Price;
-            if (_s.Thoughtful)
+            if (_s.Thoughtful && _g.IsWeekly)
+            {
+                // 주간 상환: 이번 주 몫부터 낸다. 장비를 다 사기 전에는 나머지를 장비값으로 모은다
+                int due = Math.Min(_g.DueNow(), S.Money - reserve);
+                if (due > 0) _g.Repay(due);
+                bool saving = _g.DaysLeft() >= 8 && (S.Rod < 2 || S.Reel < 2 || S.Tackle < 2);
+                if (!saving && S.Money > reserve) _g.Repay(S.Money - reserve);
+            }
+            else if (_s.Thoughtful)
             {
                 // 장비를 다 사기 전 초반에는 장비값을 모은다
                 bool saving = _g.DaysLeft() >= 8 && (S.Rod < 2 || S.Reel < 2 || S.Tackle < 2);

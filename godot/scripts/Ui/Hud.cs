@@ -97,9 +97,11 @@ namespace Hanjeopsi.App.Ui
                 _slots[i].LabelSettings.FontColor = now ? Palette.Ink : i < s.Slot ? new Color(Palette.GrayText, 0.4f) : Palette.GrayText;
             }
 
-            int left = _game.DaysLeft();
+            // 주간 상환이면 이번 주 상환일까지, 아니면 1장 기한까지
+            int left = _game.IsWeekly ? _game.DaysToDue() : _game.DaysLeft();
             bool done = s.Debt <= 0;
-            _dday.Text = done ? "상환 완료" : left > 0 ? "D-" + left : left == 0 ? "D-DAY" : "기한 지남";
+            string pre = _game.IsWeekly ? s.Week.No + "주 " : "";
+            _dday.Text = done ? "상환 완료" : left > 0 ? pre + "D-" + left : left == 0 ? pre + "상환일" : "기한 지남";
             _ddayBox.AddThemeStyleboxOverride("panel", UiKit.Box(done ? Palette.GreenDark : left <= 3 ? Palette.Red : Palette.RedDark, 26, 22, 6));
 
             if (!animate || _shownMoney < 0)
@@ -123,7 +125,13 @@ namespace Hanjeopsi.App.Ui
         private void ShowDebt(double v)
         {
             _shownDebt = v;
-            _debt.Text = v > 0.5 ? "남은 빚 " + UiKit.Won((long)Mathf.Round(v)) : "1차 상환 끝";
+            if (v > 0.5 && _game.IsWeekly)
+            {
+                // 이번 주에 더 낼 돈과 남은 빚 (다 냈으면 "이번 주 끝")
+                int due = _game.DueNow();
+                _debt.Text = (due > 0 ? "이번 주 " + UiKit.Won(due) : "이번 주 완료") + " · 빚 " + UiKit.Won((long)Mathf.Round(v));
+            }
+            else _debt.Text = v > 0.5 ? "남은 빚 " + UiKit.Won((long)Mathf.Round(v)) : "1차 상환 끝";
             SetBar(v);
         }
 

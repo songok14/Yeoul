@@ -1,0 +1,45 @@
+{
+  "daysPerWeek": 7,
+  "interestRate": 0.03,
+  "lateRate": 0.1,
+  "maxLate": 1,
+  "weeks": [
+    {
+      "principal": 400000,
+      "goals": [
+        { "type": "catch", "n": 15, "text": "물고기 15마리 낚기", "reward": 30000 },
+        { "type": "happy", "n": 5, "text": "만족한 손님 5명", "reward": 30000 },
+        { "type": "species", "id": "bollak", "n": 1, "text": "볼락 낚기", "reward": 20000 }
+      ]
+    },
+    {
+      "principal": 600000,
+      "goals": [
+        { "type": "dex", "n": 10, "text": "도감 10종 채우기", "reward": 50000 },
+        { "type": "regulars", "n": 1, "text": "단골 손님 1명", "reward": 50000 },
+        { "type": "request", "n": 1, "text": "납품 의뢰 1번", "reward": 40000 }
+      ]
+    },
+    {
+      "principal": 900000,
+      "goals": [
+        { "type": "species", "id": "chamdom", "n": 1, "text": "참돔 낚기", "reward": 100000 },
+        { "type": "happy", "n": 15, "text": "만족한 손님 15명", "reward": 60000 },
+        { "type": "earn", "n": 800000, "text": "이번 주 80만 원 벌기", "reward": 80000 }
+      ]
+    },
+    {
+      "principal": 1100000,
+      "goals": [
+        { "type": "regulars", "n": 3, "text": "단골 손님 3명", "reward": 100000 },
+        { "type": "catch", "n": 40, "text": "물고기 40마리 낚기", "reward": 80000 },
+        { "type": "dex", "n": 20, "text": "도감 20종 채우기", "reward": 80000 }
+      ]
+    }
+  ],
+  "events": [
+    { "day": 6, "id": "market", "name": "마을 장날", "note": "오늘은 장날. 트럭에 손님이 몰린다", "guestAdd": 3 },
+    { "day": 13, "id": "big", "name": "대물 소문", "note": "방파제에 대물이 붙었다는 소문", "bigAdd": 0.15 },
+    { "day": 20, "id": "rival", "name": "차세라와 대결", "note": "블루훅 차세라가 왔다. 오늘 40cm 넘는 고기를 낚으면 이긴다", "rivalSize": 40, "rivalPrize": 150000 }
+  ]
+}

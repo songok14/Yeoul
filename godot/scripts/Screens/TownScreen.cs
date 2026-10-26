@@ -4,6 +4,8 @@ using System.Linq;
 using Godot;
 using Hanjeopsi.App.Ui;
 using Hanjeopsi.Core;
+using Hanjeopsi.Core.Data;
+using Hanjeopsi.Core.State;
 using CoreGame = Hanjeopsi.Core.Game;
 
 namespace Hanjeopsi.App.Screens
@@ -79,6 +81,7 @@ namespace Hanjeopsi.App.Screens
             _hud = new Hud(G);
             col.AddChild(_hud);
             col.AddChild(NewsRibbon());
+            if (G.IsWeekly && s.Debt > 0) col.AddChild(GoalsPill());
             col.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
 
             // ── 아래: 메뉴 ──
@@ -179,7 +182,8 @@ namespace Hanjeopsi.App.Screens
         private Control NewsRibbon()
         {
             var closed = G.ClosedToday();
-            string headline = closed.Count > 0 ? string.Join("·", closed) + " 금어기" : G.HeadlineToday();
+            var ev = G.EventToday();
+            string headline = ev != null ? ev.Name + "! " + ev.Note : closed.Count > 0 ? string.Join("·", closed) + " 금어기" : G.HeadlineToday();
             var pill = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
             pill.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.62f), 30, 30, 10));
             var row = new HBoxContainer();
@@ -193,6 +197,24 @@ namespace Hanjeopsi.App.Screens
             news.Ellipsis();
             row.AddChild(news);
             pill.AddChild(row);
+            return Riser(pill);
+        }
+
+        /// <summary>이번 주 목표 몇 개 했는지. 누르면 목표 목록</summary>
+        private List<WeekGoal> _newGoals = new List<WeekGoal>();
+
+        private Control GoalsPill()
+        {
+            _newGoals = G.CheckGoals();
+            var goals = G.WeekGoals();
+            int done = Enumerable.Range(0, goals.Count).Count(G.GoalDone);
+            var pill = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Stop, MouseDefaultCursorShape = CursorShape.PointingHand };
+            pill.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.7f), 30, 28, 8).WithBorder(new Color(Palette.Gold, 0.7f), 3));
+            pill.AddChild(UiKit.Text(G.Save.Week.No + "주 목표 " + done + "/" + goals.Count, TextSize.Small - 2, done == goals.Count ? Palette.Gold : Palette.Paper, true));
+            pill.GuiInput += e =>
+            {
+                if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Left && !mb.Pressed) ShowGoals();
+            };
             return Riser(pill);
         }
 
@@ -302,12 +324,74 @@ namespace Hanjeopsi.App.Screens
                 else if (sum.Trap != null) lines.Add("통발이 비었다");
                 var w = G.WeatherToday();
                 if (w.Id != "clear") lines.Add(w.Note);
-                int left = G.DaysLeft();
-                lines.Add(s.Debt > 0 ? "상환까지 " + (left > 0 ? left + "일" : "오늘이 마지막 날") : "1차 상환은 끝났다");
-                Modal(s.Day + "일차 " + G.SlotName(), string.Join("\n", lines), new[] { new ModalButton("좋아", Palette.Green) });
+                if (sum.Rival.HasValue) lines.Add(sum.Rival.Value > 0 ? "차세라와 대결에서 이겼다 (" + sum.Rival.Value.ToString("0.#") + "cm)" : "차세라와 대결에서 졌다");
+                var ev = G.EventToday();
+                if (ev != null) lines.Add(ev.Note);
+                if (G.IsWeekly && s.Debt > 0)
+                {
+                    int d = G.DaysToDue();
+                    lines.Add(s.Week.No + "주 상환까지 " + (d > 0 ? d + "일 · " : "오늘 · ") + UiKit.Won(G.DueNow()));
+                }
+                else
+                {
+                    int left = G.DaysLeft();
+                    lines.Add(s.Debt > 0 ? "상환까지 " + (left > 0 ? left + "일" : "오늘이 마지막 날") : "1차 상환은 끝났다");
+                }
+                var week = sum.Week;
+                Modal(s.Day + "일차 " + G.SlotName(), string.Join("\n", lines), new[] { new ModalButton("좋아", Palette.Green, () => { if (week != null) PayDay(week); }) });
             }
             // 보상 장비가 생기면 노씨가 미끼가게에서 기다린다
-            if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold, SafeTop + 520);
+            if (_newGoals.Count > 0)
+            {
+                Toast("목표 달성! " + string.Join(", ", _newGoals.Select(x => x.Text)) + " (+" + UiKit.Won(_newGoals.Sum(x => x.Reward)) + ")", Palette.Gold, SafeTop + 520);
+                Sound.Play("good", -4);
+                _hud.Refresh();
+            }
+            else if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold, SafeTop + 520);
+        }
+
+        /// <summary>
+        /// 상환일 장면: 은행 직원이 다녀간 뒤 할머니와 여울. 다 냈으면 다음 주 이자와 몫,
+        /// 못 냈으면 연체료와 경고. 차압은 결말 이야기가 맡는다
+        /// </summary>
+        private void PayDay(WeekResult r)
+        {
+            if (r.Seized) return;
+            var lines = new List<DialogueLine>();
+            if (r.Paid)
+            {
+                lines.Add(new DialogueLine { Text = r.No + "주 상환일. 은행 직원이 통지서에 도장을 찍고 갔다." });
+                lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "애썼다. 밥 먹고 해." });
+                if (r.NextDue > 0)
+                    lines.Add(new DialogueLine { Speaker = "yeoul", Face = "default", Text = "다음 주는 " + UiKit.Won(r.NextDue) + ".\n이자 " + UiKit.Won(r.NextInterest) + "도 붙었다." });
+            }
+            else
+            {
+                lines.Add(new DialogueLine { Text = r.No + "주 상환일. " + UiKit.Won(r.Short) + "이 모자랐다.\n연체료 " + UiKit.Won(r.LateFee) + "이 붙었다." });
+                lines.Add(new DialogueLine { Text = "은행 직원이 말했다. 한 번 더 밀리면 기다려 줄 수 없다고." });
+                lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "괜찮다. 아직 안 끝났어." });
+                lines.Add(new DialogueLine { Speaker = "yeoul", Face = "default", Text = "이번 주에 " + UiKit.Won(r.NextDue) + ".\n꼭 낸다." });
+            }
+            Talk(lines);
+        }
+
+        /// <summary>이번 주 목표: 진행과 보상. 다 한 목표는 금빛</summary>
+        private void ShowGoals()
+        {
+            G.CheckGoals();
+            _hud.Refresh();
+            var goals = G.WeekGoals();
+            var rows = new List<string>();
+            for (int i = 0; i < goals.Count; i++)
+            {
+                var p = G.GoalProgress(goals[i]);
+                string mark = G.GoalDone(i) ? "✔ " : "· ";
+                string prog = goals[i].Type == "species" ? "" : "  " + Math.Min(p.Now, p.Need).ToString("#,0") + "/" + p.Need.ToString("#,0");
+                rows.Add(mark + goals[i].Text + prog + "  (+" + UiKit.Won(goals[i].Reward) + ")");
+            }
+            var ev = G.Data.Weekly.Events.FirstOrDefault(e => e.Day > G.Save.Day - 1 && e.Day <= G.DueDay());
+            if (ev != null) rows.Add("\n" + ev.Day + "일 " + ev.Name);
+            Modal(G.Save.Week.No + "주 목표", string.Join("\n", rows), new[] { new ModalButton("좋아", Palette.Green) });
         }
 
         public override void ShotSetup(string action)
@@ -326,6 +410,15 @@ namespace Hanjeopsi.App.Screens
                 case "yeoul":
                     TapYeoul();
                     TapCat();
+                    break;
+                case "goals":
+                    ShowGoals();
+                    break;
+                case "paid":
+                    PayDay(new WeekResult { No = 1, Paid = true, NextInterest = 78_000, NextDue = 678_000 });
+                    break;
+                case "late":
+                    PayDay(new WeekResult { No = 1, Paid = false, Short = 120_000, LateFee = 12_000, NextDue = 810_000 });
                     break;
             }
         }
@@ -444,7 +537,9 @@ namespace Hanjeopsi.App.Screens
             string line = lines[(int)(GameState.I.Rng.Next() * lines.Count)];
             Say("grandma", "default", line, new[]
             {
-                new ModalButton("10만 원 갚기", Palette.GoldDark, () => Pay(step), s.Debt <= 0 || s.Money < step),
+                new ModalButton(G.IsWeekly ? "이번 주 몫 갚기 (" + UiKit.Won(Math.Min(s.Money, G.DueNow())) + ")" : "10만 원 갚기", Palette.GoldDark,
+                    () => Pay(G.IsWeekly ? Math.Min(s.Money, G.DueNow()) : step),
+                    G.IsWeekly ? G.DueNow() <= 0 || s.Money <= 0 : s.Debt <= 0 || s.Money < step),
                 new ModalButton("있는 돈 전부 갚기 (" + UiKit.Won(canPay) + ")", Palette.Red, () => Pay(canPay), canPay <= 0),
                 new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep),
                 new ModalButton("나가기", Palette.GrayDark),
