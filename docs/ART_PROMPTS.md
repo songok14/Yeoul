@@ -389,6 +389,8 @@ Style: soft painterly watercolor illustration matching the attached background i
 ### 배경 2. 날씨 (비·눈·태풍·안개, 나중에 날씨를 넣을 때)
 지금 마을 그림(`village-1.webp` 점심, 저녁 판은 `village-3.webp`)을 **꼭 같이 첨부**해서 구도·건물·푸드트럭 자리를 그대로 두고 날씨만 바꾼다. 받으면 `godot/art/backgrounds/village-<날씨>.webp`(864×1536 이상, 9:16)로 넣는다. 빗줄기·눈송이는 화면이 따로 그리니 그림에는 약하게만 넣는다(`Ui/RainOverlay`). 이미 있는 비 두 장은 다시 뽑지 않아도 된다.
 
+**받음 (2026-10-26)**: 눈 네 장 `village-snow.webp`, `village-snow-night.webp`(트럭 자리가 맑은 날과 같다), `breakwater-snow.png`, `breakwater-snow-night.png`(사용자가 밤 판도 줬다). 게임 날씨는 아직 없어 `--weather=snow` 사진으로만 본다.
+
 #### 배경 2-1. 눈 오는 낮 (`village-snow`)
 
 ```

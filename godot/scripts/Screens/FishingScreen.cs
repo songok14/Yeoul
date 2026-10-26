@@ -139,6 +139,12 @@ namespace Hanjeopsi.App.Screens
             _stage.Background = ArtStage.LoadBackground(nightArt ? "breakwater-night" : "breakwater");
             _stage.KeepClouds = !night;
             _stage.Tint = nightArt ? Colors.White : SlotTint[tintSlot];
+            // 눈 오는 방파제는 아직 사진 확인용 --weather=snow 로만. 밤 눈 그림은 색을 입히지 않는다
+            if (GameState.I.Weather == "snow" && !_tutorial)
+            {
+                _stage.Background = ArtStage.LoadBackground(night ? "breakwater-snow-night" : "breakwater-snow");
+                _stage.Tint = night ? Colors.White : SlotTint[tintSlot];
+            }
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
