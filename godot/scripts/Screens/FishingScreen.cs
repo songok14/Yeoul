@@ -132,11 +132,13 @@ namespace Hanjeopsi.App.Screens
             // ── 그림: 방파제 배경, 여울 뒷모습(SD), 고등어 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/breakwater.png");
             int tintSlot = _tutorial ? 3 : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1);
-            // 밤에는 흰 구름까지 어둡게 칠한다
-            _stage.KeepClouds = tintSlot < SlotTint.Length - 1;
-            _stage.Tint = SlotTint[tintSlot];
+            bool night = tintSlot == SlotTint.Length - 1;
+            // 밤 그림(breakwater-night)이 있으면 그대로 쓰고, 없으면 낮 그림을 흰 구름까지 어둡게 칠한다
+            bool nightArt = night && (ResourceLoader.Exists("res://art/backgrounds/breakwater-night.png") || ResourceLoader.Exists("res://art/backgrounds/breakwater-night.webp"));
+            _stage.Background = ArtStage.LoadBackground(nightArt ? "breakwater-night" : "breakwater");
+            _stage.KeepClouds = !night;
+            _stage.Tint = nightArt ? Colors.White : SlotTint[tintSlot];
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);

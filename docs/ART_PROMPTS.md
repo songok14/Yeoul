@@ -357,6 +357,19 @@ Keep for the game screen: the lower half stays a flat open plaza with no new obj
 Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
+### 배경 3. 방파제 밤 (`breakwater-night`, 밤낚시용)
+지금 밤낚시는 낮 방파제 그림(`breakwater.png`)에 푸른 색만 입힌다. 이 그림을 받으면 밤 칸에서 바꿔 쓴다. `breakwater.png`를 꼭 같이 첨부한다.
+
+```
+Create one vertical background illustration for a mobile fishing game. Attached: the current daytime breakwater background of this exact scene. Keep the composition, camera, the concrete tetrapods on the left, the flat breakwater walkway at the bottom, the mooring bollards, the distant red lighthouse and the islands exactly the same. Change only the time to night.
+
+Night: a calm clear spring night on the south coast of Korea. Deep navy sky with scattered stars and a bright moon high on the right, a long shimmering moonlight path on the dark sea, the red lighthouse light glowing, a few small squid boat lights far on the horizon, soft blue moonlight on the tetrapods and the walkway, one warm street lamp glow at the far end of the breakwater. The sea in the middle of the image stays fairly smooth and readable (the game draws a float, ripples and splashes there).
+
+Keep for the game screen: the walkway at the bottom stays flat and empty (a character and a cooler box will stand there), the top 15 percent calm sky, the bottom 20 percent simple (a panel covers it).
+
+Style: the same soft painterly watercolor anime background as the attached image, same brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no fish, no text, no readable signs, no letters, no signature, no watermark.
+```
+
 ## 요리 시트 (트럭 메뉴·결과창용, 2026-10-26)
 고닷에는 아직 요리 그림이 없다. 받으면 칸마다 잘라 `godot/art/dishes/<요리 id>.png`(예: `chamdom-hoe.png`)로 넣는다. 붙여 넣을 때 마을 배경 그림 한 장(색감과 빛)을 같이 첨부한다. 두 시트는 같은 접시 크기와 같은 각도로 맞춘다(요리 2를 뽑을 때 요리 1 결과도 첨부).
 
