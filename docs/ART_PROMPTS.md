@@ -357,6 +357,47 @@ Keep for the game screen: the lower half stays a flat open plaza with no new obj
 Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
+## 요리 시트 (트럭 메뉴·결과창용, 2026-10-26)
+고닷에는 아직 요리 그림이 없다. 받으면 칸마다 잘라 `godot/art/dishes/<요리 id>.png`(예: `chamdom-hoe.png`)로 넣는다. 붙여 넣을 때 마을 배경 그림 한 장(색감과 빛)을 같이 첨부한다. 두 시트는 같은 접시 크기와 같은 각도로 맞춘다(요리 2를 뽑을 때 요리 1 결과도 첨부).
+
+### 요리 1. 새 요리 다섯 (참돔회, 도다리쑥국, 갑오징어숙회, 우럭매운탕, 농어구이)
+
+```
+Create one game item sheet of 5 Korean seafood dishes for a cozy mobile fishing and food truck game. Attached: a background illustration from the game (match its warm watercolor palette and soft light).
+
+Layout: 3 dishes on the top row and 2 on the bottom row, centered, wide equal spacing so nothing touches. Every dish is seen from the same three quarter top view (about 45 degrees from above), the same plate or pot size, sitting on the same invisible floor line. Light comes from the upper left.
+
+Dishes, in this order:
+1. Red sea bream sashimi (chamdom hoe): thin glossy slices of white translucent flesh with a thin pink red skin edge on each slice, fanned neatly on a light wooden board with shredded white radish, a green shiso leaf, a small dab of wasabi and a tiny dish of soy sauce.
+2. Flounder and mugwort soup (dodari ssukguk), a Korean spring dish: a round light brown earthenware bowl of clear pale soybean paste broth, two pieces of white flounder flesh with a bit of speckled brown flatfish skin, plenty of fresh bright green mugwort leaves floating on top, a few slices of green onion, soft steam rising.
+3. Blanched cuttlefish (gabojingeo sukhoe): thick pure white cuttlefish slices scored in a fine crosshatch pattern and gently curled from blanching, arranged on a white ceramic plate with cucumber slices and a small dish of glossy red vinegar chili paste (chojang).
+4. Spicy rockfish stew (ureok maeuntang): a black earthenware pot (ttukbaegi) of bubbling red spicy broth with a whole dark grey brown rockfish with spiny fins, chunks of white radish, tofu, crown daisy greens, sliced red and green chili, steam rising.
+5. Grilled sea bass (nongeo gui): one whole sea bass with a long silver grey body, darker grey back and a slightly protruding lower jaw, crisp golden grill marks, sprinkled with coarse sea salt, on a long rectangular ceramic plate with a lemon wedge and a few grilled green onions.
+
+Style: cute appetizing game food art, soft anime illustration with gentle painterly shading, clean simple shapes and slightly chunky friendly proportions so each dish reads clearly at small size, warm and cozy. The fish in each dish must look like the real species described.
+
+Background: one flat solid light grey color #EDEDED. No checkerboard, no table, no tablecloth, no shadows on the floor, no text, no labels, no numbers, no borders, no frames, no signature, no watermark.
+```
+
+### 요리 2. 원래 요리 다섯 다시 (볼락구이, 고등어조림, 노래미 매운탕, 학공치 회무침, 감성돔 숙성회)
+
+```
+Create one game item sheet of 5 Korean seafood dishes for a cozy mobile fishing and food truck game. Attached: a background illustration from the game (match its warm watercolor palette and soft light) and my other dish sheet (match its art style, plate size and camera angle exactly).
+
+Layout: 3 dishes on the top row and 2 on the bottom row, centered, wide equal spacing so nothing touches. Every dish is seen from the same three quarter top view (about 45 degrees from above), the same plate or pot size, sitting on the same invisible floor line. Light comes from the upper left.
+
+Dishes, in this order:
+1. Grilled black rockfish (bollak gui): two small whole black rockfish, short body, dark brown grey skin, very large round eyes and spiny dorsal fins (clearly a small rockfish, not a sea bream), crisp grill marks and coarse salt, on a round white ceramic plate.
+2. Braised mackerel with radish (godeungeo jorim): mackerel pieces with blue green back skin and dark wavy stripes, thick radish chunks, glossy red brown sauce, sliced green onion, in a shallow wide pot.
+3. Spicy greenling stew (noraemi maeuntang): a black earthenware pot of red spicy broth with pieces of mottled brown olive greenling, tofu, crown daisy greens and radish, steam rising.
+4. Spicy raw halfbeak salad (hakgongchi hoe muchim): thin strips of silver skinned halfbeak flesh tossed with red chili dressing, cucumber, onion, perilla leaves and sesame seeds on a ceramic plate.
+5. Aged black sea bream sashimi (gamseongdom sukseong hoe): slices of white flesh with a thin silver dark grey skin edge (not a blue backed fish), neatly fanned on a wooden board with shiso leaves and a small dish of soy sauce.
+
+Style: cute appetizing game food art, soft anime illustration with gentle painterly shading, clean simple shapes and slightly chunky friendly proportions so each dish reads clearly at small size, warm and cozy. The fish in each dish must look like the real species described.
+
+Background: one flat solid light grey color #EDEDED. No checkerboard, no table, no tablecloth, no shadows on the floor, no text, no labels, no numbers, no borders, no frames, no signature, no watermark.
+```
+
 ## 컷신 일러스트 다듬기 (여울 감정 연기)
 
 이야기 장면 전용. 지금 감정 그림 10장(`y-*.webp`)을 한 장 그림 컷신으로 다시 뽑는다. 붙여 넣을 때 지금 여울 그림과 해당 배경 그림을 같이 첨부한다.
