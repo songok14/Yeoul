@@ -24,6 +24,12 @@ namespace Hanjeopsi.Core.Data
         public double[] Zone;
         /// <summary>시간대별 가중치 [새벽, 아침, 낮, 저녁]</summary>
         public double[] Slot;
+        /// <summary>귀한 정도 1(흔함)~3(귀함). FishingPlan 도감과 같다</summary>
+        public int Stars = 1;
+        /// <summary>달별 가중치 [1월..12월]. 제철 1, 걸쳐서 0.5, 철 아님 0.06 (고닷 낚시)</summary>
+        public double[] Months;
+        /// <summary>사는 바다: south(남해), east(동해), west(서해), jeju(제주). 지금 장의 바다에 있어야 낚인다</summary>
+        public string[] Seas;
         /// <summary>도감 한 줄 힌트</summary>
         public string Hint;
         public string Desc;

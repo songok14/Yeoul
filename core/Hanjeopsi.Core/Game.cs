@@ -470,6 +470,44 @@ namespace Hanjeopsi.Core
 
         // ───────── 화면에서 자주 묻는 값 ─────────
 
+        /// <summary>오늘이 몇 월인지 (어종 제철)</summary>
+        public int MonthNow()
+        {
+            return Rules.DateOf(Save.Day).Month;
+        }
+
+        /// <summary>지금 바다에 살고 이달이 제철(걸쳐서 포함)인 어종</summary>
+        public List<Species> InSeason()
+        {
+            int m = MonthNow();
+            string sea = SeaNow();
+            return Data.Species.Where(sp => FishingRoll.LivesIn(sp, sea) && FishingRoll.MonthWeight(sp, m) >= 0.5).ToList();
+        }
+
+        /// <summary>위판장 시세판 다섯 칸: 낚아 본 제철 어종 먼저, 그다음 아직 못 낚은 제철 어종 (값이 크게 움직인 순)</summary>
+        public List<Species> BoardSpecies(int n = 5)
+        {
+            int day = Save.Day;
+            return InSeason()
+                .OrderByDescending(sp => Save.Dex.TryGetValue(sp.Id, out var e) && e.Count > 0)
+                .ThenByDescending(sp => Math.Abs(Market.ChangePercent(sp.Id, day)))
+                .ThenBy(sp => Data.SpeciesIndex(sp.Id))
+                .Take(n)
+                .ToList();
+        }
+
+        /// <summary>오늘 마을 소식 (제철 어종 중 가장 크게 움직인 것)</summary>
+        public string HeadlineToday()
+        {
+            return Market.Headline(Save.Day, InSeason());
+        }
+
+        /// <summary>지금 장의 바다 (어종이 사는 곳)</summary>
+        public string SeaNow()
+        {
+            return Data.Balance.Chapter1.Sea;
+        }
+
         public string DateLabel()
         {
             return Rules.DateLabel(Save.Day);

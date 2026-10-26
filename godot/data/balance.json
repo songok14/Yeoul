@@ -9,7 +9,8 @@
     "startMonth": 4,
     "startDate": 16,
     "startYear": 2026,
-    "repayStep": 100000
+    "repayStep": 100000,
+    "sea": "south"
   },
   "market": {
     "dailySwing": 0.5,

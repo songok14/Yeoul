@@ -15,29 +15,44 @@ namespace Hanjeopsi.Core.Tests
         private static JObject _scenario;
         private static JObject _reel;
 
+        /// <summary>
+        /// 웹 버전과 견주는 테스트용 데이터: 웹에 있는 다섯 어종(웹 이름 그대로)과 웹 REEL_TUNING.
+        /// 고닷은 어종을 FishingPlan 도감 71종으로 늘리고 낚시 수치를 바꿨지만, 같은 계산인지는 웹 모양 데이터로 본다
+        /// </summary>
         public static GameData Game
         {
             get
             {
-                return _data ??= GameData.Load(name => File.ReadAllText(Path.Combine(Dir, "data", name + ".json")));
+                if (_data != null) return _data;
+                var d = Load();
+                d.Species.RemoveAll(sp => Array.IndexOf(WebSpecies, sp.Id) < 0);
+                foreach (var sp in d.Species)
+                    if (sp.Id == "noraemi") sp.Name = "노래미";
+                d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
+                return _data = d;
             }
         }
 
-        private static GameData _webReel;
+        /// <summary>웹 버전에 있는 어종 (species.json 앞 다섯)</summary>
+        public static readonly string[] WebSpecies = { "bollak", "godeungeo", "noraemi", "hakgongchi", "gamseongdom" };
 
-        /// <summary>
-        /// 낚시 손맛 수치만 웹 REEL_TUNING(core/golden/reel.json tuning)으로 되돌린 게임 데이터.
-        /// 고닷은 낚시 시간을 줄이려고 수치를 바꿨으므로 웹과 같은 계산인지는 웹 수치로 확인한다
-        /// </summary>
+        private static GameData _full;
+
+        /// <summary>고닷 게임이 쓰는 그대로의 데이터 (어종 71종, 고닷 낚시 수치). 자동 플레이와 고닷 규칙 테스트용</summary>
+        public static GameData Full
+        {
+            get { return _full ??= Load(); }
+        }
+
+        private static GameData Load()
+        {
+            return GameData.Load(name => File.ReadAllText(Path.Combine(Dir, "data", name + ".json")));
+        }
+
+        /// <summary>낚시 계산을 웹 수치로 (Game 과 같다)</summary>
         public static GameData WebReel
         {
-            get
-            {
-                if (_webReel != null) return _webReel;
-                var d = GameData.Load(name => File.ReadAllText(Path.Combine(Dir, "data", name + ".json")));
-                d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
-                return _webReel = d;
-            }
+            get { return Game; }
         }
 
         /// <summary>scripts/export-golden.mjs 가 웹 코드로 만든 시세·신선도 기준값</summary>

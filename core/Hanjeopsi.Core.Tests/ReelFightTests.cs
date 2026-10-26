@@ -23,7 +23,7 @@ namespace Hanjeopsi.Core.Tests
         public void 고닷_수치가_웹과_같은_키를_가진다()
         {
             var web = (JObject)G["tuning"];
-            var mine = JObject.FromObject(TestData.Game.Balance.Reel, Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
+            var mine = JObject.FromObject(TestData.Full.Balance.Reel, Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
             Assert.Equal(web.Properties().Select(p => p.Name).OrderBy(n => n), mine.Properties().Select(p => p.Name).OrderBy(n => n));
         }
 

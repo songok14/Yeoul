@@ -119,7 +119,7 @@ namespace Hanjeopsi.App.Screens
         private Control NewsRibbon()
         {
             var closed = G.ClosedToday();
-            string headline = closed.Count > 0 ? string.Join("·", closed) + " 금어기" : G.Market.Headline(G.Save.Day);
+            string headline = closed.Count > 0 ? string.Join("·", closed) + " 금어기" : G.HeadlineToday();
             var pill = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
             pill.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.62f), 30, 30, 10));
             var row = new HBoxContainer();

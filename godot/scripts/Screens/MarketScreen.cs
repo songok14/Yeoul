@@ -156,7 +156,7 @@ namespace Hanjeopsi.App.Screens
             row.AddThemeConstantOverride("separation", 4);
             col.AddChild(row);
             int day = G.Save.Day;
-            foreach (var sp in G.Data.Species)
+            foreach (var sp in G.BoardSpecies())
             {
                 bool known = G.Save.Dex.ContainsKey(sp.Id) && G.Save.Dex[sp.Id].Count > 0;
                 var cell = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };

@@ -11,10 +11,39 @@
       "rare": false,
       "aging": false,
       "limitCm": 15,
-      "zone": [5, 2, 0.4],
-      "slot": [1.7, 0.8, 0.5, 1.7],
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        1.7,
+        0.8,
+        0.5,
+        1.7
+      ],
       "hint": "새벽·저녁 · 근거리",
-      "desc": "눈이 왕방울만 한 방파제 터줏대감. 해 뜨기 전과 해 질 녘에 테트라포드 틈에서 잘 문다. 아버지와 처음 낚은 물고기. 15cm 이하는 놓아준다."
+      "desc": "눈이 왕방울만 한 방파제 터줏대감. 해 뜨기 전과 해 질 녘에 테트라포드 틈에서 잘 문다. 아버지와 처음 낚은 물고기. 15cm 이하는 놓아준다.",
+      "stars": 1,
+      "months": [
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
     },
     {
       "id": "godeungeo",
@@ -26,14 +55,43 @@
       "strength": 3,
       "rare": false,
       "aging": false,
-      "zone": [1, 5, 3],
-      "slot": [0.6, 1.6, 1.4, 0.8],
+      "zone": [
+        1,
+        5,
+        3
+      ],
+      "slot": [
+        0.6,
+        1.6,
+        1.4,
+        0.8
+      ],
       "hint": "아침·낮 · 중거리 떼고기",
-      "desc": "푸른 등에 물결무늬. 떼로 몰려다니고 힘이 좋다. 고양이 고등어는 이 물고기만 보면 눈빛이 달라진다."
+      "desc": "푸른 등에 물결무늬. 떼로 몰려다니고 힘이 좋다. 고양이 고등어는 이 물고기만 보면 눈빛이 달라진다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
     },
     {
       "id": "noraemi",
-      "name": "노래미",
+      "name": "쥐노래미",
       "minSize": 18,
       "maxSize": 36,
       "avgSize": 24,
@@ -41,10 +99,39 @@
       "strength": 2,
       "rare": false,
       "aging": true,
-      "zone": [4, 3, 1],
-      "slot": [1, 1, 1, 1],
+      "zone": [
+        4,
+        3,
+        1
+      ],
+      "slot": [
+        1,
+        1,
+        1,
+        1
+      ],
       "hint": "언제나 · 근거리 · 숙성 어종",
-      "desc": "바위 밑바닥에 붙어 사는 갈색 물고기. 사계절 아무 때나 문다. 하루 이틀 숙성하면 감칠맛이 오른다."
+      "desc": "바위 밑바닥에 붙어 사는 갈색 물고기. 사계절 아무 때나 문다. 하루 이틀 숙성하면 감칠맛이 오른다.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east",
+        "west"
+      ]
     },
     {
       "id": "hakgongchi",
@@ -56,10 +143,38 @@
       "strength": 1,
       "rare": false,
       "aging": false,
-      "zone": [0.5, 2, 4],
-      "slot": [0.4, 1.2, 1.7, 0.8],
+      "zone": [
+        0.5,
+        2,
+        4
+      ],
+      "slot": [
+        0.4,
+        1.2,
+        1.7,
+        0.8
+      ],
       "hint": "낮 · 원거리 · 힘이 약함",
-      "desc": "바늘처럼 뾰족한 아래턱을 가진 은빛 물고기. 먼 물 수면에서 떼 지어 다닌다. 힘이 약해서 줄이 느슨하면 금방 빠진다."
+      "desc": "바늘처럼 뾰족한 아래턱을 가진 은빛 물고기. 먼 물 수면에서 떼 지어 다닌다. 힘이 약해서 줄이 느슨하면 금방 빠진다.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east"
+      ]
     },
     {
       "id": "gamseongdom",
@@ -72,11 +187,3051 @@
       "rare": true,
       "aging": true,
       "limitCm": 25,
-      "closed": [5, 1, 5, 31],
-      "zone": [0, 0.25, 1.1],
-      "slot": [1.8, 1, 0.5, 1.2],
+      "closed": [
+        5,
+        1,
+        5,
+        31
+      ],
+      "zone": [
+        0,
+        0.25,
+        1.1
+      ],
+      "slot": [
+        1.8,
+        1,
+        0.5,
+        1.2
+      ],
       "hint": "새벽 · 원거리 · 숙성 어종",
-      "desc": "방파제 꾼들의 꿈. 새벽 먼 물에서 드물게 모습을 보인다. 힘이 엄청나서 장비가 약하면 버티기 어렵다. 숙성회로 최고다. 25cm 이하와 5월 금어기에는 놓아줘야 한다."
+      "desc": "방파제 꾼들의 꿈. 새벽 먼 물에서 드물게 모습을 보인다. 힘이 엄청나서 장비가 약하면 버티기 어렵다. 숙성회로 최고다. 25cm 이하와 5월 금어기에는 놓아줘야 한다.",
+      "stars": 3,
+      "months": [
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "west",
+        "jeju"
+      ]
+    },
+    {
+      "id": "chamdom",
+      "name": "참돔",
+      "minSize": 25,
+      "maxSize": 70,
+      "avgSize": 40,
+      "basePrice": 25000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": 24,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "봄·여름 · 새벽 · 원거리 · 숙성 어종",
+      "desc": "푸른 점이 반짝이는 바다의 여왕. 봄 산란기에 갯바위 가까이 붙는다. 24cm 이하는 놓아준다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.5,
+        0.5,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju",
+        "east"
+      ]
+    },
+    {
+      "id": "doldom",
+      "name": "돌돔",
+      "minSize": 22,
+      "maxSize": 55,
+      "avgSize": 32,
+      "basePrice": 35000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": 24,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리 · 숙성 어종",
+      "desc": "줄무늬 장군. 힘이 가장 세다. 물이 따뜻해지면 갯바위 발밑을 돈다. 24cm 이하는 놓아준다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "bengedom",
+      "name": "벵에돔",
+      "minSize": 18,
+      "maxSize": 45,
+      "avgSize": 28,
+      "basePrice": 15000,
+      "strength": 4,
+      "rare": false,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        1.3,
+        1.2,
+        0.6,
+        1.3
+      ],
+      "hint": "봄·여름·가을·겨울 · 새벽·저녁 · 근거리 · 숙성 어종",
+      "desc": "물 맑은 갯바위의 까만 손님. 밑밥을 뿌리면 떠오른다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "ginkkoribengedom",
+      "name": "긴꼬리벵에돔",
+      "minSize": 25,
+      "maxSize": 55,
+      "avgSize": 35,
+      "basePrice": 30000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.0,
+        0.8,
+        0.6,
+        1.8
+      ],
+      "hint": "여름·가을 · 저녁 · 원거리 · 숙성 어종",
+      "desc": "먼 바다 갯바위의 검은 화살. 해 질 녘에 거칠게 문다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "jeju",
+        "south"
+      ]
+    },
+    {
+      "id": "gangdamdom",
+      "name": "강담돔",
+      "minSize": 25,
+      "maxSize": 60,
+      "avgSize": 35,
+      "basePrice": 30000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리 · 숙성 어종",
+      "desc": "점박이 부리의 돌돔 사촌. 성게 미끼를 깨 먹는다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "jeju",
+        "south"
+      ]
+    },
+    {
+      "id": "hokdom",
+      "name": "혹돔",
+      "minSize": 35,
+      "maxSize": 80,
+      "avgSize": 50,
+      "basePrice": 25000,
+      "strength": 5,
+      "rare": true,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 원거리",
+      "desc": "이마 혹이 불룩한 갯바위 거물. 한번 물면 바위로 파고든다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju",
+        "east"
+      ]
+    },
+    {
+      "id": "beomdom",
+      "name": "범돔",
+      "minSize": 8,
+      "maxSize": 18,
+      "avgSize": 12,
+      "basePrice": 2000,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리",
+      "desc": "노랑 바탕에 검은 사선 무늬. 테트라포드 사이를 떼로 다닌다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "dokgasichi",
+      "name": "독가시치",
+      "minSize": 18,
+      "maxSize": 38,
+      "avgSize": 26,
+      "basePrice": 6000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리",
+      "desc": "등가시에 독. 맨손으로 잡지 않기. 가을 방파제의 힘센 손님.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "benjari",
+      "name": "벤자리",
+      "minSize": 18,
+      "maxSize": 38,
+      "avgSize": 26,
+      "basePrice": 12000,
+      "strength": 3,
+      "rare": false,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        1.0,
+        0.8,
+        0.6,
+        1.8
+      ],
+      "hint": "여름 · 저녁 · 중거리 · 숙성 어종",
+      "desc": "여름 남해 갯바위의 맛있는 손님. 해 질 녘에 무리 지어 온다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "mangsangeo",
+      "name": "망상어",
+      "minSize": 12,
+      "maxSize": 25,
+      "avgSize": 17,
+      "basePrice": 3000,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "hint": "봄·가을·겨울 · 언제나 · 근거리",
+      "desc": "새끼를 낳는 방파제 단골. 봄에 배가 불룩하다.",
+      "stars": 1,
+      "months": [
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east",
+        "west"
+      ]
+    },
+    {
+      "id": "nongeo",
+      "name": "농어",
+      "minSize": 30,
+      "maxSize": 90,
+      "avgSize": 50,
+      "basePrice": 18000,
+      "strength": 4,
+      "rare": false,
+      "aging": true,
+      "limitCm": 30,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "봄·여름·가을 · 새벽 · 원거리 · 숙성 어종",
+      "desc": "파도 치는 날 루어를 덮친다. 펄쩍 뛰며 바늘을 털어 낸다. 30cm 이하는 놓아준다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    {
+      "id": "bangeo",
+      "name": "방어",
+      "minSize": 40,
+      "maxSize": 100,
+      "avgSize": 60,
+      "basePrice": 30000,
+      "strength": 5,
+      "rare": false,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "겨울·가을 · 새벽 · 원거리 · 숙성 어종",
+      "desc": "노란 띠를 두른 겨울 회유어. 무리가 들어오면 물이 끓는다.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "busiri",
+      "name": "부시리",
+      "minSize": 50,
+      "maxSize": 110,
+      "avgSize": 70,
+      "basePrice": 28000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "여름·가을 · 새벽 · 원거리 · 숙성 어종",
+      "desc": "방어보다 길쭉한 질주의 왕. 걸면 줄이 비명을 지른다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju",
+        "east"
+      ]
+    },
+    {
+      "id": "samchi",
+      "name": "삼치",
+      "minSize": 40,
+      "maxSize": 90,
+      "avgSize": 60,
+      "basePrice": 15000,
+      "strength": 4,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "가을 · 새벽 · 원거리",
+      "desc": "가을 메탈지그의 주인공. 이빨이 날카로워 줄을 끊는다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "west",
+        "jeju"
+      ]
+    },
+    {
+      "id": "jaetbangeo",
+      "name": "잿방어",
+      "minSize": 50,
+      "maxSize": 120,
+      "avgSize": 75,
+      "basePrice": 40000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 원거리 · 숙성 어종",
+      "desc": "방어보다 굵고 힘센 대물. 바닥으로 처박는다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "jeju",
+        "south"
+      ]
+    },
+    {
+      "id": "kkochigogi",
+      "name": "꼬치고기",
+      "minSize": 25,
+      "maxSize": 50,
+      "avgSize": 35,
+      "basePrice": 6000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "가을 · 새벽 · 원거리",
+      "desc": "뾰족한 입의 가을 루어 사냥꾼. 떼로 몰려 미끼를 쫓는다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "cheongeo",
+      "name": "청어",
+      "minSize": 20,
+      "maxSize": 35,
+      "avgSize": 26,
+      "basePrice": 3000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "겨울 · 새벽 · 중거리",
+      "desc": "겨울 방파제를 은빛으로 채우는 무리. 과메기의 원래 주인.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "east",
+        "south"
+      ]
+    },
+    {
+      "id": "jeongeori",
+      "name": "정어리",
+      "minSize": 12,
+      "maxSize": 22,
+      "avgSize": 17,
+      "basePrice": 1500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 중거리",
+      "desc": "옆구리 검은 점 줄. 떼로 오는 은빛.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "east",
+        "south"
+      ]
+    },
+    {
+      "id": "hwangeo",
+      "name": "황어",
+      "minSize": 25,
+      "maxSize": 45,
+      "avgSize": 33,
+      "basePrice": 4000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "봄 · 낮 · 근거리 · 동해",
+      "desc": "봄이면 붉은 줄을 띠고 강을 오른다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "east"
+      ]
+    },
+    {
+      "id": "jeongaengi",
+      "name": "전갱이",
+      "minSize": 15,
+      "maxSize": 35,
+      "avgSize": 22,
+      "basePrice": 3500,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 중거리",
+      "desc": "밤 방파제 아징의 단골. 가로등 불빛 아래 모인다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "jeoneo",
+      "name": "전어",
+      "minSize": 13,
+      "maxSize": 25,
+      "avgSize": 18,
+      "basePrice": 3000,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "가을 · 낮 · 근거리",
+      "desc": "가을이면 집 나간 며느리도 돌아온다. 구이 냄새가 일품.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "west"
+      ]
+    },
+    {
+      "id": "sungeo",
+      "name": "숭어",
+      "minSize": 30,
+      "maxSize": 70,
+      "avgSize": 45,
+      "basePrice": 7000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울·봄 · 낮 · 근거리",
+      "desc": "펄쩍 뛰어오르는 힘센 친구. 겨울과 봄에 기름이 오른다.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    {
+      "id": "borimyeol",
+      "name": "보리멸",
+      "minSize": 12,
+      "maxSize": 25,
+      "avgSize": 18,
+      "basePrice": 3500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 중거리",
+      "desc": "여름 백사장 원투의 귀염둥이. 투둑투둑 입질이 경쾌하다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east"
+      ]
+    },
+    {
+      "id": "baekjogi",
+      "name": "백조기",
+      "minSize": 15,
+      "maxSize": 30,
+      "avgSize": 22,
+      "basePrice": 3500,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "hint": "여름·가을 · 언제나 · 원거리 · 서해",
+      "desc": "서해 백사장의 은빛 무리. 개굴개굴 우는 소리를 낸다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "west"
+      ]
+    },
+    {
+      "id": "chamjogi",
+      "name": "참조기",
+      "minSize": 15,
+      "maxSize": 30,
+      "avgSize": 21,
+      "basePrice": 9000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "봄·가을 · 새벽·저녁 · 원거리",
+      "desc": "황금빛 배. 굴비의 주인공.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "west",
+        "south"
+      ]
+    },
+    {
+      "id": "mineo",
+      "name": "민어",
+      "minSize": 40,
+      "maxSize": 100,
+      "avgSize": 65,
+      "basePrice": 45000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "여름 · 새벽 · 원거리 · 서해 · 숙성 어종",
+      "desc": "여름 보양식의 왕. 부레가 북처럼 운다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "west"
+      ]
+    },
+    {
+      "id": "galchi",
+      "name": "갈치",
+      "minSize": 60,
+      "maxSize": 130,
+      "avgSize": 85,
+      "basePrice": 12000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": [
+        7,
+        1,
+        7,
+        31
+      ],
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 원거리",
+      "desc": "가을밤 은빛 칼. 집어등 아래 서서 헤엄친다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "ureok",
+      "name": "우럭",
+      "minSize": 18,
+      "maxSize": 50,
+      "avgSize": 28,
+      "basePrice": 9000,
+      "strength": 3,
+      "rare": false,
+      "aging": true,
+      "limitCm": 23,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "봄·여름·가을 · 새벽·저녁 · 근거리 · 숙성 어종",
+      "desc": "바위틈의 듬직한 대장. 한번 물면 바위로 파고든다. 23cm 이하는 놓아준다.",
+      "stars": 1,
+      "months": [
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "west",
+        "south",
+        "east"
+      ]
+    },
+    {
+      "id": "bulbollak",
+      "name": "불볼락",
+      "minSize": 15,
+      "maxSize": 30,
+      "avgSize": 21,
+      "basePrice": 7000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울·봄 · 낮 · 원거리",
+      "desc": "붉은 몸이 줄줄이 올라오는 열기. 깊은 바다 바닥에 산다.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "east",
+        "south"
+      ]
+    },
+    {
+      "id": "gaebollak",
+      "name": "개볼락",
+      "minSize": 15,
+      "maxSize": 30,
+      "avgSize": 22,
+      "basePrice": 8000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "겨울·봄·가을 · 새벽·저녁 · 근거리",
+      "desc": "검은 몸에 노란 얼룩. 테트라포드 터줏대감.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "ssombaengi",
+      "name": "쏨뱅이",
+      "minSize": 12,
+      "maxSize": 28,
+      "avgSize": 18,
+      "basePrice": 7000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "겨울·봄·가을 · 새벽·저녁 · 근거리",
+      "desc": "붉고 울퉁불퉁하다. 등가시를 조심한다.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "ssugimi",
+      "name": "쑤기미",
+      "minSize": 15,
+      "maxSize": 30,
+      "avgSize": 21,
+      "basePrice": 9000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "겨울·봄·가을 · 새벽·저녁 · 근거리",
+      "desc": "등가시에 맹독. 집게로만 다룬다. 맛은 매운탕 으뜸.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "west"
+      ]
+    },
+    {
+      "id": "miyeokchi",
+      "name": "미역치",
+      "minSize": 5,
+      "maxSize": 12,
+      "avgSize": 8,
+      "basePrice": 500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "hint": "봄·여름·가을 · 언제나 · 근거리",
+      "desc": "작아도 등가시가 아프다. 맨손 금지.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east",
+        "west",
+        "jeju"
+      ]
+    },
+    {
+      "id": "ssolbaegampeng",
+      "name": "쏠배감펭",
+      "minSize": 12,
+      "maxSize": 30,
+      "avgSize": 20,
+      "basePrice": 3000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 근거리",
+      "desc": "화려한 지느러미에 독가시. 눈으로만 감상한다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "jeju",
+        "south"
+      ]
+    },
+    {
+      "id": "samsegi",
+      "name": "삼세기",
+      "minSize": 20,
+      "maxSize": 40,
+      "avgSize": 28,
+      "basePrice": 8000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "hint": "겨울·가을 · 언제나 · 중거리 · 동해",
+      "desc": "못생겨도 매운탕은 최고. 겨울 동해의 삼식이.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "east"
+      ]
+    },
+    {
+      "id": "neungseongeo",
+      "name": "능성어",
+      "minSize": 30,
+      "maxSize": 80,
+      "avgSize": 45,
+      "basePrice": 40000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 원거리 · 숙성 어종",
+      "desc": "일곱 줄 무늬의 바위 밑 대물. 물면 굴로 파고든다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "jabari",
+      "name": "자바리",
+      "minSize": 35,
+      "maxSize": 90,
+      "avgSize": 50,
+      "basePrice": 80000,
+      "strength": 5,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 원거리 · 숙성 어종",
+      "desc": "제주의 전설 다금바리. 평생 한 번 만나기 어렵다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "jeju",
+        "south"
+      ]
+    },
+    {
+      "id": "bulgbari",
+      "name": "붉바리",
+      "minSize": 25,
+      "maxSize": 45,
+      "avgSize": 32,
+      "basePrice": 60000,
+      "strength": 4,
+      "rare": true,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 중거리 · 숙성 어종",
+      "desc": "주황 점이 촘촘한 귀한 바리. 남해 갯바위 밤 손님.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "jeju",
+        "south"
+      ]
+    },
+    {
+      "id": "daegu",
+      "name": "대구",
+      "minSize": 40,
+      "maxSize": 90,
+      "avgSize": 60,
+      "basePrice": 20000,
+      "strength": 4,
+      "rare": false,
+      "aging": true,
+      "limitCm": 35,
+      "closed": [
+        1,
+        16,
+        2,
+        15
+      ],
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울 · 낮 · 원거리 · 숙성 어종",
+      "desc": "턱수염 하나. 겨울 동해 선상의 대어. 35cm 이하는 놓아준다.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "east",
+        "south"
+      ]
+    },
+    {
+      "id": "imyeonsueo",
+      "name": "임연수어",
+      "minSize": 25,
+      "maxSize": 45,
+      "avgSize": 33,
+      "basePrice": 5000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울·봄 · 낮 · 원거리 · 동해",
+      "desc": "다섯 줄 무늬의 동해 겨울 고기. 껍질이 고소하다.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "east"
+      ]
+    },
+    {
+      "id": "seongdae",
+      "name": "성대",
+      "minSize": 20,
+      "maxSize": 40,
+      "avgSize": 28,
+      "basePrice": 8000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "봄·여름·가을 · 낮 · 원거리",
+      "desc": "파란 날개를 펼치는 바닥 미녀. 끌려오며 꾹꾹 운다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "west"
+      ]
+    },
+    {
+      "id": "gwangeo",
+      "name": "광어",
+      "minSize": 30,
+      "maxSize": 80,
+      "avgSize": 45,
+      "basePrice": 22000,
+      "strength": 4,
+      "rare": false,
+      "aging": true,
+      "limitCm": 35,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        1.1,
+        0.5,
+        1.1
+      ],
+      "hint": "봄·가을 · 새벽 · 원거리 · 숙성 어종",
+      "desc": "모래 바닥에 숨은 납작 사냥꾼. 큰 입으로 미끼를 덮친다. 35cm 이하는 놓아준다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    {
+      "id": "dodari",
+      "name": "도다리",
+      "minSize": 15,
+      "maxSize": 35,
+      "avgSize": 23,
+      "basePrice": 9000,
+      "strength": 2,
+      "rare": false,
+      "aging": true,
+      "limitCm": 20,
+      "closed": [
+        12,
+        1,
+        1,
+        31
+      ],
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "봄 · 낮 · 원거리 · 숙성 어종",
+      "desc": "봄 원투의 손맛. 봄 도다리 쑥국이 제철 맛이다. 20cm 이하는 놓아준다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east",
+        "west"
+      ]
+    },
+    {
+      "id": "dolgajami",
+      "name": "돌가자미",
+      "minSize": 20,
+      "maxSize": 45,
+      "avgSize": 30,
+      "basePrice": 12000,
+      "strength": 3,
+      "rare": false,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울·봄·가을 · 낮 · 원거리 · 동해 · 숙성 어종",
+      "desc": "등에 돌기 줄이 박힌 가자미. 동해 겨울 원투 손님.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "east"
+      ]
+    },
+    {
+      "id": "gangdodari",
+      "name": "강도다리",
+      "minSize": 20,
+      "maxSize": 45,
+      "avgSize": 30,
+      "basePrice": 10000,
+      "strength": 3,
+      "rare": false,
+      "aging": true,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울·봄 · 낮 · 근거리 · 동해 · 숙성 어종",
+      "desc": "지느러미에 검고 주황 줄무늬. 강 하구까지 들어온다.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "east"
+      ]
+    },
+    {
+      "id": "norang_gaori",
+      "name": "노랑가오리",
+      "minSize": 30,
+      "maxSize": 90,
+      "avgSize": 50,
+      "basePrice": 8000,
+      "strength": 4,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 원거리",
+      "desc": "꼬리 가시에 독. 줄을 끊고 놓아준다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "west",
+        "south"
+      ]
+    },
+    {
+      "id": "yangtae",
+      "name": "양태",
+      "minSize": 25,
+      "maxSize": 60,
+      "avgSize": 38,
+      "basePrice": 9000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 원거리",
+      "desc": "넓적한 머리의 모래밭 매복꾼. 여름 원투에 묵직하게 온다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "west",
+        "south"
+      ]
+    },
+    {
+      "id": "mangdung",
+      "name": "망둥어",
+      "minSize": 10,
+      "maxSize": 25,
+      "avgSize": 16,
+      "basePrice": 1500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "가을 · 낮 · 근거리",
+      "desc": "가을 갯벌 낚시의 시작. 아무거나 덥석 문다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "west",
+        "south"
+      ]
+    },
+    {
+      "id": "pulmangduk",
+      "name": "풀망둑",
+      "minSize": 25,
+      "maxSize": 50,
+      "avgSize": 35,
+      "basePrice": 2000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "가을·겨울 · 낮 · 근거리 · 서해",
+      "desc": "갯벌 망둥어 중 가장 큰 녀석. 늦가을에 살이 오른다.",
+      "stars": 1,
+      "months": [
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "west"
+      ]
+    },
+    {
+      "id": "agwi",
+      "name": "아귀",
+      "minSize": 30,
+      "maxSize": 90,
+      "avgSize": 50,
+      "basePrice": 15000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "겨울·봄 · 낮 · 원거리",
+      "desc": "큰 입으로 한 번에 삼키는 바닥 사냥꾼.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "west",
+        "south",
+        "east"
+      ]
+    },
+    {
+      "id": "bungjangeo",
+      "name": "붕장어",
+      "minSize": 30,
+      "maxSize": 90,
+      "avgSize": 50,
+      "basePrice": 7000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 원거리",
+      "desc": "밤 원투에 걸려 오는 꿈틀이. 줄을 감고 꼬인다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "west",
+        "east"
+      ]
+    },
+    {
+      "id": "gaetjangeo",
+      "name": "갯장어",
+      "minSize": 50,
+      "maxSize": 120,
+      "avgSize": 75,
+      "basePrice": 25000,
+      "strength": 4,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름 · 새벽·저녁 · 원거리",
+      "desc": "날카로운 이빨의 여름 장어. 하모 샤브샤브의 주인공.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "south"
+      ]
+    },
+    {
+      "id": "jwichi",
+      "name": "쥐치",
+      "minSize": 12,
+      "maxSize": 28,
+      "avgSize": 18,
+      "basePrice": 4000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": 18,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리",
+      "desc": "미끼 도둑. 머리에 뿔 하나. 18cm 이하는 놓아준다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "maljwichi",
+      "name": "말쥐치",
+      "minSize": 18,
+      "maxSize": 40,
+      "avgSize": 26,
+      "basePrice": 4500,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": 18,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 중거리",
+      "desc": "쥐포의 주인공. 길쭉한 쥐치. 18cm 이하는 놓아준다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east"
+      ]
+    },
+    {
+      "id": "yongchi",
+      "name": "용치놀래기",
+      "minSize": 10,
+      "maxSize": 25,
+      "avgSize": 16,
+      "basePrice": 2000,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리",
+      "desc": "알록달록 여름 갯바위 단골. 미끼를 가장 먼저 찾아온다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "hwangnollaegi",
+      "name": "황놀래기",
+      "minSize": 10,
+      "maxSize": 22,
+      "avgSize": 15,
+      "basePrice": 1500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "여름·가을 · 낮 · 근거리",
+      "desc": "주황빛 갯바위 꼬마 놀래기.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "bogeo",
+      "name": "복어",
+      "minSize": 10,
+      "maxSize": 35,
+      "avgSize": 18,
+      "basePrice": 2000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "봄·여름·가을 · 낮 · 근거리",
+      "desc": "부풀면 동그래진다. 독이 있으니 먹지 않는다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "west",
+        "east",
+        "jeju"
+      ]
+    },
+    {
+      "id": "mueuni",
+      "name": "무늬오징어",
+      "minSize": 15,
+      "maxSize": 45,
+      "avgSize": 25,
+      "basePrice": 25000,
+      "strength": 4,
+      "rare": true,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        1.0,
+        0.8,
+        0.6,
+        1.8
+      ],
+      "hint": "봄·여름·가을 · 저녁 · 근거리",
+      "desc": "에깅의 꽃. 키로급이 목표. 해 질 녘에 먹이를 쫓는다.",
+      "stars": 3,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "south",
+        "jeju"
+      ]
+    },
+    {
+      "id": "gabojingeo",
+      "name": "갑오징어",
+      "minSize": 12,
+      "maxSize": 30,
+      "avgSize": 18,
+      "basePrice": 12000,
+      "strength": 3,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "봄·가을 · 낮 · 중거리",
+      "desc": "봄가을 에깅의 묵직한 손맛. 먹물을 조심한다.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        0.5,
+        0.06
+      ],
+      "seas": [
+        "south",
+        "west"
+      ]
+    },
+    {
+      "id": "salojingeo",
+      "name": "살오징어",
+      "minSize": 15,
+      "maxSize": 30,
+      "avgSize": 22,
+      "basePrice": 4000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": [
+        4,
+        1,
+        5,
+        31
+      ],
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름·가을 · 새벽·저녁 · 원거리 · 동해",
+      "desc": "밤바다 집어등 아래 춤추는 오징어.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "east"
+      ]
+    },
+    {
+      "id": "hanchi",
+      "name": "한치",
+      "minSize": 12,
+      "maxSize": 30,
+      "avgSize": 18,
+      "basePrice": 5000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0,
+        0.4,
+        3
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "여름 · 새벽·저녁 · 원거리 · 제주",
+      "desc": "다리가 한 치뿐이라 한치. 제주 여름밤의 손님.",
+      "stars": 2,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06
+      ],
+      "seas": [
+        "jeju"
+      ]
+    },
+    {
+      "id": "hwasalojingeo",
+      "name": "화살오징어",
+      "minSize": 15,
+      "maxSize": 35,
+      "avgSize": 22,
+      "basePrice": 4000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        0.4,
+        2,
+        4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "겨울·봄 · 새벽·저녁 · 원거리",
+      "desc": "길쭉한 화살 모양. 겨울 에깅 손님.",
+      "stars": 2,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "east",
+        "south"
+      ]
+    },
+    {
+      "id": "muneo",
+      "name": "문어",
+      "minSize": 20,
+      "maxSize": 70,
+      "avgSize": 35,
+      "basePrice": 20000,
+      "strength": 4,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "봄·여름·가을·겨울 · 낮 · 근거리",
+      "desc": "바위에 붙으면 안 떨어진다. 힘으로 당겨 떼어 낸다.",
+      "stars": 2,
+      "months": [
+        0.5,
+        0.06,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "east"
+      ]
+    },
+    {
+      "id": "jukkumi",
+      "name": "주꾸미",
+      "minSize": 8,
+      "maxSize": 20,
+      "avgSize": 12,
+      "basePrice": 2500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": [
+        5,
+        11,
+        8,
+        31
+      ],
+      "zone": [
+        1,
+        4,
+        2
+      ],
+      "slot": [
+        0.5,
+        1.2,
+        1.5,
+        0.8
+      ],
+      "hint": "가을 · 낮 · 중거리",
+      "desc": "가을 마릿수 낚시의 대명사.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.5,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "west",
+        "south"
+      ]
+    },
+    {
+      "id": "nakji",
+      "name": "낙지",
+      "minSize": 15,
+      "maxSize": 50,
+      "avgSize": 28,
+      "basePrice": 6000,
+      "strength": 2,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        5,
+        2,
+        0.4
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "가을 · 새벽·저녁 · 근거리",
+      "desc": "갯벌의 가느다란 다리. 가을 낙지가 가장 연하다.",
+      "stars": 1,
+      "months": [
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        0.5,
+        0.5,
+        0.06,
+        0.06,
+        1.0,
+        1.0,
+        1.0,
+        0.5
+      ],
+      "seas": [
+        "west",
+        "south"
+      ]
+    },
+    {
+      "id": "kkolttugi",
+      "name": "꼴뚜기",
+      "minSize": 6,
+      "maxSize": 15,
+      "avgSize": 10,
+      "basePrice": 1500,
+      "strength": 1,
+      "rare": false,
+      "aging": false,
+      "limitCm": null,
+      "closed": null,
+      "zone": [
+        3,
+        3,
+        1
+      ],
+      "slot": [
+        1.8,
+        0.6,
+        0.3,
+        1.8
+      ],
+      "hint": "겨울·봄 · 새벽·저녁 · 근거리",
+      "desc": "겨울 밤 볼락 채비에 덤으로 올라온다.",
+      "stars": 1,
+      "months": [
+        1.0,
+        1.0,
+        1.0,
+        0.5,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.06,
+        0.5,
+        1.0
+      ],
+      "seas": [
+        "south",
+        "west"
+      ]
     }
   ]
 }

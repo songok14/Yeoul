@@ -25,6 +25,8 @@ namespace Hanjeopsi.Core.Data
         public int StartBait;
         public int CastsPerTrip;
         public int CustomersPerShift;
+        /// <summary>1장 바다 (species.json seas)</summary>
+        public string Sea;
         /// <summary>1일차 날짜 (2026년 4월 16일)</summary>
         public int StartYear;
         public int StartMonth;

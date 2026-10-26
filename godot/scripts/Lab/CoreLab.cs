@@ -680,13 +680,15 @@ namespace Hanjeopsi.App.Lab
             void Check(string label, bool ok) => list.Add((ok ? "○ " : "× ") + label);
             var d = _data;
             var fresh = new Freshness(d);
-            Check("데이터: 어종 5 · 요리 5 · 의뢰 8", d.Species.Count == 5 && d.Recipes.Recipes.Count == 5 && d.RequestTemplates.Count == 8);
+            // 어종은 FishingPlan 도감 71종 (앞 다섯은 웹과 같은 순서라 시세 시드가 같다)
+            Check("데이터: 어종 " + d.Species.Count + " (웹 5종 먼저) · 요리 5 · 의뢰 8", d.Species.Count == 71 && d.Species.Take(5).Select(x => x.Id).SequenceEqual(new[] { "bollak", "godeungeo", "noraemi", "hakgongchi", "gamseongdom" }) && d.Recipes.Recipes.Count == 5 && d.RequestTemplates.Count == 8);
             Check("난수 mulberry32(12345) 첫 값", new Mulberry32(12345).Next() == 0.9797282677609473);
 
             var m = new Market(d, fresh, 12345);
             int[] prices = d.Species.Select(sp => m.TodayBasePrice(sp.Id, 4)).ToArray();
             Check("시세 시드 12345 · 4일차 " + string.Join(", ", prices), prices.SequenceEqual(new[] { 7900, 3400, 3800, 4900, 46400 }));
-            Check("소식 \"" + m.Headline(4) + "\"", m.Headline(4) == "볼락 값이 38% 뛰었다");
+            var web5 = _game.Data.Species.Take(5).ToList();
+            Check("소식 \"" + m.Headline(4, web5) + "\"", m.Headline(4, web5) == "볼락 값이 38% 뛰었다");
             int v1 = m.FishValue(new FishItem(0, "noraemi", 23.6, 1, 66), 28);
             int v2 = new Market(d, fresh, 987654321).FishValue(new FishItem(0, "bollak", 16.3, 1, 68), 37);
             Check("물고기 값 " + JsMath.Won(v1) + ", " + JsMath.Won(v2), v1 == 2200 && v2 == 6600);

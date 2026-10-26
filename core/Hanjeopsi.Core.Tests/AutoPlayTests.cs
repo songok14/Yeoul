@@ -46,11 +46,11 @@ namespace Hanjeopsi.Core.Tests
 
         private PlayResult Run(int seed, PlayerSkill skill)
         {
-            var p = new AutoPlayer(TestData.Game, seed, skill, Invariants);
+            var p = new AutoPlayer(TestData.Full, seed, skill, Invariants);
             var r = p.Play();
             // 하루 끝 세이브가 그대로 저장되고 다시 읽히는지
             string json = SaveJson.ToJson(p.Game.Save);
-            var back = SaveJson.FromJson(json, TestData.Game);
+            var back = SaveJson.FromJson(json, TestData.Full);
             Assert.Equal(json, SaveJson.ToJson(back));
             return r;
         }

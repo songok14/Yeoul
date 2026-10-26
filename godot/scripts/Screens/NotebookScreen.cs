@@ -185,57 +185,78 @@ namespace Hanjeopsi.App.Screens
 
         // ───────── 도감 ─────────
 
+        // 도감은 3열 × 4줄 카드, 쪽 넘김 (71종)
+        private const int DexCols = 3;
+        private const int DexRows = 4;
+        private int _dexPage;
+
         private void Dex(VBoxContainer col)
         {
             int caught = G.Taste.SpeciesCaught(G.Save);
-            col.AddChild(Heading(F("dex", caught, G.Data.Species.Count), T["dexSub"]));
-            foreach (var sp in G.Data.Species)
+            var all = G.Data.Species;
+            col.AddChild(Heading(F("dex", caught, all.Count), T["dexSub"]));
+            int per = DexCols * DexRows;
+            int pages = (all.Count + per - 1) / per;
+            _dexPage = Mathf.Clamp(_dexPage, 0, pages - 1);
+            var grid = new GridContainer { Columns = DexCols, MouseFilter = MouseFilterEnum.Ignore, SizeFlagsVertical = SizeFlags.ExpandFill };
+            grid.AddThemeConstantOverride("h_separation", 16);
+            grid.AddThemeConstantOverride("v_separation", 16);
+            col.AddChild(grid);
+            foreach (var sp in all.Skip(_dexPage * per).Take(per))
             {
                 G.Save.Dex.TryGetValue(sp.Id, out var e);
                 bool known = e != null && e.Count > 0;
-                var card = new Button { Flat = true, FocusMode = FocusModeEnum.None, MouseDefaultCursorShape = known ? CursorShape.PointingHand : CursorShape.Arrow, SizeFlagsVertical = SizeFlags.ExpandFill, CustomMinimumSize = new Vector2(0, 170) };
-                var face = UiKit.Box(new Color(Palette.PaperLight, 0.6f), 26);
+                var card = new Button
+                {
+                    Flat = true,
+                    FocusMode = FocusModeEnum.None,
+                    MouseDefaultCursorShape = known ? CursorShape.PointingHand : CursorShape.Arrow,
+                    SizeFlagsHorizontal = SizeFlags.ExpandFill,
+                    SizeFlagsVertical = SizeFlags.ExpandFill,
+                    CustomMinimumSize = new Vector2(0, 210),
+                };
+                var face = UiKit.Box(new Color(Palette.PaperLight, known ? 0.75f : 0.4f), 24);
                 card.AddThemeStyleboxOverride("normal", face);
                 card.AddThemeStyleboxOverride("hover", face);
-                card.AddThemeStyleboxOverride("pressed", UiKit.Box(new Color(Palette.PaperDark, 0.6f), 26));
+                card.AddThemeStyleboxOverride("pressed", UiKit.Box(new Color(Palette.PaperDark, 0.6f), 24));
                 card.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
-                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-                row.AddThemeConstantOverride("separation", 22);
-                row.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect, LayoutPresetMode.Minsize, 14);
-                card.AddChild(row);
-                row.AddChild(FishIcon(sp.Id, 200, !known));
-                var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
-                text.AddThemeConstantOverride("separation", 4);
-                row.AddChild(text);
-                if (!known)
+                var inner = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+                inner.AddThemeConstantOverride("separation", 2);
+                inner.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect, LayoutPresetMode.Minsize, 10);
+                card.AddChild(inner);
+                var icon = FishIcon(sp.Id, 120, !known);
+                icon.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+                inner.AddChild(icon);
+                string stars = new string('★', sp.Stars);
+                inner.AddChild(UiKit.Text(known ? sp.Name : T["unknown"], TextSize.Small + 2, known ? Palette.Ink : Palette.InkSoft, true, false, 0, null, HorizontalAlignment.Center).Ellipsis());
+                inner.AddChild(UiKit.Text(known ? stars + "  " + F("count", e.Count) : stars, TextSize.Tiny + 2, sp.Stars == 3 ? Palette.GoldDark : Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Center));
+                if (known)
                 {
-                    text.AddChild(UiKit.Text(T["unknown"], TextSize.H1, Palette.InkSoft, true));
-                    text.AddChild(UiKit.Text(sp.Rare ? T["unknownRare"] : T["unknownSub"], TextSize.Small, Palette.InkSoft));
-                }
-                else
-                {
-                    var head = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-                    head.AddChild(UiKit.Text(sp.Name + (sp.Rare ? " ★" : ""), TextSize.H1, Palette.Ink, true));
-                    head.AddChild(Spacer());
-                    head.AddChild(UiKit.Text(F("count", e.Count), TextSize.Small, Palette.InkSoft));
-                    text.AddChild(head);
-                    text.AddChild(UiKit.Text(sp.Hint, TextSize.Small, Palette.InkSoft));
-                    var recipe = G.RecipeForSpecies(sp.Id);
-                    bool cooked = recipe != null && G.Save.RecipesCooked.Contains(recipe.Id);
-                    string best = F("best", e.Best.ToString("0.0", CultureInfo.InvariantCulture));
-                    text.AddChild(UiKit.Text(cooked ? best + " · " + F("recipe", recipe.Name) : best, TextSize.Small, cooked ? Palette.RedDark : Palette.InkSoft));
                     var id = sp.Id;
                     card.Pressed += () => DexDetail(id);
                 }
-                col.AddChild(card);
+                grid.AddChild(card);
+            }
+            if (pages > 1)
+            {
+                col.AddChild(Pager(_dexPage, pages, p =>
+                {
+                    _dexPage = p;
+                    Redraw();
+                }));
             }
         }
 
         private void DexDetail(string id)
         {
             var sp = G.Data.SpeciesById(id);
+            G.Save.Dex.TryGetValue(id, out var e);
             var lines = new List<string> { sp.Desc, "" };
+            lines.Add(sp.Hint);
             lines.Add(F("dexSize", sp.MinSize, sp.MaxSize) + " · " + T["dexPower"] + " " + new string('●', sp.Strength) + new string('○', Math.Max(0, 5 - sp.Strength)));
+            if (e != null && e.Count > 0) lines.Add(F("count", e.Count) + " · " + F("best", e.Best.ToString("0.0", CultureInfo.InvariantCulture)));
+            var recipe = G.RecipeForSpecies(id);
+            if (recipe != null && G.Save.RecipesCooked.Contains(recipe.Id)) lines.Add(F("recipe", recipe.Name));
             if (sp.Aging) lines.Add(T["dexAging"]);
             var pic = FishIcon(id, 520);
             pic.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
@@ -245,7 +266,7 @@ namespace Hanjeopsi.App.Screens
             var tw = pic.CreateTween().SetLoops();
             tw.TweenProperty(pic, "rotation_degrees", 3f, 0.9).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
             tw.TweenProperty(pic, "rotation_degrees", -3f, 0.9).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
-            Modal(sp.Name + (sp.Rare ? " ★" : ""), string.Join("\n", lines), new[] { new ModalButton(T["close"], Palette.GrayDark) }, holder);
+            Modal(sp.Name + " " + new string('★', sp.Stars), string.Join("\n", lines), new[] { new ModalButton(T["close"], Palette.GrayDark) }, holder);
         }
 
         // ───────── 미각 ─────────

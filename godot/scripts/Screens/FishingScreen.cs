@@ -654,7 +654,7 @@ namespace Hanjeopsi.App.Screens
             else
             {
                 _big = G.Spot.IsBigBite(_close, rng);
-                _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, _close, rng);
+                _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, G.MonthNow(), G.SeaNow(), _close, rng);
                 _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
             }
             _biteWindow = G.Reel.BiteWindow(G.Data.Gear.Rods[G.Save.Rod], _species, _tutorial);

@@ -8,7 +8,7 @@ namespace Hanjeopsi.Core.Tests
     /// <summary>고닷 낚시 규칙: 방향 바늘, 고등어 지점, 가까운 정도, 큰 놈, 고등어 도둑</summary>
     public class SpotTests
     {
-        private static readonly Game G = Game.NewGame(TestData.Game, 7);
+        private static readonly Game G = Game.NewGame(TestData.Full, 7);
         private SpotRules S { get { return G.Spot; } }
 
         [Fact]
@@ -63,12 +63,12 @@ namespace Hanjeopsi.Core.Tests
             {
                 if (S.IsBigBite(0, rng)) bigFar++;
                 if (S.IsBigBite(1, rng)) bigNear++;
-                if (G.Fishing.RollSpeciesNear(2, 0, 0, rng).Rare) rareFar++;
-                if (G.Fishing.RollSpeciesNear(2, 0, 1, rng).Rare) rareNear++;
+                if (G.Fishing.RollSpeciesNear(2, 0, 4, "south", 0, rng).Rare) rareFar++;
+                if (G.Fishing.RollSpeciesNear(2, 0, 4, "south", 1, rng).Rare) rareNear++;
             }
             Assert.True(bigNear > bigFar * 3);
             Assert.True(rareNear > rareFar * 2);
-            var sp = TestData.Game.Species.First();
+            var sp = TestData.Full.Species.First();
             for (int i = 0; i < 200; i++)
             {
                 double big = G.Fishing.RollSizeNear(sp, 0.5, true, rng);
@@ -85,7 +85,7 @@ namespace Hanjeopsi.Core.Tests
             int tries = Enumerable.Range(0, 1000).Count(_ => S.RollThief(3, rng) >= 0);
             Assert.InRange(tries, 100, 230);
 
-            var g = Game.NewGame(TestData.Game, 9);
+            var g = Game.NewGame(TestData.Full, 9);
             g.AddToCooler("godeungeo", 35);
             g.AddToCooler("bollak", 15);
             var cheap = g.Save.Cooler.OrderBy(f => g.FishValue(f)).First();

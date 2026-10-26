@@ -88,14 +88,15 @@ namespace Hanjeopsi.Core.Systems
             return (int)(JsMath.Round(total * mul / 100) * 100);
         }
 
-        /// <summary>오늘의 위판장 소식 한 줄. 가장 크게 움직인 어종을 고른다</summary>
-        public string Headline(int day)
+        /// <summary>오늘의 위판장 소식 한 줄. 가장 크게 움직인 어종을 고른다 (pool 이 있으면 그 안에서)</summary>
+        public string Headline(int day, IEnumerable<Species> pool = null)
         {
             var t = _data.Texts.Market;
             if (day <= 1) return t.FirstDay;
-            Species best = _data.Species[0];
+            var list = pool ?? _data.Species;
+            Species best = null;
             int bestAbs = -1;
-            foreach (var sp in _data.Species)
+            foreach (var sp in list)
             {
                 int c = Math.Abs(ChangePercent(sp.Id, day));
                 if (c > bestAbs)
@@ -104,6 +105,7 @@ namespace Hanjeopsi.Core.Systems
                     best = sp;
                 }
             }
+            if (best == null) return t.Calm;
             int change = ChangePercent(best.Id, day);
             if (Math.Abs(change) < 5) return t.Calm;
             return change > 0 ? string.Format(t.Up, best.Name, change) : string.Format(t.Down, best.Name, -change);
