@@ -452,16 +452,41 @@ Keep for the game screen: the lower half stays a flat open plaza with no new obj
 Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail, dramatic but still warm and safe feeling. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
-#### 배경 2-4. 안개 낀 새벽 (`village-fog`)
+#### 배경 2-4. 안개 낀 마을 (`village-fog`)
+날씨가 나쁜 날은 하늘이 가려 시간대 차이가 작다. 낮 판 하나에 게임이 시간대 색을 입히고, 불빛이 달라지는 밤만 따로 뽑는다(비·눈·태풍·안개 모두 같다). 안개 날은 낚시를 막지 않아서 방파제 판도 뽑는다.
 
 ```
-Create one vertical background illustration for a mobile game. Attached: the current dawn village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+Create one vertical background illustration for a mobile game. Attached: the current daytime village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
 
-Weather: thick sea fog on a spring dawn. A soft milky white mist hides the islands and most of the sea, the lighthouse is only a faint red shape with a glowing light, the boats at the pier fade into the fog, the buildings in front stay clear but softened, warm lanterns glow through the haze, the plaza is damp and pale with soft reflections.
+Weather: thick sea fog (haemu) rolling in on a quiet spring day in a south coast Korean harbor village. A soft milky white mist hides the islands and most of the sea, the red lighthouse is only a faint red shape with its glowing light, the fishing boats at the pier fade into the fog, the buildings and the food truck in front stay clear but a little softened, warm lanterns glow through the haze, the plaza is damp and pale with soft blurry reflections. Calm and quiet, no wind, sky a flat bright white gray.
 
 Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent sky.
 
 Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 2-4-2. 안개 낀 마을 밤 (`village-fog-night`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: the current night village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+
+Weather: a foggy spring night in a south coast Korean harbor village. Thick sea fog glows softly in deep blue gray, the moon is only a faint blurred halo, the sea and islands disappear into the mist, the red lighthouse light makes a hazy red glow, every street lamp, lantern and the food truck lights bloom into soft round halos of warm orange light, the boats at the pier are dim silhouettes, the damp plaza shows long soft blurry light reflections. Calm, quiet and a little mysterious but cozy.
+
+Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent sky.
+
+Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 2-4-3. 안개 낀 방파제 (`breakwater-fog`)
+
+```
+Create one vertical background illustration for a mobile fishing game. Attached: the current daytime breakwater background of this exact scene. Keep the composition, camera, the concrete tetrapods on both sides, the flat breakwater walkway at the bottom, the mooring bollards, the distant red lighthouse and the islands exactly the same. Change only the weather.
+
+Weather: thick sea fog (haemu) on a calm spring day. A soft milky white mist hides the islands and the horizon, the red lighthouse is only a faint red shape with a glowing light, the sea near the walkway stays clear and readable with calm gray green water and gentle ripples, then fades into white further out, the tetrapods and walkway in front are damp and clear, sky a flat bright white gray. Calm, no wind. The sea in the middle of the image stays readable (the game draws a float, ripples and splashes there).
+
+Keep for the game screen: the walkway at the bottom stays flat and empty (a character and a cooler box will stand there), the top 15 percent sky, the bottom 20 percent simple (a panel covers it).
+
+Style: the same soft painterly watercolor anime background as the attached image, same brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no fish, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
 ### 배경 3. 방파제 밤 (`breakwater-night`, 밤낚시용)
