@@ -151,12 +151,14 @@ namespace Hanjeopsi.App.Screens
             else if (weather == "rain")
             {
                 _stage.KeepClouds = false;
-                _stage.Tint = _stage.Tint * new Color("b4bccb");
-                fx = new RainOverlay();
+                _stage.Tint = _stage.Tint * new Color("9ca6b8");
+                fx = new RainOverlay { Intensity = 2.6f };
             }
             else if (weather == "fog")
             {
-                fx = new FogOverlay { Center = 0.33f, Strength = 0.8f, Tone = night ? new Color("7c86a8") : new Color("eef0f2") };
+                // 해무: 섬과 수평선이 하얗게 묻히고 발밑 바다는 보인다
+                _stage.KeepClouds = false;
+                fx = new FogOverlay { Center = 0.3f, Strength = 1.6f, Veil = night ? 0.45f : 0.62f, Tone = night ? new Color("7c86a8") : new Color("eef0f2") };
             }
             if (fx != null)
             {
@@ -322,13 +324,14 @@ namespace Hanjeopsi.App.Screens
                 _exit.Visible = false;
                 return;
             }
-            _info.Text = F("info", _castsLeft, G.Data.Balance.Chapter1.CastsPerTrip, s.Bait, s.Cooler.Count, G.CoolerCapacity());
+            var bait = G.BaitNow();
+            _info.Text = F("info", _castsLeft, G.Data.Balance.Chapter1.CastsPerTrip, (bait != null ? bait.Name + " " : "") + G.BaitLeft(), s.Cooler.Count, G.CoolerCapacity());
             _hud.Refresh();
         }
 
         private double Reach
         {
-            get { return G.Data.Gear.Rods[G.Save.Rod].Reach; }
+            get { return G.EffectiveRod().Reach; }
         }
 
         /// <summary>화면이 바뀐 뒤 불려도 괜찮은 지연 호출</summary>
@@ -468,7 +471,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>바늘을 멈춰 방향을 정하고 파워 게이지로. 반짝이는 지점은 계속 보인다</summary>
         private void StartPower()
         {
-            if (!_tutorial && G.Save.Bait <= 0)
+            if (!_tutorial && G.BaitLeft() <= 0)
             {
                 _phase = Phase.Busy;
                 Tell(T["noBait"], T["noBaitSub"]);
@@ -497,7 +500,7 @@ namespace Hanjeopsi.App.Screens
             _dist01 = G.Reel.CastDistance(_gaugePos, Reach);
             if (!_tutorial)
             {
-                G.UseBait();
+                G.UseBaitNow();
                 _castsLeft -= 1;
                 _castsDone += 1;
             }
@@ -685,10 +688,10 @@ namespace Hanjeopsi.App.Screens
             else
             {
                 _big = G.Spot.IsBigBite(_close, rng, G.BigAdd());
-                _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, G.MonthNow(), G.SeaNow(), _close, rng);
+                _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, G.MonthNow(), G.SeaNow(), _close, rng, G.BaitBias());
                 _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
             }
-            _biteWindow = G.Reel.BiteWindow(G.Data.Gear.Rods[G.Save.Rod], _species, _tutorial);
+            _biteWindow = G.Reel.BiteWindow(G.EffectiveRod(), _species, _tutorial);
             _feel = (float)G.Spot.Feel(_species, _size, _big);
             _nibbleTween?.Kill();
             _field.BobberSink = 1;
@@ -717,12 +720,12 @@ namespace Hanjeopsi.App.Screens
         private void Exclaim()
         {
             var r = _yeoul.GetGlobalRect();
-            var mark = UiKit.Text("!", TextSize.H1 + 24, new Color("ff8a1c"), true, false, 10, new Color("3a1a05"));
+            var mark = UiKit.Text("!", TextSize.H1 + 56, new Color("ff8a1c"), true, false, 14, new Color("3a1a05"));
             mark.MouseFilter = MouseFilterEnum.Ignore;
             Art.AddChild(mark);
             var at = r.Position - Art.GetGlobalRect().Position + new Vector2(r.Size.X * 0.62f, -10);
             mark.Position = at;
-            mark.PivotOffset = new Vector2(20, 60);
+            mark.PivotOffset = new Vector2(30, 100);
             mark.Scale = new Vector2(0.3f, 0.3f);
             var tw = mark.CreateTween();
             tw.TweenProperty(mark, "scale", new Vector2(1.15f, 1.15f), 0.12).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
@@ -755,16 +758,8 @@ namespace Hanjeopsi.App.Screens
             Buzz(35, 0.6f);
             var s = G.Save;
             _runOffset = 0;
-            _fight = G.Spot.StartTug(new FightSetup
-            {
-                Species = _species,
-                Size = _size,
-                Dist01 = _dist01,
-                Perfect = perfect,
-                Rod = G.Data.Gear.Rods[_tutorial ? 1 : s.Rod],
-                Reel = G.Data.Gear.Reels[_tutorial ? 1 : s.Reel],
-                Tutorial = _tutorial,
-            }, GameState.I.Rng);
+            // 장비(줄·바늘·찌·뜰채)까지 더한 힘싸움
+            _fight = G.Spot.StartTug(G.Fight(_species, _size, _dist01, perfect, _tutorial), GameState.I.Rng);
             _wobble = (float)GameState.I.Rng.Next() * 10;
             _field.ShadowSize = ShadowScale(0);
             var b = G.Data.Balance.Reel;
@@ -1078,7 +1073,7 @@ namespace Hanjeopsi.App.Screens
             _phase = Phase.Busy;
             Later(0.7, () =>
             {
-                if (_castsLeft <= 0 || G.Save.Bait <= 0) EndTrip();
+                if (_castsLeft <= 0 || G.BaitLeft() <= 0) EndTrip();
                 else StartAim();
             });
         }

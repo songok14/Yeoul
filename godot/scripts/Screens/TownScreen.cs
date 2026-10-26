@@ -150,7 +150,7 @@ namespace Hanjeopsi.App.Screens
                 _stage.Tint = tint;
             }
             Control fx = null;
-            if (id == "rain" || id == "typhoon") fx = new RainOverlay { Name = "RainOverlay" };
+            if (id == "rain" || id == "typhoon") fx = new RainOverlay { Name = "RainOverlay", Intensity = night ? 1 : 1.6f };
             else if (id == "snow") fx = new SnowOverlay { Name = "SnowOverlay" };
             else if (id == "fog") fx = new FogOverlay { Name = "FogOverlay", Center = 0.3f, Strength = 0.35f, Tone = night ? new Color("8890b0") : new Color("f2f2f4") };
             if (fx == null) return;
@@ -298,12 +298,16 @@ namespace Hanjeopsi.App.Screens
                 if (sum.Spoiled > 0) lines.Add("쿨러에서 " + sum.Spoiled + "마리가 상했다");
                 if (sum.ExpiredRequests > 0) lines.Add("의뢰 " + sum.ExpiredRequests + "건이 기한을 넘겼다");
                 lines.Add("위판장 시세가 바뀌었다");
+                if (sum.Trap != null && sum.Trap.Count > 0) lines.Add("통발에 " + string.Join("·", sum.Trap.GroupBy(n => n).Select(g => g.Key + (g.Count() > 1 ? " " + g.Count() : ""))) + " 들었다");
+                else if (sum.Trap != null) lines.Add("통발이 비었다");
                 var w = G.WeatherToday();
                 if (w.Id != "clear") lines.Add(w.Note);
                 int left = G.DaysLeft();
                 lines.Add(s.Debt > 0 ? "상환까지 " + (left > 0 ? left + "일" : "오늘이 마지막 날") : "1차 상환은 끝났다");
                 Modal(s.Day + "일차 " + G.SlotName(), string.Join("\n", lines), new[] { new ModalButton("좋아", Palette.Green) });
             }
+            // 보상 장비가 생기면 노씨가 미끼가게에서 기다린다
+            if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold, SafeTop + 520);
         }
 
         public override void ShotSetup(string action)
@@ -383,12 +387,12 @@ namespace Hanjeopsi.App.Screens
                 Toast("태풍이 와서 방파제 출입이 막혔다");
                 return;
             }
-            if (G.Save.Bait <= 0 && !G.IsShopOpen())
+            if (G.BaitLeft() <= 0 && !G.IsShopOpen())
             {
                 Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 새벽에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
                 return;
             }
-            if (G.Save.Bait <= 0)
+            if (G.BaitLeft() <= 0)
             {
                 Modal("미끼가 없다", "노씨 가게에서 크릴을 사 오자.", new[]
                 {

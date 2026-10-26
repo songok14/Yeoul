@@ -158,6 +158,10 @@ namespace Hanjeopsi.Core.Systems
         public Rod Rod;
         public Reel Reel;
         public bool Tutorial;
+        /// <summary>바늘: 느슨해도 이만큼(초) 더 버틴다 (고닷)</summary>
+        public double SlackBonus;
+        /// <summary>뜰채: 이 거리(m) 안에 오면 바로 떠 올린다 (고닷)</summary>
+        public double LandAt;
     }
 
     /// <summary>물고기를 건 뒤 끌어올릴 때까지. 꾹 누르면 감고(텐션 상승), 떼면 텐션이 풀리며 물고기가 멀어진다</summary>

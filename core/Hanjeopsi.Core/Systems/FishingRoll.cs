@@ -54,7 +54,7 @@ namespace Hanjeopsi.Core.Systems
         /// 고닷 낚시: 이 바다(sea)에 살고 이 달(month 1~12)이 제철일수록, 거리와 시간대가 맞을수록 잘 문다.
         /// 지점에 가까운 정도(0~1)만큼 귀한 고기 가중치가 RareColdMul 에서 RareHotMul 로 오른다
         /// </summary>
-        public Species RollSpeciesNear(int zone, int slot, int month, string sea, double closeness, IRandom rng)
+        public Species RollSpeciesNear(int zone, int slot, int month, string sea, double closeness, IRandom rng, Func<Species, double> bias = null)
         {
             var list = _data.Species;
             var weights = new double[list.Count];
@@ -68,6 +68,7 @@ namespace Hanjeopsi.Core.Systems
                 }
                 double w = list[i].Zone[zone] * list[i].Slot[slot] * MonthWeight(list[i], month);
                 if (list[i].Rare) w *= rareMul;
+                if (bias != null) w *= bias(list[i]);
                 weights[i] = w;
             }
             return WeightedPick(list, weights, rng.Next());

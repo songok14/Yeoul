@@ -73,6 +73,8 @@ namespace Hanjeopsi.App.Ui
         public float Strength = 0.5f;
         /// <summary>밤 안개는 푸르스름하다</summary>
         public Color Tone = new Color(0.94f, 0.95f, 0.97f);
+        /// <summary>화면 전체에 까는 뿌연 막 (위가 짙고 아래로 옅다). 0 이면 없다</summary>
+        public float Veil;
 
         private float _clock;
 
@@ -90,6 +92,15 @@ namespace Hanjeopsi.App.Ui
         public override void _Draw()
         {
             if (Size.X <= 0 || Size.Y <= 0) return;
+            if (Veil > 0)
+            {
+                var top = new Color(Tone, Veil);
+                var mid = new Color(Tone, Veil * 0.75f);
+                var low = new Color(Tone, Veil * 0.2f);
+                float y1 = Size.Y * (Center + 0.12f);
+                DrawPolygon(new[] { Vector2.Zero, new Vector2(Size.X, 0), new Vector2(Size.X, y1), new Vector2(0, y1) }, new[] { top, top, mid, mid });
+                DrawPolygon(new[] { new Vector2(0, y1), new Vector2(Size.X, y1), new Vector2(Size.X, Size.Y), new Vector2(0, Size.Y) }, new[] { mid, mid, low, low });
+            }
             // 위아래로 옅어지는 띠 몇 겹이 서로 다른 빠르기로 흐른다
             for (int b = 0; b < 4; b++)
             {

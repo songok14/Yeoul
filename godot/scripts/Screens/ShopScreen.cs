@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Hanjeopsi.App.Ui;
 using Hanjeopsi.Core;
+using Hanjeopsi.Core.Data;
 
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 노씨 미끼가게 (웹 ShopScene). 크릴 미끼, 낚싯대·릴·쿨러 다음 단계, 채비와 아버지의 대나무대.
+    /// 노씨 미끼가게 (웹 ShopScene). 탭 셋: 낚시(낚싯대·릴·줄·바늘·찌, 대나무대), 보관·편의(쿨러·미끼통·뜰채·헤드랜턴·의자·장화·통발), 미끼 열 가지.
+    /// 장비는 10단계: 1~4단계는 상점, 5~7단계는 보상(여울호 등급·단골·의뢰·노씨·1장), 8~10단계는 다음 지역.
     /// 들어오면 노씨가 대화창(일러스트)으로 한마디 한다. 제목 줄의 노씨 얼굴을 누르면 또 이야기한다.
     /// </summary>
     public partial class ShopScreen : PlaceScreen
@@ -49,7 +52,19 @@ namespace Hanjeopsi.App.Screens
         private void Greet()
         {
             if (GameState.I.ShotMode) return;
+            GreetNow();
+        }
+
+        private void GreetNow()
+        {
             var says = G.Data.Dialogue.NossiSays;
+            var gifts = G.CheckGifts();
+            if (gifts.Count > 0)
+            {
+                Nossi(says["gift"]);
+                Modal(T["giftTitle"], F("giftBody", string.Join("\n", gifts.Select(x => x.Name))), new[] { new ModalButton("좋아", Palette.Green, Redraw) });
+                return;
+            }
             Nossi(G.Save.Flag("nossiFavor") ? says["favor"] : NextLine());
         }
 
@@ -107,74 +122,224 @@ namespace Hanjeopsi.App.Screens
             return ring;
         }
 
+        protected override IList<string> Tabs
+        {
+            get { return new[] { T["tabFish"], T["tabKeep"], T["tabBait"] }; }
+        }
+
+        private static readonly string[] FishKinds = { "rod", "reel", "line", "hook", "float" };
+        private static readonly string[] KeepKinds = { "cooler", "baitbox", "net", "lamp", "chair", "boots", "trap" };
+
         protected override Control BuildPage()
         {
-            var paper = Paper(40, 30);
+            var paper = Paper(34, 24);
             var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            col.AddThemeConstantOverride("separation", 18);
+            col.AddThemeConstantOverride("separation", 10);
             paper.AddChild(col);
-
-            // 미끼
-            var bait = G.Data.Gear.Bait;
-            var buyBait = PriceButton(bait.Price, Palette.Green, BuyBait);
-            col.AddChild(Row(GearIcon.Kind.Bait, F("bait", G.Save.Bait), bait.Name, bait.Desc, buyBait, Palette.Ink));
-
-            // 장비 세 가지
-            foreach (var slot in new[] { GearSlot.Rod, GearSlot.Reel, GearSlot.Tackle })
+            if (Tab == 2)
             {
-                col.AddChild(Rule());
-                col.AddChild(GearRow(slot));
+                BaitPage(col);
+                return TopAligned(paper);
             }
-
-            // 채비와 대나무대
-            col.AddChild(Rule());
-            col.AddChild(Row(GearIcon.Kind.Rig, T["rig"], T["rigNow"], T["rigLater"], null, Palette.Ink));
-            col.AddChild(Rule());
-            var show = SmallButton(T["show"], Palette.Wood, () => Nossi(G.Data.Dialogue.NossiSays["bamboo"]), 220, 96);
-            col.AddChild(Row(GearIcon.Kind.Bamboo, "", T["bamboo"], T["bambooSub"], show, Palette.WoodDark));
+            var kinds = Tab == 0 ? FishKinds : KeepKinds;
+            for (int i = 0; i < kinds.Length; i++)
+            {
+                if (i > 0) col.AddChild(Rule());
+                col.AddChild(KindRow(kinds[i]));
+            }
+            if (Tab == 0)
+            {
+                // 아버지의 대나무대
+                col.AddChild(Rule());
+                var show = SmallButton(T["show"], Palette.Wood, () => Nossi(G.Data.Dialogue.NossiSays["bamboo"]), 200, 88);
+                col.AddChild(Row(new GearIcon(GearIcon.Kind.Bamboo, 104), "", T["bamboo"], T["bambooSub"], show, Palette.WoodDark));
+            }
             return TopAligned(paper);
         }
 
-        private Control GearRow(GearSlot slot)
+        // ───────── 장비 한 줄 ─────────
+
+        /// <summary>장비 한 종류: 다음 단계 그림 · 지금 단계와 다음 단계 이름, 효과 · 값 또는 얻는 법</summary>
+        private Control KindRow(string kind)
         {
-            int lv = G.GearLevel(slot);
-            string label = T[slot == GearSlot.Rod ? "rod" : slot == GearSlot.Reel ? "reel" : "tackle"];
-            var kind = slot == GearSlot.Rod ? GearIcon.Kind.Rod : slot == GearSlot.Reel ? GearIcon.Kind.Reel : GearIcon.Kind.Tackle;
-            string curName = GearName(slot, lv);
-            string top = label + " · " + F("now", curName);
-            if (lv + 1 >= G.GearCount(slot))
-                return Row(kind, label, curName, T["best"], null, Palette.GreenDark);
-            int price = G.GearPrice(slot, lv + 1);
-            var btn = PriceButton(price, Palette.Blue, () => Upgrade(slot));
-            return Row(kind, top, GearName(slot, lv + 1), GearDesc(slot, lv + 1), btn, Palette.Ink);
+            int have, count;
+            string label;
+            var kit = G.KitDef(kind);
+            if (kit != null)
+            {
+                have = G.KitLevel(kind);
+                count = kit.Levels.Count;
+                label = kit.Name;
+            }
+            else
+            {
+                var slot = SlotOf(kind);
+                have = G.GearLevel(slot) + 1;
+                count = G.GearCount(slot);
+                label = T[kind];
+            }
+            bool max = have >= count;
+            int show = max ? have : have + 1;
+            string top = have > 0 ? F("tierNow", label, have) + " " + TierName(kind, have) : label + " · " + T["none"];
+            string name = F("tier", show) + " " + TierName(kind, show);
+            if (max) return Row(GearArt(kind, show), label, name, Stat(kind, show), Pill(T["best"], Palette.GreenDark, Colors.White), Palette.GreenDark);
+            string unlock = TierUnlock(kind, show);
+            Control right;
+            if (Unlock.IsShop(unlock))
+            {
+                int price = TierPrice(kind, show);
+                right = PriceButton(price, Palette.Blue, () => Buy(kind));
+            }
+            else right = UnlockTag(unlock);
+            return Row(GearArt(kind, show), top, name, Stat(kind, show), right, Palette.Ink);
         }
 
-        private string GearName(GearSlot slot, int lv)
+        private static GearSlot SlotOf(string kind)
         {
+            return kind == "rod" ? GearSlot.Rod : kind == "reel" ? GearSlot.Reel : GearSlot.Tackle;
+        }
+
+        private string TierName(string kind, int tier)
+        {
+            var kit = G.KitDef(kind);
+            if (kit != null) return kit.Levels[tier - 1].Name;
             var g = G.Data.Gear;
-            return slot == GearSlot.Rod ? g.Rods[lv].Name : slot == GearSlot.Reel ? g.Reels[lv].Name : g.Tackles[lv].Name;
+            return kind == "rod" ? g.Rods[tier - 1].Name : kind == "reel" ? g.Reels[tier - 1].Name : g.Tackles[tier - 1].Name;
         }
 
-        private string GearDesc(GearSlot slot, int lv)
+        private string TierUnlock(string kind, int tier)
         {
-            var g = G.Data.Gear;
-            return slot == GearSlot.Rod ? g.Rods[lv].Desc : slot == GearSlot.Reel ? g.Reels[lv].Desc : g.Tackles[lv].Desc;
+            var kit = G.KitDef(kind);
+            return kit != null ? kit.Levels[tier - 1].Unlock : G.GearUnlock(SlotOf(kind), tier - 1);
         }
 
-        /// <summary>그림 · (작은 윗줄, 큰 이름, 설명) · 버튼</summary>
-        private Control Row(GearIcon.Kind kind, string top, string name, string desc, Control button, Color nameColor)
+        private int TierPrice(string kind, int tier)
+        {
+            var kit = G.KitDef(kind);
+            return kit != null ? kit.Levels[tier - 1].Price : G.GearPrice(SlotOf(kind), tier - 1);
+        }
+
+        /// <summary>효과 글</summary>
+        private string Stat(string kind, int tier)
+        {
+            var kit = G.KitDef(kind);
+            if (kit != null) return string.Format(kit.Effect, kit.Levels[tier - 1].Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
+            var g = G.Data.Gear;
+            switch (kind)
+            {
+                case "rod":
+                    var r = g.Rods[tier - 1];
+                    return F("rodStat", Mathf.RoundToInt((float)r.Reach * 100), Mathf.RoundToInt((float)r.Absorb * 100), r.HookBonus);
+                case "reel":
+                    var l = g.Reels[tier - 1];
+                    return F("reelStat", l.Speed, Mathf.RoundToInt((float)l.TensionMul * 100), l.Drag);
+                default:
+                    var c = g.Tackles[tier - 1];
+                    return F("coolerStat", c.Capacity, c.Decay);
+            }
+        }
+
+        /// <summary>보상·다음 지역 장비는 값 대신 얻는 법</summary>
+        private Control UnlockTag(string unlock)
+        {
+            string text = UnlockText(unlock);
+            var box = new PanelContainer { CustomMinimumSize = new Vector2(200, 88), SizeFlagsVertical = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
+            bool later = unlock == "later";
+            box.AddThemeStyleboxOverride("panel", UiKit.Box(later ? new Color(Palette.Ink, 0.12f) : new Color(Palette.Gold, 0.22f), 22, 14, 8).WithBorder(later ? new Color(Palette.Ink, 0.25f) : Palette.GoldDark, 3));
+            var v = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            v.AddThemeConstantOverride("separation", 0);
+            if (!later) v.AddChild(UiKit.Text(T["gift"], TextSize.Tiny, Palette.GoldDark, true, false, 0, null, HorizontalAlignment.Center));
+            var l = UiKit.Text(text, TextSize.Tiny, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
+            l.CustomMinimumSize = new Vector2(172, 0);
+            v.AddChild(l);
+            box.AddChild(v);
+            return box;
+        }
+
+        private string UnlockText(string u)
+        {
+            var parts = u.Split(':');
+            switch (parts[0])
+            {
+                case "rank": return F("unlockRank", G.Data.Diner.Ranks[int.Parse(parts[1])].Name);
+                case "regulars": return F("unlockRegulars", parts[1]);
+                case "requests": return F("unlockRequests", parts[1]);
+                case "favor": return T["unlockFavor"];
+                case "clear": return T["unlockClear"];
+                default: return T["unlockLater"];
+            }
+        }
+
+        private static TextureRect GearArt(string kind, int tier, float size = 104)
+        {
+            return new TextureRect
+            {
+                Texture = GD.Load<Texture2D>("res://art/gear/" + kind + "-" + tier + ".png"),
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2(size, size),
+                MouseFilter = MouseFilterEnum.Ignore,
+            };
+        }
+
+        /// <summary>그림 · (작은 윗줄, 큰 이름, 설명) · 오른쪽</summary>
+        private Control Row(Control icon, string top, string name, string desc, Control right, Color nameColor)
         {
             var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            row.AddThemeConstantOverride("separation", 24);
-            row.AddChild(new GearIcon(kind, 128));
+            row.AddThemeConstantOverride("separation", 20);
+            row.AddChild(icon);
             var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
-            text.AddThemeConstantOverride("separation", 2);
+            text.AddThemeConstantOverride("separation", 0);
             if (!string.IsNullOrEmpty(top)) text.AddChild(UiKit.Text(top, TextSize.Tiny, Palette.InkSoft).Ellipsis());
-            text.AddChild(UiKit.Text(name, TextSize.Body, nameColor, true, true));
-            text.AddChild(UiKit.Text(desc, TextSize.Tiny + 2, Palette.InkSoft, false, true));
+            text.AddChild(UiKit.Text(name, TextSize.Small + 2, nameColor, true).Ellipsis());
+            text.AddChild(UiKit.Text(desc, TextSize.Tiny, Palette.InkSoft, false, true));
             row.AddChild(text);
-            if (button != null) row.AddChild(button);
+            if (right != null) row.AddChild(right);
             return row;
+        }
+
+        // ───────── 미끼 ─────────
+
+        /// <summary>미끼 열 가지를 두 줄로. 고르면 그 미끼를 쓰고, 값을 누르면 한 봉지 산다</summary>
+        private void BaitPage(VBoxContainer col)
+        {
+            var grid = new GridContainer { Columns = 2, MouseFilter = MouseFilterEnum.Ignore };
+            grid.AddThemeConstantOverride("h_separation", 16);
+            grid.AddThemeConstantOverride("v_separation", 14);
+            col.AddChild(grid);
+            var baits = G.Data.Gear.Baits;
+            for (int i = 0; i < baits.Count; i++) grid.AddChild(BaitCard(baits[i], i + 1));
+        }
+
+        private Control BaitCard(Hanjeopsi.Core.Data.BaitKind b, int art)
+        {
+            bool using_ = G.Save.Kit != null && G.Save.Kit.Pick == b.Id;
+            int have = G.BaitCount(b.Id);
+            var card = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            card.AddThemeStyleboxOverride("panel", using_
+                ? UiKit.Box(new Color(Palette.Gold, 0.2f), 24, 14, 10).WithBorder(Palette.GoldDark, 4)
+                : UiKit.Box(new Color(Palette.Ink, 0.06f), 24, 14, 10).WithBorder(new Color(Palette.Ink, 0.12f), 3));
+            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 10);
+            card.AddChild(row);
+            row.AddChild(GearArt("bait", art, 84));
+            var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 0);
+            text.AddChild(UiKit.Text(b.Name + "  " + F("baitHave", have), TextSize.Tiny + 2, using_ ? Palette.GoldDark : Palette.Ink, true).Ellipsis());
+            string likes = b.Likes.Count == 0 ? T["baitAll"] : string.Join("·", b.Likes.Take(3).Select(id => G.Data.SpeciesById(id).Name));
+            if (b.WaitMul < 1) likes = T["chum"];
+            text.AddChild(UiKit.Text(likes, TextSize.Tiny - 2, Palette.InkSoft).Ellipsis());
+            var buttons = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            buttons.AddThemeConstantOverride("separation", 8);
+            var use = SmallButton(using_ ? T["baitUsing"] : T["baitUse"], using_ ? Palette.GoldDark : Palette.Teal, () => PickBait(b.Id), 120, 64);
+            use.SetEnabled(!using_ && have > 0);
+            buttons.AddChild(use);
+            var buy = SmallButton(UiKit.Won(b.Price), Palette.Green, () => BuyBait(b.Id), 150, 64);
+            buy.SetEnabled(G.Save.Money >= b.Price);
+            buttons.AddChild(buy);
+            text.AddChild(buttons);
+            row.AddChild(text);
+            return card;
         }
 
         private GameButton PriceButton(int price, Color color, Action onPress)
@@ -184,35 +349,66 @@ namespace Hanjeopsi.App.Screens
             return b;
         }
 
-        private void BuyBait()
+        private void BuyBait(string id)
         {
-            if (!G.BuyBait())
+            var b = G.BaitDef(id);
+            if (!G.BuyBaitKind(id))
             {
                 Toast(T["poor"], Palette.RedText);
                 return;
             }
             HudBar.Refresh();
-            FloatText(F("baitPlus", G.Data.Gear.Bait.Amount), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 560), Palette.GreenText);
+            int plus = (id == "krill" ? G.Data.Gear.Bait.Amount : b.Amount) + (int)G.KitValue("baitbox");
+            FloatText(F("baitPlus", plus), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 560), Palette.GreenText);
             Sound.Play("coin");
             Redraw();
+        }
+
+        private void PickBait(string id)
+        {
+            G.PickBait(id);
+            Sound.Play("tick", -6, 1.1f);
+            Redraw();
+        }
+
+        private void Buy(string kind)
+        {
+            if (G.KitDef(kind) == null)
+            {
+                Upgrade(SlotOf(kind));
+                return;
+            }
+            int next = G.KitLevel(kind) + 1;
+            if (!G.BuyKit(kind))
+            {
+                Toast(T["poor"], Palette.RedText);
+                return;
+            }
+            HudBar.Refresh();
+            Toast(F("bought", TierName(kind, next)), Palette.Gold);
+            Sound.Play("coin");
+            Sound.Play("good", -6);
+            Redraw();
+            GetTree().CreateTimer(0.5).Timeout += () => Nossi(G.Data.Dialogue.NossiSays["gear"]);
         }
 
         private void Upgrade(GearSlot slot)
         {
             int next = G.GearLevel(slot) + 1;
+            string kindId = slot == GearSlot.Rod ? "rod" : slot == GearSlot.Reel ? "reel" : "cooler";
             if (!G.UpgradeGear(slot))
             {
                 Toast(T["poor"], Palette.RedText);
                 return;
             }
             HudBar.Refresh();
-            Toast(F("bought", GearName(slot, next)), Palette.Gold);
+            Toast(F("bought", TierName(kindId, next + 1)), Palette.Gold);
             Sound.Play("coin");
             Sound.Play("good", -6);
             Redraw();
             var says = G.Data.Dialogue.NossiSays;
-            // 노씨 감성돔대(마지막 대)를 사면 아끼던 거라고 한마디
-            bool lastRod = slot == GearSlot.Rod && next == G.GearCount(GearSlot.Rod) - 1;
+            // 노씨 감성돔대(3단계)를 사면 아끼던 거라고 한마디
+            bool lastRod = slot == GearSlot.Rod && next == 2;
             GetTree().CreateTimer(0.5).Timeout += () => Nossi(lastRod ? says["rod"] : says["gear"]);
         }
 
@@ -224,6 +420,19 @@ namespace Hanjeopsi.App.Screens
             {
                 case "talk":
                     Nossi(G.Data.Dialogue.Nossi[2]);
+                    break;
+                case "keep":
+                    ShowTab(1);
+                    break;
+                case "bait":
+                    G.BuyBaitKind("shrimp");
+                    G.PickBait("shrimp");
+                    ShowTab(2);
+                    break;
+                case "gift":
+                    // 동네 맛집이 되어 노씨가 챙겨 둔 장비
+                    G.Save.Diner.Rep = G.Data.Diner.Ranks[1].Rep;
+                    GreetNow();
                     break;
             }
         }

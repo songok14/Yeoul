@@ -6,7 +6,8 @@
       "price": 0,
       "reach": 0.8,
       "absorb": 0,
-      "hookBonus": 0
+      "hookBonus": 0,
+      "unlock": "start"
     },
     {
       "name": "갯바위 찌낚싯대 1호",
@@ -14,7 +15,8 @@
       "price": 80000,
       "reach": 1,
       "absorb": 0.25,
-      "hookBonus": 80
+      "hookBonus": 80,
+      "unlock": "shop"
     },
     {
       "name": "노씨의 감성돔대",
@@ -22,7 +24,71 @@
       "price": 300000,
       "reach": 1,
       "absorb": 0.45,
-      "hookBonus": 160
+      "hookBonus": 160,
+      "unlock": "shop"
+    },
+    {
+      "name": "카본 갯바위대 1.5호",
+      "desc": "가볍고 질기다. 챔질이 빠르다",
+      "price": 450000,
+      "reach": 1,
+      "absorb": 0.5,
+      "hookBonus": 190,
+      "unlock": "shop"
+    },
+    {
+      "name": "등대지기 낚싯대",
+      "desc": "마을 일을 도운 값. 노씨가 손봐 줬다",
+      "price": 0,
+      "reach": 1,
+      "absorb": 0.55,
+      "hookBonus": 220,
+      "unlock": "requests:4"
+    },
+    {
+      "name": "물비늘 감성돔대",
+      "desc": "1장을 마친 기념. 아버지 대를 닮았다",
+      "price": 0,
+      "reach": 1,
+      "absorb": 0.6,
+      "hookBonus": 250,
+      "unlock": "clear"
+    },
+    {
+      "name": "줄 서는 집 명인대",
+      "desc": "여울호가 줄 서는 집이 되면",
+      "price": 0,
+      "reach": 1,
+      "absorb": 0.64,
+      "hookBonus": 270,
+      "unlock": "rank:3"
+    },
+    {
+      "name": "흑룡 원투대",
+      "desc": "먼 바다의 대물을 노린다",
+      "price": 0,
+      "reach": 1,
+      "absorb": 0.68,
+      "hookBonus": 290,
+      "unlock": "later"
+    },
+    {
+      "name": "홍염 명품대",
+      "desc": "아무나 쥘 수 없는 대",
+      "price": 0,
+      "reach": 1,
+      "absorb": 0.72,
+      "hookBonus": 310,
+      "unlock": "later"
+    },
+    {
+      "name": "청해 전설대",
+      "desc": "바다가 허락한 대",
+      "price": 0,
+      "reach": 1,
+      "absorb": 0.76,
+      "hookBonus": 340,
+      "unlock": "later"
     }
   ],
   "reels": [
@@ -32,7 +98,8 @@
       "price": 0,
       "speed": 5,
       "tensionMul": 1,
-      "drag": 101
+      "drag": 101,
+      "unlock": "start"
     },
     {
       "name": "2500번 스피닝릴",
@@ -40,7 +107,8 @@
       "price": 60000,
       "speed": 7,
       "tensionMul": 0.9,
-      "drag": 90
+      "drag": 90,
+      "unlock": "shop"
     },
     {
       "name": "레버브레이크릴",
@@ -48,7 +116,71 @@
       "price": 250000,
       "speed": 9,
       "tensionMul": 0.8,
-      "drag": 85
+      "drag": 85,
+      "unlock": "shop"
+    },
+    {
+      "name": "3000번 레버릴",
+      "desc": "더 빨리 감긴다. 드랙 83",
+      "price": 420000,
+      "speed": 10,
+      "tensionMul": 0.76,
+      "drag": 83,
+      "unlock": "shop"
+    },
+    {
+      "name": "맛집 축하 릴",
+      "desc": "여울호가 동네 맛집이 된 날 받는다",
+      "price": 0,
+      "speed": 11,
+      "tensionMul": 0.72,
+      "drag": 82,
+      "unlock": "rank:1"
+    },
+    {
+      "name": "단골들의 선물 릴",
+      "desc": "단골 여섯 명이 돈을 모았다",
+      "price": 0,
+      "speed": 12,
+      "tensionMul": 0.68,
+      "drag": 80,
+      "unlock": "regulars:6"
+    },
+    {
+      "name": "소문난 집 레버릴",
+      "desc": "여울호가 줄 서는 집이 되면",
+      "price": 0,
+      "speed": 13,
+      "tensionMul": 0.64,
+      "drag": 78,
+      "unlock": "rank:3"
+    },
+    {
+      "name": "흑룡 레버릴",
+      "desc": "다음 지역에서",
+      "price": 0,
+      "speed": 14,
+      "tensionMul": 0.6,
+      "drag": 76,
+      "unlock": "later"
+    },
+    {
+      "name": "홍염 레버릴",
+      "desc": "다음 지역에서",
+      "price": 0,
+      "speed": 15,
+      "tensionMul": 0.56,
+      "drag": 74,
+      "unlock": "later"
+    },
+    {
+      "name": "청해 전설릴",
+      "desc": "다음 지역에서",
+      "price": 0,
+      "speed": 16,
+      "tensionMul": 0.52,
+      "drag": 72,
+      "unlock": "later"
     }
   ],
   "tackles": [
@@ -57,21 +189,80 @@
       "desc": "8마리. 금방 상한다",
       "price": 0,
       "capacity": 8,
-      "decay": 40
+      "decay": 40,
+      "unlock": "start"
     },
     {
       "name": "아이스 쿨러",
       "desc": "15마리. 천천히 상한다",
       "price": 50000,
       "capacity": 15,
-      "decay": 25
+      "decay": 25,
+      "unlock": "shop"
     },
     {
       "name": "대형 아이스박스",
       "desc": "25마리. 얼음 가득",
       "price": 180000,
       "capacity": 25,
-      "decay": 15
+      "decay": 15,
+      "unlock": "shop"
+    },
+    {
+      "name": "활어 쿨러",
+      "desc": "30마리. 물이 순환한다",
+      "price": 320000,
+      "capacity": 30,
+      "decay": 12,
+      "unlock": "shop"
+    },
+    {
+      "name": "노씨의 낡은 쿨러",
+      "desc": "40마리를 담던 노씨의 보물",
+      "price": 0,
+      "capacity": 34,
+      "decay": 10,
+      "unlock": "favor"
+    },
+    {
+      "name": "물비늘 아이스박스",
+      "desc": "1장을 마친 기념",
+      "price": 0,
+      "capacity": 40,
+      "decay": 8,
+      "unlock": "clear"
+    },
+    {
+      "name": "맛집 대형 쿨러",
+      "desc": "여울호가 소문난 집이 되면",
+      "price": 0,
+      "capacity": 45,
+      "decay": 6,
+      "unlock": "rank:2"
+    },
+    {
+      "name": "흑룡 쿨러",
+      "desc": "다음 지역에서",
+      "price": 0,
+      "capacity": 50,
+      "decay": 5,
+      "unlock": "later"
+    },
+    {
+      "name": "홍염 쿨러",
+      "desc": "다음 지역에서",
+      "price": 0,
+      "capacity": 55,
+      "decay": 4,
+      "unlock": "later"
+    },
+    {
+      "name": "청해 전설 쿨러",
+      "desc": "다음 지역에서",
+      "price": 0,
+      "capacity": 60,
+      "decay": 3,
+      "unlock": "later"
     }
   ],
   "bait": {
@@ -79,5 +270,754 @@
     "desc": "한 봉지에 10번",
     "price": 3000,
     "amount": 10
-  }
+  },
+  "kits": [
+    {
+      "id": "line",
+      "name": "낚싯줄",
+      "effect": "텐션이 {0}% 덜 오른다",
+      "levels": [
+        {
+          "name": "나일론 원줄 2호",
+          "price": 8000,
+          "value": 3,
+          "unlock": "shop"
+        },
+        {
+          "name": "하늘 원줄 2호",
+          "price": 25000,
+          "value": 5,
+          "unlock": "shop"
+        },
+        {
+          "name": "갯바위 원줄 2.5호",
+          "price": 60000,
+          "value": 7,
+          "unlock": "shop"
+        },
+        {
+          "name": "플로로 원줄 3호",
+          "price": 120000,
+          "value": 9,
+          "unlock": "shop"
+        },
+        {
+          "name": "맛집 축하 원줄",
+          "price": 0,
+          "value": 11,
+          "unlock": "rank:1"
+        },
+        {
+          "name": "마을 의뢰 원줄",
+          "price": 0,
+          "value": 13,
+          "unlock": "requests:6"
+        },
+        {
+          "name": "명인 합사",
+          "price": 0,
+          "value": 15,
+          "unlock": "rank:3"
+        },
+        {
+          "name": "흑룡 원줄",
+          "price": 0,
+          "value": 17,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 원줄",
+          "price": 0,
+          "value": 19,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 원줄",
+          "price": 0,
+          "value": 21,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "hook",
+      "name": "바늘",
+      "effect": "느슨해도 {0}초 더 버틴다",
+      "levels": [
+        {
+          "name": "감성돔 바늘 2호",
+          "price": 8000,
+          "value": 0.15,
+          "unlock": "shop"
+        },
+        {
+          "name": "하늘 바늘 3호",
+          "price": 25000,
+          "value": 0.25,
+          "unlock": "shop"
+        },
+        {
+          "name": "올리브 바늘 3호",
+          "price": 60000,
+          "value": 0.35,
+          "unlock": "shop"
+        },
+        {
+          "name": "청 바늘 4호",
+          "price": 120000,
+          "value": 0.45,
+          "unlock": "shop"
+        },
+        {
+          "name": "단골이 준 바늘",
+          "price": 0,
+          "value": 0.55,
+          "unlock": "regulars:2"
+        },
+        {
+          "name": "물비늘 바늘",
+          "price": 0,
+          "value": 0.65,
+          "unlock": "clear"
+        },
+        {
+          "name": "명인 바늘",
+          "price": 0,
+          "value": 0.75,
+          "unlock": "regulars:8"
+        },
+        {
+          "name": "흑룡 바늘",
+          "price": 0,
+          "value": 0.85,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 바늘",
+          "price": 0,
+          "value": 0.95,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 바늘",
+          "price": 0,
+          "value": 1.05,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "float",
+      "name": "찌",
+      "effect": "챔질 시간이 {0}ms 늘어난다",
+      "levels": [
+        {
+          "name": "막대찌",
+          "price": 8000,
+          "value": 30,
+          "unlock": "shop"
+        },
+        {
+          "name": "주황 구멍찌",
+          "price": 25000,
+          "value": 50,
+          "unlock": "shop"
+        },
+        {
+          "name": "연두 구멍찌",
+          "price": 60000,
+          "value": 70,
+          "unlock": "shop"
+        },
+        {
+          "name": "파랑 구멍찌",
+          "price": 120000,
+          "value": 90,
+          "unlock": "shop"
+        },
+        {
+          "name": "노씨의 수제찌",
+          "price": 0,
+          "value": 110,
+          "unlock": "favor"
+        },
+        {
+          "name": "소문난 집 찌",
+          "price": 0,
+          "value": 130,
+          "unlock": "rank:2"
+        },
+        {
+          "name": "명인 찌",
+          "price": 0,
+          "value": 150,
+          "unlock": "later"
+        },
+        {
+          "name": "흑룡 찌",
+          "price": 0,
+          "value": 170,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 찌",
+          "price": 0,
+          "value": 190,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 찌",
+          "price": 0,
+          "value": 210,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "baitbox",
+      "name": "미끼통",
+      "effect": "미끼 한 봉지가 {0}번 더 간다",
+      "levels": [
+        {
+          "name": "작은 미끼통",
+          "price": 8000,
+          "value": 1,
+          "unlock": "shop"
+        },
+        {
+          "name": "하늘 미끼통",
+          "price": 25000,
+          "value": 2,
+          "unlock": "shop"
+        },
+        {
+          "name": "카키 미끼통",
+          "price": 60000,
+          "value": 3,
+          "unlock": "shop"
+        },
+        {
+          "name": "파도 미끼통",
+          "price": 120000,
+          "value": 4,
+          "unlock": "shop"
+        },
+        {
+          "name": "의뢰 감사 미끼통",
+          "price": 0,
+          "value": 5,
+          "unlock": "requests:3"
+        },
+        {
+          "name": "소문난 집 미끼통",
+          "price": 0,
+          "value": 6,
+          "unlock": "rank:2"
+        },
+        {
+          "name": "물비늘 미끼통",
+          "price": 0,
+          "value": 7,
+          "unlock": "clear"
+        },
+        {
+          "name": "흑룡 미끼통",
+          "price": 0,
+          "value": 8,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 미끼통",
+          "price": 0,
+          "value": 9,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 미끼통",
+          "price": 0,
+          "value": 10,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "net",
+      "name": "뜰채",
+      "effect": "{0}m 앞에서 바로 떠 올린다",
+      "levels": [
+        {
+          "name": "접이식 뜰채",
+          "price": 8000,
+          "value": 0.6,
+          "unlock": "shop"
+        },
+        {
+          "name": "하늘 뜰채",
+          "price": 25000,
+          "value": 1.0,
+          "unlock": "shop"
+        },
+        {
+          "name": "카키 뜰채",
+          "price": 60000,
+          "value": 1.4,
+          "unlock": "shop"
+        },
+        {
+          "name": "청 뜰채",
+          "price": 120000,
+          "value": 1.8,
+          "unlock": "shop"
+        },
+        {
+          "name": "맛집 축하 뜰채",
+          "price": 0,
+          "value": 2.2,
+          "unlock": "rank:1"
+        },
+        {
+          "name": "단골들의 뜰채",
+          "price": 0,
+          "value": 2.6,
+          "unlock": "regulars:5"
+        },
+        {
+          "name": "명인 뜰채",
+          "price": 0,
+          "value": 3.0,
+          "unlock": "later"
+        },
+        {
+          "name": "흑룡 뜰채",
+          "price": 0,
+          "value": 3.4,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 뜰채",
+          "price": 0,
+          "value": 3.8,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 뜰채",
+          "price": 0,
+          "value": 4.2,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "lamp",
+      "name": "헤드랜턴",
+      "effect": "밤낚시 입질이 {0}% 빨리 온다",
+      "levels": [
+        {
+          "name": "작은 헤드랜턴",
+          "price": 8000,
+          "value": 6,
+          "unlock": "shop"
+        },
+        {
+          "name": "하늘 헤드랜턴",
+          "price": 25000,
+          "value": 10,
+          "unlock": "shop"
+        },
+        {
+          "name": "카키 헤드랜턴",
+          "price": 60000,
+          "value": 14,
+          "unlock": "shop"
+        },
+        {
+          "name": "적색 헤드랜턴",
+          "price": 120000,
+          "value": 18,
+          "unlock": "shop"
+        },
+        {
+          "name": "단골이 준 랜턴",
+          "price": 0,
+          "value": 22,
+          "unlock": "regulars:3"
+        },
+        {
+          "name": "의뢰 감사 랜턴",
+          "price": 0,
+          "value": 26,
+          "unlock": "requests:8"
+        },
+        {
+          "name": "명인 랜턴",
+          "price": 0,
+          "value": 30,
+          "unlock": "later"
+        },
+        {
+          "name": "흑룡 랜턴",
+          "price": 0,
+          "value": 34,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 랜턴",
+          "price": 0,
+          "value": 38,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 랜턴",
+          "price": 0,
+          "value": 42,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "chair",
+      "name": "낚시 의자",
+      "effect": "입질이 {0}% 빨리 온다",
+      "levels": [
+        {
+          "name": "접이식 의자",
+          "price": 8000,
+          "value": 4,
+          "unlock": "shop"
+        },
+        {
+          "name": "하늘 의자",
+          "price": 25000,
+          "value": 6,
+          "unlock": "shop"
+        },
+        {
+          "name": "캠핑 의자",
+          "price": 60000,
+          "value": 8,
+          "unlock": "shop"
+        },
+        {
+          "name": "파도 의자",
+          "price": 120000,
+          "value": 10,
+          "unlock": "shop"
+        },
+        {
+          "name": "노씨의 의자",
+          "price": 0,
+          "value": 12,
+          "unlock": "favor"
+        },
+        {
+          "name": "소문난 집 의자",
+          "price": 0,
+          "value": 14,
+          "unlock": "rank:2"
+        },
+        {
+          "name": "단골들의 의자",
+          "price": 0,
+          "value": 16,
+          "unlock": "regulars:10"
+        },
+        {
+          "name": "흑룡 의자",
+          "price": 0,
+          "value": 18,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 의자",
+          "price": 0,
+          "value": 20,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 의자",
+          "price": 0,
+          "value": 22,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "boots",
+      "name": "장화",
+      "effect": "비·눈 오는 날 입질이 {0}% 빨리 온다. 눈 날 불리함이 없다",
+      "levels": [
+        {
+          "name": "고무 장화",
+          "price": 8000,
+          "value": 3,
+          "unlock": "shop"
+        },
+        {
+          "name": "카키 장화",
+          "price": 25000,
+          "value": 5,
+          "unlock": "shop"
+        },
+        {
+          "name": "남색 장화",
+          "price": 60000,
+          "value": 7,
+          "unlock": "shop"
+        },
+        {
+          "name": "갯바위 장화",
+          "price": 120000,
+          "value": 9,
+          "unlock": "shop"
+        },
+        {
+          "name": "의뢰 감사 장화",
+          "price": 0,
+          "value": 11,
+          "unlock": "requests:2"
+        },
+        {
+          "name": "물비늘 장화",
+          "price": 0,
+          "value": 13,
+          "unlock": "clear"
+        },
+        {
+          "name": "줄 서는 집 장화",
+          "price": 0,
+          "value": 15,
+          "unlock": "rank:3"
+        },
+        {
+          "name": "흑룡 장화",
+          "price": 0,
+          "value": 17,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 장화",
+          "price": 0,
+          "value": 19,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 장화",
+          "price": 0,
+          "value": 21,
+          "unlock": "later"
+        }
+      ]
+    },
+    {
+      "id": "trap",
+      "name": "통발",
+      "effect": "밤새 {0}마리가 든다 (미끼 1개)",
+      "levels": [
+        {
+          "name": "대나무 통발",
+          "price": 8000,
+          "value": 1,
+          "unlock": "shop"
+        },
+        {
+          "name": "나무 통발",
+          "price": 25000,
+          "value": 1,
+          "unlock": "shop"
+        },
+        {
+          "name": "초록 통발",
+          "price": 60000,
+          "value": 2,
+          "unlock": "shop"
+        },
+        {
+          "name": "파랑 통발",
+          "price": 120000,
+          "value": 2,
+          "unlock": "shop"
+        },
+        {
+          "name": "소문난 집 통발",
+          "price": 0,
+          "value": 3,
+          "unlock": "rank:2"
+        },
+        {
+          "name": "물비늘 통발",
+          "price": 0,
+          "value": 3,
+          "unlock": "clear"
+        },
+        {
+          "name": "명인 통발",
+          "price": 0,
+          "value": 4,
+          "unlock": "later"
+        },
+        {
+          "name": "흑룡 통발",
+          "price": 0,
+          "value": 4,
+          "unlock": "later"
+        },
+        {
+          "name": "홍염 통발",
+          "price": 0,
+          "value": 5,
+          "unlock": "later"
+        },
+        {
+          "name": "청해 전설 통발",
+          "price": 0,
+          "value": 5,
+          "unlock": "later"
+        }
+      ]
+    }
+  ],
+  "baits": [
+    {
+      "id": "worm",
+      "name": "청갯지렁이",
+      "price": 4000,
+      "amount": 10,
+      "waitMul": 1,
+      "likes": [
+        "noraemi",
+        "ureok",
+        "bollak",
+        "mangdung",
+        "dodari",
+        "borimyeol",
+        "yangtae",
+        "gaebollak"
+      ]
+    },
+    {
+      "id": "shrimp",
+      "name": "생새우",
+      "price": 6000,
+      "amount": 8,
+      "waitMul": 1,
+      "likes": [
+        "gamseongdom",
+        "nongeo",
+        "chamdom",
+        "bollak",
+        "gaebollak"
+      ]
+    },
+    {
+      "id": "clam",
+      "name": "바지락살",
+      "price": 5000,
+      "amount": 10,
+      "waitMul": 1,
+      "likes": [
+        "gamseongdom",
+        "doldom",
+        "dodari",
+        "jwichi",
+        "maljwichi"
+      ]
+    },
+    {
+      "id": "squid",
+      "name": "오징어살",
+      "price": 5000,
+      "amount": 10,
+      "waitMul": 1,
+      "likes": [
+        "bungjangeo",
+        "gaetjangeo",
+        "gwangeo",
+        "yangtae",
+        "ureok",
+        "ssombaengi"
+      ]
+    },
+    {
+      "id": "fish",
+      "name": "고등어 토막",
+      "price": 5000,
+      "amount": 8,
+      "waitMul": 1,
+      "likes": [
+        "bungjangeo",
+        "galchi",
+        "gwangeo",
+        "nongeo"
+      ]
+    },
+    {
+      "id": "corn",
+      "name": "옥수수",
+      "price": 3000,
+      "amount": 12,
+      "waitMul": 1,
+      "likes": [
+        "gamseongdom",
+        "sungeo"
+      ]
+    },
+    {
+      "id": "paste",
+      "name": "떡밥",
+      "price": 3000,
+      "amount": 12,
+      "waitMul": 1,
+      "likes": [
+        "sungeo",
+        "hakgongchi",
+        "mangsangeo",
+        "bengedom"
+      ]
+    },
+    {
+      "id": "krill",
+      "name": "크릴",
+      "price": 3000,
+      "amount": 10,
+      "waitMul": 1,
+      "likes": []
+    },
+    {
+      "id": "chum",
+      "name": "집어 크릴",
+      "price": 7000,
+      "amount": 10,
+      "waitMul": 0.8,
+      "likes": [
+        "bengedom",
+        "godeungeo",
+        "jeongaengi"
+      ]
+    },
+    {
+      "id": "weed",
+      "name": "파래",
+      "price": 4000,
+      "amount": 10,
+      "waitMul": 1,
+      "likes": [
+        "bengedom",
+        "dokgasichi",
+        "jwichi",
+        "beomdom"
+      ]
+    }
+  ],
+  "baitLikeMul": 2.5,
+  "trapPool": [
+    "muneo",
+    "jukkumi",
+    "nakji",
+    "bungjangeo",
+    "ssombaengi",
+    "mangdung",
+    "noraemi",
+    "ureok",
+    "gaebollak"
+  ]
 }

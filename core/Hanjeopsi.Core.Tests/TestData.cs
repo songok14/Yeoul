@@ -41,6 +41,13 @@ namespace Hanjeopsi.Core.Tests
                 d.Balance.Time.ShopLastSlot = 99;
                 d.Diner = null;
                 d.Weather = null;
+                // 고닷이 늘린 장비(10단계, 새 장비, 미끼)도 웹 세 단계로
+                d.Gear.Rods.RemoveRange(3, d.Gear.Rods.Count - 3);
+                d.Gear.Reels.RemoveRange(3, d.Gear.Reels.Count - 3);
+                d.Gear.Tackles.RemoveRange(3, d.Gear.Tackles.Count - 3);
+                d.Gear.Kits.Clear();
+                d.Gear.Baits.Clear();
+                d.Gear.TrapPool.Clear();
                 d.Texts.Slots = new System.Collections.Generic.List<string> { "새벽", "아침", "낮", "저녁" };
                 d.Texts.SlotAfter = "밤";
                 d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));

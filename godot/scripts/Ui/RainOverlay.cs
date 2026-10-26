@@ -30,6 +30,9 @@ namespace Hanjeopsi.App.Ui
         private float _rippleTimer;
         private bool _initialized;
 
+        /// <summary>빗줄기 진하기·굵기 배율. 밝은 낮 바다 위에서는 크게 준다</summary>
+        public float Intensity = 1;
+
         public override void _Ready()
         {
             MouseFilter = MouseFilterEnum.Ignore;
@@ -105,12 +108,12 @@ namespace Hanjeopsi.App.Ui
             // 비스듬히 떨어지는 빗줄기. 색을 옅게 유지해 배경의 디테일을 가리지 않는다.
             foreach (Drop drop in _drops)
             {
-                float alpha = Mathf.Clamp(0.12f + (drop.Speed - 430f) / 330f * 0.12f, 0.12f, 0.24f);
+                float alpha = Mathf.Clamp(0.12f + (drop.Speed - 430f) / 330f * 0.12f, 0.12f, 0.24f) * Intensity;
                 DrawLine(
                     drop.Position,
                     drop.Position + new Vector2(-drop.Length * 0.22f, drop.Length),
-                    new Color(0.78f, 0.86f, 0.98f, alpha),
-                    drop.Width,
+                    new Color(0.78f, 0.86f, 0.98f, Mathf.Min(0.75f, alpha)),
+                    drop.Width * Mathf.Max(1, Intensity * 0.8f),
                     true);
             }
 

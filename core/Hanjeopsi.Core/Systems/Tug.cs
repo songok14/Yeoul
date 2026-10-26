@@ -103,7 +103,7 @@ namespace Hanjeopsi.Core.Systems
         {
             var s = Setup;
             if (s.Tutorial) return _r.SlackLimitTutorial;
-            return Array.IndexOf(_r.FastSpecies, s.Species.Id) >= 0 ? _r.SlackLimitFast : _r.SlackLimit;
+            return (Array.IndexOf(_r.FastSpecies, s.Species.Id) >= 0 ? _r.SlackLimitFast : _r.SlackLimit) + s.SlackBonus;
         }
 
         /// <param name="holding">화면을 누르고 있는지</param>
@@ -249,7 +249,7 @@ namespace Hanjeopsi.Core.Systems
                     return res;
                 }
             }
-            if (Distance <= 0) res.End = Ended = FightEnd.Landed;
+            if (Distance <= Setup.LandAt) res.End = Ended = FightEnd.Landed;
             return res;
         }
     }

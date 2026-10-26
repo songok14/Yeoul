@@ -208,6 +208,7 @@ namespace Hanjeopsi.Core.Tests
             // 미끼가게가 밤에 닫혀 있었으면 다음 날 새벽에 장을 본다
             Town();
             if (S.Day == day0) _g.EndDay();
+            _g.CheckGifts();
             if (_s.Thoughtful) Upgrade();
             BuyBait(3 * D.Balance.Chapter1.CastsPerTrip);
             Check("잠 " + day0);
@@ -246,7 +247,7 @@ namespace Hanjeopsi.Core.Tests
             _r.Casts += 1;
             var reel = _g.Reel;
             var spot = _g.Spot;
-            var rod = D.Gear.Rods[S.Rod];
+            var rod = _g.EffectiveRod();
             var (hot, hint) = spot.RollSpots(S.CatAffinity, rod.Reach, _rng, _g.HintPenalty());
 
             // 방향 바늘을 멈추고 파워 게이지로 거리를 정한다. 힌트를 따르면 고등어가 가리킨 지점을 노린다
@@ -282,7 +283,7 @@ namespace Hanjeopsi.Core.Tests
             int zone = _g.Fishing.ZoneOf(dist01);
             bool big = spot.IsBigBite(close, _rng, _g.BigAdd());
             if (big) _r.BigBites += 1;
-            var sp = _g.Fishing.RollSpeciesNear(zone, S.Slot, _g.MonthNow(), _g.SeaNow(), close, _rng);
+            var sp = _g.Fishing.RollSpeciesNear(zone, S.Slot, _g.MonthNow(), _g.SeaNow(), close, _rng, _g.BaitBias());
             double size = _g.Fishing.RollSizeNear(sp, close, big, _rng);
             double window = reel.BiteWindow(rod, sp, false);
             double react = Math.Max(0.12, Gauss(_s.ReactMean, _s.ReactSd));
@@ -300,15 +301,7 @@ namespace Hanjeopsi.Core.Tests
             bool perfect = reel.IsPerfectStrike(elapsed);
 
             // 고닷 힘싸움: 질주가 오면 손이 늦게 알아채고, 실력만큼 반대쪽을 눌러 버틴다
-            var fight = _g.Spot.StartTug(new FightSetup
-            {
-                Species = sp,
-                Size = size,
-                Dist01 = dist01,
-                Perfect = perfect,
-                Rod = rod,
-                Reel = D.Gear.Reels[S.Reel],
-            }, _rng);
+            var fight = _g.Spot.StartTug(_g.Fight(sp, size, dist01, perfect, false), _rng);
             bool holding = true;
             int side = 1;
             double sinceLook = 0;
@@ -514,11 +507,13 @@ namespace Hanjeopsi.Core.Tests
             while (true)
             {
                 GearSlot? next = null;
+                string kit = null;
                 int price = int.MaxValue;
                 foreach (GearSlot slot in new[] { GearSlot.Tackle, GearSlot.Reel, GearSlot.Rod })
                 {
                     int lv = _g.GearLevel(slot) + 1;
-                    if (lv >= _g.GearCount(slot)) continue;
+                    // 적당히 잘하는 사람은 3단계(웹과 같은 마지막 단계)까지만 산다
+                    if (lv >= Math.Min(3, _g.GearCount(slot)) || !Data.Unlock.IsShop(_g.GearUnlock(slot, lv))) continue;
                     int p = _g.GearPrice(slot, lv);
                     if (p < price)
                     {
@@ -526,8 +521,20 @@ namespace Hanjeopsi.Core.Tests
                         next = slot;
                     }
                 }
-                if (next == null || S.Money - price < reserve) return;
-                if (!_g.UpgradeGear(next.Value)) throw new InvalidOperationException("장비를 못 샀다");
+                // 고닷 장비: 상점에서 파는 다음 단계 (통발 빼고. 통발은 크릴을 쓴다)
+                foreach (var k in D.Gear.Kits)
+                {
+                    int lv = _g.KitLevel(k.Id);
+                    if (k.Id == "trap" || lv >= Math.Min(2, k.Levels.Count) || !Data.Unlock.IsShop(k.Levels[lv].Unlock)) continue;
+                    if (k.Levels[lv].Price < price)
+                    {
+                        price = k.Levels[lv].Price;
+                        next = null;
+                        kit = k.Id;
+                    }
+                }
+                if ((next == null && kit == null) || S.Money - price < reserve) return;
+                if (kit != null ? !_g.BuyKit(kit) : !_g.UpgradeGear(next.Value)) throw new InvalidOperationException("장비를 못 샀다");
                 _r.GearSpent += price;
                 Check("장비");
             }

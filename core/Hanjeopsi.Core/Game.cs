@@ -43,7 +43,7 @@ namespace Hanjeopsi.Core
         public int Value;
     }
 
-    public sealed class Game
+    public sealed partial class Game
     {
         public GameData Data { get; }
         public SaveData Save { get; private set; }
@@ -90,6 +90,7 @@ namespace Hanjeopsi.Core
                 NextUid = 1,
                 NextRequestId = 1,
                 Diner = data.Diner != null ? new DinerState() : null,
+                Kit = data.Gear.Kits.Count > 0 ? new KitState() : null,
             };
         }
 
@@ -182,12 +183,6 @@ namespace Hanjeopsi.Core
             return Diner.PlanGuests(Save, Save.Slot, rng, WeatherToday().GuestAdd);
         }
 
-        /// <summary>입질 대기 배율 (날씨)</summary>
-        public double WaitMul()
-        {
-            return WeatherToday().WaitMul;
-        }
-
         /// <summary>고등어 힌트 정확도 빼기 (안개)</summary>
         public double HintPenalty()
         {
@@ -267,6 +262,7 @@ namespace Hanjeopsi.Core
             Save.Requests = Save.Requests.Where(r => r.Deadline >= Save.Day).ToList();
             summary.ExpiredRequests = before - Save.Requests.Count;
             RefreshRequests();
+            summary.Trap = CheckTrap();
 
             Save.PendingSummary = summary;
             Persist();
@@ -379,7 +375,7 @@ namespace Hanjeopsi.Core
             var bait = Data.Gear.Bait;
             if (!IsShopOpen() || Save.Money < bait.Price) return false;
             Save.Money -= bait.Price;
-            Save.Bait += bait.Amount;
+            Save.Bait += bait.Amount + (int)KitValue("baitbox");
             Persist();
             return true;
         }
@@ -420,6 +416,7 @@ namespace Hanjeopsi.Core
             if (!IsShopOpen()) return false;
             int next = GearLevel(slot) + 1;
             if (next >= GearCount(slot)) return false;
+            if (!Unlock.IsShop(GearUnlock(slot, next))) return false;
             int price = GearPrice(slot, next);
             if (Save.Money < price) return false;
             Save.Money -= price;
@@ -469,6 +466,7 @@ namespace Hanjeopsi.Core
             var flag = Data.RequestTemplates[req.Template].Flag;
             if (!string.IsNullOrEmpty(flag)) Save.Flags[flag] = true;
             if (Diner != null) Diner.AddRequestRep(Save);
+            if (Save.Kit != null) Save.Kit.Requests += 1;
             Persist();
             return req.Reward;
         }

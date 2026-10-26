@@ -38,6 +38,9 @@ namespace Hanjeopsi.Core.State
         /// <summary>여울호 평판·등급·손님 친밀도 (고닷만). 웹 세이브에는 없어서 비어 있으면 쓰지 않는다</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public DinerState Diner;
+        /// <summary>고닷 장비·미끼 (고닷만)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public KitState Kit;
 
         public bool Flag(string name)
         {
@@ -54,6 +57,21 @@ namespace Hanjeopsi.Core.State
         public int Rank;
         /// <summary>손님 id → 친밀도</summary>
         public Dictionary<string, int> Affinity = new Dictionary<string, int>();
+    }
+
+    /// <summary>고닷 장비 단계, 미끼, 보상</summary>
+    public sealed class KitState
+    {
+        /// <summary>장비 id → 단계 (0 없음, 1~10)</summary>
+        public Dictionary<string, int> Own = new Dictionary<string, int>();
+        /// <summary>미끼 id → 남은 수 (크릴은 SaveData.Bait)</summary>
+        public Dictionary<string, int> Bait = new Dictionary<string, int>();
+        /// <summary>쓰는 미끼</summary>
+        public string Pick = "krill";
+        /// <summary>마친 납품 의뢰 수</summary>
+        public int Requests;
+        /// <summary>받은 보상 ("rod-5" 처럼 종류-단계)</summary>
+        public List<string> Gifts = new List<string>();
     }
 
     /// <summary>도감 한 칸</summary>
@@ -82,5 +100,8 @@ namespace Hanjeopsi.Core.State
         public int Earned;
         public int Spoiled;
         public int ExpiredRequests;
+        /// <summary>밤새 통발에 든 어종 (고닷만)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> Trap;
     }
 }
