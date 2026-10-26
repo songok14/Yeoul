@@ -98,6 +98,9 @@ namespace Hanjeopsi.App.Screens
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
             Tappable(_yeoul, TapYeoul);
+            // 간판은 걸어 다니는 사람들보다 늘 위에
+            foreach (var sign in _stage.GetChildren())
+                if (sign is SignButton sb) sb.MoveToFront();
 
             // ── 위: HUD 와 오늘 소식 ──
             var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
