@@ -53,7 +53,7 @@ namespace Hanjeopsi.App.Screens
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             string art = G.TownArt();
-            // 비·눈·태풍은 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk, snow, typhoon 으로만 본다
+            // 비·눈·태풍은 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk, snow, typhoon, fog 로만 본다
             string weather = GameState.I.Weather;
             bool night = s.Slot == G.Data.Balance.Time.SlotsPerDay - 1;
             if (weather == "rain" || weather == "rain-dusk" || weather == "typhoon")
@@ -66,8 +66,9 @@ namespace Hanjeopsi.App.Screens
                 rain.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(rain);
             }
-            // 눈 그림도 아직 사진 확인용 --weather=snow 로만 (밤이면 밤 눈 그림)
+            // 눈·안개 그림도 아직 사진 확인용 --weather=snow, fog 로만 (밤이면 밤 그림)
             if (weather == "snow") art = night ? "village-snow-night" : "village-snow";
+            if (weather == "fog") art = night ? "village-fog-night" : "village-fog";
             _stage.Background = ArtStage.LoadBackground(art);
             Art.AddChild(_stage);
 

@@ -121,6 +121,8 @@ jobs:
             "town-snow-night:--screen=town --demo=night --weather=snow"
             "town-typhoon:--screen=town --demo=lunch --weather=typhoon"
             "town-typhoon-night:--screen=town --demo=night --weather=typhoon"
+            "town-fog:--screen=town --demo=summary --weather=fog"
+            "town-fog-night:--screen=town --demo=night --weather=fog"
             "town-tall:--screen=town --demo=evening"
             "talk-welcome:--screen=town --shot-action=welcome"
             "talk-clear:--screen=town --demo=evening --shot-action=clear"

@@ -28,7 +28,7 @@ namespace Hanjeopsi.App
         public string ShotScreen { get; private set; }
         public string ShotAction { get; private set; }
         public string Demo { get; private set; }
-        /// <summary>화면 확인용 날씨 인자: rain, rain-dusk, snow, typhoon (게임 날씨는 아직 없다)</summary>
+        /// <summary>화면 확인용 날씨 인자: rain, rain-dusk, snow, typhoon, fog (게임 날씨는 아직 없다)</summary>
         public string Weather { get; private set; }
         public bool ShotMode
         {

@@ -428,7 +428,7 @@ Style: the same soft painterly watercolor anime background as the attached image
 ```
 
 #### 배경 2-3. 태풍 오는 날 (`village-typhoon`)
-**받음 (2026-10-26)**: `village-typhoon.webp`, `village-typhoon-night.webp`. 트럭 자리가 맑은 날과 같다. 사진 확인용 `--weather=typhoon`(비 효과를 얹는다).
+**받음 (2026-10-26)**: `village-typhoon.webp`, `village-typhoon-night.webp`(밤은 산 위치가 맞는 판으로 다시 받았다). 트럭 자리가 맑은 날과 같다. 사진 확인용 `--weather=typhoon`(비 효과를 얹는다).
 방파제 태풍 그림은 뽑지 않는다. 태풍 날은 방파제 출입이 막혀 낚시를 못 하는 날로 둔다.
 
 ```
@@ -454,6 +454,7 @@ Style: the same soft painterly watercolor anime background as the attached image
 ```
 
 #### 배경 2-4. 안개 낀 마을 (`village-fog`)
+**받음 (2026-10-26)**: `village-fog.webp`, `village-fog-night.webp`(트럭 자리가 맑은 날과 같다). 방파제 안개는 아직.
 날씨가 나쁜 날은 하늘이 가려 시간대 차이가 작다. 낮 판 하나에 게임이 시간대 색을 입히고, 불빛이 달라지는 밤만 따로 뽑는다(비·눈·태풍·안개 모두 같다). 안개 날은 낚시를 막지 않아서 방파제 판도 뽑는다.
 
 ```
