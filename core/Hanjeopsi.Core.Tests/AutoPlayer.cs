@@ -197,15 +197,19 @@ namespace Hanjeopsi.Core.Tests
             int day0 = S.Day;
             int money0 = S.Money;
             int debt0 = S.Debt;
-            // 새벽 낚시 → 아침 위판장과 트럭 → 낮 낚시 → 저녁 트럭 → 잠
+            // 새벽 낚시 → 아침 위판장과 트럭 → 점심 낚시 → 저녁 트럭 → 밤낚시 → 잠
             FishingTrip();
             if (_g.IsMarketOpen()) Market();
             TruckShift();
             if (S.Slot <= 2) FishingTrip();
             if (S.Slot <= 3 && S.Slot >= D.Balance.Time.TruckFirstSlot) TruckShift();
-            // 저녁 장사가 끝나면 시간이 다 가서 날이 저절로 바뀐다. 아니면 식당에서 잠자기
+            if (S.Day == day0 && S.Slot <= 4) FishingTrip();
+            // 밤낚시가 끝나면 시간이 다 가서 날이 저절로 바뀐다. 아니면 식당에서 잠자기.
+            // 미끼가게가 밤에 닫혀 있었으면 다음 날 새벽에 장을 본다
             Town();
             if (S.Day == day0) _g.EndDay();
+            if (_s.Thoughtful) Upgrade();
+            BuyBait(3 * D.Balance.Chapter1.CastsPerTrip);
             Check("잠 " + day0);
             if (S.Day != day0 + 1) throw new InvalidOperationException("하루가 " + (S.Day - day0) + "일 지나갔다");
             _r.DayLog.Add(day0 + "일: 돈 " + money0 + "→" + S.Money + ", 빚 " + debt0 + "→" + S.Debt + ", 쿨러 " + S.Cooler.Count + ", 장비 " + S.Rod + S.Reel + S.Tackle);
@@ -367,7 +371,7 @@ namespace Hanjeopsi.Core.Tests
                 double wsum = 0, vsum = 0;
                 foreach (var sp in D.Species)
                 {
-                    double w = sp.Zone[zone] * sp.Slot[Math.Min(S.Slot, 3)];
+                    double w = sp.Zone[zone] * sp.Slot[Math.Min(S.Slot, sp.Slot.Length - 1)];
                     if (sp.Rare) w *= hot ? D.Balance.Fishing.RareHotMul : D.Balance.Fishing.RareColdMul;
                     wsum += w;
                     vsum += w * sp.BasePrice;
@@ -445,7 +449,8 @@ namespace Hanjeopsi.Core.Tests
             if (!_g.IsTruckOpen()) return;
             if (_g.Truck.Cookable(S).Count == 0) return;
             int served = 0;
-            while (served < D.Balance.Chapter1.CustomersPerShift)
+            int guests = _g.CustomersNow();
+            while (served < guests)
             {
                 var menu = _g.Truck.Cookable(S);
                 if (menu.Count == 0) break;
@@ -481,12 +486,13 @@ namespace Hanjeopsi.Core.Tests
                 Check("고양이");
             }
             if (_s.Thoughtful) Upgrade();
-            BuyBait(2 * D.Balance.Chapter1.CastsPerTrip);
+            BuyBait(3 * D.Balance.Chapter1.CastsPerTrip);
             Repay();
         }
 
         private void BuyBait(int target)
         {
+            if (!_g.IsShopOpen()) return;
             while (S.Bait < target && S.Money >= D.Gear.Bait.Price)
             {
                 if (!_g.BuyBait()) throw new InvalidOperationException("미끼를 못 샀다");
@@ -497,6 +503,7 @@ namespace Hanjeopsi.Core.Tests
         /// <summary>남은 날이 넉넉할 때 값이 싼 장비부터 산다</summary>
         private void Upgrade()
         {
+            if (!_g.IsShopOpen()) return;
             int reserve = 2 * D.Gear.Bait.Price;
             if (_g.DaysLeft() < 8) return;
             while (true)
@@ -524,6 +531,7 @@ namespace Hanjeopsi.Core.Tests
         /// <summary>미끼값만 남기고 갚는다. 서툰 사람은 10만 원 단위로만 (식당 "10만 원 갚기" 버튼)</summary>
         private void Repay()
         {
+            if (!_g.IsShopOpen()) return;
             int reserve = 2 * D.Gear.Bait.Price;
             if (_s.Thoughtful)
             {

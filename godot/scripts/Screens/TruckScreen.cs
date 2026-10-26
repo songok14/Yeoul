@@ -27,7 +27,8 @@ namespace Hanjeopsi.App.Screens
         private const float OffLeft = -80;
         /// <summary>장사 중 판 안쪽 높이 (간 맞추기 판이 들어가는 만큼)</summary>
         private const float ShiftPanelHeight = 540;
-        private static readonly Color[] SlotTint = { new Color("b8b8e0"), new Color("fff2e2"), new Color("fff8ee"), Colors.White };
+        // 새벽 · 아침 · 점심 · 저녁 · 밤
+        private static readonly Color[] SlotTint = { new Color("b8b8e0"), new Color("fff2e2"), new Color("fff8ee"), Colors.White, new Color("8a90c4") };
 
         private CoreGame G
         {
@@ -68,7 +69,7 @@ namespace Hanjeopsi.App.Screens
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/truckstop.png");
             _stage.KeepClouds = true;
-            _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, 3)];
+            _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1)];
             Art.AddChild(_stage);
 
             // 그림 속 빈 간판과 칠판에 게임 글자를 쓴다
@@ -222,7 +223,7 @@ namespace Hanjeopsi.App.Screens
         private void NextCustomer()
         {
             var menu = G.Truck.Cookable(G.Save);
-            int max = G.Data.Balance.Truck.CustomersPerShift;
+            int max = G.CustomersNow();
             if (_served >= max || menu.Count == 0)
             {
                 EndShift(menu.Count == 0 && _served < max);
@@ -392,7 +393,7 @@ namespace Hanjeopsi.App.Screens
             _body.AddChild(row);
             _body.AddChild(Stars(dish.Avg));
 
-            bool last = _served >= G.Data.Balance.Truck.CustomersPerShift || G.Truck.Cookable(G.Save).Count == 0;
+            bool last = _served >= G.CustomersNow() || G.Truck.Cookable(G.Save).Count == 0;
             var next = new GameButton(last ? T["finish"] : T["next"], Palette.Green, Leave, null, TextSize.Body, 120);
             next.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
             next.CustomMinimumSize = new Vector2(520, 120);

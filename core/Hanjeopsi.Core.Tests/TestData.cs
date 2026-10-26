@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Hanjeopsi.Core.Data;
 using Newtonsoft.Json.Linq;
 
@@ -27,7 +28,20 @@ namespace Hanjeopsi.Core.Tests
                 var d = Load();
                 d.Species.RemoveAll(sp => Array.IndexOf(WebSpecies, sp.Id) < 0);
                 foreach (var sp in d.Species)
+                {
                     if (sp.Id == "noraemi") sp.Name = "노래미";
+                    // 고닷은 하루를 다섯 칸으로 늘리고 밤 칸을 붙였다. 웹은 네 칸
+                    sp.Slot = sp.Slot.Take(4).ToArray();
+                }
+                // 고닷이 더한 요리와 의뢰(새 어종)도 뺀다
+                d.Recipes.Recipes.RemoveAll(r => Array.IndexOf(WebSpecies, r.Species) < 0);
+                d.RequestTemplates.RemoveAll(r => Array.IndexOf(WebSpecies, r.Species) < 0);
+                d.Balance.Time.SlotsPerDay = 4;
+                d.Balance.Chapter1.CastsPerTrip = 6;
+                d.Balance.Time.ShopLastSlot = 99;
+                d.Balance.Truck.CustomersBySlot.Clear();
+                d.Texts.Slots = new System.Collections.Generic.List<string> { "새벽", "아침", "낮", "저녁" };
+                d.Texts.SlotAfter = "밤";
                 d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
                 return _data = d;
             }

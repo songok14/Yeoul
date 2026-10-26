@@ -28,7 +28,7 @@ namespace Hanjeopsi.App
         public string ShotScreen { get; private set; }
         public string ShotAction { get; private set; }
         public string Demo { get; private set; }
-        /// <summary>화면 확인용 날씨 인자: rain 또는 rain-dusk</summary>
+        /// <summary>화면 확인용 날씨 인자: rain 또는 rain-dusk (게임 날씨는 아직 없다)</summary>
         public string Weather { get; private set; }
         public bool ShotMode
         {
@@ -120,7 +120,7 @@ namespace Hanjeopsi.App
 
         /// <summary>
         /// 사진과 화면 확인용 체험 판 (웹 BootScene setupDemo). 4일차, 소지금 86,000원, 빚 264만 원, 쿨러 6마리.
-        /// kind: evening 이면 저녁, summary 면 새벽에 어제 요약이 뜬다
+        /// kind: lunch 면 점심, evening 이면 저녁, night 면 밤, summary 면 새벽에 어제 요약이 뜬다
         /// </summary>
         public void SetupDemo(string kind)
         {
@@ -129,7 +129,7 @@ namespace Hanjeopsi.App
             Game.CompletePrologue();
             s.Money = 86_000;
             s.Day = 4;
-            s.Slot = kind == "evening" ? 3 : kind == "summary" ? 0 : 1;
+            s.Slot = kind == "night" ? 4 : kind == "lunch" ? 2 : kind == "evening" ? 3 : kind == "summary" ? 0 : 1;
             s.Debt = 2_640_000;
             var catches = new (string Species, double Size, int Fresh)[]
             {

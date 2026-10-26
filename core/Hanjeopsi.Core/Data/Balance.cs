@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Hanjeopsi.Core.Data
 {
     /// <summary>balance.json. 게임 밸런스 수치 (웹 config.ts 와 systems/*.ts 의 상수)</summary>
@@ -69,12 +71,16 @@ namespace Hanjeopsi.Core.Data
     /// <summary>하루 시간 칸</summary>
     public sealed class TimeBalance
     {
-        /// <summary>새벽 · 아침 · 낮 · 저녁</summary>
+        /// <summary>새벽 · 아침 · 점심 · 저녁 · 밤</summary>
         public int SlotsPerDay;
         /// <summary>경매는 이 칸까지 (아침)</summary>
         public int MarketLastSlot;
         /// <summary>트럭은 이 칸부터 (아침)</summary>
         public int TruckFirstSlot;
+        /// <summary>미끼가게는 이 칸까지 연다 (저녁). 없으면 언제나</summary>
+        public int ShopLastSlot = 99;
+        /// <summary>시간대마다 마을 배경 그림 이름 (godot/art/backgrounds)</summary>
+        public List<string> TownArt = new List<string>();
     }
 
     /// <summary>식당 납품 의뢰</summary>
@@ -209,6 +215,8 @@ namespace Hanjeopsi.Core.Data
     {
         /// <summary>장사 한 번에 받는 손님 수</summary>
         public int CustomersPerShift;
+        /// <summary>시간대마다 손님 수 (점심에 붐비고 밤엔 야식 손님만). 없으면 CustomersPerShift</summary>
+        public List<int> CustomersBySlot = new List<int>();
         public double ZoneHalf;
         public double TargetJitter;
         public double TargetMin;

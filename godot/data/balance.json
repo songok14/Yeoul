@@ -4,7 +4,7 @@
     "debt": 3000000,
     "startMoney": 20000,
     "startBait": 12,
-    "castsPerTrip": 6,
+    "castsPerTrip": 4,
     "customersPerShift": 5,
     "startMonth": 4,
     "startDate": 16,
@@ -33,9 +33,11 @@
     "agedFactorAging": 1.3
   },
   "time": {
-    "slotsPerDay": 4,
+    "slotsPerDay": 5,
     "marketLastSlot": 1,
-    "truckFirstSlot": 1
+    "truckFirstSlot": 1,
+    "shopLastSlot": 3,
+    "townArt": ["village-2", "village-0", "village-1", "village-3", "village-night"]
   },
   "requests": {
     "max": 2,
@@ -67,6 +69,7 @@
   },
   "truck": {
     "customersPerShift": 5,
+    "customersBySlot": [0, 4, 6, 5, 3],
     "zoneHalf": 0.085,
     "targetJitter": 0.04,
     "targetMin": 0.12,

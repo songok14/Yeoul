@@ -39,7 +39,7 @@ namespace Hanjeopsi.Core.Tests
                 Assert.True(sp.MinSize < sp.AvgSize && sp.AvgSize < sp.MaxSize, sp.Id + " 크기");
                 Assert.InRange(sp.Strength, 1, 5);
                 Assert.Equal(3, sp.Zone.Length);
-                Assert.Equal(4, sp.Slot.Length);
+                Assert.Equal(5, sp.Slot.Length);
             }
         }
 

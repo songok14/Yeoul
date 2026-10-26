@@ -133,6 +133,26 @@ namespace Hanjeopsi.Core
             return Save.Slot >= Data.Balance.Time.TruckFirstSlot;
         }
 
+        /// <summary>미끼가게는 밤에 닫는다</summary>
+        public bool IsShopOpen()
+        {
+            return Save.Slot <= Data.Balance.Time.ShopLastSlot;
+        }
+
+        /// <summary>이번 장사에 올 손님 수. 점심에 붐비고 밤엔 야식 손님만 온다</summary>
+        public int CustomersNow()
+        {
+            var by = Data.Balance.Truck.CustomersBySlot;
+            return Save.Slot < by.Count ? by[Save.Slot] : Data.Balance.Truck.CustomersPerShift;
+        }
+
+        /// <summary>지금 시간대 마을 배경 그림 이름</summary>
+        public string TownArt()
+        {
+            var art = Data.Balance.Time.TownArt;
+            return art.Count > 0 ? art[Math.Min(Save.Slot, art.Count - 1)] : "village-" + Math.Min(Save.Slot, 3);
+        }
+
         /// <summary>행동 하나로 시간 한 칸을 쓴다. 저녁이 지나면 날이 바뀐다</summary>
         public void UseSlot()
         {
@@ -265,7 +285,7 @@ namespace Hanjeopsi.Core
         public bool BuyBait()
         {
             var bait = Data.Gear.Bait;
-            if (Save.Money < bait.Price) return false;
+            if (!IsShopOpen() || Save.Money < bait.Price) return false;
             Save.Money -= bait.Price;
             Save.Bait += bait.Amount;
             Persist();
@@ -302,9 +322,10 @@ namespace Hanjeopsi.Core
             }
         }
 
-        /// <summary>다음 단계 장비를 산다. 마지막 단계거나 돈이 모자라면 false</summary>
+        /// <summary>다음 단계 장비를 산다. 가게가 닫혔거나 마지막 단계거나 돈이 모자라면 false</summary>
         public bool UpgradeGear(GearSlot slot)
         {
+            if (!IsShopOpen()) return false;
             int next = GearLevel(slot) + 1;
             if (next >= GearCount(slot)) return false;
             int price = GearPrice(slot, next);

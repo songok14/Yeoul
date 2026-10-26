@@ -48,7 +48,8 @@ namespace Hanjeopsi.App.Screens
         private static readonly Vector2 CoolerFoot = new Vector2(236, 668);
         private static readonly Vector2 CatThiefFoot = new Vector2(196, 682);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
-        private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2") };
+        // 새벽 · 아침 · 점심 · 저녁 · 밤
+        private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("6f7cb4") };
 
         private CoreGame G
         {
@@ -133,7 +134,7 @@ namespace Hanjeopsi.App.Screens
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/breakwater.png");
             _stage.KeepClouds = true;
-            _stage.Tint = SlotTint[_tutorial ? 3 : Mathf.Clamp(s.Slot, 0, 3)];
+            _stage.Tint = SlotTint[_tutorial ? 3 : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1)];
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
@@ -260,17 +261,16 @@ namespace Hanjeopsi.App.Screens
         private void UpdateRod()
         {
             var p = SdPoses.Get(_pose);
+            _field.RodDrawn = p.DrawnRod;
             if (!p.DrawnRod)
             {
-                _field.RodDrawn = false;
-                UpdateRod();
+                _field.RodTip = RodTip();
                 return;
             }
             var grip = new Vector2(p.Grip[0], p.Grip[1]);
             var end = grip + new Vector2(p.RodDir[0], p.RodDir[1]) * p.RodLen;
             var g = PoseToLogical(grip);
             var e = PoseToLogical(end);
-            _field.RodDrawn = true;
             _field.RodGrip = g;
             _field.RodDir = (e - g).Normalized();
             _field.RodLen = (e - g).Length();
@@ -1167,7 +1167,7 @@ namespace Hanjeopsi.App.Screens
             if (_phase == Phase.Reel && _fight != null && _fight.Tension >= G.Data.Balance.Reel.Danger) sway = Mathf.Sin(_time * 40) * 1.5f;
             _lean = Mathf.Lerp(_lean, _leanTarget + sway, 1 - Mathf.Exp(-_leanRate * dt));
             _yeoul.RotationDegrees = _lean;
-            _field.RodTip = RodTip();
+            UpdateRod();
         }
 
         /// <summary>줄을 거두고 대를 세운 포즈로 돌아간다. kick 만큼 뒤로 젖혔다가 천천히 바로 선다</summary>
@@ -1228,8 +1228,9 @@ namespace Hanjeopsi.App.Screens
                     StartPower();
                     break;
                 case "reel":
-                    // 던지고, 물고, 챔질한 뒤 텐션을 알맞게 유지하며 감는다
-                    ShotHook("godeungeo", 33.5, false, 0, 1);
+                    // 던지고, 물고, 챔질한 뒤 텐션을 알맞게 유지하며 감는다.
+                    // 첫 질주(0.7~1.4초)보다 먼저 찍히게 늦게 건다
+                    Later(2.3, () => ShotHook("godeungeo", 33.5, false, 0, 1));
                     break;
                 case "big":
                     // 큰 놈은 세서 사진 동안 줄이 터지지 않게 일찍 손을 뗀다 (버티는 포즈)

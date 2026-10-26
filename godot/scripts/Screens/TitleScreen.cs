@@ -25,7 +25,7 @@ namespace Hanjeopsi.App.Screens
 
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/village-3.png");
+            _stage.Background = ArtStage.LoadBackground("village-3");
             Art.AddChild(_stage);
 
             // 위·아래를 어둡게 덮어 글자가 잘 읽히게

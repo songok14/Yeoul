@@ -177,12 +177,12 @@ namespace Hanjeopsi.App.Screens
             {
                 case "harbor": Backdrop(root, "village-1", Colors.White); break;
                 case "breakwater": Backdrop(root, "breakwater", new Color("ffd8b8")); break;
-                case "dawn": Backdrop(root, "village-1", new Color("fff0dc")); break;
-                case "night": Backdrop(root, "village-0", new Color("7a80b8")); break;
-                case "phone": Backdrop(root, "village-0", new Color("4a5680")); break;
+                case "dawn": Backdrop(root, "village-2", new Color("fff6ea")); break;
+                case "night": Backdrop(root, "village-night", new Color("d8dcf0")); break;
+                case "phone": Backdrop(root, "village-night", new Color("8890b8")); break;
                 case "storage": Backdrop(root, "truckstop", new Color("8f7a6a")); break;
                 case "seize":
-                    Backdrop(root, "village-2", new Color("8a8a90"));
+                    Backdrop(root, "village-1", new Color("8a8a90"));
                     Seize(root);
                     break;
                 case "memory":
@@ -224,7 +224,7 @@ namespace Hanjeopsi.App.Screens
         {
             _stage = new ArtStage
             {
-                Background = GD.Load<Texture2D>("res://art/backgrounds/" + bg + ".png"),
+                Background = ArtStage.LoadBackground(bg),
                 Tint = tint,
                 MouseFilter = MouseFilterEnum.Ignore,
             };

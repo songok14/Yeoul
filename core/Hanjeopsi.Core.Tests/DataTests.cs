@@ -30,7 +30,8 @@ namespace Hanjeopsi.Core.Tests
                 Assert.Equal(w["closed"]?.ToObject<int[]>(), s.Closed);
                 Assert.Equal(w["zone"].ToObject<double[]>(), s.Zone);
                 Assert.Equal(w["slot"].ToObject<double[]>(), s.Slot);
-                Assert.Equal((string)w["hint"], s.Hint);
+                // 고닷은 밤 칸을 붙이고 낮을 점심으로 부른다
+                Assert.Equal((string)w["hint"], s.Hint.Replace("·밤", "").Replace("점심", "낮"));
                 Assert.Equal((string)w["desc"], s.Desc);
             }
         }

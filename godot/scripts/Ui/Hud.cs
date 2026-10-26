@@ -15,8 +15,8 @@ namespace Hanjeopsi.App.Ui
         private readonly CoreGame _game;
         private Label _day, _dday, _money, _debt;
         private PanelContainer _ddayBox;
-        private readonly Label[] _slots = new Label[4];
-        private readonly PanelContainer[] _slotBoxes = new PanelContainer[4];
+        private readonly Label[] _slots = new Label[5];
+        private readonly PanelContainer[] _slotBoxes = new PanelContainer[5];
         private Control _barFill;
         private Control _barTrack;
         private double _shownMoney = -1;
@@ -47,7 +47,7 @@ namespace Hanjeopsi.App.Ui
             top.AddChild(_day);
             var chips = new HBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, Alignment = BoxContainer.AlignmentMode.Center };
             chips.AddThemeConstantOverride("separation", 6);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < game.Data.Texts.Slots.Count && i < _slots.Length; i++)
             {
                 var box = new PanelContainer();
                 var label = UiKit.Text(game.Data.Texts.Slots[i], TextSize.Tiny + 2, Palette.GrayText, false, false, 0, null, HorizontalAlignment.Center);
@@ -89,7 +89,7 @@ namespace Hanjeopsi.App.Ui
         {
             var s = _game.Save;
             _day.Text = s.Day + "일차";
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < _slots.Length; i++)
             {
                 bool now = i == s.Slot;
                 var sb = UiKit.Box(now ? Palette.Gold : new Color(1, 1, 1, 0), 22, 18, 4);

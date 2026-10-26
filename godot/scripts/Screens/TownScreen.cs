@@ -36,6 +36,8 @@ namespace Hanjeopsi.App.Screens
         private float _catTimer = 5;
         private float _yeoulReset;
         private float _footY = 636;
+        /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 긴 화면에서 오른쪽이 잘려도 눌리게 x 370 안쪽까지</summary>
+        private static readonly Rect2 TruckArea = new Rect2(232, 290, 208, 115);
         private int _yeoulLine;
 
         protected override void Build()
@@ -45,18 +47,15 @@ namespace Hanjeopsi.App.Screens
             // ── 그림 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            _stage.Background = Tex("backgrounds/village-" + Mathf.Clamp(s.Slot, 0, 3));
+            _stage.Background = ArtStage.LoadBackground(G.TownArt());
+            // 비는 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk 로만 본다
             string weather = GameState.I.Weather;
-            bool rainy = weather == "rain" || weather == "rain-dusk";
-            if (rainy)
+            if (weather == "rain" || weather == "rain-dusk")
             {
-                string rainBackground = weather == "rain-dusk"
-                    ? "backgrounds/village-rain-dusk"
-                    : "backgrounds/village-rain";
-                Texture2D rainTexture = Tex(rainBackground);
+                var rainTexture = ArtStage.LoadBackground(weather == "rain-dusk" ? "village-rain-dusk" : "village-rain");
                 if (rainTexture != null) _stage.Background = rainTexture;
 
-                // 배경 바로 위, 간판·캐릭터 아래에 둬서 비가 장면에 자연스럽게 겹친다.
+                // 배경 바로 위, 간판·캐릭터 아래에 둬서 비가 장면에 자연스럽게 겹친다. 누르기는 그냥 지나간다
                 var rain = new RainOverlay { Name = "RainOverlay" };
                 rain.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(rain);
@@ -69,8 +68,10 @@ namespace Hanjeopsi.App.Screens
             _stage.Pin(new SignButton("여울식당", Restaurant), new Vector2(370, 262));
             _stage.Pin(new SignButton("방파제 →", GoFishing), new Vector2(330, 196));
 
-            _truck = _stage.Place(Tex("props/truck"), new Vector2(300, 600), 78);
+            // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
+            _truck = _stage.Place(Clear(TruckArea.Size), TruckArea.End, TruckArea.Size.Y, new Vector2(1, 1));
             Tappable(_truck, OpenTruck);
+            _stage.Pin(new SignButton("여울호", OpenTruck), new Vector2(336, 420));
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
@@ -92,12 +93,14 @@ namespace Hanjeopsi.App.Screens
             grid.AddThemeConstantOverride("h_separation", 22);
             grid.AddThemeConstantOverride("v_separation", 22);
             _menu.AddChild(grid);
-            grid.AddChild(new GameButton("방파제", Palette.Blue, GoFishing, "낚시 · 1칸"));
+            grid.AddChild(new GameButton("방파제", Palette.Blue, GoFishing, G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시 · 1칸" : "낚시 · 1칸"));
             grid.AddChild(new GameButton("위판장", Palette.Teal, OpenMarket, G.IsMarketOpen() ? "경매 중" : "경매 마감"));
-            var truck = new GameButton("여울호", Palette.Red, OpenTruck, G.IsTruckOpen() ? "장사 · 1칸" : "새벽엔 쉼");
+            var truck = new GameButton("여울호", Palette.Red, OpenTruck, G.IsTruckOpen() ? "손님 " + G.CustomersNow() + " · 1칸" : "새벽엔 쉼");
             truck.SetEnabled(G.IsTruckOpen());
             grid.AddChild(truck);
-            grid.AddChild(new GameButton("미끼가게", Palette.GreenDark, OpenShop, "장비 · 미끼"));
+            var shop = new GameButton("미끼가게", Palette.GreenDark, OpenShop, G.IsShopOpen() ? "장비 · 미끼" : "밤엔 닫음");
+            shop.SetEnabled(G.IsShopOpen());
+            grid.AddChild(shop);
             grid.AddChild(new GameButton("여울식당", Palette.Wood, Restaurant, "상환 · 휴식"));
             grid.AddChild(new GameButton("수첩", Palette.Purple, OpenNotebook, "도감 · 미각"));
             _menu.Resized += PlaceOnFloor;
@@ -155,7 +158,6 @@ namespace Hanjeopsi.App.Screens
             _footY = Mathf.Min(640, _stage.ToLogical(new Vector2(0, menuTop)).Y + 6);
             _stage.Move(_yeoul, new Vector2(205, _footY));
             _stage.Move(_cat, new Vector2(118, _footY));
-            _stage.Move(_truck, new Vector2(300, _footY - 36));
         }
 
         private Texture2D Tex(string path)
@@ -169,6 +171,12 @@ namespace Hanjeopsi.App.Screens
                 _tex[path] = t;
             }
             return t;
+        }
+
+        /// <summary>투명한 빈 그림 (누름 영역용)</summary>
+        private static Texture2D Clear(Vector2 size)
+        {
+            return ImageTexture.CreateFromImage(Image.CreateEmpty((int)size.X, (int)size.Y, false, Image.Format.Rgba8));
         }
 
         private static void Tappable(Control c, Action onTap)
@@ -317,6 +325,11 @@ namespace Hanjeopsi.App.Screens
 
         private void GoFishing()
         {
+            if (G.Save.Bait <= 0 && !G.IsShopOpen())
+            {
+                Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 새벽에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
+                return;
+            }
             if (G.Save.Bait <= 0)
             {
                 Modal("미끼가 없다", "노씨 가게에서 크릴을 사 오자.", new[]
@@ -346,6 +359,11 @@ namespace Hanjeopsi.App.Screens
 
         private void OpenShop()
         {
+            if (!G.IsShopOpen())
+            {
+                Toast("미끼가게는 문을 닫았다");
+                return;
+            }
             GameState.I.GoTo("shop");
         }
 

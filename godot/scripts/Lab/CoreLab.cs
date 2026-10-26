@@ -408,7 +408,7 @@ namespace Hanjeopsi.App.Lab
         {
             if (_date == null) return;
             var s = _game.Save;
-            _bg.Texture = Tex("backgrounds/village-" + Mathf.Clamp(s.Slot, 0, 3));
+            _bg.Texture = Hanjeopsi.App.Ui.ArtStage.LoadBackground(_game.TownArt());
             _date.Text = _game.DateLabel() + " · " + s.Day + "일차 · " + _game.SlotName();
             _dday.Text = "D-" + Math.Max(0, _game.DaysLeft());
             _money.Text = JsMath.Won(s.Money) + "   빚 " + JsMath.Won(s.Debt) + "   미끼 " + s.Bait + "   미각 " + _game.Taste.Stage(_game.TasteLevel()).Name;

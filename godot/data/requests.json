@@ -56,6 +56,41 @@
       "species": "godeungeo",
       "count": 2,
       "mul": 1.6
+    },
+    {
+      "client": "읍내 일식집",
+      "text": "봄 참돔 한 마리 구해 주시면 값은 섭섭지 않게 드릴게요.",
+      "species": "chamdom",
+      "count": 1,
+      "mul": 1.9
+    },
+    {
+      "client": "민박집 할머니",
+      "text": "도다리쑥국 끓이게 도다리 두 마리만 부탁해.",
+      "species": "dodari",
+      "count": 2,
+      "mul": 1.7
+    },
+    {
+      "client": "바다횟집 사장",
+      "text": "갑오징어 들어오면 나한테 먼저 주게. 숙회로 낼 거야.",
+      "species": "gabojingeo",
+      "count": 2,
+      "mul": 1.6
+    },
+    {
+      "client": "포장마차 아저씨",
+      "text": "우럭 한 마리. 매운탕 국물은 그게 최고야.",
+      "species": "ureok",
+      "count": 1,
+      "mul": 1.8
+    },
+    {
+      "client": "어촌계장",
+      "text": "잔칫상에 농어 한 마리 올리면 체면이 서지요.",
+      "species": "nongeo",
+      "count": 1,
+      "mul": 1.8
     }
   ]
 }

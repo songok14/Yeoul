@@ -128,6 +128,83 @@
           "target": 0.4
         }
       ]
+    },
+    {
+      "id": "chamdom-hoe",
+      "name": "참돔회",
+      "species": "chamdom",
+      "price": 42000,
+      "raw": true,
+      "steps": [
+        {
+          "flavor": "umami",
+          "target": 0.46
+        }
+      ]
+    },
+    {
+      "id": "dodari-ssukguk",
+      "name": "도다리쑥국",
+      "species": "dodari",
+      "price": 19000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.44
+        },
+        {
+          "flavor": "bitter",
+          "target": 0.6
+        }
+      ]
+    },
+    {
+      "id": "gabojingeo-sukhoe",
+      "name": "갑오징어숙회",
+      "species": "gabojingeo",
+      "price": 21000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "sour",
+          "target": 0.57
+        },
+        {
+          "flavor": "sweet",
+          "target": 0.42
+        }
+      ]
+    },
+    {
+      "id": "ureok-maeun",
+      "name": "우럭매운탕",
+      "species": "ureok",
+      "price": 22000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.54
+        },
+        {
+          "flavor": "umami",
+          "target": 0.68
+        }
+      ]
+    },
+    {
+      "id": "nongeo-gui",
+      "name": "농어구이",
+      "species": "nongeo",
+      "price": 32000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.5
+        }
+      ]
     }
   ]
 }

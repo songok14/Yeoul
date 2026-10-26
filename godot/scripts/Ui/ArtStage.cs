@@ -112,6 +112,14 @@ void fragment() {
             }
         }
 
+        /// <summary>배경 그림을 읽는다. 최적화한 WebP 가 있으면 그것을, 없으면 PNG 를 쓴다</summary>
+        public static Texture2D LoadBackground(string name)
+        {
+            string path = "res://art/backgrounds/" + name;
+            if (ResourceLoader.Exists(path + ".webp")) return GD.Load<Texture2D>(path + ".webp");
+            return GD.Load<Texture2D>(path + ".png");
+        }
+
         /// <summary>그림(SD, 소품)을 발밑 기준으로 세운다. height 는 논리 좌표 높이</summary>
         public TextureRect Place(Texture2D tex, Vector2 at, float height, Vector2? origin = null)
         {
