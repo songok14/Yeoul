@@ -384,10 +384,16 @@ namespace Hanjeopsi.App.Screens
             var rng = GameState.I.Rng;
             double target = G.Truck.RollTarget(st, rng);
 
-            var dishArt = PlaceScreen.DishIcon(recipe, 230);
-            dishArt.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
-            _body.AddChild(dishArt);
-            _body.AddChild(UiKit.Text(F("step", recipe.Name, step + 1, recipe.Steps.Count), TextSize.H1, Palette.Gold, true, false, 0, null, HorizontalAlignment.Center));
+            // 요리 그림은 제목 옆에 작게 둔다. 판이 장사판 높이를 넘으면 손님이 판에 가린다
+            var head = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            head.AddThemeConstantOverride("separation", 16);
+            var dishArt = PlaceScreen.DishIcon(recipe, 120);
+            dishArt.CustomMinimumSize = new Vector2(120, 84);
+            head.AddChild(dishArt);
+            var stepTitle = UiKit.Text(F("step", recipe.Name, step + 1, recipe.Steps.Count), TextSize.H1, Palette.Gold, true);
+            stepTitle.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+            head.AddChild(stepTitle);
+            _body.AddChild(head);
             _body.AddChild(UiKit.Text(visible ? T["hint"] : T["hintBlind"], TextSize.Small, Palette.GrayText, false, false, 0, null, HorizontalAlignment.Center));
             _body.AddChild(UiKit.Text(visible ? F("addFlavor", flavor.Tool, flavor.Name) : F("addFlavor", flavor.Tool, T["unknown"]), TextSize.Body, Palette.Paper, true));
             _gauge = new SeasonGauge
