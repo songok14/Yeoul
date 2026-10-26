@@ -12,7 +12,7 @@ namespace Hanjeopsi.Core.Data
     /// </summary>
     public sealed class GameData
     {
-        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste", "dialogue", "story" };
+        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste", "dialogue", "story", "diner" };
 
         public static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
@@ -29,6 +29,8 @@ namespace Hanjeopsi.Core.Data
         public List<TasteStage> TasteStages { get; private set; }
         public Dialogue Dialogue { get; private set; }
         public Story Story { get; private set; }
+        /// <summary>여울호 등급과 손님 (고닷만). 웹 모양 데이터에서는 null 이라 웹과 같은 계산이 된다</summary>
+        public DinerTable Diner { get; set; }
 
         private Dictionary<string, Species> _byId;
         private Dictionary<string, int> _indexOf;
@@ -54,6 +56,7 @@ namespace Hanjeopsi.Core.Data
                 TasteStages = Parse<TasteTable>(readText("taste")).Stages,
                 Dialogue = Parse<Dialogue>(readText("dialogue")),
                 Story = Parse<Story>(readText("story")),
+                Diner = Parse<DinerTable>(readText("diner")),
             };
             d._byId = new Dictionary<string, Species>();
             d._indexOf = new Dictionary<string, int>();

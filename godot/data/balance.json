@@ -69,7 +69,6 @@
   },
   "truck": {
     "customersPerShift": 5,
-    "customersBySlot": [0, 4, 6, 5, 3],
     "zoneHalf": 0.085,
     "targetJitter": 0.04,
     "targetMin": 0.12,

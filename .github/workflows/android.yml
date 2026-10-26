@@ -166,6 +166,8 @@ jobs:
             "truck-good:--screen=truck --shot-action=good"
             "truck-bad:--screen=truck --demo=evening --shot-action=bad"
             "truck-end:--screen=truck --shot-action=end"
+            "truck-rankup:--screen=truck --shot-action=rankup"
+            "truck-regular:--screen=truck --shot-action=regular"
             "truck-tall:--screen=truck --demo=evening"
           )
           for s in "${shots[@]}"; do

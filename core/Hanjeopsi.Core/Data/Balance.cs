@@ -215,8 +215,6 @@ namespace Hanjeopsi.Core.Data
     {
         /// <summary>장사 한 번에 받는 손님 수</summary>
         public int CustomersPerShift;
-        /// <summary>시간대마다 손님 수 (점심에 붐비고 밤엔 야식 손님만). 없으면 CustomersPerShift</summary>
-        public List<int> CustomersBySlot = new List<int>();
         public double ZoneHalf;
         public double TargetJitter;
         public double TargetMin;

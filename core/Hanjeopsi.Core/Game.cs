@@ -24,6 +24,8 @@ namespace Hanjeopsi.Core
         public int Pay;
         /// <summary>처음 만든 요리라 레시피에 기록됐다</summary>
         public bool FirstTime;
+        /// <summary>손님 평판·친밀도 (여울호 손님 규칙이 있을 때만)</summary>
+        public GuestResult Guest;
     }
 
     /// <summary>
@@ -53,6 +55,8 @@ namespace Hanjeopsi.Core
         public ReelRules Reel { get; }
         public SpotRules Spot { get; }
         public Truck Truck { get; }
+        /// <summary>여울호 등급과 손님. 웹 모양 데이터에서는 null</summary>
+        public Diner Diner { get; }
 
         /// <summary>상태가 바뀌어 저장할 때 (웹 persist)</summary>
         public event Action<SaveData> Saved;
@@ -67,6 +71,7 @@ namespace Hanjeopsi.Core
             Reel = new ReelRules(data);
             Spot = new SpotRules(data);
             Truck = new Truck(data, Fresh, Taste);
+            if (data.Diner != null) Diner = new Diner(data.Diner);
             Load(save);
         }
 
@@ -84,6 +89,7 @@ namespace Hanjeopsi.Core
                 Bait = c.StartBait,
                 NextUid = 1,
                 NextRequestId = 1,
+                Diner = data.Diner != null ? new DinerState() : null,
             };
         }
 
@@ -139,11 +145,43 @@ namespace Hanjeopsi.Core
             return Save.Slot <= Data.Balance.Time.ShopLastSlot;
         }
 
-        /// <summary>이번 장사에 올 손님 수. 점심에 붐비고 밤엔 야식 손님만 온다</summary>
+        /// <summary>이번 장사에 올 손님 수. 여울호 등급과 시간대, 그 시간대 단골로 정한다 (웹은 늘 같은 수)</summary>
         public int CustomersNow()
         {
-            var by = Data.Balance.Truck.CustomersBySlot;
-            return Save.Slot < by.Count ? by[Save.Slot] : Data.Balance.Truck.CustomersPerShift;
+            if (Diner == null) return Data.Balance.Truck.CustomersPerShift;
+            return Diner.GuestCount(Save, Save.Slot);
+        }
+
+        /// <summary>메뉴판 기본 선택: 지금 만들 수 있는 요리 중 한 접시 값이 큰 순서로 메뉴 칸만큼</summary>
+        public List<Recipe> SuggestMenu()
+        {
+            int slots = Diner != null ? Diner.MenuSlots(Save) : int.MaxValue;
+            return Truck.Cookable(Save)
+                .OrderByDescending(r => Truck.DishPay(r, Fresh.StageOf(Truck.BestFishFor(Save, r).Fresh), 0.8))
+                .Take(slots)
+                .ToList();
+        }
+
+        /// <summary>
+        /// 손님에게 한 접시를 낸다. 값은 ServeDish 와 같고, 손님 반응만큼 평판과 친밀도가 오른다.
+        /// 재료가 없으면 null
+        /// </summary>
+        public ServedDish ServeGuest(Recipe recipe, IList<SeasonResult> results, string guest)
+        {
+            var dish = ServeDish(recipe, results);
+            if (dish == null || Diner == null) return dish;
+            dish.Guest = Diner.AfterServe(Save, guest, recipe, Truck.MoodOf(dish.Avg));
+            Persist();
+            return dish;
+        }
+
+        /// <summary>새로 오른 여울호 등급 (없으면 null)</summary>
+        public DinerRank CheckDinerRankUp()
+        {
+            if (Diner == null) return null;
+            var up = Diner.CheckRankUp(Save);
+            if (up != null) Persist();
+            return up;
         }
 
         /// <summary>지금 시간대 마을 배경 그림 이름</summary>
@@ -376,6 +414,7 @@ namespace Hanjeopsi.Core
             Earn(req.Reward);
             var flag = Data.RequestTemplates[req.Template].Flag;
             if (!string.IsNullOrEmpty(flag)) Save.Flags[flag] = true;
+            if (Diner != null) Diner.AddRequestRep(Save);
             Persist();
             return req.Reward;
         }

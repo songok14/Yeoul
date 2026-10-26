@@ -178,7 +178,7 @@ namespace Hanjeopsi.Core.Tests
             _r.Debt = S.Debt;
             _r.TotalEarned = S.TotalEarned;
             _r.Dishes = S.DishesCooked;
-            _r.Gear = "낚싯대 " + S.Rod + " · 릴 " + S.Reel + " · 쿨러 " + S.Tackle;
+            _r.Gear = "낚싯대 " + S.Rod + " · 릴 " + S.Reel + " · 쿨러 " + S.Tackle + " · " + _g.Diner.Rank(S).Name + " 평판 " + S.Diner.Rep + " 단골 " + D.Diner.Guests.Count(gu => _g.Diner.IsRegular(S, gu.Id));
             return _r;
         }
 
@@ -448,13 +448,15 @@ namespace Hanjeopsi.Core.Tests
         {
             if (!_g.IsTruckOpen()) return;
             if (_g.Truck.Cookable(S).Count == 0) return;
-            int served = 0;
-            int guests = _g.CustomersNow();
-            while (served < guests)
+            // 오늘의 메뉴: 생각 있는 사람은 값이 큰 요리를, 초보는 아무거나 메뉴 칸만큼
+            var menu = _s.Thoughtful
+                ? _g.SuggestMenu()
+                : _g.Truck.Cookable(S).OrderBy(_ => _rng.Next()).Take(_g.Diner.MenuSlots(S)).ToList();
+            foreach (var guest in _g.Diner.PlanGuests(S, S.Slot, _rng))
             {
-                var menu = _g.Truck.Cookable(S);
-                if (menu.Count == 0) break;
-                var recipe = menu[(int)Math.Floor(_rng.Next() * menu.Count)];
+                var left = menu.Where(r => _g.Truck.BestFishFor(S, r) != null).ToList();
+                if (left.Count == 0) break;
+                var recipe = _g.Diner.Order(guest, left, _rng);
                 var results = new List<SeasonResult>();
                 foreach (var step in recipe.Steps)
                 {
@@ -466,12 +468,12 @@ namespace Hanjeopsi.Core.Tests
                     double pos = JsMath.Clamp(Gauss(aim, _s.SeasonSd * (visible ? 1 : 2)), 0, 1);
                     results.Add(_g.Truck.Judge(pos, target));
                 }
-                var dish = _g.ServeDish(recipe, results);
+                var dish = _g.ServeGuest(recipe, results, guest);
                 if (dish == null) throw new InvalidOperationException("만들 수 있다던 요리를 못 만들었다");
                 _r.TruckIncome += dish.Pay;
-                served += 1;
                 Check("요리");
             }
+            _g.CheckDinerRankUp();
             _g.UseSlot();
             Check("장사 끝");
         }

@@ -43,9 +43,10 @@ namespace Hanjeopsi.Core.Tests
             Assert.False(night.BuyBait());
             Assert.False(night.UpgradeGear(GearSlot.Tackle));
             Assert.Equal(100_000, night.Save.Money);
-            // 점심에 손님이 가장 많고 밤엔 적다
+            // 점심에 손님이 가장 많고 밤엔 적다 (같은 등급)
             Assert.True(At(2).CustomersNow() > At(1).CustomersNow());
             Assert.True(At(4).CustomersNow() < At(3).CustomersNow());
+            Assert.Equal(0, At(0).CustomersNow());
         }
 
         [Fact]

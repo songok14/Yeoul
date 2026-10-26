@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Hanjeopsi.Core.State
 {
@@ -13,7 +14,7 @@ namespace Hanjeopsi.Core.State
         public int Version = CurrentVersion;
         public int Seed;
         public int Day;
-        /// <summary>0 새벽, 1 아침, 2 낮, 3 저녁</summary>
+        /// <summary>0 새벽, 1 아침, 2 점심, 3 저녁, 4 밤 (웹은 네 칸)</summary>
         public int Slot;
         public int Money;
         public int Debt;
@@ -34,12 +35,25 @@ namespace Hanjeopsi.Core.State
         public int JournalPages;
         public DaySummary PendingSummary;
         public Dictionary<string, bool> Flags = new Dictionary<string, bool>();
+        /// <summary>여울호 평판·등급·손님 친밀도 (고닷만). 웹 세이브에는 없어서 비어 있으면 쓰지 않는다</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DinerState Diner;
 
         public bool Flag(string name)
         {
             bool v;
             return Flags.TryGetValue(name, out v) && v;
         }
+    }
+
+    /// <summary>여울호 평판과 손님 친밀도</summary>
+    public sealed class DinerState
+    {
+        public int Rep;
+        /// <summary>마지막으로 알려 준 등급 (등급이 오른 걸 한 번만 알린다)</summary>
+        public int Rank;
+        /// <summary>손님 id → 친밀도</summary>
+        public Dictionary<string, int> Affinity = new Dictionary<string, int>();
     }
 
     /// <summary>도감 한 칸</summary>

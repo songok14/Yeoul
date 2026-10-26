@@ -1,0 +1,61 @@
+{
+  "ranks": [
+    { "name": "포장마차", "rep": 0, "menu": 2, "guests": 3 },
+    { "name": "동네 맛집", "rep": 40, "menu": 3, "guests": 4 },
+    { "name": "소문난 집", "rep": 120, "menu": 4, "guests": 5 },
+    { "name": "줄 서는 집", "rep": 260, "menu": 5, "guests": 6 }
+  ],
+  "slotBonus": [0, 0, 1, 0, -1],
+  "maxGuests": 9,
+  "repByMood": [-1, 1, 3],
+  "repRequest": 5,
+  "affinityByMood": [-1, 0, 1],
+  "affinityFavorite": 1,
+  "affinityMax": 10,
+  "regularAt": 5,
+  "favoriteChance": 0.7,
+  "guests": [
+    {
+      "id": "fisher",
+      "name": "어부 삼촌",
+      "slots": [1, 4],
+      "likes": ["ureok-maeun", "noraemi-maeun"],
+      "regular": "늘 먹던 {0}!"
+    },
+    {
+      "id": "mom",
+      "name": "아이 엄마",
+      "slots": [2, 3],
+      "likes": ["godeungeo-jorim", "bollak-gui"],
+      "regular": "애가 {0} 또 먹고 싶대요"
+    },
+    {
+      "id": "student",
+      "name": "여학생",
+      "slots": [2, 3],
+      "likes": ["hakgongchi-muchim", "gabojingeo-sukhoe"],
+      "regular": "언니! 오늘도 {0}요"
+    },
+    {
+      "id": "mail",
+      "name": "집배원",
+      "slots": [1, 2],
+      "likes": ["noraemi-maeun", "dodari-ssukguk"],
+      "regular": "{0} 생각나서 들렀어요"
+    },
+    {
+      "id": "grandpa",
+      "name": "할아버지",
+      "slots": [1, 3],
+      "likes": ["dodari-ssukguk", "gamseongdom-hoe", "bollak-gui"],
+      "regular": "{0} 그거 또 주게"
+    },
+    {
+      "id": "tourist",
+      "name": "관광객",
+      "slots": [2, 3, 4],
+      "likes": ["chamdom-hoe", "nongeo-gui", "gamseongdom-hoe"],
+      "regular": "후기 보고 또 왔어요! {0}요"
+    }
+  ]
+}
