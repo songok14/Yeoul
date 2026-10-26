@@ -271,9 +271,10 @@ namespace Hanjeopsi.App.Screens
         {
             float cx = FanApex.X + (ArtStage.Logical.X / 2 - FanApex.X) * d;
             float spread = d * 215 * (1 - 0.3f * d);
+            // 같은 거리라도 옆으로 갈수록 조금 가까이(아래로) 와서 끝이 둥근 부채꼴이 된다
             return new Vector3(
                 cx + angle * spread,
-                Shore - 14 - d * (Shore - Horizon - 40),
+                Shore - 14 - d * (Shore - Horizon - 40) + angle * angle * d * 46,
                 1.6f - d * 0.9f);
         }
 
@@ -550,6 +551,7 @@ namespace Hanjeopsi.App.Screens
         private void Cast()
         {
             _dist01 = G.Reel.CastDistance(_gaugePos, Reach);
+            ShowThrow(false);
             if (!_tutorial)
             {
                 G.UseBaitNow();
@@ -804,6 +806,7 @@ namespace Hanjeopsi.App.Screens
         private void StartReel(bool perfect)
         {
             _phase = Phase.Reel;
+            ShowThrow(false);
             // 걸었으면 "!" 는 바로 걷는다
             if (_mark != null && IsInstanceValid(_mark)) _mark.QueueFree();
             _mark = null;

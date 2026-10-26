@@ -196,7 +196,7 @@
     "unlockRegulars": "단골 {0}명이 생기면",
     "unlockRequests": "납품 의뢰 {0}번을 마치면",
     "unlockFavor": "노씨 부탁을 들어주면",
-    "kitsLocked": "노씨 부탁을 먼저 들어주자",
+    "kitsLocked": "노씨 부탁\n먼저",
     "unlockClear": "1장을 마치면",
     "unlockLater": "다음 지역에서",
     "rodStat": "최대 {0}m · 흡수 {1}% · 챔질 +{2}ms",
