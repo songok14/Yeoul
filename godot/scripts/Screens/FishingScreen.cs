@@ -429,7 +429,7 @@ namespace Hanjeopsi.App.Screens
             _angle = -_aimDir;
             _field.ShowFan = true;
             _field.FanReach = (float)Reach;
-            _field.FanLabel = F("maxCast", Mathf.RoundToInt((float)G.Reel.CastMeters(Reach)));
+            _field.FanLabel = F("maxCast", G.Reel.CastMeters(Reach).ToString("0.0", CultureInfo.InvariantCulture));
             _field.FloatTex = FloatTexture();
             _field.NeedleFixed = false;
             _field.Aiming = null;
@@ -498,7 +498,7 @@ namespace Hanjeopsi.App.Screens
             _gauge.Bound1 = (float)zones.NearBelow;
             _gauge.Bound2 = (float)zones.MidBelow;
             _gauge.Reach = reach;
-            _gauge.ReachLabel = F("maxCast", Mathf.RoundToInt((float)G.Reel.CastMeters(Reach)));
+            _gauge.ReachLabel = F("maxCast", G.Reel.CastMeters(Reach).ToString("0.0", CultureInfo.InvariantCulture));
             _gauge.Needle = 0;
             _gauge.Showing = ReelGauge.Mode.Power;
             Tell(T["power"], T["powerSub"]);

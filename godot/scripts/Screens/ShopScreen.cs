@@ -229,7 +229,7 @@ namespace Hanjeopsi.App.Screens
             {
                 case "rod":
                     var r = g.Rods[tier - 1];
-                    return F("rodStat", Mathf.RoundToInt((float)G.Reel.CastMeters(r.Reach)), Mathf.RoundToInt((float)r.Absorb * 100), r.HookBonus);
+                    return F("rodStat", G.Reel.CastMeters(r.Reach).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture), Mathf.RoundToInt((float)r.Absorb * 100), r.HookBonus);
                 case "reel":
                     var l = g.Reels[tier - 1];
                     var rb = G.Data.Balance.Reel;
