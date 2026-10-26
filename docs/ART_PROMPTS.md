@@ -143,6 +143,84 @@ Below them, separate face pieces at the same scale: eyes open, eyes closed, happ
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no arrows, no borders, no frames, no grid lines.
 ```
 
+## 손님 2차 (새 손님 6명, 2026-10-26)
+여울호 등급과 단골이 생겨서 손님을 늘린다. 밤(지금 2명)과 아침(3명)이 비어 있어서 그 시간대 손님 위주. 먼저 **손님 2-1 디자인 시트**를 뽑고, 그 결과를 첨부해 **SD 시트 2-2, 2-3**을 뽑는다. 받으면 `python3 scripts/sd_cells.py <시트> 3 4 godot/art/customers <id>-stand,<id>-walk,<id>-happy,<id>-sad,...`로 잘라 넣고, `dialogue.json` customers와 `diner.json` guests에 더한다.
+
+| id | 손님 | 오는 시간 | 좋아할 요리 (안) |
+|---|---|---|---|
+| haenyeo | 해녀 할머니 | 아침 · 점심 | 갑오징어숙회, 참돔회 |
+| taxi | 택시 기사 아저씨 | 점심 · 밤 | 우럭매운탕, 고등어조림 |
+| nurse | 밤 근무 간호사 | 아침 · 밤 | 도다리쑥국, 볼락구이 |
+| welder | 조선소 청년 | 점심 · 저녁 · 밤 | 농어구이, 고등어조림 |
+| boy | 동네 꼬마 | 저녁 | 볼락구이, 학공치 회무침 |
+| pension | 민박집 사장님 | 아침 · 저녁 | 노래미 매운탕, 감성돔 숙성회 |
+
+### 손님 2-1. 새 손님 디자인 시트 (일러스트)
+
+```
+Create one character design sheet of 6 new food truck customers for a cozy Korean seaside village mobile game. Attached: watercolor background illustrations from my game (color palette and lighting) and my current customer illustrations (match their art style, proportions, line art and coloring exactly so the new people belong to the same village).
+
+Layout: 6 characters in one row, full body, front three quarter view facing slightly left, all at the same scale on the same baseline, generous empty space between them so nothing touches.
+
+Characters, from left to right:
+1. Haenyeo grandmother (Korean female free diver, about 70): short permed gray hair, sun tanned smiling wrinkled face, faded floral print loose work pants (momppae), plain navy long sleeve top with rolled sleeves, rubber sandals, an orange net bag (mangsari) over one shoulder and a round orange buoy tucked under her arm. Strong and cheerful.
+2. Taxi driver uncle (about 50): round face, short black hair with a little gray, sunglasses pushed up on his head, light blue short sleeve collared shirt, dark slacks, a small white towel around his neck, car keys on a lanyard, comfortable brown loafers. Friendly and chatty.
+3. Night shift nurse (about 30): dark bob hair with a clip, tired kind eyes, light teal hospital scrubs under a long navy knit cardigan, a lanyard ID card with no readable text, white sneakers, holding a thermos. Gentle and sleepy.
+4. Shipyard worker young man (about 25): short messy hair, a band-aid on his cheek, gray blue work coverall with the top tied around his waist over a white t-shirt, work gloves stuck in a pocket, a white safety helmet held under his arm, steel toe boots. Shy but hungry.
+5. Village boy (about 9): short spiky hair, missing front tooth grin, yellow t-shirt, denim shorts with a sticking plaster on one knee, a toy fishing rod with a small red float, a little plastic bucket. Energetic.
+6. Guesthouse owner (minbak, about 45): long hair in a low ponytail with a scarf headband, bright pink apron with a pocket over a striped shirt and beige pants, slippers, a bunch of house keys on a ring. Warm and busy.
+
+Style: same soft anime illustration as the attached customers, delicate clean line art, gentle cel shading with a light watercolor texture, warm sunny south coast colors, light from the upper left. Each person has one clear signature color so they read well at small size.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no name tags with writing, no borders, no frames, no grid lines, no ground shadow.
+```
+
+### 손님 2-2. SD 시트 A (해녀 할머니, 택시 기사, 간호사)
+
+```
+Create one game SD character sheet. Attached: watercolor background illustrations from my game (color palette and lighting only), the new customer design sheet (use it for the three designs below exactly) and my current SD customer sheet (match its chibi proportions, line art, coloring and pose style exactly).
+
+Characters, one per row:
+Row 1: Haenyeo grandmother: short permed gray hair, tanned smiling face, faded floral loose work pants, navy long sleeve top with rolled sleeves, rubber sandals, orange net bag over the shoulder, round orange buoy under the arm.
+Row 2: Taxi driver uncle: short black hair with a little gray, sunglasses pushed up on his head, light blue short sleeve collared shirt, dark slacks, small white towel around the neck, brown loafers.
+Row 3: Night shift nurse: dark bob hair with a clip, tired kind eyes, light teal scrubs under a long navy knit cardigan, lanyard card with no text, white sneakers, holding a thermos.
+
+Columns, the same for every row, every figure facing LEFT in side or three quarter view:
+1. standing still, relaxed, waiting to order
+2. walking to the left, one foot forward, a small bounce
+3. delighted after tasting: both arms up or hands clapping, big happy smile, a little hop
+4. disappointed: shoulders dropped, head slightly down, small frown
+
+Style: cute chibi SD, 2 to 2.5 heads tall, big head, small rounded body, short limbs, soft anime face, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 3 rows x 4 columns, full body, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps, props stay inside each figure's own space.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no speech bubbles, no effect marks.
+```
+
+### 손님 2-3. SD 시트 B (조선소 청년, 동네 꼬마, 민박집 사장님)
+
+```
+Create one game SD character sheet. Attached: watercolor background illustrations from my game (color palette and lighting only), the new customer design sheet (use it for the three designs below exactly) and my current SD customer sheet (match its chibi proportions, line art, coloring and pose style exactly).
+
+Characters, one per row:
+Row 1: Shipyard worker young man: short messy hair, band-aid on his cheek, gray blue work coverall with the top tied around the waist over a white t-shirt, gloves in a pocket, white safety helmet under his arm, steel toe boots.
+Row 2: Village boy about 9 years old (draw him a little shorter than the adults): short spiky hair, missing front tooth grin, yellow t-shirt, denim shorts, a plaster on one knee, a toy fishing rod with a small red float, a little plastic bucket.
+Row 3: Guesthouse owner woman: long hair in a low ponytail with a scarf headband, bright pink apron over a striped shirt and beige pants, slippers, a ring of house keys.
+
+Columns, the same for every row, every figure facing LEFT in side or three quarter view:
+1. standing still, relaxed, waiting to order
+2. walking to the left, one foot forward, a small bounce
+3. delighted after tasting: both arms up or hands clapping, big happy smile, a little hop
+4. disappointed: shoulders dropped, head slightly down, small frown
+
+Style: cute chibi SD, 2 to 2.5 heads tall, big head, small rounded body, short limbs, soft anime face, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 3 rows x 4 columns, full body, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps, props stay inside each figure's own space.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no speech bubbles, no effect marks.
+```
+
 ## 다음 SD 차례
 막순 할머니 → 노씨 → 손님 6명(위 디자인) → 트럭 여울호 → 물고기 5종 → 요리 5종 → 차세라. 여울·고등어 기본 시트는 받았다. 다음은 SD 2(여울 동작), SD 3(표정)이고 그 뒤 같은 형식으로 준다.
 
