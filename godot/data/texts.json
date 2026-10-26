@@ -40,6 +40,10 @@
     "원거리"
   ],
   "fishing": {
+    "ready": "어디로 던져 볼까",
+    "readySub": "고등어가 좋은 자리를 알려 준다",
+    "readyTutorial": "준비되면 던지기를 누르세요",
+    "throw": "던지기",
     "aim": "바늘이 지날 때 눌러 방향을 정하세요",
     "aimSub": "반짝이는 곳에 가까울수록 좋은 고기가 산다",
     "catHint": "냐아옹!\n({0} 반짝인다)",
@@ -47,7 +51,7 @@
     "right": "오른쪽이",
     "front": "앞바다가",
     "power": "한 번 더 눌러서 던지기!",
-    "powerSub": "동그라미가 반짝이는 곳에 닿을 때",
+    "powerSub": "아래 게이지가 알맞은 거리에 올 때",
     "cast": "{0}에 던졌다",
     "wait": "찌를 지켜보세요",
     "waitHot": "좋은 자리다. 큰 놈이 올지도",
@@ -192,6 +196,7 @@
     "unlockRegulars": "단골 {0}명이 생기면",
     "unlockRequests": "납품 의뢰 {0}번을 마치면",
     "unlockFavor": "노씨 부탁을 들어주면",
+    "kitsLocked": "노씨 부탁을 먼저 들어주자",
     "unlockClear": "1장을 마치면",
     "unlockLater": "다음 지역에서",
     "rodStat": "최대 {0}m · 흡수 {1}% · 챔질 +{2}ms",

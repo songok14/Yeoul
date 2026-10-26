@@ -65,7 +65,7 @@ namespace Hanjeopsi.App.Screens
                 Modal(T["giftTitle"], F("giftBody", string.Join("\n", gifts.Select(x => x.Name))), new[] { new ModalButton("좋아", Palette.Green, Redraw) });
                 return;
             }
-            Nossi(G.Save.Flag("nossiFavor") ? says["favor"] : NextLine());
+            Nossi(G.Save.Flag("nossiFavor") ? says["favor"] : says["ask"]);
         }
 
         private string NextLine()
@@ -185,7 +185,9 @@ namespace Hanjeopsi.App.Screens
             if (max) return Row(GearArt(kind, show), label, name, Stat(kind, show), Pill(T["best"], Palette.GreenDark, Colors.White), Palette.GreenDark);
             string unlock = TierUnlock(kind, show);
             Control right;
-            if (Unlock.IsShop(unlock))
+            // 새 장비는 노씨 첫 부탁을 들어준 뒤에 판다
+            if (kit != null && !G.KitsOpen() && Unlock.IsShop(unlock)) right = UnlockTag(unlock, T["kitsLocked"]);
+            else if (Unlock.IsShop(unlock))
             {
                 int price = TierPrice(kind, show);
                 right = PriceButton(price, Palette.Blue, () => Buy(kind));
@@ -241,15 +243,15 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>보상·다음 지역 장비는 값 대신 얻는 법</summary>
-        private Control UnlockTag(string unlock)
+        private Control UnlockTag(string unlock, string lockedText = null)
         {
-            string text = UnlockText(unlock);
+            string text = lockedText ?? UnlockText(unlock);
             var box = new PanelContainer { CustomMinimumSize = new Vector2(200, 88), SizeFlagsVertical = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
             bool later = unlock == "later";
             box.AddThemeStyleboxOverride("panel", UiKit.Box(later ? new Color(Palette.Ink, 0.12f) : new Color(Palette.Gold, 0.22f), 22, 14, 8).WithBorder(later ? new Color(Palette.Ink, 0.25f) : Palette.GoldDark, 3));
             var v = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
             v.AddThemeConstantOverride("separation", 0);
-            if (!later) v.AddChild(UiKit.Text(T["gift"], TextSize.Tiny, Palette.GoldDark, true, false, 0, null, HorizontalAlignment.Center));
+            if (!later && lockedText == null) v.AddChild(UiKit.Text(T["gift"], TextSize.Tiny, Palette.GoldDark, true, false, 0, null, HorizontalAlignment.Center));
             var l = UiKit.Text(text, TextSize.Tiny, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
             l.CustomMinimumSize = new Vector2(172, 0);
             v.AddChild(l);

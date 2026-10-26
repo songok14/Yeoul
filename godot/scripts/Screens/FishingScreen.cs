@@ -26,6 +26,8 @@ namespace Hanjeopsi.App.Screens
 
         private enum Phase
         {
+            /// <summary>던지기 단추를 기다린다 (재촉하지 않게 바늘은 아직 안 움직인다)</summary>
+            Ready,
             Aim,
             Power,
             Flying,
@@ -42,6 +44,8 @@ namespace Hanjeopsi.App.Screens
         private const float PanelHeight = 300;
         // 여울은 왼쪽 앞에서 오른쪽 바다로 대를 내민다. 고등어는 왼쪽 끝
         private static readonly Vector2 YeoulFoot = new Vector2(150, 690);
+        /// <summary>던지기 부채꼴이 퍼지기 시작하는 곳 (여울 앞 물가)</summary>
+        private static readonly Vector2 FanApex = new Vector2(168, 560);
         private const float YeoulHeight = 168;
         private static readonly Vector2 CatFoot = new Vector2(80, 686);
         // 쿨러는 여울 오른쪽 방파제 위 (긴 화면에서도 잘리지 않게). 고등어는 여울 앞을 지나 쿨러 옆까지 살금살금 간다
@@ -117,6 +121,7 @@ namespace Hanjeopsi.App.Screens
         private float _headShakeIn, _dragTick;
         /// <summary>입질 때 머리 위 "!"</summary>
         private Label _mark;
+        private GameButton _throw;
         private Tween _zoomTween, _nibbleTween;
         // SD 포즈와 기울기(도). 기울기는 목표값을 부드럽게 따라간다
         private string _pose;
@@ -198,6 +203,13 @@ namespace Hanjeopsi.App.Screens
             col.AddChild(_msg);
             col.AddChild(_sub);
             col.AddChild(_gauge);
+            _throw = new GameButton(T["throw"], Palette.Red, BeginAim, null, TextSize.H1, 120)
+            {
+                CustomMinimumSize = new Vector2(440, 120),
+                SizeFlagsHorizontal = SizeFlags.ShrinkCenter,
+                Visible = false,
+            };
+            col.AddChild(_throw);
             _panel.AddChild(col);
             Art.AddChild(_panel);
 
@@ -251,11 +263,16 @@ namespace Hanjeopsi.App.Screens
 
         // ───────── 좌표와 글 ─────────
 
-        /// <summary>방향(-1~1)과 거리(0 가까이, 1 수평선)로 물 위 자리. z 는 그 거리에서의 크기</summary>
+        /// <summary>
+        /// 방향(-1~1)과 거리(0 여울 발밑, 1 수평선)로 물 위 자리. z 는 그 거리에서의 크기.
+        /// 여울 앞(FanApex)에서 부채꼴로 퍼진다: 멀수록 좌우로 넓고, 가운데 줄은 바다 한가운데로 향한다
+        /// </summary>
         private static Vector3 PosFor(float angle, float d)
         {
+            float cx = FanApex.X + (ArtStage.Logical.X / 2 - FanApex.X) * d;
+            float spread = d * 215 * (1 - 0.3f * d);
             return new Vector3(
-                ArtStage.Logical.X / 2 + angle * (70 + 115 * (1 - d)),
+                cx + angle * spread,
                 Shore - 14 - d * (Shore - Horizon - 40),
                 1.6f - d * 0.9f);
         }
@@ -373,6 +390,9 @@ namespace Hanjeopsi.App.Screens
             bool onCat = !_tutorial && _cat.GetRect().Grow(40).HasPoint(mb.Position);
             switch (_phase)
             {
+                case Phase.Ready:
+                    if (onCat) ShowCatHint();
+                    break;
                 case Phase.Aim:
                     if (onCat)
                     {
@@ -406,9 +426,10 @@ namespace Hanjeopsi.App.Screens
 
         // ───────── 단계 ─────────
 
+        /// <summary>던질 준비: 아래 판에 "던지기" 단추. 누르면 방향 바늘이 움직이기 시작한다</summary>
         private void StartAim()
         {
-            _phase = Phase.Aim;
+            _phase = Phase.Ready;
             _gauge.Showing = ReelGauge.Mode.None;
             _field.BobberVisible = false;
             _field.ShadowVisible = false;
@@ -427,26 +448,45 @@ namespace Hanjeopsi.App.Screens
             // 바늘은 한쪽 끝에서 출발한다
             _aimDir = rng.Next() < 0.5 ? 1 : -1;
             _angle = -_aimDir;
-            _field.ShowFan = true;
+            _field.ShowFan = false;
             _field.FanReach = (float)Reach;
             _field.FanLabel = F("maxCast", G.Reel.CastMeters(Reach).ToString("0.0", CultureInfo.InvariantCulture));
             _field.FloatTex = FloatTexture();
             _field.NeedleFixed = false;
             _field.Aiming = null;
             _field.Needle = (float)_angle;
-            if (_tutorial)
-            {
-                Tell(T["aim"], T["aimTutorial"]);
-                return;
-            }
-            Tell(T["aim"], T["aimSub"]);
-            ShowCatHint();
+            Tell(T["ready"], _tutorial ? T["readyTutorial"] : T["readySub"]);
+            ShowThrow(true);
+            if (!_tutorial) ShowCatHint();
+        }
+
+        private void ShowThrow(bool on)
+        {
+            _throw.Visible = on;
+            // 단추가 있는 동안은 게이지 자리를 비워 안내판이 넘치지 않게
+            _gauge.Visible = !on;
+            if (!on) return;
+            _throw.PivotOffset = _throw.Size / 2;
+            _throw.Scale = new Vector2(0.9f, 0.9f);
+            _throw.CreateTween().TweenProperty(_throw, "scale", Vector2.One, 0.25).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+        }
+
+        /// <summary>던지기 단추: 여울 발밑에서 퍼지는 부채꼴 위로 방향 바늘이 오간다</summary>
+        private void BeginAim()
+        {
+            if (_phase != Phase.Ready) return;
+            _phase = Phase.Aim;
+            ShowThrow(false);
+            Sound.Play("tap");
+            Haptics.Tap();
+            _field.ShowFan = true;
+            Tell(T["aim"], _tutorial ? T["aimTutorial"] : T["aimSub"]);
         }
 
         /// <summary>고등어가 울며 반짝이는 지점 쪽을 본다</summary>
         private void ShowCatHint()
         {
-            if (_phase != Phase.Aim && _phase != Phase.Power) return;
+            if (_phase != Phase.Ready && _phase != Phase.Aim && _phase != Phase.Power) return;
             HideCatBubble();
             double a = _hintSpot.Angle;
             string dir = a < -0.3 ? T["left"] : a > 0.3 ? T["right"] : T["front"];
@@ -487,8 +527,11 @@ namespace Hanjeopsi.App.Screens
             _phase = Phase.Power;
             _exit.SetEnabled(false);
             HideCatBubble();
+            _field.ShowFan = true;
             _field.NeedleFixed = true;
-            _field.Aiming = 0;
+            // 힘은 바다 위가 아니라 아래 게이지로만 본다
+            _field.Aiming = null;
+            ShowThrow(false);
             Sound.Play("tap");
             Haptics.Tap();
             _gaugePos = 0;
@@ -938,7 +981,7 @@ namespace Hanjeopsi.App.Screens
             _runOffset = Mathf.Lerp(_runOffset, runTarget, 1 - Mathf.Exp(-(running ? 3.2f : 2f) * dt));
             _wobble += dt * (float)(2 + str * 0.6 + (running ? 6 : 0));
             var from = PosFor((float)_angle, (float)_dist01);
-            float fx = Mathf.Lerp(from.X, ArtStage.Logical.X / 2 + 10, p) + _runOffset * (1 - p * 0.5f) + Mathf.Sin(_wobble) * (16 + (running ? 10 : 0)) * (1 - p * 0.6f);
+            float fx = Mathf.Lerp(from.X, FanApex.X + 20, p) + _runOffset * (1 - p * 0.5f) + Mathf.Sin(_wobble) * (16 + (running ? 10 : 0)) * (1 - p * 0.6f);
             fx = Mathf.Clamp(fx, 30, ArtStage.Logical.X - 30);
             float fy = Mathf.Lerp(from.Y, Shore - 16, p);
             _field.ShadowAt = new Vector2(fx, fy);
@@ -1153,7 +1196,7 @@ namespace Hanjeopsi.App.Screens
 
         private void ConfirmExit()
         {
-            if (_phase != Phase.Aim) return;
+            if (_phase != Phase.Aim && _phase != Phase.Ready) return;
             bool cast = _castsDone > 0;
             Modal(cast ? T["exitTitle"] : T["backTitle"], cast ? T["exitBody"] : T["backBody"], new[]
             {
@@ -1219,7 +1262,7 @@ namespace Hanjeopsi.App.Screens
             _time += dt;
             // 숨 쉬기
             _yeoul.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.2f) * 0.01f);
-            if (_phase != Phase.Aim && !_thiefActive) _cat.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.8f + 1) * 0.02f);
+            if (_phase != Phase.Aim && _phase != Phase.Ready && !_thiefActive) _cat.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.8f + 1) * 0.02f);
 
             if (_shake > 0)
             {
@@ -1247,8 +1290,7 @@ namespace Hanjeopsi.App.Screens
                     var g = G.Reel.StepPower(_gaugePos, _gaugeDir, dt);
                     _gaugePos = g.Pos;
                     _gaugeDir = g.Dir;
-                    _field.Aiming = (float)G.Reel.CastDistance(_gaugePos, Reach);
-                    _gauge.Needle = _field.Aiming.Value;
+                    _gauge.Needle = (float)G.Reel.CastDistance(_gaugePos, Reach);
                     // 게이지가 찰수록 대를 뒤로 젖힌다
                     _leanRate = 14;
                     _leanTarget = -16 * (float)_gaugePos;

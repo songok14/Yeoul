@@ -527,7 +527,7 @@ namespace Hanjeopsi.Core.Tests
                     }
                 }
                 // 고닷 장비: 상점에서 파는 다음 단계 (통발 빼고. 통발은 크릴을 쓴다)
-                foreach (var k in D.Gear.Kits)
+                foreach (var k in _g.KitsOpen() ? D.Gear.Kits : new List<Data.KitKind>())
                 {
                     int lv = _g.KitLevel(k.Id);
                     if (k.Id == "trap" || lv >= Math.Min(2, k.Levels.Count) || !Data.Unlock.IsShop(k.Levels[lv].Unlock)) continue;

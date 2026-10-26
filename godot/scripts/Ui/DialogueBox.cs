@@ -142,11 +142,16 @@ namespace Hanjeopsi.App.Ui
 
         public override void _GuiInput(InputEvent e)
         {
-            if (_closing) return;
-            bool tap = (e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
-                || (e is InputEventScreenTouch st && st.Pressed);
+            // 닫히는 동안에도 누름을 삼켜 아래 버튼(상점 가격 등)이 눌리지 않게 한다
+            if (_closing)
+            {
+                AcceptEvent();
+                return;
+            }
+            // 폰은 터치가 마우스 누름으로도 한 번 더 오므로 마우스 누름만 본다 (터치만 보면 뒤따른 누름이 아래로 샌다)
+            bool tap = e is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left;
+            if (e is InputEventScreenTouch || e is InputEventMouseButton) AcceptEvent();
             if (!tap) return;
-            AcceptEvent();
             if (_typeTween != null && _typeTween.IsRunning())
             {
                 // 찍히는 중이면 한 번에 다 보이게
@@ -240,7 +245,6 @@ namespace Hanjeopsi.App.Ui
         {
             if (_closing) return;
             _closing = true;
-            MouseFilter = MouseFilterEnum.Ignore;
             var tw = CreateTween();
             tw.TweenProperty(this, "modulate:a", 0f, 0.2);
             tw.TweenCallback(Callable.From(QueueFree));

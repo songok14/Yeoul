@@ -13,6 +13,7 @@ namespace Hanjeopsi.Core.Tests
             var g = Game.NewGame(TestData.Full, 5);
             g.Save.Slot = 1;
             g.Save.Money = 2_000_000;
+            g.Save.Flags["nossiFavor"] = true;
             return g;
         }
 
@@ -47,18 +48,37 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
-        public void 조건을_채우면_보상을_한_번만_받는다()
+        public void 새_장비는_노씨_부탁을_들어준_뒤에_판다()
         {
             var g = New();
+            g.Save.Flags.Remove("nossiFavor");
+            Assert.False(g.BuyKit("line"));
+            Assert.True(g.UpgradeGear(GearSlot.Reel));
+            g.Save.Flags["nossiFavor"] = true;
+            Assert.True(g.BuyKit("line"));
+        }
+
+        [Fact]
+        public void 조건을_채우면_한_단계씩_한_번만_받는다()
+        {
+            var g = New();
+            g.Save.Flags.Remove("nossiFavor");
+            Assert.Empty(g.CheckGifts());
+            // 노씨 부탁: 쿨러·찌·의자 보상이 걸려 있어도 한 단계씩만
+            g.Save.Flags["nossiFavor"] = true;
+            var favor = g.CheckGifts();
+            Assert.Contains(favor, x => x.Kind == "chair" && x.Tier == 1);
+            Assert.Equal(1, g.KitLevel("chair"));
+            Assert.Equal(1, g.Save.Tackle);
             Assert.Empty(g.CheckGifts());
             g.Save.Diner.Rep = g.Data.Diner.Ranks[1].Rep;
             var gifts = g.CheckGifts();
-            Assert.Contains(gifts, x => x.Kind == "reel" && x.Tier == 5);
-            Assert.Contains(gifts, x => x.Kind == "line" && x.Tier == 5);
-            Assert.Equal(4, g.Save.Reel);
+            Assert.Contains(gifts, x => x.Kind == "reel" && x.Tier == 2);
+            Assert.Contains(gifts, x => x.Kind == "line" && x.Tier == 1);
+            Assert.Equal(1, g.Save.Reel);
             Assert.Empty(g.CheckGifts());
             g.Save.Flags["ch1Clear"] = true;
-            Assert.Contains(g.CheckGifts(), x => x.Kind == "rod" && x.Tier == 6);
+            Assert.Contains(g.CheckGifts(), x => x.Kind == "rod" && x.Tier == 2);
         }
 
         [Fact]

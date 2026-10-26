@@ -280,6 +280,12 @@ namespace Hanjeopsi.Core
             var templates = Data.RequestTemplates;
             var rng = new Mulberry32(Mulberry32.Hash(Save.Seed, Save.Day, b.SeedSalt));
             int guard = 0;
+            // 고닷: 노씨 부탁(새 장비가 열린다)은 들어주기 전까지 늘 들어와 있다
+            if (Save.Kit != null && !KitsOpen())
+            {
+                int favor = templates.FindIndex(t => t.Flag == "nossiFavor");
+                if (favor >= 0 && Save.Requests.Count < b.Max && !Save.Requests.Any(r => r.Template == favor)) AddRequest(favor, rng);
+            }
             while (Save.Requests.Count < b.Max && guard++ < b.Guard)
             {
                 int template = (int)Math.Floor(rng.Next() * templates.Count);
@@ -287,14 +293,21 @@ namespace Hanjeopsi.Core
                 var t = templates[template];
                 // 귀한 고기 의뢰는 첫 주에는 나오지 않는다
                 if (Data.SpeciesById(t.Species).Rare && Save.Day < b.RareFromDay) continue;
-                Save.Requests.Add(new DeliveryRequest
-                {
-                    Id = Save.NextRequestId++,
-                    Template = template,
-                    Reward = JsMath.Round100((double)Market.TodayBasePrice(t.Species, Save.Day) * t.Count * t.Mul * b.RewardMul),
-                    Deadline = Save.Day + b.DeadlineMin + (int)Math.Floor(rng.Next() * b.DeadlineRange),
-                });
+                AddRequest(template, rng);
             }
+        }
+
+        private void AddRequest(int template, IRandom rng)
+        {
+            var b = Data.Balance.Requests;
+            var t = Data.RequestTemplates[template];
+            Save.Requests.Add(new DeliveryRequest
+            {
+                Id = Save.NextRequestId++,
+                Template = template,
+                Reward = JsMath.Round100((double)Market.TodayBasePrice(t.Species, Save.Day) * t.Count * t.Mul * b.RewardMul),
+                Deadline = Save.Day + b.DeadlineMin + (int)Math.Floor(rng.Next() * b.DeadlineRange),
+            });
         }
 
         // ───────── 행동 (웹 state/actions.ts) ─────────

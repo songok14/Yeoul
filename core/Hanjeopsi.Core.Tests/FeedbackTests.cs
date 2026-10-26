@@ -84,6 +84,20 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 노씨_부탁은_들어주기_전까지_늘_들어와_있다()
+        {
+            var g = Game.NewGame(TestData.Full, 3);
+            int favor = TestData.Full.RequestTemplates.FindIndex(t => t.Flag == "nossiFavor");
+            for (int day = 0; day < 5; day++)
+            {
+                g.Save.Requests.Clear();
+                g.Save.Day += 1;
+                g.RefreshRequests();
+                Assert.Contains(g.Save.Requests, r => r.Template == favor);
+            }
+        }
+
+        [Fact]
         public void 좋은_낚싯대일수록_멀리_던진다()
         {
             var rods = TestData.Full.Gear.Rods;

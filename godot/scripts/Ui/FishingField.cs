@@ -237,7 +237,7 @@ namespace Hanjeopsi.App.Ui
         private void DrawFan()
         {
             const int n = 24;
-            float near = 0.04f;
+            float near = 0.0f;
             float far = FanReach;
             var pts = new Vector2[2 * (n + 1)];
             for (int i = 0; i <= n; i++)
@@ -581,9 +581,11 @@ namespace Hanjeopsi.App.Ui
         {
             float b = Mathf.Clamp(Bend, 0, 1.1f);
             var g = RodGrip;
-            var d0 = RodDir;
             // 줄이 가는 쪽 (없으면 대 방향)
-            var t = LineTo.HasValue ? (LineTo.Value - g).Normalized() : d0;
+            var t = LineTo.HasValue ? (LineTo.Value - g).Normalized() : RodDir;
+            // 대 전체를 물고기 쪽으로 돌려 잡는다 (최대 35도). 손잡이 이음매는 그림 속 손에 묻힌다
+            float turn = Mathf.Clamp(RodDir.AngleTo(t), -0.61f, 0.61f);
+            var d0 = RodDir.Rotated(turn * (Fighting ? 0.85f : 0.6f));
             // 텐션 0 이어도 낚싯대 무게로 끝이 조금 숙인다
             var droop = new Vector2(d0.X * 0.8f, d0.Y * 0.8f + 0.6f).Normalized();
             // 팽팽할수록 대 끝이 물고기 쪽으로 활처럼 휜다 (끝에서 줄이 꺾이지 않게)

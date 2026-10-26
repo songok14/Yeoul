@@ -38,6 +38,9 @@ namespace Hanjeopsi.App.Screens
         private float _catTimer = 5;
         private float _yeoulReset;
         private float _footY = 636;
+        /// <summary>간판을 눌러 여울이 그쪽으로 걸어가는 중 (다른 누름은 받지 않는다)</summary>
+        private bool _walking;
+        private float _truckX = 330;
         /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 비 그림 두 장은 트럭이 다른 곳에 있다</summary>
         private static readonly Rect2 TruckArea = new Rect2(232, 290, 208, 115);
         private static readonly Dictionary<string, Rect2> TruckAreaByArt = new Dictionary<string, Rect2>
@@ -67,6 +70,7 @@ namespace Hanjeopsi.App.Screens
             Rect2 truckArea;
             if (!TruckAreaByArt.TryGetValue(BackgroundName(), out truckArea)) truckArea = TruckArea;
             _truck = _stage.Place(Clear(truckArea.Size), truckArea.End, truckArea.Size.Y, new Vector2(1, 1));
+            _truckX = truckArea.GetCenter().X;
             Tappable(_truck, OpenTruck);
             _stage.Pin(new SignButton("여울호", OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
@@ -494,12 +498,61 @@ namespace Hanjeopsi.App.Screens
                 });
                 return;
             }
-            GameState.I.GoTo("fishing");
+            WalkThen(430, () => GameState.I.GoTo("fishing"));
+        }
+
+        /// <summary>
+        /// 여울이 그 건물 쪽으로 걸어가고(고등어가 뒤따른다) 화면이 바뀐다. 사진 모드는 바로 간다
+        /// </summary>
+        private void WalkThen(float x, Action then)
+        {
+            if (_walking) return;
+            if (GameState.I.ShotMode)
+            {
+                then();
+                return;
+            }
+            _walking = true;
+            _yeoulReset = 0;
+            var from = new Vector2(205, _footY);
+            var to = new Vector2(Mathf.Clamp(x, 40, ArtStage.Logical.X - 40), _footY - 26);
+            float dist = from.DistanceTo(to);
+            double time = Mathf.Clamp(dist / 260f, 0.35f, 0.8f);
+            // 그림은 왼쪽을 보고 걷는다
+            _yeoul.FlipH = to.X > from.X;
+            _cat.FlipH = to.X > from.X;
+            var catFrom = new Vector2(118, _footY);
+            var tw = CreateTween();
+            tw.TweenMethod(Callable.From<float>(t =>
+            {
+                _stage.Move(_yeoul, from.Lerp(to, t));
+                // 고등어는 조금 늦게 따라간다
+                _stage.Move(_cat, catFrom.Lerp(to + new Vector2(to.X > from.X ? -60 : 60, 4), Mathf.Max(0, t * 1.1f - 0.1f)));
+                int frame = (int)(t * dist / 22) % 2;
+                _stage.Swap(_yeoul, Tex("yeoul/walk-" + (frame + 1)));
+                _stage.Swap(_cat, Tex("cat/walk-" + (2 - frame)));
+            }), 0f, 1f, time);
+            Sound.Play("step", -6);
+            tw.TweenCallback(Callable.From(() =>
+            {
+                _walking = false;
+                then();
+            }));
+        }
+
+        /// <summary>대화만 하고 돌아올 때 (할머니댁) 제자리로</summary>
+        private void WalkBack()
+        {
+            _yeoul.FlipH = false;
+            _cat.FlipH = false;
+            _stage.Swap(_yeoul, Tex("yeoul/front"));
+            _stage.Swap(_cat, Tex("cat/sit-front"));
+            PlaceOnFloor();
         }
 
         private void OpenMarket()
         {
-            GameState.I.GoTo("market");
+            WalkThen(150, () => GameState.I.GoTo("market"));
         }
 
         private void OpenTruck()
@@ -509,7 +562,7 @@ namespace Hanjeopsi.App.Screens
                 Toast("새벽엔 손님이 없다");
                 return;
             }
-            GameState.I.GoTo("truck");
+            WalkThen(_truckX, () => GameState.I.GoTo("truck"));
         }
 
         private void OpenShop()
@@ -519,7 +572,7 @@ namespace Hanjeopsi.App.Screens
                 Toast("미끼가게는 문을 닫았다");
                 return;
             }
-            GameState.I.GoTo("shop");
+            WalkThen(80, () => GameState.I.GoTo("shop"));
         }
 
         private void OpenNotebook()
@@ -529,6 +582,11 @@ namespace Hanjeopsi.App.Screens
 
         /// <summary>할머니댁: 할머니가 한마디 하고, 대화창 위에 갚기·잠자기 선택지가 뜬다</summary>
         private void Restaurant()
+        {
+            WalkThen(370, RestaurantTalk);
+        }
+
+        private void RestaurantTalk()
         {
             var s = G.Save;
             int canPay = Math.Min(s.Money, s.Debt);
@@ -542,7 +600,7 @@ namespace Hanjeopsi.App.Screens
                     G.IsWeekly ? G.DueNow() <= 0 || s.Money <= 0 : s.Debt <= 0 || s.Money < step),
                 new ModalButton("있는 돈 전부 갚기 (" + UiKit.Won(canPay) + ")", Palette.Red, () => Pay(canPay), canPay <= 0),
                 new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep),
-                new ModalButton("나가기", Palette.GrayDark),
+                new ModalButton("나가기", Palette.GrayDark, WalkBack),
             });
         }
 

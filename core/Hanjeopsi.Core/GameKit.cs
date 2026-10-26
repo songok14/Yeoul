@@ -62,7 +62,7 @@ namespace Hanjeopsi.Core
         public bool BuyKit(string id)
         {
             var k = KitDef(id);
-            if (k == null || Save.Kit == null || !IsShopOpen()) return false;
+            if (k == null || Save.Kit == null || !IsShopOpen() || !KitsOpen()) return false;
             int next = KitLevel(id);
             if (next >= k.Levels.Count) return false;
             var lv = k.Levels[next];
@@ -71,6 +71,12 @@ namespace Hanjeopsi.Core
             Save.Kit.Own[id] = next + 1;
             Persist();
             return true;
+        }
+
+        /// <summary>새 장비(줄·바늘·찌 등)는 노씨 첫 부탁을 들어준 뒤에 판다</summary>
+        public bool KitsOpen()
+        {
+            return Save.Flag("nossiFavor");
         }
 
         /// <summary>보상 조건을 채웠나</summary>
@@ -91,7 +97,7 @@ namespace Hanjeopsi.Core
         }
 
         /// <summary>
-        /// 조건을 채운 보상 장비를 준다. 지금보다 좋은 것만 (가장 높은 단계로 바로 오른다).
+        /// 조건을 채운 보상 장비를 준다. 조건 하나마다 지금보다 한 단계씩만 오른다 (2026-10-26 폰 의견).
         /// 받은 것 목록을 돌려준다
         /// </summary>
         public List<GearGift> CheckGifts()
@@ -111,17 +117,18 @@ namespace Hanjeopsi.Core
             if (Save.Kit == null) return gifts;
             void Try(string kind, int have, int count, Func<int, string> unlock, Func<int, string> name, Action<int> set)
             {
-                // 단계 번호는 1부터. have 는 지금 단계
-                for (int t = count; t > have; t--)
+                // 단계 번호는 1부터. have 는 지금 단계. 채운 조건(t 단계 보상) 하나로 have + 1 단계를 받는다
+                for (int t = have + 1; t <= count; t++)
                 {
                     string key = kind + "-" + t;
                     if (Save.Kit.Gifts.Contains(key) || !UnlockMet(unlock(t))) continue;
+                    int to = have + 1;
                     if (give)
                     {
                         Save.Kit.Gifts.Add(key);
-                        set(t);
+                        set(to);
                     }
-                    gifts.Add(new GearGift { Kind = kind, Tier = t, Name = name(t) });
+                    gifts.Add(new GearGift { Kind = kind, Tier = to, Name = name(to) });
                     break;
                 }
             }

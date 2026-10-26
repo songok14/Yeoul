@@ -21,9 +21,8 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>쿨러 한 줄 높이(사이 간격 포함)와 줄 말고 쿨러 상자가 쓰는 높이 (시세판, 제목, 쪽 넘김)</summary>
-        private const float RowHeight = 126;
-        private const float FixedHeight = 640;
-        private int _page;
+        /// <summary>내 쿨러 목록 스크롤 위치 (팔고 다시 그려도 그 자리)</summary>
+        private int _scrollY;
         private bool _selling;
 
         private Dictionary<string, string> T
@@ -39,12 +38,6 @@ namespace Hanjeopsi.App.Screens
         protected override bool FitsToHeight
         {
             get { return true; }
-        }
-
-        /// <summary>화면 높이에 맞춰 한 쪽에 들어가는 줄 수</summary>
-        private int PageSize
-        {
-            get { return Mathf.Max(2, (int)((Content.Size.Y - FixedHeight) / RowHeight)); }
         }
 
         protected override string Backdrop
@@ -103,22 +96,8 @@ namespace Hanjeopsi.App.Screens
                 return col;
             }
 
-            int size = PageSize;
-            int pages = (groups.Count + size - 1) / size;
-            _page = Mathf.Clamp(_page, 0, pages - 1);
             bool open = G.IsMarketOpen();
-            int i = 0;
-            foreach (var grp in groups.Skip(_page * size).Take(size)) list.AddChild(GroupRow(grp, i++, open));
-            list.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
-
-            if (pages > 1)
-            {
-                list.AddChild(Pager(_page, pages, p =>
-                {
-                    _page = p;
-                    Redraw();
-                }));
-            }
+            // 전부 팔기는 맨 위에, 목록은 손가락으로 밀어 내리는 스크롤
             if (!open)
             {
                 list.AddChild(UiKit.Text(T["closedNote"], TextSize.Small, Palette.RedDark, false, false, 0, null, HorizontalAlignment.Center));
@@ -126,13 +105,30 @@ namespace Hanjeopsi.App.Screens
             else
             {
                 var sellable = G.SellableFish();
-                if (sellable.Count > 0 && pages == 1)
+                if (sellable.Count > 0)
                 {
                     int total = sellable.Sum(f => G.FishValue(f));
-                    var all = new GameButton(F("sellAll", UiKit.Won(total)), Palette.Red, () => Auction(sellable), null, TextSize.Body, 104);
-                    list.AddChild(all);
+                    list.AddChild(new GameButton(F("sellAll", UiKit.Won(total)), Palette.Red, () => Auction(sellable), null, TextSize.Body, 96));
                 }
             }
+            var scroll = new ScrollContainer
+            {
+                SizeFlagsVertical = SizeFlags.ExpandFill,
+                HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
+                ScrollDeadzone = 24,
+                MouseFilter = MouseFilterEnum.Pass,
+            };
+            list.AddChild(scroll);
+            var rows = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
+            rows.AddThemeConstantOverride("separation", 14);
+            scroll.AddChild(rows);
+            int i = 0;
+            foreach (var grp in groups) rows.AddChild(GroupRow(grp, i++, open));
+            // 스크롤 위치를 다시 그린 뒤에도 지킨다
+            int keep = _scrollY;
+            scroll.Ready += () => Callable.From(() => scroll.ScrollVertical = keep).CallDeferred();
+            scroll.GetVScrollBar().ValueChanged += v => _scrollY = (int)v;
             return col;
         }
 
