@@ -653,7 +653,7 @@ namespace Hanjeopsi.App.Lab
             {
                 SaveStore.Delete();
                 StartNewGame();
-                Log("30일이 지났다. 여울식당에 빨간 딱지가 붙었다. 처음부터 다시");
+                Log("30일이 지났다. 할머니댁에 빨간 딱지가 붙었다. 처음부터 다시");
             }
         }
 

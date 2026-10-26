@@ -229,10 +229,11 @@ namespace Hanjeopsi.App.Screens
             {
                 case "rod":
                     var r = g.Rods[tier - 1];
-                    return F("rodStat", Mathf.RoundToInt((float)r.Reach * 100), Mathf.RoundToInt((float)r.Absorb * 100), r.HookBonus);
+                    return F("rodStat", Mathf.RoundToInt((float)G.Reel.CastMeters(r.Reach)), Mathf.RoundToInt((float)r.Absorb * 100), r.HookBonus);
                 case "reel":
                     var l = g.Reels[tier - 1];
-                    return F("reelStat", l.Speed, Mathf.RoundToInt((float)l.TensionMul * 100), l.Drag);
+                    var rb = G.Data.Balance.Reel;
+                    return F("reelStat", l.Speed, l.Slack > 0 ? l.Slack : rb.Slack, l.Danger > 0 ? l.Danger : rb.Danger, l.Drag);
                 default:
                     var c = g.Tackles[tier - 1];
                     return F("coolerStat", c.Capacity, c.Decay);

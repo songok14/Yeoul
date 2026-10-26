@@ -607,19 +607,29 @@ namespace Hanjeopsi.Core
         {
             int m = MonthNow();
             string sea = SeaNow();
-            return Data.Species.Where(sp => FishingRoll.LivesIn(sp, sea) && FishingRoll.MonthWeight(sp, m) >= 0.5).ToList();
+            string spot = SpotNow();
+            return Data.Species.Where(sp => FishingRoll.LivesIn(sp, sea, spot) && FishingRoll.MonthWeight(sp, m) >= 0.5).ToList();
         }
 
-        /// <summary>위판장 시세판 다섯 칸: 낚아 본 제철 어종 먼저, 그다음 아직 못 낚은 제철 어종 (값이 크게 움직인 순)</summary>
+        /// <summary>
+        /// 위판장 시세판 다섯 칸: 내 쿨러에 있는 어종 먼저(많이 든 순), 그다음 낚아 본 제철 어종,
+        /// 아직 못 낚은 제철 어종 (값이 크게 움직인 순)
+        /// </summary>
         public List<Species> BoardSpecies(int n = 5)
         {
             int day = Save.Day;
-            return InSeason()
+            var inCooler = Save.Cooler
+                .GroupBy(f => f.Species)
+                .OrderByDescending(g => g.Count())
+                .ThenBy(g => Data.SpeciesIndex(g.Key))
+                .Select(g => Data.SpeciesById(g.Key))
+                .ToList();
+            var rest = InSeason()
+                .Where(sp => !inCooler.Contains(sp))
                 .OrderByDescending(sp => Save.Dex.TryGetValue(sp.Id, out var e) && e.Count > 0)
                 .ThenByDescending(sp => Math.Abs(Market.ChangePercent(sp.Id, day)))
-                .ThenBy(sp => Data.SpeciesIndex(sp.Id))
-                .Take(n)
-                .ToList();
+                .ThenBy(sp => Data.SpeciesIndex(sp.Id));
+            return inCooler.Concat(rest).Take(n).ToList();
         }
 
         /// <summary>오늘 마을 소식 (제철 어종 중 가장 크게 움직인 것)</summary>
@@ -634,14 +644,23 @@ namespace Hanjeopsi.Core
             return Data.Balance.Chapter1.Sea;
         }
 
+        /// <summary>지금 장의 낚시터 (1장은 방파제)</summary>
+        public string SpotNow()
+        {
+            return Data.Balance.Chapter1.Spot;
+        }
+
         public string DateLabel()
         {
             return Rules.DateLabel(Save.Day);
         }
 
+        /// <summary>오늘 금어기인 어종 이름 (지금 장의 바다와 낚시터에서 낚이는 것만)</summary>
         public List<string> ClosedToday()
         {
-            return Rules.ClosedToday(Save.Day);
+            string sea = SeaNow(), spot = SpotNow();
+            var here = new HashSet<string>(Data.Species.Where(sp => FishingRoll.LivesIn(sp, sea, spot)).Select(sp => sp.Name));
+            return Rules.ClosedToday(Save.Day).Where(here.Contains).ToList();
         }
 
         public string ReleaseReason(string species, double size)

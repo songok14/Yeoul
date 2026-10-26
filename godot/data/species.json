@@ -44,6 +44,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -89,6 +92,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -134,6 +140,9 @@
         "south",
         "east",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -178,6 +187,9 @@
       "seas": [
         "south",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -230,6 +242,9 @@
         "south",
         "west",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -277,6 +292,9 @@
         "south",
         "jeju",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -323,6 +341,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -369,6 +390,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -415,6 +439,9 @@
       "seas": [
         "jeju",
         "south"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -461,6 +488,9 @@
       "seas": [
         "jeju",
         "south"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -508,6 +538,9 @@
         "south",
         "jeju",
         "east"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -554,6 +587,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -600,6 +636,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -646,6 +685,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -693,6 +735,9 @@
         "south",
         "east",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -740,6 +785,9 @@
         "south",
         "west",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -787,6 +835,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -834,6 +885,9 @@
         "south",
         "jeju",
         "east"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -881,6 +935,9 @@
         "south",
         "west",
         "jeju"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -927,6 +984,9 @@
       "seas": [
         "jeju",
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -973,6 +1033,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1019,6 +1082,9 @@
       "seas": [
         "east",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1065,6 +1131,9 @@
       "seas": [
         "east",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1110,6 +1179,9 @@
       ],
       "seas": [
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1157,6 +1229,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1203,6 +1278,9 @@
       "seas": [
         "south",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1250,6 +1328,9 @@
         "south",
         "west",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1296,6 +1377,9 @@
       "seas": [
         "south",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1341,6 +1425,9 @@
       ],
       "seas": [
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1387,6 +1474,9 @@
       "seas": [
         "west",
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -1432,6 +1522,9 @@
       ],
       "seas": [
         "west"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -1483,6 +1576,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1530,6 +1626,9 @@
         "west",
         "south",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1576,6 +1675,9 @@
       "seas": [
         "east",
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -1623,6 +1725,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1670,6 +1775,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1716,6 +1824,9 @@
       "seas": [
         "south",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1764,6 +1875,9 @@
         "east",
         "west",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1810,6 +1924,9 @@
       "seas": [
         "jeju",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1855,6 +1972,9 @@
       ],
       "seas": [
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -1901,6 +2021,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -1947,6 +2070,9 @@
       "seas": [
         "jeju",
         "south"
+      ],
+      "spots": [
+        "rock"
       ]
     },
     {
@@ -1993,6 +2119,9 @@
       "seas": [
         "jeju",
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -2044,6 +2173,9 @@
       "seas": [
         "east",
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -2089,6 +2221,9 @@
       ],
       "seas": [
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2135,6 +2270,9 @@
       "seas": [
         "south",
         "west"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -2182,6 +2320,9 @@
         "south",
         "west",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2234,6 +2375,9 @@
         "south",
         "east",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2279,6 +2423,9 @@
       ],
       "seas": [
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2324,6 +2471,9 @@
       ],
       "seas": [
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2370,6 +2520,9 @@
       "seas": [
         "west",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2416,6 +2569,9 @@
       "seas": [
         "west",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2462,6 +2618,9 @@
       "seas": [
         "west",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2507,6 +2666,9 @@
       ],
       "seas": [
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2554,6 +2716,9 @@
         "west",
         "south",
         "east"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -2601,6 +2766,9 @@
         "south",
         "west",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2646,6 +2814,9 @@
       ],
       "seas": [
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -2693,6 +2864,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2739,6 +2913,9 @@
       "seas": [
         "south",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2786,6 +2963,9 @@
         "south",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2832,6 +3012,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2880,6 +3063,9 @@
         "west",
         "east",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2926,6 +3112,9 @@
       "seas": [
         "south",
         "jeju"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -2972,6 +3161,9 @@
       "seas": [
         "south",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -3022,6 +3214,9 @@
       ],
       "seas": [
         "east"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -3067,6 +3262,9 @@
       ],
       "seas": [
         "jeju"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -3113,6 +3311,9 @@
       "seas": [
         "east",
         "south"
+      ],
+      "spots": [
+        "boat"
       ]
     },
     {
@@ -3159,6 +3360,9 @@
       "seas": [
         "south",
         "east"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -3210,6 +3414,9 @@
       "seas": [
         "west",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -3256,6 +3463,9 @@
       "seas": [
         "west",
         "south"
+      ],
+      "spots": [
+        "breakwater"
       ]
     },
     {
@@ -3302,6 +3512,9 @@
       "seas": [
         "south",
         "west"
+      ],
+      "spots": [
+        "breakwater"
       ]
     }
   ]

@@ -64,7 +64,7 @@ namespace Hanjeopsi.App.Screens
         // 오늘의 메뉴 (등급만큼 고른다)와 이번 장사 손님 차례
         private readonly List<Recipe> _menu = new List<Recipe>();
         private List<string> _plan = new List<string>();
-        private Label _chalk;
+        private VBoxContainer _chalk;
 
         protected override void Build()
         {
@@ -76,11 +76,13 @@ namespace Hanjeopsi.App.Screens
             _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1)];
             Art.AddChild(_stage);
 
-            // 그림 속 빈 간판과 칠판에 게임 글자를 쓴다
-            _stage.Pin(UiKit.Text(T["truckName"], TextSize.H1, new Color("2f4a7a"), true), new Vector2(330, 228));
-            _chalk = UiKit.Text(T["boardEmpty"], TextSize.Tiny - 4, new Color("f4f0e6"), false, false, 0, null, HorizontalAlignment.Center);
-            _chalk.LabelSettings.LineSpacing = 4;
-            _stage.Pin(_chalk, new Vector2(390, 392));
+            // 그림 속 빈 간판에 물결과 같은 푸른 페인트로 이름을, 칠판에 분필로 오늘의 메뉴를 쓴다
+            var sign = UiKit.Text(T["truckName"], TextSize.Title, new Color("2b5288"), true, false, 5, new Color(1, 0.96f, 0.88f, 0.7f));
+            sign.MouseFilter = MouseFilterEnum.Ignore;
+            _stage.Pin(sign, new Vector2(324, 228));
+            _chalk = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore, CustomMinimumSize = new Vector2(150, 0) };
+            _chalk.AddThemeConstantOverride("separation", 2);
+            _stage.Pin(_chalk, new Vector2(387, 384));
             _menu.AddRange(G.SuggestMenu());
 
             _customer = _stage.Place(Tex("fisher-walk"), new Vector2(OffLeft, _footY), CustomerHeight);
@@ -262,7 +264,17 @@ namespace Hanjeopsi.App.Screens
         /// <summary>그림 속 칠판에 오늘의 메뉴를 쓴다</summary>
         private void UpdateChalk()
         {
-            _chalk.Text = _menu.Count > 0 ? string.Join("\n", _menu.Take(5).Select(r => r.Name)) : T["boardEmpty"];
+            foreach (Node c in _chalk.GetChildren()) c.QueueFree();
+            var chalk = new Color(0.96f, 0.95f, 0.9f, 0.92f);
+            var title = UiKit.Text(T["boardTitle"], TextSize.Tiny - 6, new Color(0.98f, 0.88f, 0.55f, 0.95f), true, false, 0, null, HorizontalAlignment.Center);
+            _chalk.AddChild(title);
+            // 분필로 그은 짧은 밑줄
+            _chalk.AddChild(new ColorRect { Color = new Color(chalk, 0.45f), CustomMinimumSize = new Vector2(0, 2), MouseFilter = MouseFilterEnum.Ignore });
+            _chalk.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4), MouseFilter = MouseFilterEnum.Ignore });
+            if (_menu.Count == 0)
+                _chalk.AddChild(UiKit.Text(T["boardEmpty"], TextSize.Tiny - 7, chalk, false, false, 0, null, HorizontalAlignment.Center));
+            foreach (var r in _menu.Take(5))
+                _chalk.AddChild(UiKit.Text(r.Name, TextSize.Tiny - 7, chalk, false, false, 0, null, HorizontalAlignment.Center));
         }
 
         // ───────── 손님 ─────────

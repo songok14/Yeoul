@@ -12,7 +12,7 @@ namespace Hanjeopsi.App.Screens
 {
     /// <summary>
     /// 물비늘포 마을 (웹 TownScene). 시간대별 배경, 건물 간판, SD 여울과 고등어, 트럭, 아래 메뉴 여섯 개.
-    /// 들어올 때 1장 결말과 어제 요약을 확인한다. 여울식당에서 빚을 갚고 잠을 잔다.
+    /// 들어올 때 1장 결말과 어제 요약을 확인한다. 할머니댁에서 빚을 갚고 잠을 잔다.
     /// </summary>
     public partial class TownScreen : Screen
     {
@@ -60,7 +60,7 @@ namespace Hanjeopsi.App.Screens
             // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
             _stage.Pin(new SignButton("위판장", OpenMarket), new Vector2(150, 222));
             _stage.Pin(new SignButton("미끼가게", OpenShop), new Vector2(96, 318));
-            _stage.Pin(new SignButton("여울식당", Restaurant), new Vector2(370, 262));
+            _stage.Pin(new SignButton("할머니댁", Restaurant), new Vector2(370, 262));
             _stage.Pin(new SignButton("방파제 →", GoFishing), new Vector2(330, 196));
 
             // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
@@ -101,7 +101,7 @@ namespace Hanjeopsi.App.Screens
             var shop = new GameButton("미끼가게", Palette.GreenDark, OpenShop, G.IsShopOpen() ? "장비 · 미끼" : "밤엔 닫음");
             shop.SetEnabled(G.IsShopOpen());
             grid.AddChild(shop);
-            grid.AddChild(new GameButton("여울식당", Palette.Wood, Restaurant, "상환 · 휴식"));
+            grid.AddChild(new GameButton("할머니댁", Palette.Wood, Restaurant, "상환 · 휴식"));
             grid.AddChild(new GameButton("수첩", Palette.Purple, OpenNotebook, "도감 · 미각"));
             _menu.Resized += PlaceOnFloor;
             OnSafeAreaChanged();
@@ -527,7 +527,7 @@ namespace Hanjeopsi.App.Screens
             GameState.I.GoTo("notebook");
         }
 
-        /// <summary>여울식당: 할머니가 한마디 하고, 대화창 위에 갚기·잠자기 선택지가 뜬다</summary>
+        /// <summary>할머니댁: 할머니가 한마디 하고, 대화창 위에 갚기·잠자기 선택지가 뜬다</summary>
         private void Restaurant()
         {
             var s = G.Save;

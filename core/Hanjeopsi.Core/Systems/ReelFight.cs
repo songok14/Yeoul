@@ -44,6 +44,12 @@ namespace Hanjeopsi.Core.Systems
             return JsMath.Clamp(power * reach, B.MinCast, 1);
         }
 
+        /// <summary>던진 거리(0~1)를 미터로 (힘싸움 시작 거리와 같다)</summary>
+        public double CastMeters(double dist01)
+        {
+            return B.StartDistanceBase + dist01 * B.StartDistancePerDist;
+        }
+
         /// <summary>챔질 허용 시간(초). 좋은 낚싯대는 길고 귀한 고기는 짧다</summary>
         public double BiteWindow(Rod rod, Species sp, bool tutorial)
         {

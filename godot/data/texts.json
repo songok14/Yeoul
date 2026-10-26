@@ -67,6 +67,7 @@
     "reel": "꾹 누르면 릴을 감아요",
     "reelSub": "팽팽하게 버티면 물고기가 지친다",
     "distance": "남은 거리 {0}m",
+    "maxCast": "최대 {0}m",
     "surge": "꾹꾹!",
     "jump": "철썩!",
     "snap": "팅! 줄이 터졌다",
@@ -193,8 +194,8 @@
     "unlockFavor": "노씨 부탁을 들어주면",
     "unlockClear": "1장을 마치면",
     "unlockLater": "다음 지역에서",
-    "rodStat": "비거리 {0}% · 흡수 {1}% · 챔질 +{2}ms",
-    "reelStat": "초당 {0}m · 텐션 {1}% · 드랙 {2}",
+    "rodStat": "최대 {0}m · 흡수 {1}% · 챔질 +{2}ms",
+    "reelStat": "초당 {0}m · 안전 구간 {1}~{2} · 드랙 {3}",
     "coolerStat": "{0}마리 · 하루 신선도 −{1}"
   },
   "notebook": {
@@ -249,6 +250,7 @@
     "stock": "재료 {0}",
     "noStock": "재료 없음",
     "boardEmpty": "재료 준비 중",
+    "boardTitle": "오늘의 메뉴",
     "start": "장사 시작",
     "startSub": "손님 {0}명 · 1칸",
     "pickFirst": "메뉴를 골라 주세요",

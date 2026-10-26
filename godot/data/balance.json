@@ -10,7 +10,8 @@
     "startDate": 16,
     "startYear": 2026,
     "repayStep": 100000,
-    "sea": "south"
+    "sea": "south",
+    "spot": "breakwater"
   },
   "market": {
     "dailySwing": 0.5,
@@ -194,6 +195,8 @@
     "tiredFloor": 0.45,
     "perfectStamina": 0.15,
     "maxOverrun": 8,
-    "freshReelMul": 0.35
+    "freshReelMul": 0.35,
+    "tiredRiseMul": 0.2,
+    "tiredReelMul": 1.4
   }
 }

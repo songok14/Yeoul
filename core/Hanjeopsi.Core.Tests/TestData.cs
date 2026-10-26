@@ -46,6 +46,11 @@ namespace Hanjeopsi.Core.Tests
                 d.Gear.Rods.RemoveRange(3, d.Gear.Rods.Count - 3);
                 d.Gear.Reels.RemoveRange(3, d.Gear.Reels.Count - 3);
                 d.Gear.Tackles.RemoveRange(3, d.Gear.Tackles.Count - 3);
+                // 고닷은 낚싯대 단계마다 닿는 거리를 늘렸다. 웹은 0.8, 1, 1
+                var webRods = MarketGolden["gear"]["rods"];
+                for (int i = 0; i < d.Gear.Rods.Count; i++) d.Gear.Rods[i].Reach = (double)webRods[i]["reach"];
+                foreach (var r in d.Gear.Reels) r.Slack = r.Danger = 0;
+                d.Balance.Chapter1.Spot = null;
                 d.Gear.Kits.Clear();
                 d.Gear.Baits.Clear();
                 d.Gear.TrapPool.Clear();

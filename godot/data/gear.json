@@ -4,7 +4,7 @@
       "name": "다이소 낚싯대",
       "desc": "할머니가 쓰던 이천 원짜리",
       "price": 0,
-      "reach": 0.8,
+      "reach": 0.74,
       "absorb": 0,
       "hookBonus": 0,
       "unlock": "start"
@@ -13,7 +13,7 @@
       "name": "갯바위 찌낚싯대 1호",
       "desc": "먼 물까지 닿는다. 저항 흡수",
       "price": 80000,
-      "reach": 1,
+      "reach": 0.8,
       "absorb": 0.25,
       "hookBonus": 80,
       "unlock": "shop"
@@ -22,7 +22,7 @@
       "name": "노씨의 감성돔대",
       "desc": "노씨 애장품. 저항 크게 흡수",
       "price": 300000,
-      "reach": 1,
+      "reach": 0.86,
       "absorb": 0.45,
       "hookBonus": 160,
       "unlock": "shop"
@@ -31,7 +31,7 @@
       "name": "카본 갯바위대 1.5호",
       "desc": "가볍고 질기다. 챔질이 빠르다",
       "price": 450000,
-      "reach": 1,
+      "reach": 0.9,
       "absorb": 0.5,
       "hookBonus": 190,
       "unlock": "shop"
@@ -40,7 +40,7 @@
       "name": "등대지기 낚싯대",
       "desc": "마을 일을 도운 값. 노씨가 손봐 줬다",
       "price": 0,
-      "reach": 1,
+      "reach": 0.93,
       "absorb": 0.55,
       "hookBonus": 220,
       "unlock": "requests:4"
@@ -49,7 +49,7 @@
       "name": "물비늘 감성돔대",
       "desc": "1장을 마친 기념. 아버지 대를 닮았다",
       "price": 0,
-      "reach": 1,
+      "reach": 0.95,
       "absorb": 0.6,
       "hookBonus": 250,
       "unlock": "clear"
@@ -58,7 +58,7 @@
       "name": "줄 서는 집 명인대",
       "desc": "여울호가 줄 서는 집이 되면",
       "price": 0,
-      "reach": 1,
+      "reach": 0.97,
       "absorb": 0.64,
       "hookBonus": 270,
       "unlock": "rank:3"
@@ -67,7 +67,7 @@
       "name": "흑룡 원투대",
       "desc": "먼 바다의 대물을 노린다",
       "price": 0,
-      "reach": 1,
+      "reach": 0.98,
       "absorb": 0.68,
       "hookBonus": 290,
       "unlock": "later"
@@ -76,7 +76,7 @@
       "name": "홍염 명품대",
       "desc": "아무나 쥘 수 없는 대",
       "price": 0,
-      "reach": 1,
+      "reach": 0.99,
       "absorb": 0.72,
       "hookBonus": 310,
       "unlock": "later"
@@ -85,7 +85,7 @@
       "name": "청해 전설대",
       "desc": "바다가 허락한 대",
       "price": 0,
-      "reach": 1,
+      "reach": 1.0,
       "absorb": 0.76,
       "hookBonus": 340,
       "unlock": "later"
@@ -99,7 +99,9 @@
       "speed": 5,
       "tensionMul": 1,
       "drag": 101,
-      "unlock": "start"
+      "unlock": "start",
+      "slack": 14,
+      "danger": 80
     },
     {
       "name": "2500번 스피닝릴",
@@ -108,7 +110,9 @@
       "speed": 7,
       "tensionMul": 0.9,
       "drag": 90,
-      "unlock": "shop"
+      "unlock": "shop",
+      "slack": 12,
+      "danger": 84
     },
     {
       "name": "레버브레이크릴",
@@ -117,7 +121,9 @@
       "speed": 9,
       "tensionMul": 0.8,
       "drag": 85,
-      "unlock": "shop"
+      "unlock": "shop",
+      "slack": 10,
+      "danger": 87
     },
     {
       "name": "3000번 레버릴",
@@ -126,7 +132,9 @@
       "speed": 10,
       "tensionMul": 0.76,
       "drag": 83,
-      "unlock": "shop"
+      "unlock": "shop",
+      "slack": 9,
+      "danger": 89
     },
     {
       "name": "맛집 축하 릴",
@@ -135,7 +143,9 @@
       "speed": 11,
       "tensionMul": 0.72,
       "drag": 82,
-      "unlock": "rank:1"
+      "unlock": "rank:1",
+      "slack": 8,
+      "danger": 90
     },
     {
       "name": "단골들의 선물 릴",
@@ -144,7 +154,9 @@
       "speed": 12,
       "tensionMul": 0.68,
       "drag": 80,
-      "unlock": "regulars:6"
+      "unlock": "regulars:6",
+      "slack": 7,
+      "danger": 91
     },
     {
       "name": "소문난 집 레버릴",
@@ -153,7 +165,9 @@
       "speed": 13,
       "tensionMul": 0.64,
       "drag": 78,
-      "unlock": "rank:3"
+      "unlock": "rank:3",
+      "slack": 6,
+      "danger": 92
     },
     {
       "name": "흑룡 레버릴",
@@ -162,7 +176,9 @@
       "speed": 14,
       "tensionMul": 0.6,
       "drag": 76,
-      "unlock": "later"
+      "unlock": "later",
+      "slack": 5,
+      "danger": 93
     },
     {
       "name": "홍염 레버릴",
@@ -171,7 +187,9 @@
       "speed": 15,
       "tensionMul": 0.56,
       "drag": 74,
-      "unlock": "later"
+      "unlock": "later",
+      "slack": 4,
+      "danger": 94
     },
     {
       "name": "청해 전설릴",
@@ -180,7 +198,9 @@
       "speed": 16,
       "tensionMul": 0.52,
       "drag": 72,
-      "unlock": "later"
+      "unlock": "later",
+      "slack": 3,
+      "danger": 95
     }
   ],
   "tackles": [
@@ -916,7 +936,7 @@
       "waitMul": 1,
       "likes": [
         "gamseongdom",
-        "doldom",
+        "mangsangeo",
         "dodari",
         "jwichi",
         "maljwichi"
@@ -930,7 +950,7 @@
       "waitMul": 1,
       "likes": [
         "bungjangeo",
-        "gaetjangeo",
+        "ssugimi",
         "gwangeo",
         "yangtae",
         "ureok",

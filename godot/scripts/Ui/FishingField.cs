@@ -42,6 +42,8 @@ namespace Hanjeopsi.App.Ui
         // 부채꼴: 바늘이 좌우로 오가고, 누르면 멈춘다. 파워 단계에서는 바늘 위로 떨어질 자리가 움직인다
         public bool ShowFan;
         public float FanReach = 1;
+        /// <summary>부채꼴 끝에 쓰는 최대 거리 (예: "최대 18m")</summary>
+        public string FanLabel;
         public float Needle;
         public bool NeedleFixed;
         /// <summary>파워 게이지가 가리키는 거리 (없으면 null)</summary>
@@ -51,7 +53,8 @@ namespace Hanjeopsi.App.Ui
         public bool ShowHint;
         public float HintAngle, HintDist;
 
-        // 찌
+        // 찌. 가진 찌 그림이 있으면 그 그림 윗부분을 물 위에 띄운다
+        public Texture2D FloatTex;
         public bool BobberVisible;
         public Vector2 BobberAt;
         public float BobberScale = 1;
@@ -87,6 +90,10 @@ namespace Hanjeopsi.App.Ui
         /// <summary>릴링 중이면 텐션에 따라 줄이 떨리고 색이 바뀐다</summary>
         public bool Fighting;
         public Vector2? LineTo;
+        /// <summary>대 끝이 툭 튀는 세기 (물고기가 머리를 흔들거나 챔질할 때). 저절로 줄어든다</summary>
+        public float RodKick;
+        /// <summary>화면이 하얗게 번쩍이는 세기 0~1. 저절로 줄어든다</summary>
+        public float Flash;
 
         // 쿨러 (고등어가 노린다)
         public Vector2 CoolerAt;
@@ -160,6 +167,8 @@ namespace Hanjeopsi.App.Ui
         {
             float dt = (float)delta;
             _time += dt;
+            RodKick = Mathf.Max(0, RodKick - dt * 3.5f);
+            Flash = Mathf.Max(0, Flash - dt * 2.8f);
             for (int i = _rings.Count - 1; i >= 0; i--)
             {
                 _rings[i].T += dt * _rings[i].Speed;
@@ -220,6 +229,7 @@ namespace Hanjeopsi.App.Ui
             if (ShadowVisible && ShowStamina) DrawStamina();
             foreach (var d in _drops) DrawDrop(d);
             DrawCooler();
+            if (Flash > 0.01f) DrawRect(new Rect2(Vector2.Zero, Size), new Color(1, 0.98f, 0.9f, 0.4f * Flash * Flash));
         }
 
         // ───────── 부채꼴 ─────────
@@ -244,6 +254,17 @@ namespace Hanjeopsi.App.Ui
             DrawLine(P(PosAt(1, near)), P(PosAt(1, far)), new Color(1, 1, 1, 0.6f), 3.5f, true);
             foreach (float zone in new[] { 0.35f, 0.7f })
                 if (zone < far - 0.03f) DashedArc(zone, new Color(1, 1, 1, 0.45f));
+            // 이 낚싯대로는 닿지 않는 먼 물: 옅은 점선으로만 보인다
+            if (far < 0.985f) DashedArc(1, new Color(1, 1, 1, 0.2f));
+            if (!string.IsNullOrEmpty(FanLabel))
+            {
+                var lp = P(PosAt(0, far));
+                var font = Fonts.Body;
+                int fs = TextSize.Tiny;
+                var pos = new Vector2(lp.X - 150, lp.Y - 14);
+                DrawStringOutline(font, pos, FanLabel, HorizontalAlignment.Center, 300, fs, 8, new Color(Palette.NightDeep, 0.8f));
+                DrawString(font, pos, FanLabel, HorizontalAlignment.Center, 300, fs, new Color(1, 0.97f, 0.88f));
+            }
 
             // 바늘: 발밑에서 수평선 쪽으로 뻗은 빛줄기
             float w = 0.035f;
@@ -500,6 +521,11 @@ namespace Hanjeopsi.App.Ui
                 float w = 1 + 0.12f * Mathf.Sin(_time * 3);
                 Ellipse(c, 11 * u * w, 0.28f, new Color(Palette.Foam, 0.55f), 2);
             }
+            if (FloatTex != null)
+            {
+                DrawFloatTex(c, u, sink, alpha);
+                return;
+            }
             var o = c + new Vector2(0, sink * 9 * u);
             // 안테나와 몸통 (위는 빨강, 아래는 흰색)
             DrawLine(o + new Vector2(0, -6 * u), o + new Vector2(0, -19 * u), new Color(Palette.Ink, alpha), Mathf.Max(2, 1.4f * u));
@@ -524,6 +550,30 @@ namespace Hanjeopsi.App.Ui
         }
 
         /// <summary>
+        /// 가진 찌 그림: 날아갈 때는 통째로, 물에 뜨면 몸통 가운데까지만 (아래는 물에 잠긴다). 잠기면 더 내려간다
+        /// </summary>
+        private void DrawFloatTex(Vector2 c, float u, float sink, float alpha)
+        {
+            var tex = FloatTex;
+            float texH = tex.GetHeight(), texW = tex.GetWidth();
+            // 그림 높이 192 중 몸통 가운데(물에 닿는 곳)는 위에서 0.56
+            const float waterAt = 0.56f;
+            float scale = 30 * u / (texH * waterAt);
+            float w = texW * scale;
+            float shown = BobberFloating ? texH * Mathf.Lerp(waterAt, waterAt * 0.35f, sink) : texH;
+            var top = c + new Vector2(-w / 2, -texH * waterAt * scale + (BobberFloating ? sink * texH * waterAt * 0.65f * scale : 0));
+            DrawTextureRectRegion(tex, new Rect2(top, new Vector2(w, shown * scale)), new Rect2(0, 0, texW, shown), new Color(1, 1, 1, alpha));
+            if (BobberFloating)
+            {
+                // 물에 닿은 자리 반짝이는 물테
+                DrawSetTransform(c + new Vector2(0, 1), 0, new Vector2(1, 0.3f));
+                DrawCircle(Vector2.Zero, w * 0.62f, new Color(0.17f, 0.45f, 0.6f, 0.35f));
+                DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                Ellipse(c + new Vector2(0, 1), w * 0.62f, 0.3f, new Color(1, 1, 1, 0.6f), 2);
+            }
+        }
+
+        /// <summary>
         /// 낚싯대: 손잡이에서 뻗어 나가다 끝이 줄 쪽으로 휜다. 텐션이 셀수록 크게 휘고(활처럼), 위험하면 떨린다.
         /// 끝 자리를 RodTip 에 넣어 줄이 거기서 나가게 한다
         /// </summary>
@@ -536,34 +586,43 @@ namespace Hanjeopsi.App.Ui
             var t = LineTo.HasValue ? (LineTo.Value - g).Normalized() : d0;
             // 텐션 0 이어도 낚싯대 무게로 끝이 조금 숙인다
             var droop = new Vector2(d0.X * 0.8f, d0.Y * 0.8f + 0.6f).Normalized();
-            float k = Fighting ? 0.18f + 0.62f * Mathf.Min(1, b) : 0.15f;
+            // 팽팽할수록 대 끝이 물고기 쪽으로 활처럼 휜다 (끝에서 줄이 꺾이지 않게)
+            float k = Fighting ? 0.45f + 0.5f * Mathf.Min(1, b) : 0.3f;
             var tipDir = droop.Lerp(t, k).Normalized();
-            if (Fighting && b > 0.85f) tipDir = tipDir.Rotated(Mathf.Sin(_time * 55) * 0.02f);
-            float len = RodLen * (1 - 0.14f * Mathf.Min(1, b));
-            var tip = g + (d0 * 0.5f + tipDir * 0.5f).Normalized() * len;
-            var ctrl = g + d0 * len * 0.62f;
+            float shake = (Fighting && b > 0.85f ? 0.025f : 0) + 0.07f * RodKick;
+            if (shake > 0) tipDir = tipDir.Rotated(Mathf.Sin(_time * 55) * shake);
+            float len = RodLen * (1 - 0.16f * Mathf.Min(1, b));
+            var tip = g + (d0 * 0.4f + tipDir * 0.6f).Normalized() * len;
+            var ctrl = g + d0 * len * 0.55f;
             RodTip = tip;
 
-            const int n = 22;
-            var pts = Bezier(P(g), P(ctrl), P(tip), n);
+            const int n = 24;
+            // 그림 속 손잡이 안쪽에서 시작해 이음매가 보이지 않게 한다
+            var butt = g - d0 * len * 0.05f;
+            var pts = Bezier(P(butt), P(ctrl), P(tip), n);
             float u = K / 2.4f;
-            // 굵은 손잡이 쪽에서 가는 끝으로 (조각마다 굵기를 줄인다)
+            var edge = new Color("1c1714");
+            var body = new Color("3a322b");
+            // 굵은 손잡이 쪽에서 가는 끝으로 (조각마다 굵기를 줄인다). 처음 한 토막은 손잡이처럼 굵다
             for (int i = 0; i < n; i++)
             {
                 float f = (float)i / n;
-                float w = Mathf.Lerp(6.5f, 1.8f, f) * u;
-                DrawLine(pts[i], pts[i + 1], new Color("231e1a"), w + 1.6f * u, true);
-                DrawLine(pts[i], pts[i + 1], new Color("3a322b"), w, true);
+                float w = f < 0.1f ? 9f * u : Mathf.Lerp(7f, 1.8f, (f - 0.1f) / 0.9f) * u;
+                DrawLine(pts[i], pts[i + 1], edge, w + 1.8f * u, true);
+                DrawLine(pts[i], pts[i + 1], body, w, true);
             }
+            // 손잡이 끝 금빛 고리 (손잡이와 대가 이어지는 자리)
+            int joint = Mathf.Clamp((int)(0.1f * n), 1, n);
+            DrawCircle(pts[joint], 4.6f * u, new Color("c9a24a"));
             // 위쪽 빛 한 줄
-            for (int i = 2; i < n - 2; i++)
+            for (int i = 3; i < n - 2; i++)
             {
                 var dir = (pts[i + 1] - pts[i]).Normalized();
-                var off = new Vector2(dir.Y, -dir.X) * Mathf.Lerp(1.6f, 0.5f, (float)i / n) * u;
+                var off = new Vector2(dir.Y, -dir.X) * Mathf.Lerp(1.8f, 0.5f, (float)i / n) * u;
                 DrawLine(pts[i] + off, pts[i + 1] + off, new Color(1, 0.95f, 0.85f, 0.28f), 1.2f * u, true);
             }
             // 가이드 링 (금빛 작은 고리)
-            foreach (float f in new[] { 0.3f, 0.5f, 0.68f, 0.84f, 0.96f })
+            foreach (float f in new[] { 0.32f, 0.5f, 0.68f, 0.84f, 0.96f })
             {
                 int i = Mathf.Clamp((int)(f * n), 0, n);
                 DrawArc(pts[i], Mathf.Lerp(3.2f, 1.6f, f) * u, 0, Mathf.Tau, 10, new Color("c9a24a"), 1.3f * u, true);
@@ -584,10 +643,11 @@ namespace Hanjeopsi.App.Ui
             float slackness = Mathf.Clamp(1 - bend / 0.55f, 0, 1);
             // 처짐: 느슨하면 깊게, 팽팽하면 거의 없다. 느슨할 때는 바람에 살랑인다
             float sag = (6 + 64 * slackness * slackness) * u + Mathf.Sin(_time * 2.2f) * 6 * slackness * u;
-            var mid = (tip + to) / 2 + new Vector2(0, sag);
+            // 줄은 늘 아래로 처진다 (대 끝에서 위로 솟지 않게 물고기 쪽으로 늘어진다)
+            var mid = (tip + to) / 2 + new Vector2(0, sag + (to - tip).Length() * 0.04f * slackness);
             var pts = Bezier(tip, mid, to, 28);
             // 팽팽하면 줄이 파르르 떨린다 (가운데가 가장 크게)
-            float shiver = Fighting ? Mathf.Clamp((bend - 0.62f) / 0.3f, 0, 1) : 0;
+            float shiver = Fighting ? Mathf.Max(Mathf.Clamp((bend - 0.62f) / 0.3f, 0, 1), 0.6f * RodKick) : 0;
             if (shiver > 0)
             {
                 var dir = (to - tip).Normalized();

@@ -30,6 +30,8 @@ namespace Hanjeopsi.Core.Data
         public double[] Months;
         /// <summary>사는 바다: south(남해), east(동해), west(서해), jeju(제주). 지금 장의 바다에 있어야 낚인다</summary>
         public string[] Seas;
+        /// <summary>낚이는 곳: breakwater(방파제), rock(갯바위), boat(배낚시). 지금 장의 낚시터에 있어야 낚인다 (없으면 어디든)</summary>
+        public string[] Spots;
         /// <summary>도감 한 줄 힌트</summary>
         public string Hint;
         public string Desc;

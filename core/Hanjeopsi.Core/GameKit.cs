@@ -268,7 +268,7 @@ namespace Hanjeopsi.Core
             Save.Bait -= 1;
             var rng = new Mulberry32(Mulberry32.Hash(Save.Seed, Save.Day, 7717));
             int month = MonthNow();
-            var pool = Data.Gear.TrapPool.Select(Data.SpeciesById).Where(sp => FishingRoll.LivesIn(sp, SeaNow())).ToList();
+            var pool = Data.Gear.TrapPool.Select(Data.SpeciesById).Where(sp => FishingRoll.LivesIn(sp, SeaNow(), SpotNow())).ToList();
             var weights = pool.Select(sp => FishingRoll.MonthWeight(sp, month)).ToList();
             var got = new List<string>();
             for (int i = 0; i < n && !CoolerFull(); i++)

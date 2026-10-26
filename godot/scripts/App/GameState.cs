@@ -148,6 +148,13 @@ namespace Hanjeopsi.App
                 s.Dex[c.Species] = e;
             }
             s.Flags["taste2"] = true;
+            if (kind == "gear" && s.Kit != null)
+            {
+                // 장비를 갖춘 판: 3단계 낚싯대·릴, 4단계 찌
+                s.Rod = 2;
+                s.Reel = 2;
+                s.Kit.Own["float"] = 4;
+            }
             if (kind == "summary") s.PendingSummary = new DaySummary { Day = 3, Earned = 124_300, Spoiled = 1, ExpiredRequests = 0 };
             Game.Persist();
         }

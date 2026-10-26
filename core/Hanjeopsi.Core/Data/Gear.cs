@@ -95,6 +95,10 @@ namespace Hanjeopsi.Core.Data
         public double TensionMul;
         /// <summary>이 텐션을 넘으면 드랙이 풀리며 상승이 느려진다</summary>
         public double Drag;
+        /// <summary>고닷 힘싸움: 이 텐션 아래면 느슨하다 (0 이면 balance reel.slack)</summary>
+        public double Slack;
+        /// <summary>고닷 힘싸움: 이 텐션부터 위험 (0 이면 balance reel.danger). 좋은 릴일수록 초록이 넓다</summary>
+        public double Danger;
     }
 
     /// <summary>소품(쿨러). 담을 수 있는 마릿수와 하루 신선도 감소</summary>

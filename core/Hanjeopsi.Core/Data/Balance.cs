@@ -29,11 +29,13 @@ namespace Hanjeopsi.Core.Data
         public int CustomersPerShift;
         /// <summary>1장 바다 (species.json seas)</summary>
         public string Sea;
+        /// <summary>1장 낚시터 (species.json spots). 방파제</summary>
+        public string Spot;
         /// <summary>1일차 날짜 (2026년 4월 16일)</summary>
         public int StartYear;
         public int StartMonth;
         public int StartDate;
-        /// <summary>여울식당 "10만 원 갚기" 버튼 금액</summary>
+        /// <summary>할머니댁 "10만 원 갚기" 버튼 금액</summary>
         public int RepayStep;
     }
 
@@ -197,6 +199,10 @@ namespace Hanjeopsi.Core.Data
         public double MaxOverrun;
         /// <summary>힘이 가득한 물고기는 감는 속도의 이만큼만 끌려온다 (다 지치면 1)</summary>
         public double FreshReelMul;
+        /// <summary>다 지친 물고기를 감을 때 텐션 상승 배율 (거의 안 오른다)</summary>
+        public double TiredRiseMul = 1;
+        /// <summary>다 지친 물고기를 감을 때 감는 속도 배율 (쭉 끌려온다)</summary>
+        public double TiredReelMul = 1;
     }
 
     /// <summary>간 맞추기 판정</summary>

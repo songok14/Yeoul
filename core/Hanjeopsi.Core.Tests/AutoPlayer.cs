@@ -288,7 +288,7 @@ namespace Hanjeopsi.Core.Tests
             int zone = _g.Fishing.ZoneOf(dist01);
             bool big = spot.IsBigBite(close, _rng, _g.BigAdd());
             if (big) _r.BigBites += 1;
-            var sp = _g.Fishing.RollSpeciesNear(zone, S.Slot, _g.MonthNow(), _g.SeaNow(), close, _rng, _g.BaitBias());
+            var sp = _g.Fishing.RollSpeciesNear(zone, S.Slot, _g.MonthNow(), _g.SeaNow(), close, _rng, _g.BaitBias(), _g.SpotNow());
             double size = _g.Fishing.RollSizeNear(sp, close, big, _rng);
             double window = reel.BiteWindow(rod, sp, false);
             double react = Math.Max(0.12, Gauss(_s.ReactMean, _s.ReactSd));

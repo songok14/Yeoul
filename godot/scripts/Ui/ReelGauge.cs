@@ -3,8 +3,9 @@ using Godot;
 namespace Hanjeopsi.App.Ui
 {
     /// <summary>
-    /// 낚시 화면 아래 게이지. 던질 때는 파워 게이지(근거리·중거리·원거리 구간 위를 바늘이 오간다),
-    /// 릴링 때는 텐션 게이지(파랑 느슨함, 초록 알맞음, 빨강 위험, 금색 선은 드랙).
+    /// 낚시 화면 아래 게이지. 던질 때는 파워 게이지(근거리·중거리·원거리 구간 위를 바늘이 오간다.
+    /// 낚싯대가 닿지 않는 먼 쪽은 어둡게 막고 최대 거리를 적는다),
+    /// 릴링 때는 텐션 게이지(파랑 느슨함, 초록 알맞음, 빨강 위험, 금색 선은 드랙. 구간은 릴마다 다르다).
     /// </summary>
     public partial class ReelGauge : Control
     {
@@ -21,6 +22,9 @@ namespace Hanjeopsi.App.Ui
         public float Bound1, Bound2;
         public string[] ZoneNames = new string[3];
         public float Needle;
+        /// <summary>낚싯대가 닿는 끝 (0~1). 그 너머는 어둡게</summary>
+        public float Reach = 1;
+        public string ReachLabel;
 
         // 텐션: 0~100 기준 값
         public float Slack, Danger, Drag, Tension;
@@ -91,12 +95,33 @@ namespace Hanjeopsi.App.Ui
 
         private void DrawPower(Rect2 bar)
         {
-            Segment(bar, 0, Bound1, Palette.SeaLight);
-            Segment(bar, Bound1, Bound2, Palette.Sea);
-            Segment(bar, Bound2, 1, new Color("1b4466"));
-            Label(ZoneNames[0], Bound1 / 2, bar);
-            Label(ZoneNames[1], (Bound1 + Bound2) / 2, bar);
-            if (Bound2 < 1) Label(ZoneNames[2], (Bound2 + 1) / 2, bar);
+            float reach = Mathf.Clamp(Reach, 0.05f, 1);
+            Segment(bar, 0, Mathf.Min(Bound1, reach), Palette.SeaLight);
+            Segment(bar, Bound1, Mathf.Min(Bound2, reach), Palette.Sea);
+            Segment(bar, Bound2, reach, new Color("1b4466"));
+            // 닿지 않는 먼 물: 어둡게 막고 빗금
+            if (reach < 0.995f)
+            {
+                Segment(bar, reach, 1, new Color(0.12f, 0.13f, 0.16f));
+                float x0 = bar.Position.X + bar.Size.X * reach, x1 = bar.End.X - 14;
+                for (float x = x0 + 8; x < x1; x += 14)
+                    DrawLine(new Vector2(x, bar.End.Y - 6), new Vector2(x + 10, bar.Position.Y + 6), new Color(1, 1, 1, 0.12f), 3, true);
+                DrawRect(new Rect2(x0 - 2, bar.Position.Y - 4, 4, bar.Size.Y + 8), Palette.Gold);
+            }
+            Label(ZoneNames[0], Mathf.Min(Bound1, reach) / 2, bar);
+            Label(ZoneNames[1], (Bound1 + Mathf.Min(Bound2, reach)) / 2, bar);
+            if (Bound2 < reach - 0.08f) Label(ZoneNames[2], (Bound2 + reach) / 2, bar);
+            if (!string.IsNullOrEmpty(ReachLabel))
+            {
+                // 막대 위 오른쪽: 이 낚싯대의 최대 거리
+                var font = Fonts.Body;
+                int size = TextSize.Tiny;
+                float w = 300;
+                float cx = bar.Position.X + bar.Size.X * reach;
+                var pos = new Vector2(Mathf.Min(cx - w / 2, bar.End.X - w), bar.Position.Y - 22);
+                DrawStringOutline(font, pos, ReachLabel, reach < 0.995f ? HorizontalAlignment.Center : HorizontalAlignment.Right, w, size, 8, new Color(Palette.NightDeep, 0.85f));
+                DrawString(font, pos, ReachLabel, reach < 0.995f ? HorizontalAlignment.Center : HorizontalAlignment.Right, w, size, Palette.Gold);
+            }
             Needle01(bar, Needle, Palette.Gold);
         }
 

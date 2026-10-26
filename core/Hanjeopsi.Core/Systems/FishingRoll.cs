@@ -51,17 +51,17 @@ namespace Hanjeopsi.Core.Systems
         }
 
         /// <summary>
-        /// 고닷 낚시: 이 바다(sea)에 살고 이 달(month 1~12)이 제철일수록, 거리와 시간대가 맞을수록 잘 문다.
+        /// 고닷 낚시: 이 바다(sea)의 이 낚시터(spot)에 살고 이 달(month 1~12)이 제철일수록, 거리와 시간대가 맞을수록 잘 문다.
         /// 지점에 가까운 정도(0~1)만큼 귀한 고기 가중치가 RareColdMul 에서 RareHotMul 로 오른다
         /// </summary>
-        public Species RollSpeciesNear(int zone, int slot, int month, string sea, double closeness, IRandom rng, Func<Species, double> bias = null)
+        public Species RollSpeciesNear(int zone, int slot, int month, string sea, double closeness, IRandom rng, Func<Species, double> bias = null, string spot = null)
         {
             var list = _data.Species;
             var weights = new double[list.Count];
             double rareMul = B.RareColdMul + (B.RareHotMul - B.RareColdMul) * closeness;
             for (int i = 0; i < list.Count; i++)
             {
-                if (!LivesIn(list[i], sea))
+                if (!LivesIn(list[i], sea, spot))
                 {
                     weights[i] = 0;
                     continue;
@@ -74,10 +74,12 @@ namespace Hanjeopsi.Core.Systems
             return WeightedPick(list, weights, rng.Next());
         }
 
-        /// <summary>이 바다에 사는지 (seas 가 없으면 어디든)</summary>
-        public static bool LivesIn(Species sp, string sea)
+        /// <summary>이 바다에 살고 이 낚시터에서 낚이는지 (seas, spots 가 없으면 어디든)</summary>
+        public static bool LivesIn(Species sp, string sea, string spot = null)
         {
-            return sp.Seas == null || sea == null || Array.IndexOf(sp.Seas, sea) >= 0;
+            bool inSea = sp.Seas == null || sea == null || Array.IndexOf(sp.Seas, sea) >= 0;
+            bool atSpot = sp.Spots == null || spot == null || Array.IndexOf(sp.Spots, spot) >= 0;
+            return inSea && atSpot;
         }
 
         /// <summary>달 가중치 (months 가 없으면 1)</summary>

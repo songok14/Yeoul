@@ -8,7 +8,7 @@ namespace Hanjeopsi.Core.Data
     /// </summary>
     public sealed class Dialogue
     {
-        /// <summary>여울식당 막순 할머니 (웹 TownScene GRANDMA_LINES)</summary>
+        /// <summary>할머니댁 막순 할머니 (웹 TownScene GRANDMA_LINES)</summary>
         public List<string> Grandma = new List<string>();
         /// <summary>고등어를 눌렀을 때 SD 말풍선 (상한 생선이 없을 때)</summary>
         public List<string> CatIdle = new List<string>();

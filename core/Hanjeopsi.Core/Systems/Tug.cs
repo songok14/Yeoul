@@ -99,6 +99,18 @@ namespace Hanjeopsi.Core.Systems
             return JsMath.Clamp(1 - Distance / StartDistance, 0, 1);
         }
 
+        /// <summary>이 텐션 아래면 느슨하다. 좋은 릴일수록 낮다</summary>
+        public double SlackAt
+        {
+            get { return Setup.Reel.Slack > 0 ? Setup.Reel.Slack : _r.Slack; }
+        }
+
+        /// <summary>이 텐션부터 위험하다. 좋은 릴일수록 높다 (끊기는 건 똑같이 snap)</summary>
+        public double DangerAt
+        {
+            get { return Setup.Reel.Danger > 0 ? Setup.Reel.Danger : _r.Danger; }
+        }
+
         private double SlackLimit()
         {
             var s = Setup;
@@ -191,12 +203,15 @@ namespace Hanjeopsi.Core.Systems
                 {
                     double rise = (_r.RiseBase + str * _r.RisePerStr) * reel.TensionMul;
                     if (Tension > reel.Drag) rise *= _r.OverDragMul;
+                    // 다 지친 물고기는 텐션이 거의 안 오르고 쭉 끌려온다
+                    if (Tired) rise *= _b.TiredRiseMul;
                     Tension += rise * dt;
                     // 팔팔한 물고기는 잘 안 끌려온다. 지칠수록 감는 만큼 다가온다
                     double give = _b.FreshReelMul + (1 - _b.FreshReelMul) * (1 - Stamina);
-                    Distance -= reel.Speed * give * (Tension > _r.Slack ? 1 : _r.SlackReelMul) * dt;
+                    if (Tired) give *= _b.TiredReelMul;
+                    Distance -= reel.Speed * give * (Tension > SlackAt || Tired ? 1 : _r.SlackReelMul) * dt;
                     // 알맞게 팽팽하면 물고기가 지친다
-                    double pressure = JsMath.Clamp((Tension - _r.Slack) / (_r.Danger - _r.Slack), 0, 1);
+                    double pressure = JsMath.Clamp((Tension - SlackAt) / (DangerAt - SlackAt), 0, 1);
                     Stamina -= _b.CalmDrain * pressure / Math.Max(1, str * _b.StaminaPerStr) * dt;
                 }
                 else
@@ -220,7 +235,8 @@ namespace Hanjeopsi.Core.Systems
             Tension = JsMath.Clamp(Tension, 0, _r.MaxTension);
             Distance = Math.Min(Distance, StartDistance + _b.MaxOverrun);
 
-            if (Phase != TugPhase.Run && Tension < _r.Slack) SlackTime += dt;
+            // 지친 물고기는 텐션이 낮아도 줄이 느슨해지지 않는다 (끌려오는 중)
+            if (Phase != TugPhase.Run && Tension < SlackAt && !(Tired && holding)) SlackTime += dt;
             else SlackTime = Math.Max(0, SlackTime - dt * _r.SlackRecover);
 
             if (Tension >= _r.Snap)
