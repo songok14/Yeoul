@@ -210,6 +210,7 @@ Background: plain flat light gray #EDEDED in every panel. No glow or white outli
 ### 배경 1. 물비늘포 마을 (발 디딜 앞마당이 있는 구도)
 지금 마을 그림은 위에서 내려다보는 구도라 SD 여울·고등어·트럭이 꽃밭과 난간 위에 떠 보인다(2026-10-22 사용자 의견). 눈높이에서 본 항구 길을 아래쪽에 넓게 두고, 장소 네 곳(위판장, 미끼가게, 여울식당, 방파제)이 위쪽 절반에 보이게 다시 뽑는다.
 - **받음 (2026-10-22)**: 밤과 낮 두 장. 새벽(`village-0`)은 밤 그림, 낮(`village-2`)은 낮 그림 그대로, 아침(`village-1`)과 저녁(`village-3`)은 낮 그림에 색을 입혀 만들었다. 진짜 아침·저녁 그림을 뽑으면 바꿔 넣는다.
+- **바꿈 (2026-10-25, 사용자가 GPT로 뽑음)**: WebP 일곱 장 `village-0`(해 뜸) `village-1`(맑은 낮) `village-2`(분홍빛 새벽) `village-3`(노을) `village-night` `village-rain` `village-rain-dusk`. 푸드트럭이 그림 안에 있어서 소품 트럭은 뺐다. 시간대와 그림 짝은 `balance.json` time.townArt(새벽 2, 아침 0, 점심 1, 저녁 3, 밤 night). 옛 PNG 네 장은 지웠다.
 - 먼저 **1-1 낮**을 뽑고, 나머지 세 장은 1-1 결과를 같이 첨부해서 같은 구도로 시간만 바꾼다.
 - 받으면 `godot/art/backgrounds/village-<0~3>.png`(900×1600 PNG)로 넣고, `TownScreen` 간판 자리(`Pin`)와 발 높이(`_footY`)를 새 그림에 맞춘다. 웹은 `public/assets/bg-village-<n>.webp`.
 
@@ -303,6 +304,57 @@ Very important composition for a game screen:
 Time of day: Sunset evening: orange and pink sky, the sea glowing gold, warm lantern light starting in the restaurant, long blue shadows on the road.
 
 Style: soft painterly watercolor illustration matching the attached background images (same palette, brush texture and level of detail), gentle anime background art, clean shapes. Vertical 9:16, at least 1080x1920. No people, no animals, no vehicles, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+### 배경 2. 날씨 (비·눈·태풍·안개, 나중에 날씨를 넣을 때)
+지금 마을 그림(`village-1.webp` 점심, 저녁 판은 `village-3.webp`)을 **꼭 같이 첨부**해서 구도·건물·푸드트럭 자리를 그대로 두고 날씨만 바꾼다. 받으면 `godot/art/backgrounds/village-<날씨>.webp`(864×1536 이상, 9:16)로 넣는다. 빗줄기·눈송이는 화면이 따로 그리니 그림에는 약하게만 넣는다(`Ui/RainOverlay`). 이미 있는 비 두 장은 다시 뽑지 않아도 된다.
+
+#### 배경 2-1. 눈 오는 낮 (`village-snow`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: the current daytime village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+
+Weather: a quiet snowy winter day in a south coast Korean harbor village. Soft overcast pale grey sky, light snow resting on the tiled roofs, the market shed roof, the awning and the top of the food truck, a thin even layer of fresh snow on the plaza with a few faint footprint-free patches near the buildings, the sea a calm muted grey blue, warm lanterns glowing in the restaurant windows. Only a few soft falling snowflakes, no heavy blizzard (the game draws falling snow on top).
+
+Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent calm sky.
+
+Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 2-2. 눈 오는 밤 (`village-snow-night`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: the current night village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+
+Weather: a calm snowy winter night. Deep navy sky with soft snow clouds and a hidden moon glow, snow on the roofs, the awning and the food truck, a thin white layer on the plaza that reflects the warm orange light of the restaurant lanterns, street lamps and the truck lights, the sea dark and still with a few boat lights. Only a few soft falling snowflakes (the game draws falling snow on top).
+
+Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent calm sky.
+
+Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 2-3. 태풍 오는 날 (`village-typhoon`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: the current daytime village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+
+Weather: a typhoon approaching a south coast Korean harbor village in late summer. Heavy dark slate and green grey clouds rolling in fast, a strange yellowish light low on the horizon, big white waves crashing over the tetrapods and the breakwater with spray around the red lighthouse, fishing boats tied tightly at the pier, the restaurant doors closed with lanterns swinging, the truck awning rolled up, wet dark plaza with puddles, palm and pine trees bending in strong wind. Light rain only (the game draws rain on top).
+
+Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent sky.
+
+Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail, dramatic but still gentle and cozy. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 2-4. 안개 낀 새벽 (`village-fog`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: the current dawn village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+
+Weather: thick sea fog on a spring dawn. A soft milky white mist hides the islands and most of the sea, the lighthouse is only a faint red shape with a glowing light, the boats at the pier fade into the fog, the buildings in front stay clear but softened, warm lanterns glow through the haze, the plaza is damp and pale with soft reflections.
+
+Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent sky.
+
+Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
 ## 컷신 일러스트 다듬기 (여울 감정 연기)
