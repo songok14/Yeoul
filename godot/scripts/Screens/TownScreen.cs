@@ -36,8 +36,13 @@ namespace Hanjeopsi.App.Screens
         private float _catTimer = 5;
         private float _yeoulReset;
         private float _footY = 636;
-        /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 긴 화면에서 오른쪽이 잘려도 눌리게 x 370 안쪽까지</summary>
+        /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 비 그림 두 장은 트럭이 다른 곳에 있다</summary>
         private static readonly Rect2 TruckArea = new Rect2(232, 290, 208, 115);
+        private static readonly Dictionary<string, Rect2> TruckAreaByArt = new Dictionary<string, Rect2>
+        {
+            { "village-rain", new Rect2(218, 270, 226, 105) },
+            { "village-rain-dusk", new Rect2(230, 342, 214, 113) },
+        };
         private int _yeoulLine;
 
         protected override void Build()
@@ -47,19 +52,19 @@ namespace Hanjeopsi.App.Screens
             // ── 그림 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            _stage.Background = ArtStage.LoadBackground(G.TownArt());
+            string art = G.TownArt();
             // 비는 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk 로만 본다
             string weather = GameState.I.Weather;
             if (weather == "rain" || weather == "rain-dusk")
             {
-                var rainTexture = ArtStage.LoadBackground(weather == "rain-dusk" ? "village-rain-dusk" : "village-rain");
-                if (rainTexture != null) _stage.Background = rainTexture;
+                art = weather == "rain-dusk" ? "village-rain-dusk" : "village-rain";
 
                 // 배경 바로 위, 간판·캐릭터 아래에 둬서 비가 장면에 자연스럽게 겹친다. 누르기는 그냥 지나간다
                 var rain = new RainOverlay { Name = "RainOverlay" };
                 rain.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(rain);
             }
+            _stage.Background = ArtStage.LoadBackground(art);
             Art.AddChild(_stage);
 
             // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
@@ -69,9 +74,11 @@ namespace Hanjeopsi.App.Screens
             _stage.Pin(new SignButton("방파제 →", GoFishing), new Vector2(330, 196));
 
             // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
-            _truck = _stage.Place(Clear(TruckArea.Size), TruckArea.End, TruckArea.Size.Y, new Vector2(1, 1));
+            Rect2 truckArea;
+            if (!TruckAreaByArt.TryGetValue(art, out truckArea)) truckArea = TruckArea;
+            _truck = _stage.Place(Clear(truckArea.Size), truckArea.End, truckArea.Size.Y, new Vector2(1, 1));
             Tappable(_truck, OpenTruck);
-            _stage.Pin(new SignButton("여울호", OpenTruck), new Vector2(336, 420));
+            _stage.Pin(new SignButton("여울호", OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);

@@ -49,7 +49,7 @@ namespace Hanjeopsi.App.Screens
         private static readonly Vector2 CatThiefFoot = new Vector2(196, 682);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
         // 새벽 · 아침 · 점심 · 저녁 · 밤
-        private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("6f7cb4") };
+        private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
 
         private CoreGame G
         {
@@ -133,8 +133,10 @@ namespace Hanjeopsi.App.Screens
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.Background = GD.Load<Texture2D>("res://art/backgrounds/breakwater.png");
-            _stage.KeepClouds = true;
-            _stage.Tint = SlotTint[_tutorial ? 3 : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1)];
+            int tintSlot = _tutorial ? 3 : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1);
+            // 밤에는 흰 구름까지 어둡게 칠한다
+            _stage.KeepClouds = tintSlot < SlotTint.Length - 1;
+            _stage.Tint = SlotTint[tintSlot];
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
