@@ -20,6 +20,8 @@ namespace Hanjeopsi.Core.Data
         public Dictionary<string, string> NossiSays = new Dictionary<string, string>();
         /// <summary>트럭 손님 (SD 그림 godot/art/customers/&lt;id&gt;-stand|walk|happy|sad.png 와 주문 말투)</summary>
         public List<TruckCustomer> Customers = new List<TruckCustomer>();
+        /// <summary>마을 마당을 오가는 사람들 (SD 그림 godot/art/villagers/&lt;id&gt;-walk-1|walk-2|stand.png)</summary>
+        public List<Villager> Villagers = new List<Villager>();
         /// <summary>대화에 나오는 사람과 감정별 일러스트</summary>
         public List<Speaker> Speakers = new List<Speaker>();
         /// <summary>이름 붙은 대화 장면 (welcome, chapterClear, chapterFail ...)</summary>
@@ -31,6 +33,17 @@ namespace Hanjeopsi.Core.Data
                 if (s.Id == id) return s;
             throw new KeyNotFoundException("없는 화자 id: " + id);
         }
+    }
+
+    public sealed class Villager
+    {
+        public string Id;
+        /// <summary>나오는 시간대 (0 새벽 ~ 4 밤)</summary>
+        public List<int> Slots = new List<int>();
+        /// <summary>SD 키 비율</summary>
+        public float Height = 1;
+        /// <summary>눌렀을 때 한 줄 말풍선</summary>
+        public List<string> Lines = new List<string>();
     }
 
     public sealed class TruckCustomer

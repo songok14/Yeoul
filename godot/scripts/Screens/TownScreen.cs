@@ -40,6 +40,17 @@ namespace Hanjeopsi.App.Screens
         private float _footY = 636;
         /// <summary>간판을 눌러 여울이 그쪽으로 걸어가는 중 (다른 누름은 받지 않는다)</summary>
         private bool _walking;
+
+        /// <summary>마당을 오가는 마을 사람 (그림은 오른쪽을 보고 걷는다)</summary>
+        private sealed class Walker
+        {
+            public Villager Def;
+            public TextureRect Node;
+            public float X, Lane, Dir, Frame, Stop;
+            public float Height;
+        }
+
+        private readonly List<Walker> _walkers = new List<Walker>();
         private float _truckX = 330;
         /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 비 그림 두 장은 트럭이 다른 곳에 있다</summary>
         private static readonly Rect2 TruckArea = new Rect2(232, 290, 208, 115);
@@ -82,6 +93,7 @@ namespace Hanjeopsi.App.Screens
             _truckX = truckArea.GetCenter().X;
             Tappable(_truck, OpenTruck);
             _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
+            AddVillagers(s.Slot);
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
@@ -258,6 +270,70 @@ namespace Hanjeopsi.App.Screens
             return System.IO.Path.GetFileNameWithoutExtension(path);
         }
 
+        /// <summary>이 시간대에 나오는 마을 사람 둘까지. 여울보다 뒤 줄을 천천히 오가고 가끔 멈춘다</summary>
+        private void AddVillagers(int slot)
+        {
+            var rng = GameState.I.Rng;
+            var pool = G.Data.Dialogue.Villagers.Where(v => v.Slots.Contains(slot)).OrderBy(_ => rng.Next()).Take(2).ToList();
+            for (int i = 0; i < pool.Count; i++)
+            {
+                var v = pool[i];
+                var w = new Walker
+                {
+                    Def = v,
+                    X = 50 + (float)rng.Next() * 350,
+                    Lane = -54 - i * 30,
+                    Dir = rng.Next() < 0.5 ? -1 : 1,
+                    Frame = 0,
+                    Stop = (float)rng.Next() * 2,
+                    Height = 112 * v.Height,
+                };
+                w.Node = _stage.Place(Tex("villagers/" + v.Id + "-stand"), new Vector2(w.X, _footY + w.Lane), w.Height);
+                var ww = w;
+                Tappable(w.Node, () => TapVillager(ww));
+                _walkers.Add(w);
+            }
+        }
+
+        private void TapVillager(Walker w)
+        {
+            var lines = w.Def.Lines;
+            if (lines.Count == 0) return;
+            w.Stop = 2.4f;
+            _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));
+            w.Node.FlipH = false;
+            Bubble(Art, lines[(int)(GameState.I.Rng.Next() * lines.Count)], _stage.ToLocal(new Vector2(w.X, _footY + w.Lane - w.Height - 6)), 2.2f);
+        }
+
+        private void UpdateVillagers(float dt)
+        {
+            var rng = GameState.I.Rng;
+            foreach (var w in _walkers)
+            {
+                if (w.Stop > 0)
+                {
+                    w.Stop -= dt;
+                    if (w.Stop <= 0) w.Frame = 0;
+                    _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
+                    continue;
+                }
+                w.X += w.Dir * 20 * dt;
+                if (w.X < 30 || w.X > ArtStage.Logical.X - 30) w.Dir = -w.Dir;
+                w.Frame += dt;
+                int f = (int)(w.Frame / 0.24f) % 2;
+                _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-walk-" + (f + 1)));
+                w.Node.FlipH = w.Dir < 0;
+                _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
+                // 가끔 멈춰 선다
+                if (rng.Next() < dt * 0.12)
+                {
+                    w.Stop = 1.5f + (float)rng.Next() * 2;
+                    _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));
+                    w.Node.FlipH = false;
+                }
+            }
+        }
+
         /// <summary>그림 속 종이 간판: 이름과 (있으면) 아래 작은 상태 한 줄</summary>
         private static SignButton Sign(string name, string state, bool open, Action onPress)
         {
@@ -286,6 +362,7 @@ namespace Hanjeopsi.App.Screens
             _cat.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.8f + 1) * 0.02f);
             _stage.Zoom = 1.01f + Mathf.Sin(_time * 0.1f) * 0.01f;
 
+            UpdateVillagers(dt);
             // 여울은 손 흔든 뒤 정면으로
             if (_yeoulReset > 0)
             {
@@ -375,15 +452,17 @@ namespace Hanjeopsi.App.Screens
             var lines = new List<DialogueLine>();
             if (r.Paid)
             {
-                lines.Add(new DialogueLine { Text = r.No + "주 상환일. 은행 직원이 통지서에 도장을 찍고 갔다." });
-                lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "애썼다. 밥 먹고 해." });
+                lines.Add(new DialogueLine { Text = r.No + "주 상환일. 아침 일찍 은행 직원이 찾아왔다." });
+                lines.Add(new DialogueLine { Speaker = "banker", Face = "stamp", Text = r.No + "주 몫 확인했습니다.\n도장 찍어 드릴게요." });
                 if (r.NextDue > 0)
-                    lines.Add(new DialogueLine { Speaker = "yeoul", Face = "default", Text = "다음 주는 " + UiKit.Won(r.NextDue) + ".\n이자 " + UiKit.Won(r.NextInterest) + "도 붙었다." });
+                    lines.Add(new DialogueLine { Speaker = "banker", Face = "default", Text = "다음 주는 " + UiKit.Won(r.NextDue) + "이에요.\n이자 " + UiKit.Won(r.NextInterest) + "이 들어 있습니다." });
+                lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "애썼다. 밥 먹고 해." });
             }
             else
             {
-                lines.Add(new DialogueLine { Text = r.No + "주 상환일. " + UiKit.Won(r.Short) + "이 모자랐다.\n연체료 " + UiKit.Won(r.LateFee) + "이 붙었다." });
-                lines.Add(new DialogueLine { Text = "은행 직원이 말했다. 한 번 더 밀리면 기다려 줄 수 없다고." });
+                lines.Add(new DialogueLine { Text = r.No + "주 상환일. 아침 일찍 은행 직원이 찾아왔다." });
+                lines.Add(new DialogueLine { Speaker = "banker", Face = "sorry", Text = UiKit.Won(r.Short) + "이 모자라네요.\n연체료 " + UiKit.Won(r.LateFee) + "이 붙습니다." });
+                lines.Add(new DialogueLine { Speaker = "banker", Face = "worried", Text = "한 번 더 밀리면...\n저도 더는 기다려 드릴 수가 없어요." });
                 lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "괜찮다. 아직 안 끝났어." });
                 lines.Add(new DialogueLine { Speaker = "yeoul", Face = "default", Text = "이번 주에 " + UiKit.Won(r.NextDue) + ".\n꼭 낸다." });
             }

@@ -86,6 +86,62 @@
       "order": "{0} 하나요.\n우리 손님들한테 자랑하려고요"
     }
   ],
+  "villagers": [
+    {
+      "id": "fisher",
+      "slots": [
+        0,
+        1,
+        3
+      ],
+      "height": 1,
+      "lines": [
+        "오늘 물 좋다. 볼락이 붙었어.",
+        "새벽 배 들어왔다. 위판장 가 봐라.",
+        "고등어 녀석 또 따라다니네."
+      ]
+    },
+    {
+      "id": "auntie",
+      "slots": [
+        1,
+        2
+      ],
+      "height": 0.96,
+      "lines": [
+        "경매 늦으면 값 떨어진다!",
+        "어머, 막순 언니 손녀구나.",
+        "오늘 쥐노래미 값 괜찮더라."
+      ]
+    },
+    {
+      "id": "boy",
+      "slots": [
+        2,
+        3
+      ],
+      "height": 0.82,
+      "lines": [
+        "누나! 방파제에 큰 거 있대!",
+        "나도 나중에 낚시할 거야.",
+        "고등어야 이리 와!"
+      ]
+    },
+    {
+      "id": "courier",
+      "slots": [
+        1,
+        2,
+        3
+      ],
+      "height": 0.95,
+      "lines": [
+        "택배요! 아, 여기 아니구나.",
+        "이 동네 언덕 너무 많아요.",
+        "여울호 냄새 좋던데요?"
+      ]
+    }
+  ],
   "speakers": [
     {
       "id": "yeoul",
@@ -128,6 +184,20 @@
       "side": "right",
       "faces": {
         "default": "nossi"
+      }
+    },
+    {
+      "id": "banker",
+      "name": "은행 직원",
+      "color": "#3b5b8a",
+      "side": "right",
+      "faces": {
+        "default": "banker",
+        "relieved": "banker-relieved",
+        "sorry": "banker-sorry",
+        "stamp": "banker-stamp",
+        "surprised": "banker-surprised",
+        "worried": "banker-worried"
       }
     }
   ],
