@@ -52,24 +52,7 @@ namespace Hanjeopsi.App.Screens
             // ── 그림 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            string art = G.TownArt();
-            // 비·눈·태풍은 아직 게임 날씨가 없다. 사진 확인용 --weather=rain, rain-dusk, snow, typhoon, fog 로만 본다
-            string weather = GameState.I.Weather;
-            bool night = s.Slot == G.Data.Balance.Time.SlotsPerDay - 1;
-            if (weather == "rain" || weather == "rain-dusk" || weather == "typhoon")
-            {
-                art = weather == "typhoon" ? (night ? "village-typhoon-night" : "village-typhoon")
-                    : weather == "rain-dusk" ? "village-rain-dusk" : "village-rain";
-
-                // 배경 바로 위, 간판·캐릭터 아래에 둬서 비가 장면에 자연스럽게 겹친다. 누르기는 그냥 지나간다
-                var rain = new RainOverlay { Name = "RainOverlay" };
-                rain.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-                _stage.AddChild(rain);
-            }
-            // 눈·안개 그림도 아직 사진 확인용 --weather=snow, fog 로만 (밤이면 밤 그림)
-            if (weather == "snow") art = night ? "village-snow-night" : "village-snow";
-            if (weather == "fog") art = night ? "village-fog-night" : "village-fog";
-            _stage.Background = ArtStage.LoadBackground(art);
+            PaintWeather(s.Slot);
             Art.AddChild(_stage);
 
             // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
@@ -80,7 +63,7 @@ namespace Hanjeopsi.App.Screens
 
             // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
             Rect2 truckArea;
-            if (!TruckAreaByArt.TryGetValue(art, out truckArea)) truckArea = TruckArea;
+            if (!TruckAreaByArt.TryGetValue(BackgroundName(), out truckArea)) truckArea = TruckArea;
             _truck = _stage.Place(Clear(truckArea.Size), truckArea.End, truckArea.Size.Y, new Vector2(1, 1));
             Tappable(_truck, OpenTruck);
             _stage.Pin(new SignButton("여울호", OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
@@ -105,7 +88,9 @@ namespace Hanjeopsi.App.Screens
             grid.AddThemeConstantOverride("h_separation", 22);
             grid.AddThemeConstantOverride("v_separation", 22);
             _menu.AddChild(grid);
-            grid.AddChild(new GameButton("방파제", Palette.Blue, GoFishing, G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시 · 1칸" : "낚시 · 1칸"));
+            var fishing = new GameButton("방파제", Palette.Blue, GoFishing, !G.CanFishToday() ? "태풍 · 출입 금지" : G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시 · 1칸" : "낚시 · 1칸");
+            fishing.SetEnabled(G.CanFishToday());
+            grid.AddChild(fishing);
             grid.AddChild(new GameButton("위판장", Palette.Teal, OpenMarket, G.IsMarketOpen() ? "경매 중" : "경매 마감"));
             var truck = new GameButton("여울호", Palette.Red, OpenTruck, G.IsTruckOpen() ? "손님 " + G.CustomersNow() + " · 1칸" : "새벽엔 쉼");
             truck.SetEnabled(G.IsTruckOpen());
@@ -126,6 +111,51 @@ namespace Hanjeopsi.App.Screens
             tw.TweenProperty(_hud, "modulate:a", 1f, 0.45);
 
             CallDeferred(MethodName.OnEnter);
+        }
+
+        /// <summary>
+        /// 오늘 날씨에 맞는 마을 그림과 비·눈·안개. 날씨 그림은 낮·밤 두 장이라 새벽과 저녁은 색만 입힌다.
+        /// 날씨 효과는 배경 바로 위, 간판·캐릭터 아래에 둔다
+        /// </summary>
+        private void PaintWeather(int slot)
+        {
+            string id = G.WeatherToday().Id;
+            bool night = slot == G.Data.Balance.Time.SlotsPerDay - 1;
+            string art = G.TownArt();
+            Color tint = Colors.White;
+            var dayTint = slot == 0 ? new Color("c8c6e8") : slot == 3 ? new Color("ffd6bc") : Colors.White;
+            switch (id)
+            {
+                case "rain":
+                    // 비 그림은 낮과 노을. 밤비는 밤 그림을 더 어둡게
+                    if (night)
+                    {
+                        art = "village-night";
+                        tint = new Color("aab0cc");
+                    }
+                    else art = slot == 3 ? "village-rain-dusk" : "village-rain";
+                    if (slot == 0) tint = dayTint;
+                    break;
+                case "typhoon":
+                case "snow":
+                case "fog":
+                    art = "village-" + id + (night ? "-night" : "");
+                    if (!night) tint = dayTint;
+                    break;
+            }
+            _stage.Background = ArtStage.LoadBackground(art);
+            if (tint != Colors.White)
+            {
+                _stage.KeepClouds = false;
+                _stage.Tint = tint;
+            }
+            Control fx = null;
+            if (id == "rain" || id == "typhoon") fx = new RainOverlay { Name = "RainOverlay" };
+            else if (id == "snow") fx = new SnowOverlay { Name = "SnowOverlay" };
+            else if (id == "fog") fx = new FogOverlay { Name = "FogOverlay", Center = 0.3f, Strength = 0.35f, Tone = night ? new Color("8890b0") : new Color("f2f2f4") };
+            if (fx == null) return;
+            fx.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            _stage.AddChild(fx);
         }
 
         /// <summary>HUD 는 노치 밑까지, 메뉴는 제스처 바 밑까지 칠한다. 글자와 버튼만 안전 영역 안에 둔다</summary>
@@ -155,6 +185,9 @@ namespace Hanjeopsi.App.Screens
             var row = new HBoxContainer();
             row.AddThemeConstantOverride("separation", 16);
             row.AddChild(UiKit.Text(G.DateLabel(), TextSize.Small - 2, Palette.Gold, true));
+            // 날씨가 궂으면 날짜 옆에 날씨 이름
+            var w = G.WeatherToday();
+            if (w.Id != "clear") row.AddChild(UiKit.Text(w.Name, TextSize.Small - 2, new Color("9fd0ff"), true));
             var news = UiKit.Text(headline, TextSize.Small - 2, Palette.Paper);
             news.CustomMinimumSize = new Vector2(Mathf.Min(UiKit.Measure(headline, TextSize.Small - 2) + 4, 760), 0);
             news.Ellipsis();
@@ -189,6 +222,12 @@ namespace Hanjeopsi.App.Screens
         private static Texture2D Clear(Vector2 size)
         {
             return ImageTexture.CreateFromImage(Image.CreateEmpty((int)size.X, (int)size.Y, false, Image.Format.Rgba8));
+        }
+
+        private string BackgroundName()
+        {
+            var path = _stage.Background != null ? _stage.Background.ResourcePath : "";
+            return System.IO.Path.GetFileNameWithoutExtension(path);
         }
 
         private static void Tappable(Control c, Action onTap)
@@ -259,6 +298,8 @@ namespace Hanjeopsi.App.Screens
                 if (sum.Spoiled > 0) lines.Add("쿨러에서 " + sum.Spoiled + "마리가 상했다");
                 if (sum.ExpiredRequests > 0) lines.Add("의뢰 " + sum.ExpiredRequests + "건이 기한을 넘겼다");
                 lines.Add("위판장 시세가 바뀌었다");
+                var w = G.WeatherToday();
+                if (w.Id != "clear") lines.Add(w.Note);
                 int left = G.DaysLeft();
                 lines.Add(s.Debt > 0 ? "상환까지 " + (left > 0 ? left + "일" : "오늘이 마지막 날") : "1차 상환은 끝났다");
                 Modal(s.Day + "일차 " + G.SlotName(), string.Join("\n", lines), new[] { new ModalButton("좋아", Palette.Green) });
@@ -337,6 +378,11 @@ namespace Hanjeopsi.App.Screens
 
         private void GoFishing()
         {
+            if (!G.CanFishToday())
+            {
+                Toast("태풍이 와서 방파제 출입이 막혔다");
+                return;
+            }
             if (G.Save.Bait <= 0 && !G.IsShopOpen())
             {
                 Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 새벽에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });

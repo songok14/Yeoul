@@ -93,10 +93,10 @@ namespace Hanjeopsi.Core.Systems
         }
 
         /// <summary>이번 장사 손님 수 = 등급 기본 + 시간대 보정 + 이 시간대 단골 (최대 MaxGuests)</summary>
-        public int GuestCount(SaveData save, int slot)
+        public int GuestCount(SaveData save, int slot, int weatherAdd = 0)
         {
             if (GuestsAt(slot).Count == 0) return 0;
-            int bonus = slot < _t.SlotBonus.Count ? _t.SlotBonus[slot] : 0;
+            int bonus = (slot < _t.SlotBonus.Count ? _t.SlotBonus[slot] : 0) + weatherAdd;
             int n = Math.Max(1, Rank(save).Guests + bonus) + RegularsAt(save, slot).Count;
             return Math.Min(_t.MaxGuests, n);
         }
@@ -105,11 +105,11 @@ namespace Hanjeopsi.Core.Systems
         /// 이번 장사에 올 손님 차례. 단골은 꼭 한 번씩 오고, 나머지는 이 시간대 손님 중에서 뽑는다.
         /// 같은 손님이 두 번 잇달아 오지는 않는다
         /// </summary>
-        public List<string> PlanGuests(SaveData save, int slot, IRandom rng)
+        public List<string> PlanGuests(SaveData save, int slot, IRandom rng, int weatherAdd = 0)
         {
             var pool = GuestsAt(slot);
             var regulars = RegularsAt(save, slot).Select(g => g.Id).ToList();
-            int n = GuestCount(save, slot);
+            int n = GuestCount(save, slot, weatherAdd);
             // 단골이 아닌 손님: 바로 앞 손님과 다른 사람으로 뽑는다
             var list = new List<string>();
             for (int i = regulars.Count; i < n; i++)

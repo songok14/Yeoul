@@ -139,11 +139,30 @@ namespace Hanjeopsi.App.Screens
             _stage.Background = ArtStage.LoadBackground(nightArt ? "breakwater-night" : "breakwater");
             _stage.KeepClouds = !night;
             _stage.Tint = nightArt ? Colors.White : SlotTint[tintSlot];
-            // 눈 오는 방파제는 아직 사진 확인용 --weather=snow 로만. 밤 눈 그림은 색을 입히지 않는다
-            if (GameState.I.Weather == "snow" && !_tutorial)
+            // 날씨: 눈은 눈 그림, 비는 어둑하게 칠하고 빗줄기, 안개는 수평선에 해무 (튜토리얼은 맑은 저녁)
+            string weather = _tutorial ? "clear" : G.WeatherToday().Id;
+            Control fx = null;
+            if (weather == "snow")
             {
                 _stage.Background = ArtStage.LoadBackground(night ? "breakwater-snow-night" : "breakwater-snow");
                 _stage.Tint = night ? Colors.White : SlotTint[tintSlot];
+                fx = new SnowOverlay();
+            }
+            else if (weather == "rain")
+            {
+                _stage.KeepClouds = false;
+                _stage.Tint = _stage.Tint * new Color("b4bccb");
+                fx = new RainOverlay();
+            }
+            else if (weather == "fog")
+            {
+                fx = new FogOverlay { Center = 0.33f, Strength = 0.8f, Tone = night ? new Color("7c86a8") : new Color("eef0f2") };
+            }
+            if (fx != null)
+            {
+                fx.MouseFilter = MouseFilterEnum.Ignore;
+                fx.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+                _stage.AddChild(fx);
             }
             Art.AddChild(_stage);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
@@ -395,7 +414,7 @@ namespace Hanjeopsi.App.Screens
             SetInfo();
 
             var rng = GameState.I.Rng;
-            var spots = G.Spot.RollSpots(G.Save.CatAffinity, Reach, rng);
+            var spots = G.Spot.RollSpots(G.Save.CatAffinity, Reach, rng, _tutorial ? 0 : G.HintPenalty());
             _hotSpot = spots.Hot;
             _hintSpot = spots.Hint;
             // 바늘은 한쪽 끝에서 출발한다
@@ -506,7 +525,8 @@ namespace Hanjeopsi.App.Screens
             Later(0.3, () =>
             {
                 if (_phase != Phase.Flying && _phase != Phase.Wait) return;
-                SetPose("fish-wait");
+                // 찌가 자리를 잡으면 낚시 의자에 앉아 기다린다
+                SetPose("fish-sit");
                 _leanRate = 8;
                 _leanTarget = 0;
             });
@@ -543,6 +563,7 @@ namespace Hanjeopsi.App.Screens
             var rng = GameState.I.Rng;
             // 입질까지 기다리는 시간은 어디에 던지든 같다
             _wait = G.Reel.StartWait(false, _tutorial, rng);
+            if (!_tutorial) _wait.Scale(G.WaitMul());
             _thiefAt = _tutorial ? -1 : G.Spot.RollThief(G.Save.Cooler.Count, rng);
             _thiefDone = false;
             TellWait();
@@ -663,7 +684,7 @@ namespace Hanjeopsi.App.Screens
             }
             else
             {
-                _big = G.Spot.IsBigBite(_close, rng);
+                _big = G.Spot.IsBigBite(_close, rng, G.BigAdd());
                 _species = G.Fishing.RollSpeciesNear(zone, G.Save.Slot, G.MonthNow(), G.SeaNow(), _close, rng);
                 _size = G.Fishing.RollSizeNear(_species, _close, _big, rng);
             }
@@ -689,6 +710,27 @@ namespace Hanjeopsi.App.Screens
             _leanRate = 20;
             _leanTarget = _big ? 9 : 5;
             Tell(T["bite"], T["biteSub"], Palette.Gold);
+            Exclaim();
+        }
+
+        /// <summary>입질 순간 여울 머리 위에 "!" 가 톡 튀어 오른다</summary>
+        private void Exclaim()
+        {
+            var r = _yeoul.GetGlobalRect();
+            var mark = UiKit.Text("!", TextSize.H1 + 24, new Color("ff8a1c"), true, false, 10, new Color("3a1a05"));
+            mark.MouseFilter = MouseFilterEnum.Ignore;
+            Art.AddChild(mark);
+            var at = r.Position - Art.GetGlobalRect().Position + new Vector2(r.Size.X * 0.62f, -10);
+            mark.Position = at;
+            mark.PivotOffset = new Vector2(20, 60);
+            mark.Scale = new Vector2(0.3f, 0.3f);
+            var tw = mark.CreateTween();
+            tw.TweenProperty(mark, "scale", new Vector2(1.15f, 1.15f), 0.12).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+            tw.Parallel().TweenProperty(mark, "position:y", at.Y - 26, 0.12);
+            tw.TweenProperty(mark, "scale", Vector2.One, 0.1);
+            tw.TweenInterval(0.45);
+            tw.TweenProperty(mark, "modulate:a", 0f, 0.2);
+            tw.TweenCallback(Callable.From(mark.QueueFree));
         }
 
         private void Strike()
@@ -1264,6 +1306,31 @@ namespace Hanjeopsi.App.Screens
                         _gauge.Showing = ReelGauge.Mode.None;
                         _field.ShadowVisible = false;
                         _field.AddBurst(_field.ShadowAt, 2.4f);
+                    });
+                    break;
+                case "wait":
+                    // 의자에 앉아 찌를 지켜본다 (입질이 사진 뒤로 밀리게 오래 기다린다)
+                    _angle = 0.1;
+                    _gaugePos = 0.8;
+                    Cast();
+                    _phase = Phase.Flying;
+                    Landed();
+                    _thiefAt = -1;
+                    _wait.Scale(20);
+                    break;
+                case "bite":
+                    // 앉아 있다가 찌가 쑥: 머리 위 "!"
+                    _angle = 0.1;
+                    _gaugePos = 0.8;
+                    Cast();
+                    _phase = Phase.Flying;
+                    Landed();
+                    _thiefAt = -1;
+                    _wait.Scale(20);
+                    Later(2.55, () =>
+                    {
+                        StartBite();
+                        _biteWindow = 99;
                     });
                     break;
                 case "thief":

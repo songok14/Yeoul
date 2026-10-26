@@ -220,6 +220,8 @@ namespace Hanjeopsi.Core.Tests
 
         private void FishingTrip()
         {
+            // 태풍 날은 방파제 출입 금지
+            if (!_g.CanFishToday()) return;
             if (S.Bait <= 0) BuyBait(12);
             if (S.Bait <= 0) return;
             int casts = 0;
@@ -245,7 +247,7 @@ namespace Hanjeopsi.Core.Tests
             var reel = _g.Reel;
             var spot = _g.Spot;
             var rod = D.Gear.Rods[S.Rod];
-            var (hot, hint) = spot.RollSpots(S.CatAffinity, rod.Reach, _rng);
+            var (hot, hint) = spot.RollSpots(S.CatAffinity, rod.Reach, _rng, _g.HintPenalty());
 
             // 방향 바늘을 멈추고 파워 게이지로 거리를 정한다. 힌트를 따르면 고등어가 가리킨 지점을 노린다
             double angle = _s.FollowHint ? JsMath.Clamp(Gauss(hint.Angle, _s.PowerSd * 1.5), -1, 1) : _hand.Next() * 2 - 1;
@@ -264,6 +266,7 @@ namespace Hanjeopsi.Core.Tests
 
             // 입질 대기: 어디에 던지든 같다. 속임 입질에 속으면 헛챔질
             var wait = reel.StartWait(false, false, _rng);
+            wait.Scale(_g.WaitMul());
             for (int i = 0; i < 100000; i++)
             {
                 var w = wait.Step(Frame, _rng);
@@ -277,7 +280,7 @@ namespace Hanjeopsi.Core.Tests
             }
 
             int zone = _g.Fishing.ZoneOf(dist01);
-            bool big = spot.IsBigBite(close, _rng);
+            bool big = spot.IsBigBite(close, _rng, _g.BigAdd());
             if (big) _r.BigBites += 1;
             var sp = _g.Fishing.RollSpeciesNear(zone, S.Slot, _g.MonthNow(), _g.SeaNow(), close, _rng);
             double size = _g.Fishing.RollSizeNear(sp, close, big, _rng);
@@ -452,7 +455,7 @@ namespace Hanjeopsi.Core.Tests
             var menu = _s.Thoughtful
                 ? _g.SuggestMenu()
                 : _g.Truck.Cookable(S).OrderBy(_ => _rng.Next()).Take(_g.Diner.MenuSlots(S)).ToList();
-            foreach (var guest in _g.Diner.PlanGuests(S, S.Slot, _rng))
+            foreach (var guest in _g.PlanGuests(_rng))
             {
                 var left = menu.Where(r => _g.Truck.BestFishFor(S, r) != null).ToList();
                 if (left.Count == 0) break;

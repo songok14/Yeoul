@@ -5,6 +5,7 @@
 - --erase=x,y: 그 점에서 오른쪽 아래를 지운다. 낚싯대 끝에 그려진 줄과 봉돌을 없앨 때 (줄은 게임이 그린다)
 - --body: 몸만 있는 세로 띠의 오른쪽 끝 x. 그 안에서 머리 꼭대기와 발바닥을 재서 키로 삼는다
 - --tip: 낚싯대 끝. 주지 않으면 가장 오른쪽 위 점
+- --tall=비율: 앉은 포즈처럼 키가 선 키의 이 비율일 때. 게임이 선 키로 맞추므로 키를 비율로 나눠 기록한다
 - 결과: godot/art/yeoul/<이름>.png (키가 KEEP_BODY px 이 되게 줄인다)
         godot/data/poses.json 의 <이름>: 발(아래 가운데), 낚싯대 끝, 키 (모두 결과 그림 픽셀)
 게임은 키를 기준으로 크기를 맞추므로 원본마다 크기가 달라도 같은 키로 보인다.
@@ -64,7 +65,7 @@ def main():
     poses[name] = {
         'foot': [round((foot[0] - x0) * k, 1), round((foot[1] - y0) * k, 1)],
         'tip': [round((tip[0] - x0) * k, 1), round((tip[1] - y0) * k, 1)],
-        'body': round((bottom - top) * k, 1),
+        'body': round((bottom - top) * k / float(opts.get('tall', 1)), 1),
     }
     POSES.write_text(json.dumps(poses, ensure_ascii=False, indent=2) + '\n')
     print(f'{name}: {im.width}x{im.height} {out.stat().st_size // 1024}KB {poses[name]}')

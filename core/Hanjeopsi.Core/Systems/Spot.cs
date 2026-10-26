@@ -45,11 +45,11 @@ namespace Hanjeopsi.Core.Systems
         /// 물 좋은 지점(Hot)과 고등어가 가리키는 지점(Hint). 호감이 높을수록 제대로 가리킨다.
         /// 지점은 낚싯대가 닿는 거리 안에서만 고른다
         /// </summary>
-        public (CastSpot Hot, CastSpot Hint) RollSpots(int affinity, double reach, IRandom rng)
+        public (CastSpot Hot, CastSpot Hint) RollSpots(int affinity, double reach, IRandom rng, double hintPenalty = 0)
         {
             var hot = RandomSpot(reach, rng);
             var c = _data.Balance.Cat;
-            double accuracy = Math.Min(c.HintMax, c.HintBase + affinity * c.HintPerAffinity);
+            double accuracy = Math.Min(c.HintMax, c.HintBase + affinity * c.HintPerAffinity) - hintPenalty;
             if (rng.Next() < accuracy) return (hot, hot);
             // 헛짚으면 물 좋은 곳과 떨어진 엉뚱한 지점을 가리킨다
             var hint = RandomSpot(reach, rng);
@@ -73,9 +73,9 @@ namespace Hanjeopsi.Core.Systems
         }
 
         /// <summary>큰 놈 입질인가. 지점에 가까울수록 잘 온다</summary>
-        public bool IsBigBite(double closeness, IRandom rng)
+        public bool IsBigBite(double closeness, IRandom rng, double bigAdd = 0)
         {
-            return rng.Next() < B.BigBase + B.BigPerClose * closeness;
+            return rng.Next() < B.BigBase + B.BigPerClose * closeness + bigAdd;
         }
 
         /// <summary>이번에 고등어가 쿨러를 노리면 찌가 떨어지고 몇 초 뒤인지. 안 노리면 -1</summary>

@@ -149,7 +149,61 @@ namespace Hanjeopsi.Core
         public int CustomersNow()
         {
             if (Diner == null) return Data.Balance.Truck.CustomersPerShift;
-            return Diner.GuestCount(Save, Save.Slot);
+            return Diner.GuestCount(Save, Save.Slot, WeatherToday().GuestAdd);
+        }
+
+        // ───────── 날씨 (고닷만) ─────────
+
+        /// <summary>화면 확인용: 이 날씨로 고정한다 (세이브에 남지 않는다)</summary>
+        public string ForcedWeather;
+
+        private static readonly WeatherKind Clear = new WeatherKind { Id = "clear", Name = "맑음", Note = "" };
+
+        /// <summary>오늘 날씨. 시드와 날짜로 정해서 같은 날은 늘 같다. 날씨 데이터가 없으면 늘 맑음</summary>
+        public WeatherKind WeatherToday()
+        {
+            var w = Data.Weather;
+            if (w == null || w.Kinds.Count == 0) return Clear;
+            if (!string.IsNullOrEmpty(ForcedWeather)) return w.ById(ForcedWeather);
+            var weights = w.Months[Math.Max(0, Math.Min(11, MonthNow() - 1))];
+            uint seed = unchecked((uint)(Save.Seed * 2654435761u + (uint)Save.Day * 40503u + (uint)w.SeedSalt));
+            double r = new Mulberry32(seed).Next() * weights.Sum();
+            for (int i = 0; i < weights.Count; i++)
+            {
+                r -= weights[i];
+                if (r < 0) return w.Kinds[i];
+            }
+            return w.Kinds[0];
+        }
+
+        /// <summary>이번 장사 손님 차례 (날씨 반영)</summary>
+        public List<string> PlanGuests(IRandom rng)
+        {
+            return Diner.PlanGuests(Save, Save.Slot, rng, WeatherToday().GuestAdd);
+        }
+
+        /// <summary>입질 대기 배율 (날씨)</summary>
+        public double WaitMul()
+        {
+            return WeatherToday().WaitMul;
+        }
+
+        /// <summary>고등어 힌트 정확도 빼기 (안개)</summary>
+        public double HintPenalty()
+        {
+            return WeatherToday().HintPenalty;
+        }
+
+        /// <summary>큰 놈 입질 확률 더하기 (안개)</summary>
+        public double BigAdd()
+        {
+            return WeatherToday().BigAdd;
+        }
+
+        /// <summary>오늘 방파제에 나갈 수 있나 (태풍이면 출입 금지)</summary>
+        public bool CanFishToday()
+        {
+            return !WeatherToday().NoFishing;
         }
 
         /// <summary>메뉴판 기본 선택: 지금 만들 수 있는 요리 중 한 접시 값이 큰 순서로 메뉴 칸만큼</summary>

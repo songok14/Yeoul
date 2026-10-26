@@ -112,6 +112,12 @@ namespace Hanjeopsi.Core.Systems
             return r;
         }
 
+        /// <summary>날씨·장비로 남은 대기 시간을 늘리거나 줄인다</summary>
+        public void Scale(double mul)
+        {
+            Wait *= mul;
+        }
+
         /// <summary>프롤로그에서 챔질을 놓쳤을 때 다시 기다리기 (속임 입질 타이머는 이어서)</summary>
         public void Retry()
         {

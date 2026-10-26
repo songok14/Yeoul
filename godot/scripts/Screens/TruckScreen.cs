@@ -278,7 +278,7 @@ namespace Hanjeopsi.App.Screens
             if (_menu.Count == 0) return;
             _served = 0;
             _sales = 0;
-            _plan = G.Diner.PlanGuests(G.Save, G.Save.Slot, GameState.I.Rng);
+            _plan = G.PlanGuests(GameState.I.Rng);
             if (first != null) _plan.Insert(0, first);
             _body.AddThemeConstantOverride("separation", 20);
             NextCustomer();

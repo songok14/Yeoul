@@ -111,6 +111,8 @@ namespace Hanjeopsi.App
             if (Game != null) Game.Saved -= Write;
             Game = g;
             Game.Saved += Write;
+            // 사진 확인용 날씨 고정 (rain-dusk 는 저녁 비)
+            if (!string.IsNullOrEmpty(Weather)) Game.ForcedWeather = Weather == "rain-dusk" ? "rain" : Weather;
         }
 
         private void Write(SaveData save)

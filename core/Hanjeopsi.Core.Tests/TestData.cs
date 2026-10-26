@@ -40,6 +40,7 @@ namespace Hanjeopsi.Core.Tests
                 d.Balance.Chapter1.CastsPerTrip = 6;
                 d.Balance.Time.ShopLastSlot = 99;
                 d.Diner = null;
+                d.Weather = null;
                 d.Texts.Slots = new System.Collections.Generic.List<string> { "새벽", "아침", "낮", "저녁" };
                 d.Texts.SlotAfter = "밤";
                 d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
