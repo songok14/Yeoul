@@ -413,6 +413,18 @@ Keep for the game screen: the lower half stays a flat open plaza with no new obj
 Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
+#### 배경 2-5. 눈 오는 방파제 (`breakwater-snow`, 겨울 낚시)
+
+```
+Create one vertical background illustration for a mobile fishing game. Attached: the current daytime breakwater background of this exact scene. Keep the composition, camera, the concrete tetrapods on both sides, the flat breakwater walkway at the bottom, the mooring bollards, the distant red lighthouse and the islands exactly the same. Change only the season and weather.
+
+Weather: a quiet snowy winter morning on the south coast of Korea. Soft pale gray sky, light snow resting on top of the tetrapods, the bollards and the walkway rails, a thin even layer of fresh snow on the walkway, the islands dusted white, the sea a calm cold gray blue with gentle waves, the lighthouse a small red accent. Only a few soft falling snowflakes (the game draws falling snow on top). The sea in the middle of the image stays fairly smooth and readable (the game draws a float, ripples and splashes there).
+
+Keep for the game screen: the walkway at the bottom stays flat and empty (a character and a cooler box will stand there), the top 15 percent calm sky, the bottom 20 percent simple (a panel covers it).
+
+Style: the same soft painterly watercolor anime background as the attached image, same brush texture and detail. Vertical 9:16, at least 1080x1920. No people, no animals, no fish, no footprints, no text, no readable signs, no letters, no signature, no watermark.
+```
+
 #### 배경 2-3. 태풍 오는 날 (`village-typhoon`)
 
 ```
