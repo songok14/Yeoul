@@ -144,6 +144,8 @@ Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters
 ```
 
 ## 손님 2차 (새 손님 6명, 2026-10-26)
+**받음 (2026-10-26)**: 디자인 시트와 SD 시트 두 장. `sd_cells.py`로 잘라 넣었다(시트 A는 회색 곱슬머리라 `--hair=0`).
+
 여울호 등급과 단골이 생겨서 손님을 늘린다. 밤(지금 2명)과 아침(3명)이 비어 있어서 그 시간대 손님 위주. 먼저 **손님 2-1 디자인 시트**를 뽑고, 그 결과를 첨부해 **SD 시트 2-2, 2-3**을 뽑는다. 받으면 `python3 scripts/sd_cells.py <시트> 3 4 godot/art/customers <id>-stand,<id>-walk,<id>-happy,<id>-sad,...`로 잘라 넣고, `dialogue.json` customers와 `diner.json` guests에 더한다.
 
 | id | 손님 | 오는 시간 | 좋아할 요리 (안) |

@@ -7,10 +7,14 @@ namespace Hanjeopsi.Core.Tests
     public class TruckDataTests
     {
         [Fact]
-        public void 손님은_여섯_명이고_주문에_요리_자리가_있다()
+        public void 손님은_열두_명이고_주문에_요리_자리가_있고_그림이_있다()
         {
-            var cs = TestData.Game.Dialogue.Customers;
-            Assert.Equal(6, cs.Count);
+            var cs = TestData.Full.Dialogue.Customers;
+            Assert.Equal(12, cs.Count);
+            string dir = System.IO.Path.Combine(System.AppContext.BaseDirectory, "../../../../../godot/art/customers");
+            foreach (var c in cs)
+                foreach (var pose in new[] { "stand", "walk", "happy", "sad" })
+                    Assert.True(System.IO.File.Exists(System.IO.Path.Combine(dir, c.Id + "-" + pose + ".png")), c.Id + "-" + pose + ".png 이 없다");
             Assert.Equal(cs.Count, cs.Select(c => c.Id).Distinct().Count());
             Assert.All(cs, c => Assert.Contains("{0}", c.Order));
         }

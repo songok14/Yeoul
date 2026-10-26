@@ -38,6 +38,8 @@ namespace Hanjeopsi.Core.Data
         public string Id;
         /// <summary>주문 말풍선. {0} 은 요리 이름</summary>
         public string Order;
+        /// <summary>SD 키 비율 (어른 1, 꼬마는 더 작게)</summary>
+        public float Height = 1;
     }
 
     public sealed class Speaker

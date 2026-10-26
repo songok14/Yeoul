@@ -269,10 +269,17 @@ namespace Hanjeopsi.App.Screens
 
         private void StartShift()
         {
+            StartShift(null);
+        }
+
+        /// <summary>first 가 있으면 그 손님이 맨 먼저 온다 (사진 확인용)</summary>
+        private void StartShift(string first)
+        {
             if (_menu.Count == 0) return;
             _served = 0;
             _sales = 0;
             _plan = G.Diner.PlanGuests(G.Save, G.Save.Slot, GameState.I.Rng);
+            if (first != null) _plan.Insert(0, first);
             _body.AddThemeConstantOverride("separation", 20);
             NextCustomer();
         }
@@ -296,7 +303,8 @@ namespace Hanjeopsi.App.Screens
 
             // 판을 비우고 손님이 왼쪽에서 트럭 쪽으로 걸어온다
             ClearBody();
-            _stage.Swap(_customer, Tex(_who.Id + "-walk"));
+            // 손님마다 키가 다르다 (꼬마는 작게)
+            _stage.Swap(_customer, Tex(_who.Id + "-walk"), CustomerHeight * _who.Height, new Vector2(0.5f, 1));
             _customer.FlipH = true;
             _customer.Visible = true;
             Walk(OffLeft, CustomerX, _auto != null ? 0.4 : 0.9, () =>
@@ -339,7 +347,8 @@ namespace Hanjeopsi.App.Screens
 
         private Vector2 OverHead()
         {
-            return _stage.ToLocal(new Vector2(CustomerX + 18, _footY - CustomerHeight - 4));
+            float h = CustomerHeight * (_who != null ? _who.Height : 1);
+            return _stage.ToLocal(new Vector2(CustomerX + 18, _footY - h - 4));
         }
 
         private void SetBubble(string text)
@@ -574,6 +583,10 @@ namespace Hanjeopsi.App.Screens
                     foreach (var g in G.Data.Diner.Guests) G.Save.Diner.Affinity[g.Id] = G.Data.Diner.RegularAt;
                     _auto = "good";
                     StartShift();
+                    break;
+                case "boy":
+                    // 꼬마 손님은 어른보다 작게 선다
+                    StartShift("boy");
                     break;
                 case "end":
                     _served = 5;
