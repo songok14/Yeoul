@@ -27,7 +27,7 @@ namespace Hanjeopsi.App.Ui
 
         public SeasonGauge()
         {
-            CustomMinimumSize = new Vector2(0, TrackH + 70);
+            CustomMinimumSize = new Vector2(0, TrackH + 74);
             MouseFilter = MouseFilterEnum.Ignore;
         }
 
@@ -106,10 +106,11 @@ namespace Hanjeopsi.App.Ui
             DrawColoredPolygon(new[] { new Vector2(x - 20, top - 30), new Vector2(x + 20, top - 30), new Vector2(x, top - 8) }, Palette.Gold);
 
             // 아래 양끝 글
-            float by = top + TrackH + 46;
-            DrawString(font, new Vector2(0, by), LessText, HorizontalAlignment.Left, -1, TextSize.Tiny, Palette.GrayText);
-            var ms = font.GetStringSize(MoreText, HorizontalAlignment.Left, -1, TextSize.Tiny);
-            DrawString(font, new Vector2(w - ms.X, by), MoreText, HorizontalAlignment.Left, -1, TextSize.Tiny, Palette.GrayText);
+            float by = top + TrackH + 50;
+            var lc = new Color(Palette.Paper, 0.85f);
+            DrawString(font, new Vector2(0, by), LessText, HorizontalAlignment.Left, -1, TextSize.Small, lc);
+            var ms = font.GetStringSize(MoreText, HorizontalAlignment.Left, -1, TextSize.Small);
+            DrawString(font, new Vector2(w - ms.X, by), MoreText, HorizontalAlignment.Left, -1, TextSize.Small, lc);
         }
     }
 }

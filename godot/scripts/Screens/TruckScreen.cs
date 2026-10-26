@@ -192,11 +192,14 @@ namespace Hanjeopsi.App.Screens
             var next = G.Diner.NextRank(s);
             string repText = next != null ? F("repTo", s.Diner.Rep, next.Rep) : F("repMax", s.Diner.Rep);
             _body.AddChild(UiKit.Text(F("rankLine", rank.Name, repText, G.CustomersNow()), TextSize.Small, Palette.GrayText, false, false, 0, null, HorizontalAlignment.Center));
-            // 재료가 있는 요리 먼저
-            var rows = G.Data.Recipes.Recipes
-                .OrderByDescending(r => G.Truck.BestFishFor(s, r) != null)
-                .ToList();
-            foreach (var r in rows) _body.AddChild(MenuRow(r, slots));
+            // 재료가 있는 요리만 줄로 보이고, 나머지는 한 줄로 접는다 (못 배운 요리의 ??? 가 줄줄이 늘어서지 않게)
+            var ready = G.Data.Recipes.Recipes.Where(r => G.Truck.BestFishFor(s, r) != null).ToList();
+            foreach (var r in ready) _body.AddChild(MenuRow(r, slots));
+            int known = G.Data.Recipes.Recipes.Count(r => !ready.Contains(r) && s.Dex.ContainsKey(r.Species) && s.Dex[r.Species].Count > 0);
+            int unknown = G.Data.Recipes.Recipes.Count - ready.Count - known;
+            if (ready.Count == 0) _body.AddChild(UiKit.Text(T["noReady"], TextSize.Body, Palette.GrayText, false, true, 0, null, HorizontalAlignment.Center));
+            if (known + unknown > 0)
+                _body.AddChild(UiKit.Text(F("folded", known, unknown), TextSize.Small, Palette.GrayText, false, true, 0, null, HorizontalAlignment.Center));
             UpdateChalk();
             var buttons = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             buttons.AddThemeConstantOverride("separation", 24);

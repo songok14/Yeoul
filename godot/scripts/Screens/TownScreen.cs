@@ -59,12 +59,21 @@ namespace Hanjeopsi.App.Screens
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             PaintWeather(s.Slot);
             Art.AddChild(_stage);
+            // 하늘에 갈매기 (밤과 궂은 날은 빼고)
+            string w = G.WeatherToday().Id;
+            if (s.Slot != G.Data.Balance.Time.SlotsPerDay - 1 && w != "typhoon" && w != "snow")
+            {
+                var gulls = new Gulls(_stage, 4, s.Slot == 3 ? new Color("4a3a40") : new Color("33404d"));
+                gulls.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+                _stage.AddChild(gulls);
+            }
 
             // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
-            _stage.Pin(new SignButton("위판장", OpenMarket), new Vector2(150, 222));
-            _stage.Pin(new SignButton("미끼가게", OpenShop), new Vector2(96, 318));
-            _stage.Pin(new SignButton("할머니댁", Restaurant), new Vector2(370, 262));
-            _stage.Pin(new SignButton("방파제 →", GoFishing), new Vector2(330, 196));
+            // 간판에 지금 상태를 함께 적는다 (아래 버튼판 대신). 닫힌 곳은 흐리게
+            _stage.Pin(Sign("위판장", G.IsMarketOpen() ? "경매 중" : "경매 마감", true, OpenMarket), new Vector2(150, 222));
+            _stage.Pin(Sign("미끼가게", G.IsShopOpen() ? null : "닫음", G.IsShopOpen(), OpenShop), new Vector2(96, 318));
+            _stage.Pin(Sign("할머니댁", "상환 · 잠", true, Restaurant), new Vector2(370, 262));
+            _stage.Pin(Sign("방파제 →", !G.CanFishToday() ? "출입 금지" : G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시" : null, G.CanFishToday(), GoFishing), new Vector2(330, 196));
 
             // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
             Rect2 truckArea;
@@ -72,7 +81,7 @@ namespace Hanjeopsi.App.Screens
             _truck = _stage.Place(Clear(truckArea.Size), truckArea.End, truckArea.Size.Y, new Vector2(1, 1));
             _truckX = truckArea.GetCenter().X;
             Tappable(_truck, OpenTruck);
-            _stage.Pin(new SignButton("여울호", OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
+            _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
@@ -91,22 +100,15 @@ namespace Hanjeopsi.App.Screens
             // ── 아래: 메뉴 ──
             _menu = new PanelContainer();
             col.AddChild(_menu);
-            var grid = new GridContainer { Columns = 3 };
-            grid.AddThemeConstantOverride("h_separation", 22);
-            grid.AddThemeConstantOverride("v_separation", 22);
-            _menu.AddChild(grid);
-            var fishing = new GameButton("방파제", Palette.Blue, GoFishing, !G.CanFishToday() ? "태풍 · 출입 금지" : G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시 · 1칸" : "낚시 · 1칸");
-            fishing.SetEnabled(G.CanFishToday());
-            grid.AddChild(fishing);
-            grid.AddChild(new GameButton("위판장", Palette.Teal, OpenMarket, G.IsMarketOpen() ? "경매 중" : "경매 마감"));
-            var truck = new GameButton("여울호", Palette.Red, OpenTruck, G.IsTruckOpen() ? "손님 " + G.CustomersNow() + " · 1칸" : "새벽엔 쉼");
-            truck.SetEnabled(G.IsTruckOpen());
-            grid.AddChild(truck);
-            var shop = new GameButton("미끼가게", Palette.GreenDark, OpenShop, G.IsShopOpen() ? "장비 · 미끼" : "밤엔 닫음");
-            shop.SetEnabled(G.IsShopOpen());
-            grid.AddChild(shop);
-            grid.AddChild(new GameButton("할머니댁", Palette.Wood, Restaurant, "상환 · 휴식"));
-            grid.AddChild(new GameButton("수첩", Palette.Purple, OpenNotebook, "도감 · 미각"));
+            // 아래 판은 짧게: 안내 한 줄과 수첩. 장소는 그림 속 간판을 누르면 여울이 걸어간다
+            var bar = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            bar.AddThemeConstantOverride("separation", 22);
+            _menu.AddChild(bar);
+            var hint = UiKit.Text("간판을 누르면 여울이 걸어가요", TextSize.Small, Palette.GrayText, false, true);
+            hint.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+            hint.VerticalAlignment = VerticalAlignment.Center;
+            bar.AddChild(hint);
+            bar.AddChild(new GameButton("수첩", Palette.Purple, OpenNotebook, "도감 · 미각", TextSize.Body, 110) { CustomMinimumSize = new Vector2(280, 110), SizeFlagsHorizontal = SizeFlags.ShrinkEnd });
             _menu.Resized += PlaceOnFloor;
             OnSafeAreaChanged();
 
@@ -254,6 +256,15 @@ namespace Hanjeopsi.App.Screens
         {
             var path = _stage.Background != null ? _stage.Background.ResourcePath : "";
             return System.IO.Path.GetFileNameWithoutExtension(path);
+        }
+
+        /// <summary>그림 속 종이 간판: 이름과 (있으면) 아래 작은 상태 한 줄</summary>
+        private static SignButton Sign(string name, string state, bool open, Action onPress)
+        {
+            var b = new SignButton(string.IsNullOrEmpty(state) ? name : name + "\n" + state, onPress);
+            if (!string.IsNullOrEmpty(state)) b.AddThemeFontSizeOverride("font_size", TextSize.Small - 4);
+            if (!open) b.Modulate = new Color(1, 1, 1, 0.62f);
+            return b;
         }
 
         private static void Tappable(Control c, Action onTap)

@@ -130,10 +130,21 @@ namespace Hanjeopsi.App.Screens
                 col.AddChild(e);
                 return;
             }
+            // 위판장 쿨러처럼 쪽 넘김 대신 스크롤. 수첩은 한 마리씩 크기와 신선도 막대까지 보여 준다
             var list = cooler.OrderByDescending(f => f.Fresh).ToList();
-            int pages = (list.Count + CoolerPage - 1) / CoolerPage;
-            _coolerPage = Mathf.Clamp(_coolerPage, 0, pages - 1);
-            foreach (var f in list.Skip(_coolerPage * CoolerPage).Take(CoolerPage))
+            var scroll = new ScrollContainer
+            {
+                SizeFlagsVertical = SizeFlags.ExpandFill,
+                HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
+                ScrollDeadzone = 24,
+                MouseFilter = MouseFilterEnum.Pass,
+            };
+            col.AddChild(scroll);
+            var rows = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
+            rows.AddThemeConstantOverride("separation", 10);
+            scroll.AddChild(rows);
+            foreach (var f in list)
             {
                 var stage = G.Fresh.StageOf(f.Fresh);
                 var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
@@ -153,16 +164,7 @@ namespace Hanjeopsi.App.Screens
                 value.CustomMinimumSize = new Vector2(150, 0);
                 value.VerticalAlignment = VerticalAlignment.Center;
                 row.AddChild(value);
-                col.AddChild(row);
-            }
-            col.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
-            if (pages > 1)
-            {
-                col.AddChild(Pager(_coolerPage, pages, p =>
-                {
-                    _coolerPage = p;
-                    Redraw();
-                }));
+                rows.AddChild(row);
             }
         }
 
@@ -365,6 +367,29 @@ namespace Hanjeopsi.App.Screens
                 Settings.Vibrate = on;
                 if (on) Haptics.Pulse(60, 0.6f);
             }));
+            if (Settings.Vibrate)
+            {
+                // 진동 세기: 약 · 보통 · 강 (누르면 그 세기로 한 번 떨린다)
+                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                row.AddThemeConstantOverride("separation", 16);
+                var label = UiKit.Text(T["vibeLevel"], TextSize.Small + 2, Palette.InkSoft, false, false);
+                label.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                label.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(label);
+                var names = T["vibeLevels"].Split(',');
+                for (int i = 0; i < names.Length; i++)
+                {
+                    int lv = i;
+                    var b = SmallButton(names[i], Settings.VibeLevel == lv ? Palette.Green : Palette.GrayDark, () =>
+                    {
+                        Settings.VibeLevel = lv;
+                        Haptics.Pattern((50, 0.6f, 60), (90, 0.8f, 0));
+                        Redraw();
+                    }, 130, 84);
+                    row.AddChild(b);
+                }
+                col.AddChild(row);
+            }
         }
 
         /// <summary>이름, 설명, 오른쪽에 켜짐/꺼짐 단추</summary>

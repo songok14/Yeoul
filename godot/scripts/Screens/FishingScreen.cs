@@ -768,6 +768,8 @@ namespace Hanjeopsi.App.Screens
                 // 투둑, 쑥: 작은 고기도 손에 분명히 온다
                 Haptics.Pattern(((int)(35 + 35 * _feel), 0.5f + 0.4f * _feel, 45), ((int)(25 + 25 * _feel), 0.4f + 0.4f * _feel, 70), ((int)(60 + 60 * _feel), 0.6f + 0.4f * _feel, 0));
             }
+            // 의자에 앉아 있다가 깜짝 놀라 대를 붙잡는다
+            if (_pose == "fish-sit") SetPose("fish-bite");
             // 대 끝이 물 쪽으로 쿡 끌려간다
             _leanRate = 20;
             _leanTarget = _big ? 9 : 5;
@@ -1140,11 +1142,64 @@ namespace Hanjeopsi.App.Screens
             if (rule != null) body.Add(rule);
             else if (full) body.Add(T["full"]);
 
-            Modal(sp.Name + (isNew ? " (새 어종!)" : ""), string.Join("\n", body), new[]
+            ResultCard(sp, isNew, string.Join("\n", body), rule != null ? T["mustRelease"] : full ? T["coolerFull"] : T["keep"], full || rule != null);
+        }
+
+        /// <summary>
+        /// 결과 카드: 화면 가운데를 가리지 않게 아래 안내판 자리에 작게 뜬다. 물고기 그림 · 이름과 값 · 놓아주기/챙기기.
+        /// 하나를 누르면 바로 다음 던지기로
+        /// </summary>
+        private void ResultCard(Species sp, bool isNew, string body, string keepLabel, bool keepOff)
+        {
+            var card = new PanelContainer { MouseFilter = MouseFilterEnum.Stop };
+            card.SetAnchorsAndOffsetsPreset(LayoutPreset.BottomWide);
+            card.OffsetTop = -(PanelHeight + SafeBottom + 120);
+            card.OffsetLeft = 28;
+            card.OffsetRight = -28;
+            card.OffsetBottom = -(SafeBottom + 20);
+            card.AddThemeStyleboxOverride("panel", UiKit.Box(Palette.Paper, 40, 34, 28).WithBorder(Palette.PaperDark, 0, 8).WithShadow(0.4f, 24, 10));
+            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            col.AddThemeConstantOverride("separation", 18);
+            card.AddChild(col);
+            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 24);
+            col.AddChild(row);
+            var pic = FishPicture(sp.Id);
+            pic.CustomMinimumSize = new Vector2(250, 190);
+            row.AddChild(pic);
+            var text = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore, SizeFlagsHorizontal = SizeFlags.ExpandFill, Alignment = BoxContainer.AlignmentMode.Center };
+            text.AddThemeConstantOverride("separation", 6);
+            text.AddChild(UiKit.Text(sp.Name + (isNew ? "  " + T["newFish"] : ""), TextSize.Title - 8, isNew ? Palette.GoldDark : Palette.Ink, true));
+            text.AddChild(UiKit.Text(body, TextSize.Small, Palette.InkSoft, false, true));
+            row.AddChild(text);
+            var buttons = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            buttons.AddThemeConstantOverride("separation", 20);
+            col.AddChild(buttons);
+            void Pick(bool released)
             {
-                new ModalButton(T["release"], Palette.BlueDark, () => Finish(true)),
-                new ModalButton(rule != null ? T["mustRelease"] : full ? T["coolerFull"] : T["keep"], Palette.Green, () => Finish(false), full || rule != null),
-            }, FishPicture(sp.Id));
+                if (!IsInstanceValid(card)) return;
+                card.MouseFilter = MouseFilterEnum.Ignore;
+                var tw = card.CreateTween();
+                tw.TweenProperty(card, "modulate:a", 0f, 0.15);
+                tw.TweenCallback(Callable.From(card.QueueFree));
+                Finish(released);
+            }
+            var release = new GameButton(T["release"], Palette.BlueDark, () => Pick(true), null, TextSize.Body, 104) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            var keep = new GameButton(keepLabel, Palette.Green, () => Pick(false), null, TextSize.Body, 104) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            keep.SetEnabled(!keepOff);
+            buttons.AddChild(release);
+            buttons.AddChild(keep);
+            Popups.AddChild(card);
+            Sound.Play("pop", -4);
+            // 아래에서 쏙 올라온다
+            card.Modulate = new Color(1, 1, 1, 0);
+            var up = card.CreateTween().SetParallel(true);
+            up.TweenProperty(card, "modulate:a", 1f, 0.18);
+            float y = card.OffsetTop;
+            card.OffsetTop = y + 80;
+            card.OffsetBottom += 80;
+            up.TweenProperty(card, "offset_top", y, 0.25).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+            up.TweenProperty(card, "offset_bottom", card.OffsetBottom - 80, 0.25).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
         }
 
         /// <summary>결과 상자 안 물고기 그림. 파닥파닥 흔들린다</summary>
@@ -1190,7 +1245,7 @@ namespace Hanjeopsi.App.Screens
         private void FinishCast()
         {
             _phase = Phase.Busy;
-            Later(0.7, () =>
+            Later(0.35, () =>
             {
                 if (_castsLeft <= 0 || G.BaitLeft() <= 0) EndTrip();
                 else StartAim();

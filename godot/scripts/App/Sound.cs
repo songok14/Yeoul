@@ -146,6 +146,19 @@ namespace Hanjeopsi.App
         private static ulong _lastMs;
         /// <summary>전체 세기 (폰 진동은 생각보다 세다. 2026-10-22 사용자 의견으로 낮춤)</summary>
         private const float Master = 0.7f;
+        /// <summary>설정의 진동 세기(약·보통·강)에 따른 세기와 길이 배율</summary>
+        private static readonly float[] LevelAmp = { 0.5f, 1f, 1.4f };
+        private static readonly float[] LevelLen = { 0.75f, 1f, 1.2f };
+
+        private static float Amp(float a)
+        {
+            return Mathf.Clamp(a * Master * LevelAmp[Settings.VibeLevel], 0.04f, 1f);
+        }
+
+        private static int Len(int ms)
+        {
+            return Mathf.Max(5, (int)(ms * LevelLen[Settings.VibeLevel]));
+        }
 
         public static void Pulse(int ms, float amplitude = 0.5f)
         {
@@ -154,7 +167,7 @@ namespace Hanjeopsi.App
             ulong now = Time.GetTicksMsec();
             if (now - _lastMs < 40) return;
             _lastMs = now;
-            Input.VibrateHandheld(ms, Mathf.Clamp(amplitude * Master, 0.04f, 1f));
+            Input.VibrateHandheld(Len(ms), Amp(amplitude));
         }
 
         /// <summary>(길이 ms, 세기, 다음까지 쉬는 ms) 를 차례로</summary>
@@ -165,9 +178,10 @@ namespace Hanjeopsi.App
             foreach (var s in steps)
             {
                 var step = s;
-                float amp = Mathf.Clamp(step.Amp * Master, 0.04f, 1f);
-                if (at <= 0) Input.VibrateHandheld(step.Ms, amp);
-                else Sound.I.GetTree().CreateTimer(at).Timeout += () => Input.VibrateHandheld(step.Ms, amp);
+                float amp = Amp(step.Amp);
+                int len = Len(step.Ms);
+                if (at <= 0) Input.VibrateHandheld(len, amp);
+                else Sound.I.GetTree().CreateTimer(at).Timeout += () => Input.VibrateHandheld(len, amp);
                 at += (step.Ms + step.Gap) / 1000.0;
             }
             _lastMs = Time.GetTicksMsec();

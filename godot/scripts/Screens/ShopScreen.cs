@@ -295,7 +295,7 @@ namespace Hanjeopsi.App.Screens
             text.AddThemeConstantOverride("separation", 0);
             if (!string.IsNullOrEmpty(top)) text.AddChild(UiKit.Text(top, TextSize.Tiny, Palette.InkSoft).Ellipsis());
             text.AddChild(UiKit.Text(name, TextSize.Small + 2, nameColor, true).Ellipsis());
-            text.AddChild(UiKit.Text(desc, TextSize.Tiny, Palette.InkSoft, false, true));
+            text.AddChild(UiKit.Text(desc, TextSize.Tiny + 3, Palette.Ink, false, true));
             row.AddChild(text);
             if (right != null) row.AddChild(right);
             return row;

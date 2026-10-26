@@ -11,6 +11,7 @@ namespace Hanjeopsi.App
         private const string Path = "user://settings.cfg";
         private static bool _loaded;
         private static bool _sfx = true, _music = true, _vibrate = true;
+        private static int _vibeLevel = 1;
 
         public static bool Sfx
         {
@@ -30,6 +31,13 @@ namespace Hanjeopsi.App
             set { _vibrate = value; Save(); }
         }
 
+        /// <summary>진동 세기 0 약, 1 보통, 2 강</summary>
+        public static int VibeLevel
+        {
+            get { Load(); return _vibeLevel; }
+            set { _vibeLevel = Mathf.Clamp(value, 0, 2); Save(); }
+        }
+
         private static void Load()
         {
             if (_loaded) return;
@@ -39,6 +47,7 @@ namespace Hanjeopsi.App
             _sfx = (bool)cfg.GetValue("sound", "sfx", true);
             _music = (bool)cfg.GetValue("sound", "music", true);
             _vibrate = (bool)cfg.GetValue("sound", "vibrate", true);
+            _vibeLevel = (int)cfg.GetValue("sound", "vibeLevel", 1);
         }
 
         private static void Save()
@@ -48,6 +57,7 @@ namespace Hanjeopsi.App
             cfg.SetValue("sound", "sfx", _sfx);
             cfg.SetValue("sound", "music", _music);
             cfg.SetValue("sound", "vibrate", _vibrate);
+            cfg.SetValue("sound", "vibeLevel", _vibeLevel);
             cfg.Save(Path);
         }
     }

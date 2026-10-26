@@ -58,11 +58,18 @@ namespace Hanjeopsi.App.Screens
 
             var lines = new[] { "나는 맛을 잃었다.", "다시 맛을 느낄 수 있는 건", "내 손으로 낚은 물고기뿐이다." };
             var lineLabels = new Label[lines.Length];
+            // 그림 위에서도 읽히게 글 뒤에 옅은 그늘
+            var shade = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore, SizeFlagsHorizontal = SizeFlags.ShrinkCenter };
+            shade.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.38f), 44, 48, 18));
+            var lineCol = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            lineCol.AddThemeConstantOverride("separation", 0);
+            shade.AddChild(lineCol);
+            col.AddChild(shade);
             for (int i = 0; i < lines.Length; i++)
             {
                 var l = UiKit.Shadowed(lines[i], TextSize.Body, new Color("fbf3e0"), false, 8);
                 l.LabelSettings.LineSpacing = 0;
-                col.AddChild(Riser(l));
+                lineCol.AddChild(Riser(l));
                 lineLabels[i] = l;
             }
 

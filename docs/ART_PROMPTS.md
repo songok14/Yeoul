@@ -40,6 +40,7 @@
 
 ### 받은 SD 시트
 - 2026-10-22: **손님 SD 시트 두 장**(6명 × 서기·걷기·기쁨·실망). `scripts/sd_cells.py`로 잘라 `godot/art/customers/<id>-<포즈>.png`. 두 번째 시트는 체크무늬가 박혀 있어도 지워진다. 흰 수염 할아버지는 `--hair=0`.
+- 2026-10-26: **여울 낚시 SD 포즈 두 장 다시**(체크무늬가 박힌 시트). 서서 기다리기(뒷모습), 의자에 앉기(뒷모습), 입질에 놀라기(앉아서 옆), 던지기(뒤에서 머리 위로), 감기(뒷모습, 대는 게임이 그린다), 버티기(옆, 휜 대), 기뻐하기(정면) 여덟 장을 `scripts/sd_pose.py`로 넣고 `clean_halo.py --fringe`로 정리했다. 붙어 있던 두 포즈는 손으로 나눴다.
 - 2026-10-22: **여울 낚시 SD 포즈**(15포즈·17포즈·6포즈 시트, 옆모습 당기기). 던지기·버티기·기쁨 셋을 넣었다. 17포즈 시트의 앉아 기다리기, 놀람(!), 엎드려 졸기는 아직 안 썼다.
 - 2026-10-22: **여울 일러스트 일곱 장 고해상도 판**(사용자가 다듬음). 웹 900, 고닷 1400 높이.
 - 2026-10: **SD 1 여울 기본 시트**, **SD 5 고등어 시트**. 디자인과 찌가 잘 나왔다. `scripts/sd_sheet.py`로 여울 8장, 고등어 12장을 잘라 `godot/art/`에 넣었다.
@@ -544,6 +545,31 @@ Dishes, in this order:
 Style: cute appetizing game food art, soft anime illustration with gentle painterly shading, clean simple shapes and slightly chunky friendly proportions so each dish reads clearly at small size, warm and cozy. The fish in each dish must look like the real species described.
 
 Background: one flat solid light grey color #EDEDED. No checkerboard, no table, no tablecloth, no shadows on the floor, no text, no labels, no numbers, no borders, no frames, no signature, no watermark.
+```
+
+## 마을 사람 SD (마을이 움직이게, 2026-10-26)
+
+마을 그림 위를 시간대마다 오가는 사람들. 손님 SD와 같은 그림체로 걷기 두 장과 서기 한 장. 지금 여울 SD 그림과 손님 SD 그림을 같이 첨부한다.
+
+```
+Create one SD character sheet for a mobile game, background solid light gray #EDEDED (no checkerboard, no text, no borders). Attached: my current SD characters (keep exactly the same chibi style, 2 to 2.5 heads tall, soft anime coloring, clean outline).
+
+Make 4 Korean seaside village people, each in 3 poses in one row: walking step A (side view facing left), walking step B (side view facing left, other leg forward), standing front view. 4 rows x 3 columns, wide equal spacing, same scale, same ground line, full body with feet visible.
+Row 1: a village fisherman in his 50s with a knit cap, navy vest and yellow rubber boots, carrying a blue fish basket.
+Row 2: an auntie from the fish market in a floral apron and arm sleeves, rubber gloves, carrying a red plastic tub.
+Row 3: an elementary school boy with a backpack and a toy fishing net.
+Row 4: a young delivery woman on foot with a cap and a small parcel box.
+```
+
+## 상환 장면 은행 직원 (대화 일러스트, 2026-10-26)
+
+주간 상환 장면에 들어갈 감정 일러스트. 지금 막순 할머니·노씨 대화 일러스트를 같이 첨부한다.
+
+```
+Create one character expression sheet for a mobile game dialogue box, background solid light gray #EDEDED (no checkerboard, no text, no borders). Attached: my current dialogue illustrations (keep the same soft anime style, line weight and coloring).
+
+Character: a bank loan officer from the town branch, Korean man in his early 30s, neat short black hair, thin silver glasses, white shirt with a loose navy tie, navy cardigan, a bank ID lanyard, holding a slim document folder. Polite and a little awkward, not a villain.
+Upper body, 3 columns x 2 rows, same size and same framing: polite business smile, apologetic while explaining a late fee, stamping a document, surprised and impressed, worried, gentle relieved smile.
 ```
 
 ## 컷신 일러스트 다듬기 (여울 감정 연기)
