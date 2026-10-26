@@ -282,11 +282,11 @@ namespace Hanjeopsi.App.Screens
                 {
                     Def = v,
                     X = 50 + (float)rng.Next() * 350,
-                    Lane = -54 - i * 30,
+                    Lane = -92 - i * 34,
                     Dir = rng.Next() < 0.5 ? -1 : 1,
                     Frame = 0,
                     Stop = (float)rng.Next() * 2,
-                    Height = 112 * v.Height,
+                    Height = 100 * v.Height,
                 };
                 w.Node = _stage.Place(Tex("villagers/" + v.Id + "-stand"), new Vector2(w.X, _footY + w.Lane), w.Height);
                 var ww = w;
