@@ -428,15 +428,28 @@ Style: the same soft painterly watercolor anime background as the attached image
 ```
 
 #### 배경 2-3. 태풍 오는 날 (`village-typhoon`)
+방파제 태풍 그림은 뽑지 않는다. 태풍 날은 방파제 출입이 막혀 낚시를 못 하는 날로 둔다.
 
 ```
 Create one vertical background illustration for a mobile game. Attached: the current daytime village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
 
-Weather: a typhoon approaching a south coast Korean harbor village in late summer. Heavy dark slate and green grey clouds rolling in fast, a strange yellowish light low on the horizon, big white waves crashing over the tetrapods and the breakwater with spray around the red lighthouse, fishing boats tied tightly at the pier, the restaurant doors closed with lanterns swinging, the truck awning rolled up, wet dark plaza with puddles, palm and pine trees bending in strong wind. Light rain only (the game draws rain on top).
+Weather: a typhoon approaching a south coast Korean harbor village in late summer. Heavy dark slate and green gray clouds rolling in fast, a strange yellowish light low on the horizon, big white waves crashing over the tetrapods and the breakwater with spray around the red lighthouse, fishing boats tied tightly at the pier with extra ropes, the restaurant wooden doors shut with lanterns swinging, the food truck awning rolled up and its stools stacked, the bait shop awning pulled in, wet dark plaza with puddles reflecting the gray sky, pine trees bending hard in strong wind, a few leaves flying. Only light rain streaks (the game draws rain on top).
 
 Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent sky.
 
 Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail, dramatic but still gentle and cozy. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 배경 2-3-2. 태풍 오는 밤 (`village-typhoon-night`)
+
+```
+Create one vertical background illustration for a mobile game. Attached: the current night village background of this exact scene. Keep the composition, camera, every building, the blue and white food truck and the empty paved plaza exactly the same. Change only the weather.
+
+Weather: a typhoon night in a south coast Korean harbor village. Pitch dark churning clouds lit from inside by a distant flash of lightning, the sea black and violent with huge white waves breaking over the tetrapods, spray hiding the base of the red lighthouse whose light still blinks, fishing boats tied tightly at the pier and rocking, warm light leaking through the shut wooden doors of the restaurant, the food truck closed with its awning rolled up and one small light on inside, street lamps swaying and casting long trembling reflections on the soaked plaza, pine trees bending hard in the wind. Only light rain streaks (the game draws rain on top).
+
+Keep for the game screen: the lower half stays a flat open plaza with no new objects, the bottom 15 percent simple ground, the top 15 percent sky.
+
+Style: the same soft painterly watercolor anime background as the attached image, same palette family, brush texture and detail, dramatic but still warm and safe feeling. Vertical 9:16, at least 1080x1920. No people, no animals, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
 #### 배경 2-4. 안개 낀 새벽 (`village-fog`)
