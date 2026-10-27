@@ -182,6 +182,10 @@ namespace Hanjeopsi.App.Screens
             text.AddThemeConstantOverride("separation", 4);
             var sp = G.Data.SpeciesById(grp.Species);
             text.AddChild(UiKit.Text(sp.Name + " ×" + grp.Items.Count, TextSize.Body, Palette.Ink, true));
+            // 크기가 클수록 비싸다: 한 마리씩 크기를 큰 순서로
+            var sizes = grp.Items.OrderByDescending(f => f.Size).Select(f => f.Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)).ToList();
+            string sizeText = string.Join(" · ", sizes.Take(4)) + "cm" + (sizes.Count > 4 ? " 외 " + (sizes.Count - 4) + "마리" : "");
+            text.AddChild(UiKit.Text(sizeText, TextSize.Tiny + 2, Palette.InkSoft));
             var meta = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             meta.AddThemeConstantOverride("separation", 14);
             meta.AddChild(StagePill(grp.Stage));

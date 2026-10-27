@@ -6,7 +6,7 @@
       "species": "hakgongchi",
       "count": 3,
       "mul": 1.6,
-      "sd": "customers/fisher",
+      "sd": "villagers/sashimi",
       "thanks": "이야, 물 좋네. 단골 해 주게."
     },
     {
@@ -15,7 +15,7 @@
       "species": "bollak",
       "count": 2,
       "mul": 1.7,
-      "sd": "customers/haenyeo",
+      "sd": "villagers/minbak",
       "thanks": "아이고 고마워라. 손주들 좋아하겠다."
     },
     {
@@ -34,7 +34,7 @@
       "count": 2,
       "mul": 1.8,
       "flag": "nossiFavor",
-      "sd": "customers/grandpa",
+      "sd": "villagers/nossi",
       "thanks": "...노래미 고맙다."
     },
     {
@@ -43,7 +43,7 @@
       "species": "gamseongdom",
       "count": 1,
       "mul": 2,
-      "sd": "customers/welder",
+      "sd": "villagers/sushi",
       "thanks": "역시. 값은 넉넉히 쳐 드렸어요."
     },
     {
@@ -70,7 +70,7 @@
       "species": "godeungeo",
       "count": 2,
       "mul": 1.6,
-      "sd": "customers/taxi",
+      "sd": "villagers/stall",
       "thanks": "좋아, 오늘 밤 안주 걱정 끝."
     },
     {
@@ -79,7 +79,7 @@
       "species": "chamdom",
       "count": 1,
       "mul": 1.9,
-      "sd": "customers/welder",
+      "sd": "villagers/sushi",
       "thanks": "역시. 값은 넉넉히 쳐 드렸어요."
     },
     {
@@ -88,7 +88,7 @@
       "species": "dodari",
       "count": 2,
       "mul": 1.7,
-      "sd": "customers/haenyeo",
+      "sd": "villagers/minbak",
       "thanks": "아이고 고마워라. 손주들 좋아하겠다."
     },
     {
@@ -97,7 +97,7 @@
       "species": "gabojingeo",
       "count": 2,
       "mul": 1.6,
-      "sd": "customers/fisher",
+      "sd": "villagers/sashimi",
       "thanks": "이야, 물 좋네. 단골 해 주게."
     },
     {
@@ -106,7 +106,7 @@
       "species": "ureok",
       "count": 1,
       "mul": 1.8,
-      "sd": "customers/taxi",
+      "sd": "villagers/stall",
       "thanks": "좋아, 오늘 밤 안주 걱정 끝."
     },
     {
