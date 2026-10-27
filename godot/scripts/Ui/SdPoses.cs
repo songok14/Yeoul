@@ -55,6 +55,19 @@ namespace Hanjeopsi.App.Ui
             return _all[name];
         }
 
+        private static List<float> _reelFoot;
+
+        /// <summary>뒤에서 본 릴 그림(gear/reel-back-단계)에서 릴 다리 꼭대기의 가로 위치 비율 (data/gearlook.json)</summary>
+        public static float ReelFoot(int level)
+        {
+            if (_reelFoot == null)
+            {
+                var o = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
+                _reelFoot = o["reelFoot"].ToObject<List<float>>();
+            }
+            return _reelFoot[Mathf.Clamp(level - 1, 0, _reelFoot.Count - 1)];
+        }
+
         private static List<float> _chairSeat;
 
         /// <summary>뒤에서 본 의자 그림(gear/chair-back-단계) 높이 중 앉는 자리 높이 비율 (data/gearlook.json)</summary>

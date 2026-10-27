@@ -39,6 +39,7 @@
 ---
 
 ### 받은 SD 시트
+- 2026-10-27: **뒤에서 본 릴 열 개 다시**(두 번째 시트: 릴 다리 위, 스풀 너머, 핸들 왼쪽). `godot/art/gear/reel-back-N.png`, 다리 꼭대기 가로 위치는 `data/gearlook.json reelFoot`. 낚시 화면에서 손 위 대 아래에 매단다. 앞 시트(스풀 앞면이 보이던 것)는 버렸다.
 - 2026-10-27: **여울 낚시 포즈 다시**(SD 2-2, 뒷모습 중심 2×4). `sd_sheet.py`로 자르고 `godot/art/yeoul/fish-*.png`, `poses.json`에 넣었다. 테두리가 또렷해 `clean_halo.py`는 쓰지 않았다(쓰면 가는 낚싯대가 끊긴다). 감기는 손 위 대를 지웠다. 놀람(bite) 옆 주황 표시는 잘릴 때 빠진다.
 - 2026-10-22: **손님 SD 시트 두 장**(6명 × 서기·걷기·기쁨·실망). `scripts/sd_cells.py`로 잘라 `godot/art/customers/<id>-<포즈>.png`. 두 번째 시트는 체크무늬가 박혀 있어도 지워진다. 흰 수염 할아버지는 `--hair=0`.
 - 2026-10-27: **마을 의뢰인 SD 2**(노씨·바다횟집 사장·읍내 일식집·포장마차 아저씨·민박집 할머니)를 `godot/art/villagers/{nossi,sashimi,sushi,stall,minbak}-*.png`로 넣고 `requests.json sd`를 바꿨다.

@@ -602,6 +602,9 @@ namespace Hanjeopsi.App.Ui
         /// <summary>포즈를 뒤집었으면 핸들이 반대쪽</summary>
         public bool ReelFlip;
         public Color ReelBody = new Color("b8bcc2"), ReelAccent = new Color("8a5a32");
+        /// <summary>가진 릴 그림 (뒤에서 본 것, 릴 다리가 위). ReelFootX 는 그림에서 다리 꼭대기의 가로 비율. 없으면 코드로 그린 릴</summary>
+        public Texture2D ReelTex;
+        public float ReelFootX = 0.6f;
 
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
         private bool _rodReady;
@@ -611,7 +614,7 @@ namespace Hanjeopsi.App.Ui
         /// </summary>
         private static readonly float[] GuideAt = { 0.2f, 0.32f, 0.43f, 0.53f, 0.62f, 0.7f, 0.77f, 0.84f, 0.9f, 0.95f, 1f };
         private readonly Vector2[] _guideRing = new Vector2[GuideAt.Length];
-        private Vector2 _reelAt, _reelCenter, _rodAlong;
+        private Vector2 _reelAt, _reelCenter, _rodAlong, _reelSeat;
 
         /// <summary>여울 그림 바로 아래에 끼울 대 그림 (ArtStage 안, 같은 좌표)</summary>
         public Control MakeRodView()
@@ -669,8 +672,11 @@ namespace Hanjeopsi.App.Ui
                 var at = _rodPts[i].Lerp(_rodPts[i + 1], fi - i);
                 _guideRing[j] = at + Down(_rodPts[i + 1] - _rodPts[i]) * (j == GuideAt.Length - 1 ? 0 : Mathf.Lerp(2.2f, 0.6f, f) * u);
             }
+            // 릴 다리는 손 바로 위 대 아래에 붙는다. 그림 릴은 거기서 아래로 매달린다
+            _reelSeat = _rodPts[2];
             // 원줄은 릴 스풀 앞(대 끝 쪽)에서 나와 첫 고리로 간다
-            var reel = ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + Down(p1 - p0) * 6 * u;
+            var reel = ReelShown && ReelTex != null ? _reelSeat + new Vector2(0, ReelWidth * K * ReelTex.GetHeight() / ReelTex.GetWidth() * 0.3f)
+                : ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + Down(p1 - p0) * 6 * u;
             var along = (p1 - p0).Normalized();
             _reelAt = reel + along * ReelWidth * K * 0.25f;
             _reelCenter = reel;
@@ -751,6 +757,16 @@ namespace Hanjeopsi.App.Ui
         {
             if (!_rodReady || !ReelShown) return;
             float u = K / 2.4f;
+            if (ReelTex != null)
+            {
+                // 그림 릴: 다리 꼭대기를 대에 붙이고 아래로 매단다 (포즈를 뒤집으면 핸들도 반대쪽)
+                float rw = ReelWidth * K * 1.15f;
+                float rh = rw * ReelTex.GetHeight() / ReelTex.GetWidth();
+                c.DrawSetTransform(_reelSeat, 0, new Vector2(ReelFlip ? -1 : 1, 1));
+                c.DrawTextureRect(ReelTex, new Rect2(-ReelFootX * rw, -2 * u, rw, rh), false);
+                c.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+                return;
+            }
             float w = ReelWidth * K;
             var at = _reelCenter;
             var up = _rodAlong;                 // 대 끝 쪽

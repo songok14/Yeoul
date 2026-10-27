@@ -1458,6 +1458,8 @@ namespace Hanjeopsi.App.Screens
                 _field.RodTrim = new Color(look.Trim);
             }
             _field.CoolerTex = TrimmedGear("cooler", G.Save.Tackle + 1);
+            _field.ReelTex = TrimmedGear("reel-back", G.Save.Reel + 1);
+            _field.ReelFootX = SdPoses.ReelFoot(G.Save.Reel + 1);
             var reel = G.Data.Gear.Reels[Mathf.Clamp(G.Save.Reel, 0, G.Data.Gear.Reels.Count - 1)].Look;
             if (reel != null)
             {
