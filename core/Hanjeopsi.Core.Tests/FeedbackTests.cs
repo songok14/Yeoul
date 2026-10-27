@@ -98,6 +98,27 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 한_사람이_의뢰_둘을_들고_오지_않는다()
+        {
+            // 2026-10-27 폰 의견: 민박집 할머니가 마을 양옆에 둘이 섰다
+            var g = Game.NewGame(TestData.Full, 3);
+            var t = TestData.Full.RequestTemplates;
+            g.Save.Flags["nossiFavor"] = true; // 노씨 부탁이 한 자리를 늘 차지하지 않게
+            int pairs = 0;
+            for (int day = 0; day < 200; day++)
+            {
+                g.Save.Requests.Clear();
+                g.Save.Day = 1 + day;
+                g.Save.Seed = 1000 + day;
+                g.RefreshRequests();
+                var clients = g.Save.Requests.Select(r => t[r.Template].Client).ToList();
+                Assert.Equal(clients.Count, clients.Distinct().Count());
+                if (clients.Count == 2) pairs++;
+            }
+            Assert.True(pairs > 150);
+        }
+
+        [Fact]
         public void 좋은_낚싯대일수록_멀리_던진다()
         {
             var rods = TestData.Full.Gear.Rods;

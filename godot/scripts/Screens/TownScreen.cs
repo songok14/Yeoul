@@ -325,12 +325,15 @@ namespace Hanjeopsi.App.Screens
                 _stage.Remove(c.Mark);
             }
             _clients.Clear();
-            var reqs = G.Save.Requests;
+            // 한 사람에 의뢰 하나 (예전 세이브에 같은 사람 의뢰가 둘이면 앞의 것만 세운다)
+            var reqs = G.Save.Requests
+                .Where(r => !string.IsNullOrEmpty(G.Data.RequestTemplates[r.Template].Sd))
+                .GroupBy(r => G.Data.RequestTemplates[r.Template].Client)
+                .Select(g => g.First()).ToList();
             for (int i = 0; i < reqs.Count && i < 2; i++)
             {
                 var req = reqs[i];
                 var t = G.Data.RequestTemplates[req.Template];
-                if (string.IsNullOrEmpty(t.Sd)) continue;
                 var at = ClientSpot(i);
                 var node = _stage.Place(Tex(t.Sd + "-stand"), at, ClientSize);
                 node.FlipH = at.X > ArtStage.Logical.X / 2;
@@ -407,10 +410,10 @@ namespace Hanjeopsi.App.Screens
             string due = left <= 0 ? "오늘까지" : left + "일 안에";
             if (!req.IsAccepted())
             {
+                // 조건도 의뢰인 줄에 붙인다. 해설 줄로 나누면 의뢰인 그림이 빠져 선택지가 마당 사람을 덮었다
                 Talk(new[]
                 {
-                    ClientLine(t, t.Text),
-                    new DialogueLine { Text = sp.Name + " " + t.Count + "마리 · " + due + " · 보상 " + UiKit.Won(req.Reward) },
+                    ClientLine(t, t.Text + "\n(" + sp.Name + " " + t.Count + "마리 · " + due + " · 보상 " + UiKit.Won(req.Reward) + ")"),
                 }, new[]
                 {
                     new ModalButton("맡을게요", Palette.Green, () =>

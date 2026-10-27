@@ -303,6 +303,8 @@ namespace Hanjeopsi.Core
                 int template = (int)Math.Floor(rng.Next() * templates.Count);
                 if (Save.Requests.Any(r => r.Template == template)) continue;
                 var t = templates[template];
+                // 고닷: 마을에 의뢰인이 직접 서니 한 사람이 두 의뢰를 들고 오지 않는다
+                if (Save.Kit != null && Save.Requests.Any(r => templates[r.Template].Client == t.Client)) continue;
                 // 귀한 고기 의뢰는 첫 주에는 나오지 않는다
                 if (Data.SpeciesById(t.Species).Rare && Save.Day < b.RareFromDay) continue;
                 AddRequest(template, rng);
