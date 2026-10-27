@@ -31,6 +31,20 @@ namespace Hanjeopsi.App.Ui
             Pressed += () => onPress();
         }
 
+        /// <summary>
+        /// 닫힌 가게 간판: 불투명한 바랜 종이와 흐린 글씨.
+        /// 반투명으로 하면 뒤 그림이 비쳐 지우다 만 자국처럼 보였다 (폰 5차)
+        /// </summary>
+        public void SetClosed()
+        {
+            var face = UiKit.Box(Palette.PaperDark, 40, 30, 10).WithBorder(new Color(Palette.InkSoft, 0.7f), 3).WithShadow(0.22f, 8, 4);
+            AddThemeStyleboxOverride("normal", face);
+            AddThemeStyleboxOverride("hover", face);
+            AddThemeColorOverride("font_color", Palette.InkSoft);
+            AddThemeColorOverride("font_hover_color", Palette.InkSoft);
+            AddThemeColorOverride("font_pressed_color", Palette.InkSoft);
+        }
+
         private void Squash(float to, double time)
         {
             _tween?.Kill();

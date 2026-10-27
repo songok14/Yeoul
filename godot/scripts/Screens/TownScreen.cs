@@ -651,7 +651,7 @@ namespace Hanjeopsi.App.Screens
         {
             var b = new SignButton(string.IsNullOrEmpty(state) ? name : name + "\n" + state, onPress);
             if (!string.IsNullOrEmpty(state)) b.AddThemeFontSizeOverride("font_size", TextSize.Small - 4);
-            if (!open) b.Modulate = new Color(1, 1, 1, 0.62f);
+            if (!open) b.SetClosed();
             return b;
         }
 
