@@ -12,7 +12,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 
 ## 지금까지 상황
 - 환경: cloud. 원격 https://github.com/songok14/Yeoul (공개). 브랜치는 main 과 ci-build(CI 결과 창고, 지우지 않는다)만 쓴다. 세션이 다른 이름의 작업 브랜치를 주더라도 main 에서 작업해 main 에 푸시한다(사용자 결정 2026-10-27). PR은 만들지 않는다. 시작하면 git fetch origin, git checkout main, git pull 후 docs/HANDOFF.md 부터 읽는다.
-- main 끝: 9a9f79a(코드) 다음 이 문서 커밋. 사용자에게 마지막으로 보낸 APK는 빌드 #112(9a9f79a). 커밋 안 된 변경·안 올린 커밋 없음.
+- main 끝: 6b8f872(코드) 다음 이 문서 커밋. 사용자에게 마지막으로 보낸 APK는 빌드 #113(6b8f872). 커밋 안 된 변경·안 올린 커밋 없음.
 - 먼저 읽을 것: CLAUDE.md, docs/POLISH.md(다듬기 목록), docs/GODOT_PLAN.md(단계표 9절, 폰에서 볼 것 10-2), docs/GAME_DESIGN.md 3·6·7·8·9절(7절 "마을 사람"·"마을 의뢰"·생선구이), docs/STORY.md, docs/ART_PROMPTS.md(SD 2-2, 2-3, 받은 SD 시트)
 - 단계: U0~U9, U11, U11-1~5 완료. 지금은 U12 전 다듬기(POLISH.md). 남은 큰 단계 U10(SD 다듬기 나머지), U12(폰에서 1장 끝까지).
 
@@ -23,7 +23,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 - 트럭 메뉴판: 고른 요리 위, 특별 요리 재료순, 생선구이 셋 이상은 한 줄로 접기(사진 truck-grill). 상점: 노씨 부탁 전 잠긴 장비는 위에 띠 하나.
 - U10: Ui/SdMotion(걸음 기우뚱·숨쉬기·의뢰인 고개 까딱), 마을 여울·고등어·마을 사람·의뢰인.
 - 1장 이야기 장면 넷(dialogue.json beats, 코어 GameStory.cs): 고등어 찌 D.Y.(2일), 노씨 쪽지(4일), 차세라 첫 만남(15~19일), 대결 날 아침(20일). 사진 story-catfloat/-nossinote/-sera.
-- ART_PROMPTS 에 차세라 표정 시트(대화 4), 컷 9 고등어 찌, 컷 10 차세라 첫 만남. 받으면 sera 화자·장면 그림으로 바꾼다(POLISH 8절 남은 줄).
+- 차세라 표정 여섯(portraits/sera*, 화자 sera, 옷은 빨강·흰 바람막이로 나와 그대로 씀)과 컷신 두 장(godot/art/cuts/cat-float, sera-meet). 대사 줄 cut 으로 대화창 뒤에 화면 가득, "-"로 걷기. 테스트 132개.
 - 테스트 131개. 자동 플레이 적당히 잘함 20/20 평균 21.7일.
 
 ### 그 전 세션(2026-10-27 오전)에 한 일 (모두 main)
