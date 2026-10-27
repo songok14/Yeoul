@@ -113,12 +113,18 @@ namespace Hanjeopsi.App.Ui
             if (Bound2 < reach - 0.08f) Label(ZoneNames[2], (Bound2 + reach) / 2, bar);
             if (!string.IsNullOrEmpty(ReachLabel))
             {
-                // 막대 위 오른쪽: 이 낚싯대의 최대 거리
+                // 이 낚싯대의 최대 거리. 막힌 칸이 넉넉하면 그 안에, 아니면 막대 위 오른쪽 (위 안내 글과 겹치지 않게)
                 var font = Fonts.Body;
                 int size = TextSize.Tiny;
                 float w = 300;
                 float cx = bar.Position.X + bar.Size.X * reach;
-                var pos = new Vector2(Mathf.Min(cx - w / 2, bar.End.X - w), bar.Position.Y - 22);
+                float blocked = bar.End.X - cx;
+                float textW = font.GetStringSize(ReachLabel, HorizontalAlignment.Left, -1, size).X;
+                Vector2 pos;
+                if (reach < 0.995f && blocked >= textW + 24)
+                    pos = new Vector2(cx + blocked / 2 - w / 2, bar.Position.Y + bar.Size.Y / 2 + size * 0.36f);
+                else
+                    pos = new Vector2(Mathf.Min(cx - w / 2, bar.End.X - w), bar.Position.Y - 22);
                 DrawStringOutline(font, pos, ReachLabel, reach < 0.995f ? HorizontalAlignment.Center : HorizontalAlignment.Right, w, size, 8, new Color(Palette.NightDeep, 0.85f));
                 DrawString(font, pos, ReachLabel, reach < 0.995f ? HorizontalAlignment.Center : HorizontalAlignment.Right, w, size, Palette.Gold);
             }
