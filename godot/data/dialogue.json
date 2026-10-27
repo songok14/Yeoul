@@ -248,6 +248,20 @@
         "surprised": "banker-surprised",
         "worried": "banker-worried"
       }
+    },
+    {
+      "id": "sera",
+      "name": "차세라",
+      "color": "#b3343c",
+      "side": "right",
+      "faces": {
+        "default": "sera",
+        "smirk": "sera-smirk",
+        "point": "sera-point",
+        "surprised": "sera-surprised",
+        "annoyed": "sera-annoyed",
+        "serious": "sera-serious"
+      }
     }
   ],
   "scenes": {
@@ -306,7 +320,8 @@
       {
         "speaker": "yeoul",
         "face": "default",
-        "text": "찌잖아? 손으로 깎은 나무 찌네."
+        "text": "찌잖아? 손으로 깎은 나무 찌네.",
+        "cut": "cat-float"
       },
       {
         "speaker": "",
@@ -340,10 +355,12 @@
       {
         "speaker": "",
         "face": "",
-        "text": "방파제 입구에 파란 승합차가 섰다.\n옆구리에 블루훅 로고가 번쩍인다."
+        "text": "방파제 입구에 파란 승합차가 섰다.\n옆구리에 블루훅 로고가 번쩍인다.",
+        "cut": "sera-meet"
       },
       {
-        "name": "차세라",
+        "speaker": "sera",
+        "face": "default",
         "text": "여기가 물비늘포구나.\n사진보다 작네."
       },
       {
@@ -352,11 +369,14 @@
         "text": "누구세요?"
       },
       {
-        "name": "차세라",
-        "text": "블루훅 차세라.\n이 방파제 곧 우리 리조트 자리야."
+        "speaker": "sera",
+        "face": "smirk",
+        "text": "블루훅 차세라.\n이 방파제 곧 우리 리조트 자리야.",
+        "cut": "-"
       },
       {
-        "name": "차세라",
+        "speaker": "sera",
+        "face": "point",
         "text": "20일에 다시 올게.\n40cm 넘는 걸 낚으면 인정해 줄게."
       },
       {
@@ -372,7 +392,8 @@
     ],
     "seraDuel": [
       {
-        "name": "차세라",
+        "speaker": "sera",
+        "face": "point",
         "text": "약속대로 왔어.\n오늘 안에 40cm. 못 넘으면 구경만 해."
       },
       {

@@ -104,5 +104,5 @@
 ## 8. 이야기
 
 - [x] 1장 중간이 비어 있다(STORY.md 대비). 고등어 찌 D.Y.(2일), 노씨 쪽지(4일), 차세라 첫 만남(15일)과 대결 날 아침(20일)을 대화 장면으로 (`dialogue.json beats`) (봄)
-- [ ] 차세라 표정 시트와 컷 9·10 그림을 받으면 `sera` 화자와 장면 그림으로 바꾼다 (`ART_PROMPTS.md`)
+- [x] 차세라 표정 여섯(`portraits/sera*`, 화자 `sera`)과 컷신 두 장(`art/cuts/cat-float`, `sera-meet`). 대사 줄에 `cut`을 적으면 대화창 뒤에 화면 가득 깔리고("-"는 걷기) 그동안 인물 그림은 숨는다 (사진 story-catfloat, story-sera, story-seraduel)
 - [x] 상환 장면에 은행 직원 대화 일러스트(도장·사과·걱정 등 여섯 표정, 화자 `banker`)

@@ -62,6 +62,21 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 대화_장면의_컷신_그림이_있다()
+        {
+            var cuts = System.IO.Path.Combine(System.AppContext.BaseDirectory, "cuts");
+            int n = 0;
+            foreach (var scene in TestData.Full.Dialogue.Scenes.Values)
+                foreach (var line in scene)
+                {
+                    if (string.IsNullOrEmpty(line.Cut) || line.Cut == "-") continue;
+                    n++;
+                    Assert.True(System.IO.File.Exists(System.IO.Path.Combine(cuts, line.Cut + ".png")), "그림이 없다: cuts/" + line.Cut + ".png");
+                }
+            Assert.True(n >= 2);
+        }
+
+        [Fact]
         public void 대화_장면의_화자와_감정_그림이_있다()
         {
             var d = TestData.Game.Dialogue;

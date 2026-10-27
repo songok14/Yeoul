@@ -22,6 +22,9 @@ namespace Hanjeopsi.App.Ui
         private readonly int _safeBottom;
 
         private TextureRect _portrait;
+        /// <summary>컷신 그림 (화면 가득, 대화창 뒤)</summary>
+        private TextureRect _cut;
+        private string _cutKey;
         private string _portraitKey;
         private string _speakerId;
         /// <summary>지금 그림이 SD (의뢰인)라 작게 세운다</summary>
@@ -55,6 +58,9 @@ namespace Hanjeopsi.App.Ui
             var dim = new ColorRect { Color = new Color(Palette.NightDeep, 0.32f), MouseFilter = MouseFilterEnum.Ignore };
             dim.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             AddChild(dim);
+            _cut = new TextureRect { ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, MouseFilter = MouseFilterEnum.Ignore, Visible = false };
+            _cut.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            AddChild(_cut);
             var shade = UiKit.VerticalShade(new Color(Palette.NightDeep, 0), new Color(Palette.NightDeep, 0.78f));
             shade.SetAnchorsAndOffsetsPreset(LayoutPreset.BottomWide);
             shade.OffsetTop = -1150;
@@ -178,6 +184,7 @@ namespace Hanjeopsi.App.Ui
             }
             var line = _lines[_index];
             SetSpeaker(line);
+            SetCut(line.Cut);
             _text.Text = line.Text;
             _text.VisibleRatio = 0;
             _typeTween?.Kill();
@@ -185,6 +192,33 @@ namespace Hanjeopsi.App.Ui
             double secs = Math.Max(0.25, line.Text.Length / CharsPerSecond);
             _typeTween.TweenProperty(_text, "visible_ratio", 1f, secs);
             _typeTween.TweenCallback(Callable.From(ShowChoicesIfLast));
+        }
+
+        /// <summary>컷신 그림을 깐다. 한 번 깔리면 다른 컷이 올 때까지 남고, 그동안 인물 그림은 숨긴다</summary>
+        private void SetCut(string cut)
+        {
+            if (cut == "-" && _cutKey != null)
+            {
+                // "-" 는 컷을 걷고 인물 그림으로 돌아간다
+                _cutKey = null;
+                var fade = CreateTween();
+                fade.TweenProperty(_cut, "modulate:a", 0f, 0.4);
+                fade.TweenCallback(Callable.From(() => _cut.Visible = _cutKey != null));
+            }
+            else if (!string.IsNullOrEmpty(cut) && cut != "-" && cut != _cutKey)
+            {
+                _cutKey = cut;
+                _cut.Texture = GD.Load<Texture2D>("res://art/cuts/" + cut + ".png");
+                _cut.Visible = true;
+                _cut.PivotOffset = Size / 2;
+                _cut.Modulate = new Color(1, 1, 1, 0);
+                _cut.Scale = Vector2.One;
+                var tw = CreateTween().SetParallel(true);
+                tw.TweenProperty(_cut, "modulate:a", 1f, 0.5).SetTrans(Tween.TransitionType.Sine);
+                // 천천히 다가가는 카메라
+                tw.TweenProperty(_cut, "scale", new Vector2(1.06f, 1.06f), 9).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
+            }
+            _portrait.Visible = _cutKey == null;
         }
 
         /// <summary>말하는 사람이 바뀌면 일러스트가 옆에서 미끄러져 들어오고, 감정만 바뀌면 살짝 바꿔 낀다</summary>

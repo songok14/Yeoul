@@ -40,6 +40,7 @@
 - 그림 역할: **화면 위에서 움직이는 캐릭터는 SD(2~2.5등신)**, **대화와 감정은 일러스트**. 마을·낚시·트럭에서 걷고 반응하는 건 SD와 한 줄 말풍선(`Screen.Bubble`). 누군가와 이야기하는 장면은 대화창(`Screen.Talk`/`Say`/`TalkScene`)에 감정 일러스트(`godot/art/portraits/`)가 들어온다. 감정이 터지는 장면은 한 장짜리 컷신 일러스트. 배경은 수채화 그대로. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).
 - 소리는 모두 `python3 scripts/sound.py [이름...]`로 합성해 `godot/audio/sfx`, `godot/audio/bgm`에 OGG로 둔다(외부 소리 파일 없음). 효과음은 `Sound.Play("plop")`, 반복은 `Sound.Loop`, 배경음은 화면에서 `Music`을 재정의한다. 진동은 `Haptics.Pulse`/`Pattern`. 켜고 끄기는 `Settings`(user://settings.cfg, 수첩 설정 탭).
 - 고닷 낚시는 웹과 다르다(부채꼴 조준, 고등어 지점, 큰 놈, 고등어 도둑, 짧은 수치). 규칙은 코어 `SpotRules`, 수치는 `balance.json` spot·reel. 골든 테스트는 웹 수치(`TestData.WebReel`)로 계산만 비교한다. `docs/GAME_DESIGN.md` 3절.
+- 컷신 그림(9:16 한 장)은 `godot/art/cuts/`. 대사 줄에 `"cut": "<이름>"`을 적으면 그 줄부터 대화창 뒤에 화면 가득 깔리고 `"-"`로 걷는다. 깔린 동안 인물 그림은 숨는다.
 - 대화 내용은 `godot/data/dialogue.json`: `speakers`(이름, 이름표 색, 서는 쪽, 감정별 그림)와 `scenes`(이름 붙은 대화). 새 감정 그림은 `faces`에 이름을 붙여 넣는다.
 - 배경을 지운 일러스트는 `python3 scripts/clean_halo.py <그림들>`로 머리카락 사이 흰 테두리를 정리한다(제자리에서 고친다, 흰 옷은 남긴다). 머리색이 비친 크림빛 테두리가 남으면 머리 둘레에 흰 옷이 없는 그림에만 `--strong=0.45`를 준다(요리복 두 장에 썼다. 후드 그림에 쓰면 후드가 먹힌다). 갈색 머리 둘레에 가는 가닥과 분홍빛 바탕이 남으면 `--fringe`를 준다(흰머리·회색 머리 그림에는 쓰지 않는다). 정리한 뒤 어두운 바탕 위에 올려 눈으로 확인한다.
 - **SD 걷기 그림은 모두 오른쪽을 본다. 왼쪽으로 갈 때만 `FlipH = true`.** 시트를 자를 때 `sd_sheet.py ... --face=right`를 주면 얼굴 쪽을 재서 맞춰 준다(이미 자른 그림은 `python3 scripts/sd_sheet.py --face=right <그림들>`). 서기·앉기 같은 다른 포즈는 그림마다 다르니 쓰는 곳에서 확인한다.

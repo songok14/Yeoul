@@ -98,5 +98,10 @@ namespace Hanjeopsi.Core.Data
         public string Name;
         /// <summary>그 사람의 SD 그림 (godot/art/ 아래 경로, 확장자 없이). 일러스트 대신 작게 선다</summary>
         public string Art;
+        /// <summary>
+        /// 컷신 그림 (godot/art/cuts/ 파일 이름). 이 줄부터 대화창 뒤에 화면 가득 깔리고 장면 끝까지 남는다.
+        /// 깔려 있는 동안은 인물 그림을 띄우지 않는다. "-" 는 컷을 걷는다
+        /// </summary>
+        public string Cut;
     }
 }
