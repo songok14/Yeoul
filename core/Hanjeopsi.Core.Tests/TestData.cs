@@ -35,6 +35,8 @@ namespace Hanjeopsi.Core.Tests
                 }
                 // 고닷이 더한 요리와 의뢰(새 어종)도 뺀다
                 d.Recipes.Recipes.RemoveAll(r => Array.IndexOf(WebSpecies, r.Species) < 0);
+                // 고닷이 더한 생선구이(웹 어종이라도 웹에 없는 요리)도 뺀다
+                d.Recipes.Recipes.RemoveAll(r => r.Id.EndsWith("-gui") && r.Id != "bollak-gui");
                 d.RequestTemplates.RemoveAll(r => Array.IndexOf(WebSpecies, r.Species) < 0);
                 d.Balance.Time.SlotsPerDay = 4;
                 d.Balance.Chapter1.CastsPerTrip = 6;

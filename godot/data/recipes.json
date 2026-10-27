@@ -205,6 +205,425 @@
           "target": 0.5
         }
       ]
+    },
+    {
+      "id": "hwangnollaegi-gui",
+      "name": "황놀래기구이",
+      "species": "hwangnollaegi",
+      "price": 4000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.52
+        }
+      ]
+    },
+    {
+      "id": "ureok-gui",
+      "name": "우럭구이",
+      "species": "ureok",
+      "price": 11000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.56
+        }
+      ]
+    },
+    {
+      "id": "ssombaengi-gui",
+      "name": "쏨뱅이구이",
+      "species": "ssombaengi",
+      "price": 9000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.6
+        }
+      ]
+    },
+    {
+      "id": "gaebollak-gui",
+      "name": "개볼락구이",
+      "species": "gaebollak",
+      "price": 10000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.55
+        }
+      ]
+    },
+    {
+      "id": "noraemi-gui",
+      "name": "노래미구이",
+      "species": "noraemi",
+      "price": 7000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.5
+        }
+      ]
+    },
+    {
+      "id": "dodari-gui",
+      "name": "도다리구이",
+      "species": "dodari",
+      "price": 11000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.47
+        }
+      ]
+    },
+    {
+      "id": "gangdodari-gui",
+      "name": "강도다리구이",
+      "species": "gangdodari",
+      "price": 12000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.45
+        }
+      ]
+    },
+    {
+      "id": "dolgajami-gui",
+      "name": "돌가자미구이",
+      "species": "dolgajami",
+      "price": 14000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.49
+        }
+      ]
+    },
+    {
+      "id": "gwangeo-gui",
+      "name": "광어구이",
+      "species": "gwangeo",
+      "price": 25000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.43
+        }
+      ]
+    },
+    {
+      "id": "yangtae-gui",
+      "name": "양태구이",
+      "species": "yangtae",
+      "price": 11000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.53
+        }
+      ]
+    },
+    {
+      "id": "godeungeo-gui",
+      "name": "고등어구이",
+      "species": "godeungeo",
+      "price": 6000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.64
+        }
+      ]
+    },
+    {
+      "id": "jeongaengi-gui",
+      "name": "전갱이구이",
+      "species": "jeongaengi",
+      "price": 5000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.6
+        }
+      ]
+    },
+    {
+      "id": "gamseongdom-gui",
+      "name": "감성돔구이",
+      "species": "gamseongdom",
+      "price": 32000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.46
+        }
+      ]
+    },
+    {
+      "id": "chamdom-gui",
+      "name": "참돔구이",
+      "species": "chamdom",
+      "price": 29000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.44
+        }
+      ]
+    },
+    {
+      "id": "cheongeo-gui",
+      "name": "청어구이",
+      "species": "cheongeo",
+      "price": 4000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.62
+        }
+      ]
+    },
+    {
+      "id": "kkochigogi-gui",
+      "name": "꼬치고기구이",
+      "species": "kkochigogi",
+      "price": 8000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.57
+        }
+      ]
+    },
+    {
+      "id": "jeoneo-gui",
+      "name": "전어구이",
+      "species": "jeoneo",
+      "price": 4000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.66
+        }
+      ]
+    },
+    {
+      "id": "sungeo-gui",
+      "name": "숭어구이",
+      "species": "sungeo",
+      "price": 9000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.54
+        }
+      ]
+    },
+    {
+      "id": "beomdom-gui",
+      "name": "범돔구이",
+      "species": "beomdom",
+      "price": 4000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.51
+        }
+      ]
+    },
+    {
+      "id": "baekjogi-gui",
+      "name": "백조기구이",
+      "species": "baekjogi",
+      "price": 5000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.55
+        }
+      ]
+    },
+    {
+      "id": "mueuni-gui",
+      "name": "무늬오징어 통구이",
+      "species": "mueuni",
+      "price": 29000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.42
+        },
+        {
+          "flavor": "sweet",
+          "target": 0.5
+        }
+      ]
+    },
+    {
+      "id": "gabojingeo-gui",
+      "name": "갑오징어구이",
+      "species": "gabojingeo",
+      "price": 14000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.45
+        },
+        {
+          "flavor": "sweet",
+          "target": 0.55
+        }
+      ]
+    },
+    {
+      "id": "muneo-gui",
+      "name": "문어구이",
+      "species": "muneo",
+      "price": 23000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.48
+        },
+        {
+          "flavor": "sour",
+          "target": 0.4
+        }
+      ]
+    },
+    {
+      "id": "bungjangeo-gui",
+      "name": "붕장어구이",
+      "species": "bungjangeo",
+      "price": 9000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "sweet",
+          "target": 0.62
+        },
+        {
+          "flavor": "salty",
+          "target": 0.48
+        }
+      ]
+    },
+    {
+      "id": "imyeonsueo-gui",
+      "name": "임연수어구이",
+      "species": "imyeonsueo",
+      "price": 6000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.58
+        }
+      ]
+    },
+    {
+      "id": "ssugimi-gui",
+      "name": "쑤기미구이",
+      "species": "ssugimi",
+      "price": 11000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.5
+        }
+      ]
+    },
+    {
+      "id": "jeongeori-gui",
+      "name": "정어리구이",
+      "species": "jeongeori",
+      "price": 4000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.63
+        }
+      ]
+    },
+    {
+      "id": "mangsangeo-gui",
+      "name": "망상어구이",
+      "species": "mangsangeo",
+      "price": 4000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.52
+        }
+      ]
+    },
+    {
+      "id": "hakgongchi-gui",
+      "name": "학공치구이",
+      "species": "hakgongchi",
+      "price": 5000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.56
+        }
+      ]
+    },
+    {
+      "id": "hwangeo-gui",
+      "name": "황어구이",
+      "species": "hwangeo",
+      "price": 5000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.55
+        }
+      ]
+    },
+    {
+      "id": "bengedom-gui",
+      "name": "벵에돔구이",
+      "species": "bengedom",
+      "price": 18000,
+      "raw": false,
+      "steps": [
+        {
+          "flavor": "salty",
+          "target": 0.5
+        }
+      ]
     }
   ]
 }
