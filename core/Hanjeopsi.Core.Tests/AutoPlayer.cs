@@ -392,6 +392,8 @@ namespace Hanjeopsi.Core.Tests
         private void Market()
         {
             // 의뢰 먼저
+            // 마을에서 의뢰인에게 말을 걸어 다 맡는다
+            foreach (var req in S.Requests.ToList()) _g.AcceptRequest(req.Id);
             foreach (var req in S.Requests.ToList())
             {
                 if (_g.FishForRequest(req.Id) == null) continue;

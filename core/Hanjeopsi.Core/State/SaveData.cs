@@ -113,6 +113,14 @@ namespace Hanjeopsi.Core.State
         public int Reward;
         /// <summary>이날까지 납품해야 한다</summary>
         public int Deadline;
+        /// <summary>고닷: 의뢰인에게 말을 걸어 맡았는지 (false 면 마을에서 "!" 로 기다린다). 웹은 null (바로 맡은 것과 같다)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Accepted;
+
+        public bool IsAccepted()
+        {
+            return Accepted != false;
+        }
     }
 
     /// <summary>날이 바뀔 때 보여 줄 어제 요약</summary>

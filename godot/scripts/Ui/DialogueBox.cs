@@ -24,6 +24,8 @@ namespace Hanjeopsi.App.Ui
         private TextureRect _portrait;
         private string _portraitKey;
         private string _speakerId;
+        /// <summary>지금 그림이 SD (의뢰인)라 작게 세운다</summary>
+        private bool _sd;
         private PanelContainer _box, _nameTag;
         private Label _name, _text;
         private Polygon2D _next;
@@ -110,11 +112,11 @@ namespace Hanjeopsi.App.Ui
             var tex = _portrait.Texture;
             if (tex != null)
             {
-                float h = size.Y * 0.7f;
+                float h = size.Y * (_sd ? 0.3f : 0.7f);
                 float w = tex.GetWidth() * h / tex.GetHeight();
                 _portrait.Size = new Vector2(w, h);
                 float cx = right ? size.X * 0.66f : size.X * 0.34f;
-                _portrait.Position = new Vector2(cx - w / 2, boxTop + 120 - h * 0.72f);
+                _portrait.Position = new Vector2(cx - w / 2, _sd ? boxTop - h + 30 : boxTop + 120 - h * 0.72f);
             }
 
             // 선택지는 말하는 사람 반대쪽에 세워 얼굴을 가리지 않는다
@@ -128,6 +130,7 @@ namespace Hanjeopsi.App.Ui
 
         private string Side()
         {
+            if (_sd) return "right";
             if (string.IsNullOrEmpty(_speakerId)) return "left";
             return _data.SpeakerById(_speakerId).Side;
         }
@@ -187,6 +190,26 @@ namespace Hanjeopsi.App.Ui
         private void SetSpeaker(DialogueLine line)
         {
             bool narrator = string.IsNullOrEmpty(line.Speaker);
+            if (narrator && !string.IsNullOrEmpty(line.Name))
+            {
+                // 마을 의뢰인: 이름표와 SD 그림
+                _speakerId = null;
+                _nameTag.Visible = true;
+                _name.Text = line.Name;
+                _nameTag.AddThemeStyleboxOverride("panel", UiKit.Box(Palette.WoodDark, 34, 40, 12).WithShadow(0.3f, 10, 4));
+                string artKey = "art:" + line.Art;
+                if (artKey != _portraitKey)
+                {
+                    _portraitKey = artKey;
+                    _sd = true;
+                    _portrait.Texture = string.IsNullOrEmpty(line.Art) ? null : GD.Load<Texture2D>("res://art/" + line.Art + ".png");
+                    _portrait.Modulate = new Color(1, 1, 1, 0);
+                    CreateTween().TweenProperty(_portrait, "modulate:a", 1f, 0.25);
+                }
+                Layout();
+                return;
+            }
+            _sd = false;
             if (narrator)
             {
                 _nameTag.Visible = false;

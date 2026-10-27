@@ -122,6 +122,14 @@ namespace Hanjeopsi.App.Screens
         /// <summary>입질 때 머리 위 "!"</summary>
         private Label _mark;
         private GameButton _throw;
+        private VBoxContainer _quests;
+
+        private void RefreshQuests()
+        {
+            if (_tutorial || _quests == null) return;
+            foreach (Node c in _quests.GetChildren()) c.QueueFree();
+            foreach (var line in TownScreen.QuestLines(G)) _quests.AddChild(TownScreen.TrackerPill(line));
+        }
         private Tween _zoomTween, _nibbleTween;
         // SD 포즈와 기울기(도). 기울기는 목표값을 부드럽게 따라간다
         private string _pose;
@@ -226,6 +234,11 @@ namespace Hanjeopsi.App.Screens
             rowPad.AddThemeConstantOverride("margin_right", 30);
             rowPad.AddChild(row);
             top.AddChild(rowPad);
+            // 맡은 의뢰 추적 카드
+            _quests = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            _quests.AddThemeConstantOverride("separation", 6);
+            top.AddChild(_quests);
+            RefreshQuests();
             _info = UiKit.Text("", TextSize.Small, Palette.Paper, false, false, 8, new Color(Palette.NightDeep, 0.8f));
             _info.SizeFlagsHorizontal = SizeFlags.ExpandFill;
             _info.SizeFlagsVertical = SizeFlags.ShrinkCenter;
@@ -1228,7 +1241,19 @@ namespace Hanjeopsi.App.Screens
             var s = G.Save;
             G.RecordCatch(_species.Id, _size, released);
             _caught += 1;
-            if (!released) G.AddToCooler(_species.Id, _size);
+            if (!released)
+            {
+                G.AddToCooler(_species.Id, _size);
+                // 맡은 의뢰 고기면 알린다
+                var req = G.AcceptedRequestFor(_species.Id);
+                if (req != null)
+                {
+                    var t = G.Data.RequestTemplates[req.Template];
+                    int have = Math.Min(G.RequestFishHave(t.Species), t.Count);
+                    Toast(have >= t.Count ? F("questReady", t.Client) : F("questFish", _species.Name, have, t.Count), have >= t.Count ? Palette.GreenText : Palette.Gold, SafeTop + 420);
+                }
+                RefreshQuests();
+            }
             else s.Flags["released"] = true;
             Sound.Play(released ? "plop" : "coin", -3);
             SetInfo();

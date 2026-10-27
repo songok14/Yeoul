@@ -139,6 +139,14 @@ void fragment() {
             Layout();
         }
 
+        /// <summary>세운 그림이나 단 것을 뗀다</summary>
+        public void Remove(Control c)
+        {
+            _items.RemoveAll(it => it.Node == c);
+            _anchored.RemoveAll(it => it.Node == c);
+            if (IsInstanceValid(c)) c.QueueFree();
+        }
+
         /// <summary>세운 그림의 텍스처를 바꾼다 (포즈 바꾸기). 높이 기준은 그대로</summary>
         public void Swap(TextureRect r, Texture2D tex)
         {
@@ -168,6 +176,8 @@ void fragment() {
                 var it = _items[i];
                 _items[i] = (it.Node, at, it.Origin, it.Height);
             }
+            for (int i = 0; i < _anchored.Count; i++)
+                if (_anchored[i].Node == node) _anchored[i] = (node, at);
             Layout();
         }
 

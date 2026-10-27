@@ -19,5 +19,9 @@ namespace Hanjeopsi.Core.Data
         public double Mul;
         /// <summary>납품하면 켜지는 플래그 (노씨 의뢰 → nossiFavor). 없으면 null</summary>
         public string Flag;
+        /// <summary>고닷: 마을에 서 있는 의뢰인 SD 그림 (godot/art/ 아래, 예 customers/pension). -stand 를 붙여 쓴다</summary>
+        public string Sd;
+        /// <summary>고닷: 다 모아 건넸을 때 의뢰인의 고맙다는 말</summary>
+        public string Thanks;
     }
 }

@@ -45,7 +45,7 @@ namespace Hanjeopsi.App.Screens
 
         protected override IList<string> Tabs
         {
-            get { return new[] { T["tabCooler"], T["tabDex"], T["tabTaste"], T["tabJournal"], T["tabSettings"] }; }
+            get { return new[] { T["tabCooler"], T["tabQuest"], T["tabDex"], T["tabTaste"], T["tabJournal"], T["tabSettings"] }; }
         }
 
         protected override void Decorate(ArtStage stage)
@@ -94,9 +94,10 @@ namespace Hanjeopsi.App.Screens
             switch (Tab)
             {
                 case 0: Cooler(col); break;
-                case 1: Dex(col); break;
-                case 2: Taste(col); break;
-                case 3: Journal(col); break;
+                case 1: Quests(col); break;
+                case 2: Dex(col); break;
+                case 3: Taste(col); break;
+                case 4: Journal(col); break;
                 default: SettingsPage(col); break;
             }
             return paper;
@@ -348,6 +349,45 @@ namespace Hanjeopsi.App.Screens
             }
         }
 
+        // ───────── 의뢰 ─────────
+
+        /// <summary>맡은 의뢰, 마을에서 기다리는 의뢰, 이번 주 목표</summary>
+        private void Quests(VBoxContainer col)
+        {
+            var reqs = G.Save.Requests;
+            col.AddChild(Heading(T["questHead"], T["questSub"]));
+            if (reqs.Count == 0) col.AddChild(UiKit.Text(T["questNone"], TextSize.Small + 2, Palette.InkSoft, false, true));
+            foreach (var req in reqs.OrderByDescending(r => r.IsAccepted()))
+            {
+                var t = G.Data.RequestTemplates[req.Template];
+                var sp = G.Data.SpeciesById(t.Species);
+                int have = Math.Min(G.RequestFishHave(t.Species), t.Count);
+                int left = req.Deadline - G.Save.Day;
+                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                row.AddThemeConstantOverride("separation", 18);
+                row.AddChild(FishIcon(t.Species, 110));
+                var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+                text.AddThemeConstantOverride("separation", 2);
+                text.AddChild(UiKit.Text(t.Client + " · " + sp.Name + " " + t.Count + "마리", TextSize.Small + 2, Palette.Ink, true));
+                string state = !req.IsAccepted() ? T["questWaiting"] : have >= t.Count ? F("questGo", t.Client) : F("questHave", have, t.Count);
+                text.AddChild(UiKit.Text(state + " · " + (left <= 0 ? T["questToday"] : F("questDays", left)) + " · " + UiKit.Won(req.Reward), TextSize.Tiny + 2, !req.IsAccepted() ? Palette.GoldDark : have >= t.Count ? Palette.GreenDark : Palette.InkSoft, false, true));
+                row.AddChild(text);
+                col.AddChild(row);
+            }
+            if (G.IsWeekly && G.Save.Debt > 0)
+            {
+                col.AddChild(Rule());
+                col.AddChild(Heading(F("goalHead", G.Save.Week.No), T["goalSub"]));
+                var goals = G.WeekGoals();
+                for (int i = 0; i < goals.Count; i++)
+                {
+                    var p = G.GoalProgress(goals[i]);
+                    string prog = goals[i].Type == "species" ? "" : "  " + Math.Min(p.Now, p.Need).ToString("#,0") + "/" + p.Need.ToString("#,0");
+                    col.AddChild(UiKit.Text((G.GoalDone(i) ? "✔ " : "· ") + goals[i].Text + prog + "  (+" + UiKit.Won(goals[i].Reward) + ")", TextSize.Small, G.GoalDone(i) ? Palette.GreenDark : Palette.Ink, false, true));
+                }
+            }
+        }
+
         // ───────── 설정 ─────────
 
         private void SettingsPage(VBoxContainer col)
@@ -419,21 +459,25 @@ namespace Hanjeopsi.App.Screens
             switch (action)
             {
                 case "dex":
-                    ShowTab(1);
+                    ShowTab(2);
                     break;
                 case "detail":
-                    ShowTab(1);
+                    ShowTab(2);
                     DexDetail("bollak");
                     break;
                 case "taste":
-                    ShowTab(2);
+                    ShowTab(3);
                     break;
                 case "journal":
                     G.Save.JournalPages = 1;
-                    ShowTab(3);
+                    ShowTab(4);
+                    break;
+                case "quest":
+                    if (G.Save.Requests.Count > 0) G.AcceptRequest(G.Save.Requests[0].Id);
+                    ShowTab(1);
                     break;
                 case "settings":
-                    ShowTab(4);
+                    ShowTab(5);
                     break;
             }
         }

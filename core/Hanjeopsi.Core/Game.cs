@@ -263,9 +263,10 @@ namespace Hanjeopsi.Core
 
             summary.Spoiled = Fresh.ApplyDailyDecay(Save.Cooler, Save.Tackle);
 
-            int before = Save.Requests.Count;
+            // 맡지 않은 의뢰는 조용히 사라진다. 맡은 의뢰만 놓친 것으로 센다
+            int missed = Save.Requests.Count(r => r.Deadline < Save.Day && r.IsAccepted());
             Save.Requests = Save.Requests.Where(r => r.Deadline >= Save.Day).ToList();
-            summary.ExpiredRequests = before - Save.Requests.Count;
+            summary.ExpiredRequests = missed;
             RefreshRequests();
             summary.Trap = CheckTrap();
 
@@ -307,6 +308,8 @@ namespace Hanjeopsi.Core
                 Template = template,
                 Reward = JsMath.Round100((double)Market.TodayBasePrice(t.Species, Save.Day) * t.Count * t.Mul * b.RewardMul),
                 Deadline = Save.Day + b.DeadlineMin + (int)Math.Floor(rng.Next() * b.DeadlineRange),
+                // 고닷은 마을에서 의뢰인에게 말을 걸어 맡는다
+                Accepted = Save.Kit != null ? false : (bool?)null,
             });
         }
 
@@ -461,6 +464,24 @@ namespace Hanjeopsi.Core
             return pay;
         }
 
+        /// <summary>의뢰인에게 말을 걸어 의뢰를 맡는다. 맡은 날부터 기한을 다시 센다</summary>
+        public bool AcceptRequest(int requestId)
+        {
+            var req = Save.Requests.FirstOrDefault(r => r.Id == requestId);
+            if (req == null || req.IsAccepted()) return false;
+            var b = Data.Balance.Requests;
+            req.Accepted = true;
+            req.Deadline = Math.Max(req.Deadline, Save.Day + b.DeadlineMin);
+            Persist();
+            return true;
+        }
+
+        /// <summary>맡은 의뢰 가운데 이 어종을 기다리는 것 (낚시 화면 "의뢰 고기!")</summary>
+        public DeliveryRequest AcceptedRequestFor(string species)
+        {
+            return Save.Requests.FirstOrDefault(r => r.IsAccepted() && Data.RequestTemplates[r.Template].Species == species);
+        }
+
         /// <summary>의뢰에 맞는 물고기 (활어·선어 중 큰 순서). 모자라면 null</summary>
         public List<FishItem> FishForRequest(int requestId)
         {
@@ -479,7 +500,7 @@ namespace Hanjeopsi.Core
         {
             var fish = FishForRequest(requestId);
             var req = Save.Requests.FirstOrDefault(r => r.Id == requestId);
-            if (fish == null || req == null) return 0;
+            if (fish == null || req == null || !req.IsAccepted()) return 0;
             RemoveFish(fish.Select(f => f.Uid));
             Save.Requests = Save.Requests.Where(r => r.Id != requestId).ToList();
             Earn(req.Reward);

@@ -51,6 +51,15 @@ namespace Hanjeopsi.App.Screens
         }
 
         private readonly List<Walker> _walkers = new List<Walker>();
+
+        /// <summary>마을에 서 있는 의뢰인과 머리 위 표시 (! 새 의뢰, 볼락 1/2 모으는 중, ✔ 건넬 수 있음)</summary>
+        private readonly List<(int Id, TextureRect Node, Control Mark)> _clients = new List<(int, TextureRect, Control)>();
+        /// <summary>의뢰인 자리: 마당 양옆, 여울보다 조금 뒤</summary>
+        private Vector2 ClientSpot(int i)
+        {
+            return i == 0 ? new Vector2(58, _footY - 46) : new Vector2(404, _footY - 34);
+        }
+        private Control _tracker;
         private float _truckX = 330;
         /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 비 그림 두 장은 트럭이 다른 곳에 있다</summary>
         private static readonly Rect2 TruckArea = new Rect2(232, 290, 208, 115);
@@ -94,6 +103,7 @@ namespace Hanjeopsi.App.Screens
             Tappable(_truck, OpenTruck);
             _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
             AddVillagers(s.Slot);
+            RefreshClients();
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
@@ -110,6 +120,9 @@ namespace Hanjeopsi.App.Screens
             col.AddChild(_hud);
             col.AddChild(NewsRibbon());
             if (G.IsWeekly && s.Debt > 0) col.AddChild(GoalsPill());
+            _tracker = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            col.AddChild(_tracker);
+            RefreshTracker();
             col.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
 
             // ── 아래: 메뉴 ──
@@ -246,6 +259,11 @@ namespace Hanjeopsi.App.Screens
             _footY = Mathf.Min(640, _stage.ToLogical(new Vector2(0, menuTop)).Y + 6);
             _stage.Move(_yeoul, new Vector2(205, _footY));
             _stage.Move(_cat, new Vector2(118, _footY));
+            for (int i = 0; i < _clients.Count; i++)
+            {
+                _stage.Move(_clients[i].Node, ClientSpot(i));
+                _stage.Move(_clients[i].Mark, ClientSpot(i) + new Vector2(0, -122));
+            }
         }
 
         private Texture2D Tex(string path)
@@ -273,11 +291,172 @@ namespace Hanjeopsi.App.Screens
             return System.IO.Path.GetFileNameWithoutExtension(path);
         }
 
+        // ───────── 의뢰 ─────────
+
+        /// <summary>의뢰인을 다시 세운다 (의뢰를 맡거나 건넨 뒤)</summary>
+        private void RefreshClients()
+        {
+            foreach (var c in _clients)
+            {
+                _stage.Remove(c.Node);
+                _stage.Remove(c.Mark);
+            }
+            _clients.Clear();
+            var reqs = G.Save.Requests;
+            for (int i = 0; i < reqs.Count && i < 2; i++)
+            {
+                var req = reqs[i];
+                var t = G.Data.RequestTemplates[req.Template];
+                if (string.IsNullOrEmpty(t.Sd)) continue;
+                var at = ClientSpot(i);
+                var node = _stage.Place(Tex(t.Sd + "-stand"), at, 104);
+                node.FlipH = at.X > ArtStage.Logical.X / 2;
+                int id = req.Id;
+                Tappable(node, () => TapClient(id));
+                var mark = ClientMark(req);
+                Tappable(mark, () => TapClient(id));
+                _stage.Pin(mark, at + new Vector2(0, -122));
+                _clients.Add((id, node, mark));
+                // 머리 위 표시가 둥실 뜬다
+                var tw = mark.CreateTween().SetLoops();
+                tw.TweenProperty(mark, "modulate:a", 0.75f, 0.7).SetTrans(Tween.TransitionType.Sine);
+                tw.TweenProperty(mark, "modulate:a", 1f, 0.7).SetTrans(Tween.TransitionType.Sine);
+            }
+            foreach (var sign in _stage.GetChildren())
+                if (sign is SignButton sb) sb.MoveToFront();
+        }
+
+        private Control ClientMark(DeliveryRequest req)
+        {
+            var t = G.Data.RequestTemplates[req.Template];
+            bool ready = req.IsAccepted() && G.FishForRequest(req.Id) != null;
+            string text = !req.IsAccepted() ? "!" : ready ? "✔" : G.Data.SpeciesById(t.Species).Name + " " + Math.Min(G.RequestFishHave(t.Species), t.Count) + "/" + t.Count;
+            var color = !req.IsAccepted() ? Palette.Gold : ready ? Palette.Green : Palette.PaperLight;
+            var pill = new PanelContainer { MouseFilter = MouseFilterEnum.Stop };
+            pill.AddThemeStyleboxOverride("panel", UiKit.Box(color, 30, !req.IsAccepted() || ready ? 22 : 18, 4).WithBorder(Palette.Ink, 3).WithShadow(0.3f, 8, 3));
+            pill.AddChild(UiKit.Text(text, !req.IsAccepted() || ready ? TextSize.H1 : TextSize.Tiny + 2, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center));
+            return pill;
+        }
+
+        private void TapClient(int id)
+        {
+            var req = G.Save.Requests.FirstOrDefault(r => r.Id == id);
+            if (req == null) return;
+            var spot = _clients.FirstOrDefault(c => c.Id == id);
+            float x = spot.Node != null ? (spot.Node.FlipH ? ClientSpot(1).X - 60 : ClientSpot(0).X + 60) : 205;
+            WalkThen(x, () => ClientTalk(id));
+        }
+
+        /// <summary>의뢰인과 이야기: 새 의뢰면 듣고 맡기, 모았으면 건네기, 아직이면 무엇이 남았는지</summary>
+        private void ClientTalk(int id)
+        {
+            var req = G.Save.Requests.FirstOrDefault(r => r.Id == id);
+            if (req == null) return;
+            var t = G.Data.RequestTemplates[req.Template];
+            var sp = G.Data.SpeciesById(t.Species);
+            int left = req.Deadline - G.Save.Day;
+            string due = left <= 0 ? "오늘까지" : left + "일 안에";
+            if (!req.IsAccepted())
+            {
+                Talk(new[]
+                {
+                    ClientLine(t, t.Text),
+                    new DialogueLine { Text = sp.Name + " " + t.Count + "마리 · " + due + " · 보상 " + UiKit.Won(req.Reward) },
+                }, new[]
+                {
+                    new ModalButton("맡을게요", Palette.Green, () =>
+                    {
+                        G.AcceptRequest(id);
+                        Sound.Play("good", -4);
+                        Toast("의뢰를 맡았다: " + sp.Name + " " + t.Count + "마리", Palette.Gold);
+                        AfterQuest();
+                    }),
+                    new ModalButton("다음에", Palette.GrayDark, WalkBack),
+                });
+                return;
+            }
+            if (G.FishForRequest(id) != null)
+            {
+                Talk(new[] { new DialogueLine { Speaker = "yeoul", Face = "default", Text = "부탁하신 " + sp.Name + " " + t.Count + "마리 가져왔어요." } }, new[]
+                {
+                    new ModalButton("건네기 (" + UiKit.Won(req.Reward) + ")", Palette.Green, () => Deliver(id)),
+                    new ModalButton("나중에", Palette.GrayDark, WalkBack),
+                });
+                return;
+            }
+            int have = G.RequestFishHave(t.Species);
+            Talk(new[] { ClientLine(t, sp.Name + " " + t.Count + "마리, " + due + " 부탁해요.\n(지금 " + have + "마리)") }, null, WalkBack);
+        }
+
+        private DialogueLine ClientLine(RequestTemplate t, string text)
+        {
+            // 노씨는 대화 일러스트가 있다
+            if (t.Client == G.Data.Dialogue.SpeakerById("nossi").Name) return new DialogueLine { Speaker = "nossi", Face = "default", Text = text };
+            return new DialogueLine { Name = t.Client, Art = t.Sd + "-stand", Text = text };
+        }
+
+        private void Deliver(int id)
+        {
+            var req = G.Save.Requests.FirstOrDefault(r => r.Id == id);
+            if (req == null) return;
+            var t = G.Data.RequestTemplates[req.Template];
+            int reward = G.DeliverRequest(id);
+            if (reward <= 0) return;
+            _hud.Refresh();
+            Sound.Play("coin");
+            Haptics.Pattern((40, 0.5f, 50), (70, 0.7f, 0));
+            FloatText("+" + UiKit.Won(reward), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 420), Palette.Gold);
+            Talk(new[] { ClientLine(t, string.IsNullOrEmpty(t.Thanks) ? "고마워요!" : t.Thanks) }, null, () =>
+            {
+                AfterQuest();
+                // 보상 장비(노씨 부탁 등)가 생겼으면 알린다
+                if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold);
+            });
+        }
+
+        private void AfterQuest()
+        {
+            WalkBack();
+            RefreshClients();
+            RefreshTracker();
+        }
+
+        /// <summary>맡은 의뢰 추적 카드: 마을 소식 아래 한 줄씩 (어종 n/m · 의뢰인 · D-n)</summary>
+        private void RefreshTracker()
+        {
+            foreach (Node c in _tracker.GetChildren()) c.QueueFree();
+            foreach (var line in QuestLines(G)) _tracker.AddChild(Riser(TrackerPill(line)));
+        }
+
+        /// <summary>맡은 의뢰 한 줄씩 (낚시 화면도 쓴다)</summary>
+        public static List<string> QuestLines(CoreGame g)
+        {
+            var lines = new List<string>();
+            foreach (var req in g.Save.Requests.Where(r => r.IsAccepted()))
+            {
+                var t = g.Data.RequestTemplates[req.Template];
+                int left = req.Deadline - g.Save.Day;
+                int have = Math.Min(g.RequestFishHave(t.Species), t.Count);
+                lines.Add((have >= t.Count ? "✔ " : "") + g.Data.SpeciesById(t.Species).Name + " " + have + "/" + t.Count + " · " + t.Client + " · " + (left <= 0 ? "오늘까지" : "D-" + left));
+            }
+            return lines;
+        }
+
+        public static Control TrackerPill(string text)
+        {
+            var pill = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
+            pill.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.62f), 26, 26, 6).WithBorder(new Color(Palette.Gold, 0.6f), 2));
+            pill.AddChild(UiKit.Text(text, TextSize.Tiny + 2, text.StartsWith("✔") ? Palette.GreenText : Palette.Paper, false, false, 0, null, HorizontalAlignment.Center));
+            return pill;
+        }
+
         /// <summary>이 시간대에 나오는 마을 사람 둘까지. 여울보다 뒤 줄을 천천히 오가고 가끔 멈춘다</summary>
         private void AddVillagers(int slot)
         {
             var rng = GameState.I.Rng;
-            var pool = G.Data.Dialogue.Villagers.Where(v => v.Slots.Contains(slot)).OrderBy(_ => rng.Next()).Take(2).ToList();
+            // 의뢰인으로 서 있는 사람은 걸어 다니지 않는다
+            var busy = new HashSet<string>(G.Save.Requests.Select(r => G.Data.RequestTemplates[r.Template].Sd ?? ""));
+            var pool = G.Data.Dialogue.Villagers.Where(v => v.Slots.Contains(slot) && !busy.Contains("villagers/" + v.Id)).OrderBy(_ => rng.Next()).Take(2).ToList();
             for (int i = 0; i < pool.Count; i++)
             {
                 var v = pool[i];
@@ -455,16 +634,14 @@ namespace Hanjeopsi.App.Screens
             var lines = new List<DialogueLine>();
             if (r.Paid)
             {
-                lines.Add(new DialogueLine { Text = r.No + "주 상환일. 아침 일찍 은행 직원이 찾아왔다." });
-                lines.Add(new DialogueLine { Speaker = "banker", Face = "stamp", Text = r.No + "주 몫 확인했습니다.\n도장 찍어 드릴게요." });
+                lines.Add(new DialogueLine { Speaker = "banker", Face = "stamp", Text = r.No + "주 상환일이라 들렀어요.\n몫 확인했습니다. 도장 찍어 드릴게요." });
                 if (r.NextDue > 0)
                     lines.Add(new DialogueLine { Speaker = "banker", Face = "default", Text = "다음 주는 " + UiKit.Won(r.NextDue) + "이에요.\n이자 " + UiKit.Won(r.NextInterest) + "이 들어 있습니다." });
                 lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "애썼다. 밥 먹고 해." });
             }
             else
             {
-                lines.Add(new DialogueLine { Text = r.No + "주 상환일. 아침 일찍 은행 직원이 찾아왔다." });
-                lines.Add(new DialogueLine { Speaker = "banker", Face = "sorry", Text = UiKit.Won(r.Short) + "이 모자라네요.\n연체료 " + UiKit.Won(r.LateFee) + "이 붙습니다." });
+                lines.Add(new DialogueLine { Speaker = "banker", Face = "sorry", Text = r.No + "주 상환일인데 " + UiKit.Won(r.Short) + "이 모자라네요.\n연체료 " + UiKit.Won(r.LateFee) + "이 붙습니다." });
                 lines.Add(new DialogueLine { Speaker = "banker", Face = "worried", Text = "한 번 더 밀리면...\n저도 더는 기다려 드릴 수가 없어요." });
                 lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "괜찮다. 아직 안 끝났어." });
                 lines.Add(new DialogueLine { Speaker = "yeoul", Face = "default", Text = "이번 주에 " + UiKit.Won(r.NextDue) + ".\n꼭 낸다." });
@@ -513,6 +690,14 @@ namespace Hanjeopsi.App.Screens
                     break;
                 case "paid":
                     PayDay(new WeekResult { No = 1, Paid = true, NextInterest = 78_000, NextDue = 678_000 });
+                    break;
+                case "quest":
+                    if (G.Save.Requests.Count > 0) G.AcceptRequest(G.Save.Requests[0].Id);
+                    RefreshClients();
+                    RefreshTracker();
+                    break;
+                case "questTalk":
+                    if (G.Save.Requests.Count > 1) ClientTalk(G.Save.Requests[1].Id);
                     break;
                 case "late":
                     PayDay(new WeekResult { No = 1, Paid = false, Short = 120_000, LateFee = 12_000, NextDue = 810_000 });

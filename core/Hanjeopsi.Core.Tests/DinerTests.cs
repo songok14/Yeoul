@@ -131,6 +131,9 @@ namespace Hanjeopsi.Core.Tests
             var t = g.Data.RequestTemplates[req.Template];
             for (int i = 0; i < t.Count; i++) g.AddToCooler(t.Species, g.Data.SpeciesById(t.Species).MaxSize - 1);
             int rep = g.Save.Diner.Rep;
+            // 맡기 전에는 건넬 수 없다
+            Assert.Equal(0, g.DeliverRequest(req.Id));
+            Assert.True(g.AcceptRequest(req.Id));
             Assert.True(g.DeliverRequest(req.Id) > 0);
             Assert.Equal(rep + g.Data.Diner.RepRequest, g.Save.Diner.Rep);
         }

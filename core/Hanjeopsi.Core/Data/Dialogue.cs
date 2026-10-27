@@ -82,5 +82,9 @@ namespace Hanjeopsi.Core.Data
         public string Speaker;
         public string Face;
         public string Text;
+        /// <summary>speakers 에 없는 사람(마을 의뢰인)의 이름표. Speaker 가 비었을 때만</summary>
+        public string Name;
+        /// <summary>그 사람의 SD 그림 (godot/art/ 아래 경로, 확장자 없이). 일러스트 대신 작게 선다</summary>
+        public string Art;
     }
 }

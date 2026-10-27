@@ -562,6 +562,21 @@ Row 3: an elementary school boy with a backpack and a toy fishing net.
 Row 4: a young delivery woman on foot with a cap and a small parcel box.
 ```
 
+## 마을 의뢰인 SD 2 (2026-10-27)
+
+납품 의뢰가 마을 퀘스트로 바뀌어 의뢰인이 마을에 서 있다. 그림이 없는 넷은 지금 손님 SD로 대신 서 있다(바다횟집 사장 → 어부 삼촌, 읍내 일식집 → 조선소 청년, 포장마차 아저씨 → 택시 기사, 노씨 → 할아버지). 받으면 `godot/art/villagers/<id>-stand|walk-1|walk-2.png`로 넣고 `requests.json sd`를 바꾼다. 지금 여울 SD, 손님 SD, 노씨 대화 그림을 같이 첨부한다.
+
+```
+Create one SD character sheet for a mobile game, background solid light gray #EDEDED (no checkerboard, no text, no borders). Attached: my current SD characters and the dialogue illustration of the bait shop owner (keep exactly the same chibi style, 2 to 2.5 heads tall, soft anime coloring, clean outline).
+
+Make 5 Korean seaside village people, each in 3 poses in one row: walking step A (side view facing left), walking step B (side view facing left, other leg forward), standing front view. 5 rows x 3 columns, wide equal spacing, same scale, same ground line, full body with feet visible.
+Row 1: Mr. No, the gruff bait shop owner from the attached illustration, in his 60s, same face, hair and apron, holding a small bait box.
+Row 2: the owner of a seaside raw fish restaurant, man in his 40s, white chef coat with rolled sleeves, rubber apron and rubber boots, a towel around his neck.
+Row 3: a Japanese restaurant chef from the town, man in his 30s, white chef jacket and white chef hat, neat and polite.
+Row 4: an old street food stall owner, man in his 60s, red cap, padded vest, a hand towel on his shoulder.
+Row 5: a guesthouse grandmother in her 70s, short curly gray hair, warm cardigan, holding a straw basket.
+```
+
 ## 상환 장면 은행 직원 (대화 일러스트, 2026-10-26)
 
 주간 상환 장면에 들어갈 감정 일러스트. 지금 막순 할머니·노씨 대화 일러스트를 같이 첨부한다.

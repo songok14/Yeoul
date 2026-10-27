@@ -50,10 +50,6 @@ namespace Hanjeopsi.App.Screens
             get { return T["title"]; }
         }
 
-        protected override IList<string> Tabs
-        {
-            get { return new[] { T["tabAuction"], F("tabRequest", G.Save.Requests.Count) }; }
-        }
 
         protected override void BuildHeader()
         {
@@ -63,8 +59,8 @@ namespace Hanjeopsi.App.Screens
 
         protected override Control BuildPage()
         {
-            SetTabLabel(1, F("tabRequest", G.Save.Requests.Count));
-            return Tab == 0 ? AuctionPage() : RequestPage();
+            // 납품 의뢰는 마을 의뢰인에게 직접 건넨다 (2026-10-27). 위판장은 경매만
+            return AuctionPage();
         }
 
         // ───────── 경매 ─────────
@@ -340,93 +336,6 @@ namespace Hanjeopsi.App.Screens
             return (int)(Math.Round(v / 100) * 100);
         }
 
-        // ───────── 납품 의뢰 ─────────
-
-        private Control RequestPage()
-        {
-            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            col.AddThemeConstantOverride("separation", 26);
-            var reqs = G.Save.Requests;
-            if (reqs.Count == 0)
-            {
-                var paper = Paper();
-                paper.CustomMinimumSize = new Vector2(0, 420);
-                var l = UiKit.Text(T["noRequest"], TextSize.Body, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
-                l.VerticalAlignment = VerticalAlignment.Center;
-                paper.AddChild(l);
-                col.AddChild(paper);
-                return col;
-            }
-            foreach (var req in reqs.ToList()) col.AddChild(RequestCard(req));
-            return col;
-        }
-
-        private Control RequestCard(DeliveryRequest req)
-        {
-            var t = G.Data.RequestTemplates[req.Template];
-            var sp = G.Data.SpeciesById(t.Species);
-            var card = Paper(44, 34);
-            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            col.AddThemeConstantOverride("separation", 16);
-            card.AddChild(col);
-
-            var head = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            var client = UiKit.Text(t.Client, TextSize.H1, Palette.Ink, true);
-            client.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-            head.AddChild(client);
-            int left = req.Deadline - G.Save.Day;
-            head.AddChild(Pill(left <= 0 ? T["today"] : F("dday", left), left <= 1 ? Palette.Red : Palette.GrayDark, Colors.White));
-            col.AddChild(head);
-            col.AddChild(UiKit.Text("“" + t.Text + "”", TextSize.Small + 2, Palette.InkSoft, false, true));
-            col.AddChild(Rule());
-
-            var mid = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            mid.AddThemeConstantOverride("separation", 24);
-            mid.AddChild(FishIcon(t.Species, 230));
-            var need = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
-            need.AddThemeConstantOverride("separation", 6);
-            need.AddChild(UiKit.Text(F("need", sp.Name, t.Count), TextSize.Body + 2, Palette.Ink, true));
-            need.AddChild(UiKit.Text(T["needSub"], TextSize.Tiny, Palette.InkSoft));
-            int have = G.RequestFishHave(t.Species);
-            need.AddChild(UiKit.Text(F("have", have), TextSize.Small, have >= t.Count ? Palette.GreenDark : Palette.RedDark, true));
-            mid.AddChild(need);
-            col.AddChild(mid);
-
-            var foot = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            var reward = UiKit.Text(F("reward", UiKit.Won(req.Reward)), TextSize.H1, Palette.RedDark, true);
-            reward.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-            reward.VerticalAlignment = VerticalAlignment.Center;
-            foot.AddChild(reward);
-            var btn = SmallButton(T["deliver"], Palette.Green, () => ConfirmDeliver(req), 260, 100);
-            btn.SetEnabled(G.FishForRequest(req.Id) != null);
-            foot.AddChild(btn);
-            col.AddChild(foot);
-            return card;
-        }
-
-        private void ConfirmDeliver(DeliveryRequest req)
-        {
-            var t = G.Data.RequestTemplates[req.Template];
-            var sp = G.Data.SpeciesById(t.Species);
-            Modal(F("deliverTitle", t.Client), F("deliverBody", sp.Name, t.Count), new[]
-            {
-                new ModalButton(T["cancel"], Palette.GrayDark),
-                new ModalButton(T["deliverOk"], Palette.Green, () =>
-                {
-                    int reward = G.DeliverRequest(req.Id);
-                    if (reward <= 0) return;
-                    HudBar.Refresh();
-                    FloatText("+" + UiKit.Won(reward), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 420), Palette.Gold);
-                    Sound.Play("coin");
-                    Redraw();
-                    // 노씨는 대화창으로, 다른 손님은 짧은 알림으로
-                    if (!string.IsNullOrEmpty(t.Flag) && t.Client == G.Data.Dialogue.SpeakerById("nossi").Name)
-                        Say("nossi", "default", G.Data.Dialogue.NossiSays["favor"]);
-                    else Toast(t.Client + ": " + T["thanks"]);
-                }),
-            });
-        }
-
         // ───────── CI 사진 ─────────
 
         public override void ShotSetup(string action)
@@ -435,9 +344,6 @@ namespace Hanjeopsi.App.Screens
             {
                 case "auction":
                     Auction(G.CoolerGroups()[0].Items);
-                    break;
-                case "request":
-                    ShowTab(1);
                     break;
             }
         }
