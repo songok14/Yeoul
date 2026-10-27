@@ -218,6 +218,10 @@ namespace Hanjeopsi.App.Screens
             _field.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _field.GuiInput += OnFieldInput;
             Art.AddChild(_field);
+            // 낚싯대는 여울 그림 바로 아래 층에 그린다 (손이 대를 쥔 것처럼)
+            var rodView = _field.MakeRodView();
+            _stage.AddChild(rodView);
+            _stage.MoveChild(rodView, _yeoul.GetIndex());
 
             // ── 아래 안내판: 큰 글, 작은 글, 게이지 ──
             _panel = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
@@ -497,6 +501,7 @@ namespace Hanjeopsi.App.Screens
             _field.BobberVisible = false;
             _field.ShadowVisible = false;
             _field.LineTo = null;
+            _field.Dangle = true;
             _field.Bend = 0;
             _field.Fighting = false;
             SetPose("fish-ready");
@@ -613,6 +618,7 @@ namespace Hanjeopsi.App.Screens
         private void Cast()
         {
             _dist01 = G.Reel.CastDistance(_gaugePos, Reach);
+            _field.Dangle = false;
             ShowThrow(false);
             if (!_tutorial)
             {
