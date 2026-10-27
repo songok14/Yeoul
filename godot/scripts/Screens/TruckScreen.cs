@@ -320,7 +320,8 @@ namespace Hanjeopsi.App.Screens
             ClearBody();
             // 손님마다 키가 다르다 (꼬마는 작게)
             _stage.Swap(_customer, Tex(_who.Id + "-walk"), CustomerHeight * _who.Height, new Vector2(0.5f, 1));
-            _customer.FlipH = true;
+            // 걷기 그림은 오른쪽을 본다 (트럭 쪽)
+            _customer.FlipH = false;
             _customer.Visible = true;
             Walk(OffLeft, CustomerX, _auto != null ? 0.4 : 0.9, () =>
             {
@@ -550,7 +551,7 @@ namespace Hanjeopsi.App.Screens
             SetBubble(null);
             ClearBody();
             _stage.Swap(_customer, Tex(_who.Id + "-walk"));
-            _customer.FlipH = false;
+            _customer.FlipH = true;
             Walk(CustomerX, OffLeft, 0.7, () =>
             {
                 _customer.Visible = false;

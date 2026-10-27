@@ -506,7 +506,8 @@ namespace Hanjeopsi.App.Screens
                 Texture = frames[0],
                 ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
                 StretchMode = TextureRect.StretchModeEnum.Scale,
-                FlipH = true,
+                // 걷기 그림은 오른쪽을 본다
+                FlipH = false,
                 MouseFilter = MouseFilterEnum.Ignore,
                 Size = new Vector2(300, 257),
             };

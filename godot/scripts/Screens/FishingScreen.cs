@@ -42,15 +42,15 @@ namespace Hanjeopsi.App.Screens
         private const float Horizon = 290;
         private const float Shore = 560;
         private const float PanelHeight = 300;
-        // 여울은 왼쪽 앞에서 오른쪽 바다로 대를 내민다. 고등어는 왼쪽 끝
-        private static readonly Vector2 YeoulFoot = new Vector2(150, 690);
-        /// <summary>던지기 부채꼴이 퍼지기 시작하는 곳 (여울 앞 물가)</summary>
-        private static readonly Vector2 FanApex = new Vector2(168, 560);
+        // 여울은 방파제 가운데 서서 바다를 본다. 고등어는 왼쪽, 쿨러는 오른쪽
+        private static readonly Vector2 YeoulFoot = new Vector2(225, 690);
+        /// <summary>던지기 부채꼴이 퍼지기 시작하는 곳 (여울 앞 물가, 방파제 가운데)</summary>
+        private static readonly Vector2 FanApex = new Vector2(225, 560);
         private const float YeoulHeight = 168;
-        private static readonly Vector2 CatFoot = new Vector2(80, 686);
+        private static readonly Vector2 CatFoot = new Vector2(140, 686);
         // 쿨러는 여울 오른쪽 방파제 위 (긴 화면에서도 잘리지 않게). 고등어는 여울 앞을 지나 쿨러 옆까지 살금살금 간다
-        private static readonly Vector2 CoolerFoot = new Vector2(236, 668);
-        private static readonly Vector2 CatThiefFoot = new Vector2(196, 682);
+        private static readonly Vector2 CoolerFoot = new Vector2(318, 668);
+        private static readonly Vector2 CatThiefFoot = new Vector2(280, 682);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
         // 새벽 · 아침 · 점심 · 저녁 · 밤
         private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
@@ -128,7 +128,9 @@ namespace Hanjeopsi.App.Screens
         {
             if (_tutorial || _quests == null) return;
             foreach (Node c in _quests.GetChildren()) c.QueueFree();
-            foreach (var line in TownScreen.QuestLines(G)) _quests.AddChild(TownScreen.TrackerPill(line));
+            // 바다를 가리지 않게 한 줄로
+            string line = TownScreen.QuestSummary(G);
+            if (line != null) _quests.AddChild(TownScreen.TrackerPill(line));
         }
         private Tween _zoomTween, _nibbleTween;
         // SD 포즈와 기울기(도). 기울기는 목표값을 부드럽게 따라간다
@@ -137,6 +139,9 @@ namespace Hanjeopsi.App.Screens
         // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
         private float _pullHold;
         private bool _shotPull;
+        /// <summary>기다리는 동안 다음 작은 볼거리까지 (먼 물이 톡 튀거나 고등어가 딴짓을 한다)</summary>
+        private float _idleT;
+        private bool _catIdle;
         /// <summary>프롤로그 튜토리얼: 저녁 방파제, 볼락 한 마리, 고등어와 쿨러는 아직 없다, 줄이 터질 뻔하면 구해 준다</summary>
         private bool _tutorial;
 
@@ -184,9 +189,22 @@ namespace Hanjeopsi.App.Screens
                 _stage.AddChild(fx);
             }
             Art.AddChild(_stage);
+            // 하늘에 갈매기 (밤과 궂은 날은 빼고)
+            if (!night && weather != "typhoon" && weather != "snow" && weather != "rain")
+            {
+                var gulls = new Gulls(_stage, 3, tintSlot == 3 ? new Color("4a3a40") : new Color("33404d"));
+                gulls.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+                _stage.AddChild(gulls);
+            }
+            // 발밑 그림자 (방파제 위에 떠 보이지 않게)
+            var shadows = new FootShadows(_stage);
+            shadows.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            _stage.AddChild(shadows);
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
             SetPose("fish-ready");
+            shadows.Add(_yeoul, 62);
+            shadows.Add(_cat, 44);
 
             _field = new FishingField(_stage)
             {
@@ -278,11 +296,11 @@ namespace Hanjeopsi.App.Screens
 
         /// <summary>
         /// 방향(-1~1)과 거리(0 여울 발밑, 1 수평선)로 물 위 자리. z 는 그 거리에서의 크기.
-        /// 여울 앞(FanApex)에서 부채꼴로 퍼진다: 멀수록 좌우로 넓고, 가운데 줄은 바다 한가운데로 향한다
+        /// 방파제 가운데(FanApex)에서 좌우 대칭 부채꼴로 퍼진다: 멀수록 좌우로 넓고, 가운데 줄은 똑바로 바다로 향한다
         /// </summary>
         private static Vector3 PosFor(float angle, float d)
         {
-            float cx = FanApex.X + (ArtStage.Logical.X / 2 - FanApex.X) * d;
+            float cx = FanApex.X;
             float spread = d * 215 * (1 - 0.3f * d);
             // 같은 거리라도 옆으로 갈수록 조금 가까이(아래로) 와서 끝이 둥근 부채꼴이 된다
             return new Vector3(
@@ -504,7 +522,7 @@ namespace Hanjeopsi.App.Screens
             HideCatBubble();
             double a = _hintSpot.Angle;
             string dir = a < -0.3 ? T["left"] : a > 0.3 ? T["right"] : T["front"];
-            _catBubble = Bubble(Art, F("catHint", dir), _stage.ToLocal(CatFoot + new Vector2(-8, -60)), 0);
+            _catBubble = Bubble(Art, F("catHint", dir), _stage.ToLocal(CatFoot + new Vector2(-30, -60)), 0);
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + (Math.Abs(a) <= 0.3 ? "sit-front" : "sit-side") + ".png"));
             _cat.FlipH = a > 0.3;
             Hop(_cat, 12);
@@ -612,7 +630,7 @@ namespace Hanjeopsi.App.Screens
                 float x = Mathf.Lerp(from.X, _target.X, t);
                 float y = (1 - t) * (1 - t) * from.Y + 2 * (1 - t) * t * peak + t * t * _target.Y;
                 _field.BobberAt = new Vector2(x, y);
-                _field.BobberScale = Mathf.Lerp(1.4f, _targetScale, t);
+                _field.BobberScale = Mathf.Lerp(1.3f, _targetScale, t);
                 _field.LineTo = _field.BobberAt;
             }), 0f, 1f, 0.65).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
             tw.TweenCallback(Callable.From(Landed));
@@ -636,7 +654,50 @@ namespace Hanjeopsi.App.Screens
             if (!_tutorial) _wait.Scale(G.WaitMul());
             _thiefAt = _tutorial ? -1 : G.Spot.RollThief(G.Save.Cooler.Count, rng);
             _thiefDone = false;
+            _idleT = 3 + (float)rng.Next() * 3;
             TellWait();
+        }
+
+        /// <summary>
+        /// 기다리는 동안 작은 볼거리: 먼 물에서 잔고기가 톡 튀거나(물고기 모습은 없이 물보라만),
+        /// 고등어가 기지개를 켜고 식빵을 굽고 하품을 한다
+        /// </summary>
+        private void WaitIdle()
+        {
+            var rng = GameState.I.Rng;
+            _idleT = 5 + (float)rng.Next() * 6;
+            double r = rng.Next();
+            if (_tutorial || r < 0.55)
+            {
+                var at = PosFor((float)(rng.Next() * 2 - 1), 0.3f + (float)rng.Next() * 0.65f);
+                var p = new Vector2(at.X, at.Y);
+                // 찌 바로 옆은 피한다 (입질로 헷갈리지 않게)
+                if (p.DistanceTo(_target) < 40) p.X += p.X < _target.X ? -50 : 50;
+                _field.AddSplash(p, 0.3f * at.Z);
+                Sound.Play("plop", -18, 1.35f);
+                return;
+            }
+            string[] poses = { "stretch", "loaf", "meow-1" };
+            string pose = poses[(int)(rng.Next() * poses.Length)];
+            _catIdle = true;
+            _cat.FlipH = false;
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + pose + ".png"));
+            if (pose == "meow-1")
+            {
+                var idle = G.Data.Dialogue.CatIdle;
+                if (idle.Count > 0) Bubble(Art, idle[(int)(rng.Next() * idle.Count)], _stage.ToLocal(CatFoot + new Vector2(-30, -60)), 1.4f);
+                Sound.Play("meow-short", -12);
+            }
+            Later(pose == "loaf" ? 4 : 2.2, CatSitBack);
+        }
+
+        /// <summary>딴짓하던 고등어가 다시 앉아 찌를 본다</summary>
+        private void CatSitBack()
+        {
+            if (!_catIdle || _thiefActive) return;
+            _catIdle = false;
+            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/sit-side.png"));
+            _cat.FlipH = false;
         }
 
         /// <summary>떨어진 자리가 좋은지 알려 준다</summary>
@@ -680,8 +741,8 @@ namespace Hanjeopsi.App.Screens
             _thiefT = 0;
             Sound.Play("sneak", -2);
             Haptics.Pulse(25, 0.25f);
-            // 오른쪽으로 걸어가며 여울 앞을 지난다 (그림은 왼쪽을 본다)
-            _cat.FlipH = true;
+            // 오른쪽으로 걸어가며 여울 앞을 지난다 (걷기 그림은 오른쪽을 본다)
+            _cat.FlipH = false;
             _stage.MoveChild(_cat, _stage.GetChildCount() - 1);
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/walk-1.png"));
             Tell(T["thief"], T["thiefSub"], Palette.Gold);
@@ -706,6 +767,8 @@ namespace Hanjeopsi.App.Screens
             _field.CoolerLid = 0;
             Sound.Play("hiss");
             Haptics.Tap();
+            // 뛰기·먹기 그림은 왼쪽을 본다. 쿨러 쪽(오른쪽)을 보게 뒤집는다
+            _cat.FlipH = true;
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/jump.png"));
             Hop(_cat, 20);
             Toast(T["thiefStopped"], Palette.Paper, SafeTop + 420);
@@ -720,6 +783,7 @@ namespace Hanjeopsi.App.Screens
             _field.CoolerLid = 0;
             var fish = G.CatSteal();
             SetInfo();
+            _cat.FlipH = true;
             _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/eat.png"));
             Sound.Play("steal");
             Haptics.Pulse(60, 0.3f);
@@ -743,6 +807,7 @@ namespace Hanjeopsi.App.Screens
         {
             _phase = Phase.Bite;
             _biteElapsed = 0;
+            CatSitBack();
             var rng = GameState.I.Rng;
             int zone = G.Fishing.ZoneOf(_dist01);
             if (_tutorial)
@@ -1391,9 +1456,12 @@ namespace Hanjeopsi.App.Screens
                     _waitT += dt;
                     if (!_thiefDone && _thiefAt >= 0 && _waitT >= _thiefAt)
                     {
+                        _catIdle = false;
                         StartThief();
                         break;
                     }
+                    _idleT -= dt;
+                    if (_idleT <= 0) WaitIdle();
                     var w = _wait.Step(dt, GameState.I.Rng);
                     if (w.Nibble) Nibble();
                     if (w.Bite) StartBite();

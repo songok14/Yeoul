@@ -198,6 +198,17 @@ namespace Hanjeopsi.Core
             return WeatherToday().BigAdd + EventBig();
         }
 
+        /// <summary>지금 마을 마당을 지나가는 사람 수 (시간대와 날씨)</summary>
+        public int VillagersWanted()
+        {
+            var t = Data.Balance.Town;
+            if (t.Walkers.Count == 0) return 0;
+            int n = t.Walkers[Math.Min(Save.Slot, t.Walkers.Count - 1)];
+            int less;
+            if (t.WeatherLess.TryGetValue(WeatherToday().Id, out less)) n -= less;
+            return Math.Max(0, n);
+        }
+
         /// <summary>오늘 방파제에 나갈 수 있나 (태풍이면 출입 금지)</summary>
         public bool CanFishToday()
         {

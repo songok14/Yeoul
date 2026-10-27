@@ -112,10 +112,11 @@ namespace Hanjeopsi.App.Ui
             var tex = _portrait.Texture;
             if (tex != null)
             {
-                float h = size.Y * (_sd ? 0.3f : 0.7f);
+                // SD(대화 일러스트가 없는 의뢰인)는 마당 사람 크기와 어울리게 작게, 이름표 위 오른쪽에
+                float h = _sd ? Mathf.Min(size.Y * 0.24f, 470) : size.Y * 0.7f;
                 float w = tex.GetWidth() * h / tex.GetHeight();
                 _portrait.Size = new Vector2(w, h);
-                float cx = right ? size.X * 0.66f : size.X * 0.34f;
+                float cx = _sd ? size.X * 0.74f : right ? size.X * 0.66f : size.X * 0.34f;
                 _portrait.Position = new Vector2(cx - w / 2, _sd ? boxTop - h + 30 : boxTop + 120 - h * 0.72f);
             }
 

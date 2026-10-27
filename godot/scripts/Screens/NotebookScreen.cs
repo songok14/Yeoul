@@ -45,8 +45,12 @@ namespace Hanjeopsi.App.Screens
 
         protected override IList<string> Tabs
         {
-            get { return new[] { T["tabCooler"], T["tabQuest"], T["tabDex"], T["tabTaste"], T["tabJournal"], T["tabSettings"] }; }
+            // 설정은 탭이 아니라 제목 줄 단추 (탭 다섯이면 글자가 넉넉하다)
+            get { return new[] { T["tabCooler"], T["tabQuest"], T["tabDex"], T["tabTaste"], T["tabJournal"] }; }
         }
+
+        /// <summary>설정 쪽 번호 (탭 줄에는 없다)</summary>
+        private const int SettingsTab = 5;
 
         protected override void Decorate(ArtStage stage)
         {
@@ -72,6 +76,12 @@ namespace Hanjeopsi.App.Screens
             {
                 if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Left && !mb.Pressed) TapCat();
             };
+            var settings = new GameButton(T["tabSettings"], Palette.GrayDark, () => ShowTab(SettingsTab), null, TextSize.Small, 84)
+            {
+                CustomMinimumSize = new Vector2(150, 84),
+                SizeFlagsVertical = SizeFlags.ShrinkCenter,
+            };
+            HeaderRight.AddChild(settings);
             HeaderRight.AddChild(_cat);
             var tw = _cat.CreateTween().SetLoops();
             tw.TweenProperty(_cat, "scale", new Vector2(1, 1.03f), 1.3).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
@@ -477,7 +487,7 @@ namespace Hanjeopsi.App.Screens
                     ShowTab(1);
                     break;
                 case "settings":
-                    ShowTab(5);
+                    ShowTab(SettingsTab);
                     break;
             }
         }

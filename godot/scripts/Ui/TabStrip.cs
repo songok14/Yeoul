@@ -61,6 +61,9 @@ namespace Hanjeopsi.App.Ui
             bool first = _selected < 0;
             _selected = i;
             for (int k = 0; k < _labels.Count; k++) _labels[k].LabelSettings.FontColor = k == i ? Palette.Ink : Palette.GrayText;
+            // 탭 줄 밖 쪽(수첩 설정처럼 제목 줄 단추로 여는 쪽)이면 고른 탭이 없다
+            _knob.Visible = i >= 0 && i < _buttons.Count;
+            if (!_knob.Visible) return;
             MoveKnob(!first);
         }
 
@@ -71,7 +74,7 @@ namespace Hanjeopsi.App.Ui
 
         private void MoveKnob(bool animate)
         {
-            if (_selected < 0 || _row.Size.X <= 0) return;
+            if (_selected < 0 || _selected >= _buttons.Count || _row.Size.X <= 0) return;
             float w = _row.Size.X / _buttons.Count;
             var pos = new Vector2(w * _selected + 4, 0);
             var size = new Vector2(w - 8, _row.Size.Y);

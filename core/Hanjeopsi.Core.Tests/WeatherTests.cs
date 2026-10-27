@@ -57,6 +57,21 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 마을_사람은_아침과_저녁에_많고_새벽과_밤과_궂은_날엔_적다()
+        {
+            var g = Game.NewGame(TestData.Full, 3);
+            g.ForcedWeather = "clear";
+            var bySlot = Enumerable.Range(0, 5).Select(s => { g.Save.Slot = s; return g.VillagersWanted(); }).ToList();
+            Assert.True(bySlot[1] > bySlot[0] && bySlot[3] > bySlot[4]);
+            Assert.True(bySlot[1] >= bySlot[2]);
+            g.Save.Slot = 1;
+            g.ForcedWeather = "rain";
+            Assert.True(g.VillagersWanted() < bySlot[1]);
+            g.ForcedWeather = "typhoon";
+            Assert.Equal(0, g.VillagersWanted());
+        }
+
+        [Fact]
         public void 웹_데이터는_늘_맑다()
         {
             var g = Game.NewGame(TestData.Game, 3);

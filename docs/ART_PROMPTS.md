@@ -59,7 +59,7 @@ Style: cute chibi SD character, 2.5 heads tall, big head, small rounded body, sh
 
 Layout: 2 rows x 4 columns, every figure full body, exactly the same scale, all standing on the same baseline, generous empty space between figures so nothing touches or overlaps.
 Row 1: front view standing relaxed, three-quarter front view, side view facing left, back view.
-Row 2: idle pose with hands in jacket pockets, waving hello with a small smile, walking side view facing left with left foot forward, walking side view facing left with right foot forward.
+Row 2: idle pose with hands in jacket pockets, waving hello with a small smile, walking side view facing right with right foot forward, walking side view facing right with left foot forward.
 
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow.
 ```
@@ -78,6 +78,36 @@ Props: a simple float fishing rod with a small spinning reel (thin, dark gray), 
 Layout: 2 rows x 4 columns, full body, same scale, same baseline, all facing left in side or three-quarter view, generous empty space between poses, the fishing rod must stay inside each pose's own space.
 Row 1: casting the rod overhead with both hands, sitting on a small stool holding the rod and watching the float calmly, striking with the rod jerked up and eyes sharp, reeling with the rod bent and leaning back with effort.
 Row 2: holding up a fish proudly with both hands and a bright smile, shoulders dropped holding an empty line after the fish got away, pinching salt over a frying pan with careful focus, serving a plate forward with both hands and a nervous smile.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow.
+```
+
+## SD 2-2. 여울 낚시 포즈 다시 (방파제 가운데, 2026-10-27)
+
+지금 낚시 포즈 여덟 장은 투명하게 만들 때 얼굴 앞쪽(이마·뺨)과 후드 위가 배경과 함께 지워졌다. 그리고 여울이 방파제 가운데 서서 좌우 대칭 부채꼴로 던지도록 바꿨다(사용자 결정 2026-10-27). 그래서 **뒤에서 본 모습 중심**으로 다시 뽑는다. 지금 여울 SD(기본 시트)와 방파제 배경을 같이 첨부한다.
+
+받으면: `python3 scripts/sd_sheet.py <시트> 2 4 <임시 폴더> ready,wait,cast,sit,bite,reel,pull,joy`로 자르고, 한 장씩 `python3 scripts/sd_pose.py <그림> fish-<이름> --body=<몸 오른쪽 끝 x>`로 `godot/art/yeoul/`와 `poses.json`에 넣는다(감기 `reel`은 `--erase`로 대를 지운다. 게임이 대를 그린다). 얼굴과 후드 둘레는 어두운 바탕에 올려 눈으로 확인한다.
+
+```
+Create one game character pose sheet for a mobile fishing game. Attached images: the current chibi SD sheet of the heroine (keep exactly her design and the same chibi style) and the watercolor breakwater background (use it only for colors and light).
+
+Character: Han Yeoul, a 29-year-old Korean woman. Long brown hair pulled up into a high messy bun with a few loose strands, brown eyes, oversized cream-white hooded jacket with toggle buttons, white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants with side pockets, chunky white-gray sneakers.
+
+Scene idea: she stands in the middle of a seawall, facing the open sea, so the player mostly sees her from behind. She is right-handed. The fishing rod is thin, dark and straight unless bent by a fish, held in front of her and pointing up and forward toward the sea, leaning a little to the right so it never hides behind her head. The whole rod and its tip must stay inside each pose's own cell. No fishing line, no float, no fish, no water, no ground.
+
+Style: cute chibi SD, 2.5 heads tall, big head, small rounded body, soft anime coloring, soft cel shading with a light watercolor texture, light from the upper left. A clean continuous dark brown outline around the whole silhouette, including her face, cheeks and the white hood, so every light part separates clearly from the background.
+
+Layout: 2 rows x 4 columns, full body with both feet visible, exactly the same scale, all on the same baseline, wide equal spacing so nothing touches.
+Row 1:
+1. ready: standing back view, both hands holding the rod at waist height, rod pointing up and forward.
+2. waiting: standing back view, relaxed, rod in the right hand pointing up and forward, left hand in the jacket pocket, head tilted slightly.
+3. casting: back view, rod swung back over her right shoulder with both hands, about to throw forward.
+4. sitting: sitting on a small black folding camp stool, back view, rod held up and forward with both hands.
+Row 2:
+5. bite: sitting on the same stool, three-quarter back view turned slightly to the right, startled, gripping the rod, a small part of her surprised face visible.
+6. reeling: standing back view, leaning back a little, right hand turning the reel and left hand on the grip, rod pointing up and forward.
+7. fighting: three-quarter back view turned slightly to the right, feet planted wide, leaning back hard, rod bent strongly up and to the right.
+8. joy: front view facing the viewer, big happy smile, rod in the right hand, left fist raised.
 
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow.
 ```
@@ -124,7 +154,7 @@ Character: Godeungeo, a stray cat with a silver-gray mackerel tabby coat and dar
 Style: cute chibi SD animal, big round head, small chubby body, short legs, fluffy tail, soft anime face with big eyes, clean thin dark brown line art, soft cel shading with a light watercolor texture, warm sunny seaside colors matching the attached backgrounds, light from the upper left.
 
 Layout: 3 rows x 4 columns, full body, same scale, same baseline, generous empty space between poses so nothing touches.
-Row 1: sitting front view, sitting side view facing left, walking side view facing left with front left paw forward, walking side view facing left with front right paw forward.
+Row 1: sitting front view, sitting side view facing left, walking side view facing right with front right paw forward, walking side view facing right with front left paw forward.
 Row 2: sitting back view with tail curled, meowing while looking to the left, meowing while looking to the right, loaf pose with eyes half closed.
 Row 3: sleeping curled up, stretching with rear up, eating a small fish happily, jumping up excitedly.
 
@@ -556,7 +586,7 @@ Background: one flat solid light grey color #EDEDED. No checkerboard, no table, 
 ```
 Create one SD character sheet for a mobile game, background solid light gray #EDEDED (no checkerboard, no text, no borders). Attached: my current SD characters (keep exactly the same chibi style, 2 to 2.5 heads tall, soft anime coloring, clean outline).
 
-Make 4 Korean seaside village people, each in 3 poses in one row: walking step A (side view facing left), walking step B (side view facing left, other leg forward), standing front view. 4 rows x 3 columns, wide equal spacing, same scale, same ground line, full body with feet visible.
+Make 4 Korean seaside village people, each in 3 poses in one row: walking step A (side view facing right), walking step B (side view facing right, other leg forward), standing front view. 4 rows x 3 columns, wide equal spacing, same scale, same ground line, full body with feet visible.
 Row 1: a village fisherman in his 50s with a knit cap, navy vest and yellow rubber boots, carrying a blue fish basket.
 Row 2: an auntie from the fish market in a floral apron and arm sleeves, rubber gloves, carrying a red plastic tub.
 Row 3: an elementary school boy with a backpack and a toy fishing net.
@@ -570,7 +600,7 @@ Row 4: a young delivery woman on foot with a cap and a small parcel box.
 ```
 Create one SD character sheet for a mobile game, background solid light gray #EDEDED (no checkerboard, no text, no borders). Attached: my current SD characters and the dialogue illustration of the bait shop owner (keep exactly the same chibi style, 2 to 2.5 heads tall, soft anime coloring, clean outline).
 
-Make 5 Korean seaside village people, each in 3 poses in one row: walking step A (side view facing left), walking step B (side view facing left, other leg forward), standing front view. 5 rows x 3 columns, wide equal spacing, same scale, same ground line, full body with feet visible.
+Make 5 Korean seaside village people, each in 3 poses in one row: walking step A (side view facing right), walking step B (side view facing right, other leg forward), standing front view. 5 rows x 3 columns, wide equal spacing, same scale, same ground line, full body with feet visible.
 Row 1: Mr. No, the gruff bait shop owner from the attached illustration, in his 60s, same face, hair and apron, holding a small bait box.
 Row 2: the owner of a seaside raw fish restaurant, man in his 40s, white chef coat with rolled sleeves, rubber apron and rubber boots, a towel around his neck.
 Row 3: a Japanese restaurant chef from the town, man in his 30s, white chef jacket and white chef hat, neat and polite.

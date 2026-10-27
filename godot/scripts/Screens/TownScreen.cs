@@ -33,6 +33,7 @@ namespace Hanjeopsi.App.Screens
         private Hud _hud;
         private PanelContainer _menu;
         private TextureRect _yeoul, _cat, _truck;
+        private FootShadows _shadows;
         private readonly Dictionary<string, Texture2D> _tex = new Dictionary<string, Texture2D>();
         private float _time;
         private float _catTimer = 5;
@@ -41,16 +42,22 @@ namespace Hanjeopsi.App.Screens
         /// <summary>간판을 눌러 여울이 그쪽으로 걸어가는 중 (다른 누름은 받지 않는다)</summary>
         private bool _walking;
 
-        /// <summary>마당을 오가는 마을 사람 (그림은 오른쪽을 보고 걷는다)</summary>
+        /// <summary>마당을 지나가는 마을 사람 (걷기 그림은 오른쪽을 본다)</summary>
         private sealed class Walker
         {
             public Villager Def;
             public TextureRect Node;
-            public float X, Lane, Dir, Frame, Stop;
+            public float X, Lane, Dir, Frame, Stop, Speed;
             public float Height;
         }
 
         private readonly List<Walker> _walkers = new List<Walker>();
+        /// <summary>지나가는 줄 (여울 발밑 기준 위로). 줄마다 한 사람만 걸어 서로 겹치지 않는다. 뒤 줄일수록 작다</summary>
+        private static readonly float[] Lanes = { -84, -112, -140 };
+        /// <summary>마을 사람은 이 자리 아래에 끼워 넣는다 (의뢰인·여울·고등어·간판보다 뒤)</summary>
+        private Control _walkerLayer;
+        private int _walkersWanted;
+        private float _spawnTimer;
 
         /// <summary>마을에 서 있는 의뢰인과 머리 위 표시 (! 새 의뢰, 볼락 1/2 모으는 중, ✔ 건넬 수 있음)</summary>
         private readonly List<(int Id, TextureRect Node, Control Mark)> _clients = new List<(int, TextureRect, Control)>();
@@ -88,6 +95,11 @@ namespace Hanjeopsi.App.Screens
                 _stage.AddChild(gulls);
             }
 
+            // 마당에 선 사람들 발밑 그림자 (모두 이 위에 선다)
+            _shadows = new FootShadows(_stage);
+            _shadows.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            _stage.AddChild(_shadows);
+
             // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
             // 간판에 지금 상태를 함께 적는다 (아래 버튼판 대신). 닫힌 곳은 흐리게
             _stage.Pin(Sign("위판장", G.IsMarketOpen() ? "경매 중" : "경매 마감", true, OpenMarket), new Vector2(150, 222));
@@ -102,12 +114,14 @@ namespace Hanjeopsi.App.Screens
             _truckX = truckArea.GetCenter().X;
             Tappable(_truck, OpenTruck);
             _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
-            AddVillagers(s.Slot);
+            AddVillagers();
             RefreshClients();
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
             Tappable(_cat, TapCat);
             _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
             Tappable(_yeoul, TapYeoul);
+            _shadows.Add(_yeoul, 58);
+            _shadows.Add(_cat, 44);
             // 간판은 걸어 다니는 사람들보다 늘 위에
             foreach (var sign in _stage.GetChildren())
                 if (sign is SignButton sb) sb.MoveToFront();
@@ -262,7 +276,7 @@ namespace Hanjeopsi.App.Screens
             for (int i = 0; i < _clients.Count; i++)
             {
                 _stage.Move(_clients[i].Node, ClientSpot(i));
-                _stage.Move(_clients[i].Mark, ClientSpot(i) + new Vector2(0, -122));
+                _stage.Move(_clients[i].Mark, ClientSpot(i) + new Vector2(0, -MarkUp));
             }
         }
 
@@ -311,31 +325,57 @@ namespace Hanjeopsi.App.Screens
                 var at = ClientSpot(i);
                 var node = _stage.Place(Tex(t.Sd + "-stand"), at, 104);
                 node.FlipH = at.X > ArtStage.Logical.X / 2;
+                _shadows.Add(node, 50);
                 int id = req.Id;
                 Tappable(node, () => TapClient(id));
                 var mark = ClientMark(req);
                 Tappable(mark, () => TapClient(id));
-                _stage.Pin(mark, at + new Vector2(0, -122));
+                _stage.Pin(mark, at + new Vector2(0, -MarkUp));
                 _clients.Add((id, node, mark));
-                // 머리 위 표시가 둥실 뜬다
-                var tw = mark.CreateTween().SetLoops();
-                tw.TweenProperty(mark, "modulate:a", 0.75f, 0.7).SetTrans(Tween.TransitionType.Sine);
-                tw.TweenProperty(mark, "modulate:a", 1f, 0.7).SetTrans(Tween.TransitionType.Sine);
             }
             foreach (var sign in _stage.GetChildren())
                 if (sign is SignButton sb) sb.MoveToFront();
         }
 
+        /// <summary>머리 위 표시가 통통 튀는 높이 (논리 좌표가 아니라 화면 px)</summary>
+        private const float MarkHop = 26;
+        /// <summary>의뢰인 발밑에서 머리 위 표시까지 (논리 좌표)</summary>
+        private const float MarkUp = 130;
+
+        /// <summary>
+        /// 의뢰인 머리 위 표시. 새 의뢰 ! 와 건넬 수 있는 ✔ 는 크게, 통통 튄다.
+        /// 위아래 빈칸의 합이 늘 같아서 표시만 오르내리고 자리는 그대로다
+        /// </summary>
         private Control ClientMark(DeliveryRequest req)
         {
             var t = G.Data.RequestTemplates[req.Template];
             bool ready = req.IsAccepted() && G.FishForRequest(req.Id) != null;
+            bool loud = !req.IsAccepted() || ready;
             string text = !req.IsAccepted() ? "!" : ready ? "✔" : G.Data.SpeciesById(t.Species).Name + " " + Math.Min(G.RequestFishHave(t.Species), t.Count) + "/" + t.Count;
             var color = !req.IsAccepted() ? Palette.Gold : ready ? Palette.Green : Palette.PaperLight;
-            var pill = new PanelContainer { MouseFilter = MouseFilterEnum.Stop };
-            pill.AddThemeStyleboxOverride("panel", UiKit.Box(color, 30, !req.IsAccepted() || ready ? 22 : 18, 4).WithBorder(Palette.Ink, 3).WithShadow(0.3f, 8, 3));
-            pill.AddChild(UiKit.Text(text, !req.IsAccepted() || ready ? TextSize.H1 : TextSize.Tiny + 2, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center));
-            return pill;
+            var pill = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore, SizeFlagsHorizontal = SizeFlags.ShrinkCenter };
+            pill.AddThemeStyleboxOverride("panel", UiKit.Box(color, loud ? 44 : 30, loud ? 26 : 18, loud ? 2 : 4).WithBorder(Palette.Ink, 4).WithShadow(0.35f, 10, 4));
+            pill.AddChild(UiKit.Text(text, loud ? TextSize.Title + 22 : TextSize.Tiny + 2, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center));
+            var box = new VBoxContainer { MouseFilter = MouseFilterEnum.Stop };
+            box.AddThemeConstantOverride("separation", 0);
+            var top = new Control { MouseFilter = MouseFilterEnum.Ignore, CustomMinimumSize = new Vector2(0, MarkHop) };
+            var bottom = new Control { MouseFilter = MouseFilterEnum.Ignore };
+            box.AddChild(top);
+            box.AddChild(pill);
+            box.AddChild(bottom);
+            if (!loud) return box;
+            Action<float> lift = h =>
+            {
+                top.CustomMinimumSize = new Vector2(0, MarkHop - h);
+                bottom.CustomMinimumSize = new Vector2(0, h);
+            };
+            var tw = box.CreateTween().SetLoops();
+            tw.TweenMethod(Callable.From(lift), 0f, MarkHop, 0.26).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+            tw.TweenMethod(Callable.From(lift), MarkHop, 0f, 0.26).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+            tw.TweenMethod(Callable.From(lift), 0f, MarkHop * 0.3f, 0.12).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+            tw.TweenMethod(Callable.From(lift), MarkHop * 0.3f, 0f, 0.12).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+            tw.TweenInterval(0.55);
+            return box;
         }
 
         private void TapClient(int id)
@@ -442,38 +482,96 @@ namespace Hanjeopsi.App.Screens
             return lines;
         }
 
+        /// <summary>
+        /// 맡은 의뢰를 한 줄로 (낚시 화면은 바다를 가리지 않게 한 줄만).
+        /// 하나면 자세히, 여럿이면 어종과 마릿수만 늘어놓고 가장 급한 기한 하나
+        /// </summary>
+        public static string QuestSummary(CoreGame g)
+        {
+            var lines = QuestLines(g);
+            if (lines.Count <= 1) return lines.FirstOrDefault();
+            var parts = new List<string>();
+            int soonest = int.MaxValue;
+            foreach (var req in g.Save.Requests.Where(r => r.IsAccepted()))
+            {
+                var t = g.Data.RequestTemplates[req.Template];
+                int have = Math.Min(g.RequestFishHave(t.Species), t.Count);
+                parts.Add((have >= t.Count ? "✔" : "") + g.Data.SpeciesById(t.Species).Name + " " + have + "/" + t.Count);
+                soonest = Math.Min(soonest, req.Deadline - g.Save.Day);
+            }
+            return string.Join(" · ", parts) + " · " + (soonest <= 0 ? "오늘까지" : "D-" + soonest);
+        }
+
         public static Control TrackerPill(string text)
         {
             var pill = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
             pill.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.62f), 26, 26, 6).WithBorder(new Color(Palette.Gold, 0.6f), 2));
-            pill.AddChild(UiKit.Text(text, TextSize.Tiny + 2, text.StartsWith("✔") ? Palette.GreenText : Palette.Paper, false, false, 0, null, HorizontalAlignment.Center));
+            var label = UiKit.Text(text, TextSize.Tiny + 2, text.StartsWith("✔") ? Palette.GreenText : Palette.Paper, false, false, 0, null, HorizontalAlignment.Center);
+            // 길면 한 줄 안에서 줄임표
+            label.CustomMinimumSize = new Vector2(Mathf.Min(UiKit.Measure(text, TextSize.Tiny + 2) + 4, 880), 0);
+            label.Ellipsis();
+            pill.AddChild(label);
             return pill;
         }
 
-        /// <summary>이 시간대에 나오는 마을 사람 둘까지. 여울보다 뒤 줄을 천천히 오가고 가끔 멈춘다</summary>
-        private void AddVillagers(int slot)
+        /// <summary>
+        /// 마을 사람: 시간대와 날씨만큼(새벽·밤·궂은 날은 적게) 마당을 지나간다. 처음엔 이미 걷고 있고,
+        /// 나간 사람이 있으면 잠시 뒤 다른 사람이 화면 가장자리에서 걸어 들어온다
+        /// </summary>
+        private void AddVillagers()
+        {
+            _walkerLayer = new Control { MouseFilter = MouseFilterEnum.Ignore };
+            _stage.AddChild(_walkerLayer);
+            _walkersWanted = Math.Min(G.VillagersWanted(), Lanes.Length);
+            var rng = GameState.I.Rng;
+            for (int i = 0; i < _walkersWanted; i++) SpawnWalker(50 + (float)rng.Next() * 350);
+            _spawnTimer = NextSpawn();
+        }
+
+        private float NextSpawn()
+        {
+            var t = G.Data.Balance.Town;
+            return (float)(t.SpawnMin + GameState.I.Rng.Next() * (t.SpawnMax - t.SpawnMin));
+        }
+
+        /// <summary>빈 줄에 이 시간대 사람 하나. x 가 없으면 화면 가장자리 밖에서 들어온다</summary>
+        private void SpawnWalker(float? x = null)
         {
             var rng = GameState.I.Rng;
-            // 의뢰인으로 서 있는 사람은 걸어 다니지 않는다
+            var free = Lanes.Where(l => _walkers.All(w => w.Lane != l)).ToList();
+            if (free.Count == 0) return;
+            // 의뢰인으로 서 있는 사람과 지금 걷는 사람은 빼고
             var busy = new HashSet<string>(G.Save.Requests.Select(r => G.Data.RequestTemplates[r.Template].Sd ?? ""));
-            var pool = G.Data.Dialogue.Villagers.Where(v => v.Slots.Contains(slot) && !busy.Contains("villagers/" + v.Id)).OrderBy(_ => rng.Next()).Take(2).ToList();
-            for (int i = 0; i < pool.Count; i++)
+            var pool = G.Data.Dialogue.Villagers
+                .Where(v => v.Slots.Contains(G.Save.Slot) && !busy.Contains("villagers/" + v.Id) && _walkers.All(w => w.Def != v))
+                .ToList();
+            if (pool.Count == 0) return;
+            var v = pool[(int)(rng.Next() * pool.Count)];
+            float lane = free[(int)(rng.Next() * free.Count)];
+            float dir = rng.Next() < 0.5 ? -1 : 1;
+            float edge = 40;
+            var w = new Walker
             {
-                var v = pool[i];
-                var w = new Walker
-                {
-                    Def = v,
-                    X = 50 + (float)rng.Next() * 350,
-                    Lane = -92 - i * 34,
-                    Dir = rng.Next() < 0.5 ? -1 : 1,
-                    Frame = 0,
-                    Stop = (float)rng.Next() * 2,
-                    Height = 100 * v.Height,
-                };
-                w.Node = _stage.Place(Tex("villagers/" + v.Id + "-stand"), new Vector2(w.X, _footY + w.Lane), w.Height);
-                var ww = w;
-                Tappable(w.Node, () => TapVillager(ww));
-                _walkers.Add(w);
+                Def = v,
+                X = x ?? (dir > 0 ? -edge : ArtStage.Logical.X + edge),
+                Lane = lane,
+                Dir = dir,
+                Frame = (float)rng.Next(),
+                Speed = 17 + (float)rng.Next() * 8,
+                // 뒤 줄일수록 조금 작게
+                Height = 100 * v.Height * (1 + (lane - Lanes[0]) * 0.003f),
+            };
+            w.Node = _stage.Place(Tex("villagers/" + v.Id + "-walk-1"), new Vector2(w.X, _footY + w.Lane), w.Height);
+            w.Node.FlipH = w.Dir < 0;
+            var ww = w;
+            Tappable(w.Node, () => TapVillager(ww));
+            _shadows.Add(w.Node, w.Height * 0.46f);
+            _walkers.Add(w);
+            // 먼 줄이 뒤로 가게 줄 순서대로 의뢰인·여울 아래에 끼운다
+            foreach (var o in _walkers.OrderBy(o => o.Lane))
+            {
+                int at = _walkerLayer.GetIndex();
+                _stage.MoveChild(o.Node, o.Node.GetIndex() < at ? at - 1 : at);
             }
         }
 
@@ -484,13 +582,14 @@ namespace Hanjeopsi.App.Screens
             w.Stop = 2.4f;
             _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));
             w.Node.FlipH = false;
+            Sound.Play("tap", -10);
             Bubble(Art, lines[(int)(GameState.I.Rng.Next() * lines.Count)], _stage.ToLocal(new Vector2(w.X, _footY + w.Lane - w.Height - 6)), 2.2f);
         }
 
         private void UpdateVillagers(float dt)
         {
             var rng = GameState.I.Rng;
-            foreach (var w in _walkers)
+            foreach (var w in _walkers.ToList())
             {
                 if (w.Stop > 0)
                 {
@@ -499,19 +598,35 @@ namespace Hanjeopsi.App.Screens
                     _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
                     continue;
                 }
-                w.X += w.Dir * 20 * dt;
-                if (w.X < 30 || w.X > ArtStage.Logical.X - 30) w.Dir = -w.Dir;
+                w.X += w.Dir * w.Speed * dt;
+                // 반대쪽 가장자리 밖으로 나가면 사라진다
+                if (w.X < -50 || w.X > ArtStage.Logical.X + 50)
+                {
+                    _stage.Remove(w.Node);
+                    _walkers.Remove(w);
+                    continue;
+                }
                 w.Frame += dt;
                 int f = (int)(w.Frame / 0.24f) % 2;
                 _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-walk-" + (f + 1)));
                 w.Node.FlipH = w.Dir < 0;
                 _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
-                // 가끔 멈춰 선다
-                if (rng.Next() < dt * 0.12)
+                // 마당 안쪽에서 가끔 멈춰 선다
+                if (w.X > 60 && w.X < ArtStage.Logical.X - 60 && rng.Next() < dt * 0.06)
                 {
                     w.Stop = 1.5f + (float)rng.Next() * 2;
                     _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));
                     w.Node.FlipH = false;
+                }
+            }
+            // 모자라면 잠시 뒤 새 사람이 들어온다
+            if (_walkers.Count < _walkersWanted)
+            {
+                _spawnTimer -= dt;
+                if (_spawnTimer <= 0)
+                {
+                    _spawnTimer = NextSpawn();
+                    SpawnWalker();
                 }
             }
         }
@@ -796,21 +911,28 @@ namespace Hanjeopsi.App.Screens
             var to = new Vector2(Mathf.Clamp(x, 40, ArtStage.Logical.X - 40), _footY - 26);
             float dist = from.DistanceTo(to);
             double time = Mathf.Clamp(dist / 260f, 0.35f, 0.8f);
-            // 그림은 왼쪽을 보고 걷는다
-            _yeoul.FlipH = to.X > from.X;
-            _cat.FlipH = to.X > from.X;
+            // 걷기 그림은 오른쪽을 본다. 왼쪽으로 갈 때만 뒤집는다
+            _yeoul.FlipH = to.X < from.X;
+            _cat.FlipH = to.X < from.X;
             var catFrom = new Vector2(118, _footY);
+            int lastFrame = -1;
             var tw = CreateTween();
             tw.TweenMethod(Callable.From<float>(t =>
             {
                 _stage.Move(_yeoul, from.Lerp(to, t));
                 // 고등어는 조금 늦게 따라간다
                 _stage.Move(_cat, catFrom.Lerp(to + new Vector2(to.X > from.X ? -60 : 60, 4), Mathf.Max(0, t * 1.1f - 0.1f)));
-                int frame = (int)(t * dist / 22) % 2;
+                int step = (int)(t * dist / 22);
+                int frame = step % 2;
+                // 발이 땅에 닿을 때마다 발소리
+                if (step != lastFrame)
+                {
+                    lastFrame = step;
+                    Sound.Play("step", -8 - (step % 2) * 2);
+                }
                 _stage.Swap(_yeoul, Tex("yeoul/walk-" + (frame + 1)));
                 _stage.Swap(_cat, Tex("cat/walk-" + (2 - frame)));
             }), 0f, 1f, time);
-            Sound.Play("step", -6);
             tw.TweenCallback(Callable.From(() =>
             {
                 _walking = false;

@@ -17,6 +17,7 @@ namespace Hanjeopsi.Core.Data
         public ReelBalance Reel = new ReelBalance();
         public SpotBalance Spot = new SpotBalance();
         public TugBalance Tug = new TugBalance();
+        public TownBalance Town = new TownBalance();
     }
 
     public sealed class Chapter1Balance
@@ -97,6 +98,18 @@ namespace Hanjeopsi.Core.Data
         public int DeadlineRange;
         /// <summary>귀한 고기(감성돔) 의뢰는 이날부터</summary>
         public int RareFromDay;
+    }
+
+    /// <summary>마을 마당을 지나가는 사람 수</summary>
+    public sealed class TownBalance
+    {
+        /// <summary>시간대마다 마당에 있는 사람 수 (새벽 · 아침 · 점심 · 저녁 · 밤)</summary>
+        public List<int> Walkers = new List<int>();
+        /// <summary>궂은 날씨면 이만큼 줄어든다 (날씨 id → 줄어드는 수)</summary>
+        public Dictionary<string, int> WeatherLess = new Dictionary<string, int>();
+        /// <summary>한 사람이 나간 뒤 다음 사람이 들어오기까지 (초)</summary>
+        public double SpawnMin;
+        public double SpawnMax;
     }
 
     /// <summary>고양이 고등어 호감과 입질 힌트</summary>

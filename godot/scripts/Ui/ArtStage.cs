@@ -181,6 +181,14 @@ void fragment() {
             Layout();
         }
 
+        /// <summary>세운 그림의 발밑 (논리 좌표). 세운 그림이 아니면 null</summary>
+        public Vector2? FootOf(Control node)
+        {
+            foreach (var it in _items)
+                if (it.Node == node) return it.At;
+            return null;
+        }
+
         /// <summary>화면 픽셀(이 Control 안) → 논리 좌표</summary>
         public Vector2 ToLogical(Vector2 local)
         {
