@@ -113,6 +113,58 @@ Row 2:
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow.
 ```
 
+## SD 2-3. 낚시 의자와 릴을 가진 장비로 (2026-10-27)
+
+낚시 화면의 의자와 릴이 지금은 포즈 그림에 박혀 있어 늘 같은 모양이다. 의자는 여울을 "의자 없이 앉은" 포즈로 다시 뽑고 그 아래에 가진 의자 그림(뒤에서 본 것)을 놓는다. 릴은 그림 속 릴 위에 가진 릴 그림(뒤에서 본 것)을 덮는다. 세 장 모두 상점 그림(`godot/art/gear/chair-*.png`, `reel-*.png`)과 지금 여울 낚시 포즈 시트를 첨부한다.
+
+받으면: 의자 없는 포즈는 `sd_sheet.py`로 잘라 `fish-sit`, `fish-bite`를 바꾸고 손 위 대를 지운다(대는 게임이 그린다). 의자는 `godot/art/gear/chair-back-<단계>.png`, 릴은 `godot/art/gear/reel-back-<단계>.png`로 자른다.
+
+### SD 2-3-1. 의자 없이 앉은 여울 (두 포즈)
+
+```
+Create one game character pose sheet for a mobile fishing game. Attached: the current chibi SD fishing pose sheet of the heroine (keep exactly her design, scale and chibi style).
+
+Character: Han Yeoul, a 29-year-old Korean woman. Long brown hair in a high messy bun with a few loose strands, brown eyes, oversized cream-white hooded jacket with toggle buttons, white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants, chunky white-gray sneakers.
+
+She sits on an invisible seat at the height of a low camping chair, knees bent, feet flat on the ground, as if a chair were there. Do not draw any chair, stool or seat. She holds only the rod handle and a small spinning reel in both hands at chest height. Draw no rod above her hands, no fishing line, no float.
+
+Style: cute chibi SD, 2.5 heads tall, soft anime coloring, soft cel shading with a light watercolor texture, light from the upper left, a clean continuous dark brown outline around the whole silhouette including the face and the white hood.
+
+Layout: 1 row x 2 columns, same scale as the attached standing poses, same baseline, wide spacing.
+1. sitting and waiting: back view, calm, shoulders relaxed.
+2. bite: three-quarter back view turned slightly to the right, startled, gripping the handle, a small part of her surprised face visible.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no labels, no borders, no grid lines, no ground shadow.
+```
+
+### SD 2-3-2. 낚시 의자 열 개 (뒤에서 본 것)
+
+```
+Create one item sheet for a mobile fishing game. Attached: my 10 fishing chair shop icons (keep each design, colors and decorations exactly, in the same order) and the heroine's back-view sitting pose (for scale and angle).
+
+Draw the same 10 chairs seen from behind and slightly above, as the player sees them when the heroine sits on them facing the sea, empty, no person. Each chair stands upright on its legs, seat at the same height for all, the backrest facing the viewer. Keep the order: 1 simple beige folding stool, 2 blue folding chair, 3 olive camping chair, 4 blue reclining chair, 5 red and black chair, 6 yellow and black chair, 7 purple chair, 8 black and gold chair, 9 red and gold chair, 10 white and blue legendary chair with a small sunshade.
+
+Style: the same painted game icon style as the attached icons, soft shading, light from the upper left, a clean dark outline around each chair.
+
+Layout: 2 rows x 5 columns, all chairs at the same scale and on the same baseline, wide equal spacing so nothing touches.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no numbers, no labels, no borders, no grid lines, no ground shadow.
+```
+
+### SD 2-3-3. 릴 열 개 (낚싯대 아래 단 모습, 뒤에서)
+
+```
+Create one item sheet for a mobile fishing game. Attached: my 10 spinning reel shop icons (keep each design, colors and decorations exactly, in the same order) and the heroine's back-view fishing pose (for scale and angle).
+
+Draw the same 10 spinning reels as they look mounted under a vertical fishing rod, seen from behind the angler: the reel foot at the top, the spool facing the viewer, the handle knob on the left side, no rod, no line, no hands. Keep the order: 1 silver reel with a wooden knob, 2 silver and blue, 3 olive green, 4 gold and black, 5 red, 6 blue and silver, 7 purple and gold, 8 black and gold, 9 red and gold, 10 blue and gold legendary reel.
+
+Style: the same painted game icon style as the attached icons, soft shading, light from the upper left, a clean dark outline around each reel.
+
+Layout: 2 rows x 5 columns, all reels at the same scale, centered in their cells, wide equal spacing so nothing touches.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no numbers, no labels, no borders, no grid lines, no shadow.
+```
+
 ## SD 3. 여울 표정 시트
 
 ```
