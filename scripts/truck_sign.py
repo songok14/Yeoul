@@ -26,7 +26,8 @@ QUAD = [(405.0, 453.0), (747.0, 380.0), (747.0, 505.0), (405.0, 560.0)]
 # 펴 놓은 판 크기 (가로 342px 판을 3배로)
 RW, RH = 1026, 330
 # 펴 놓은 판에서 다시 채울 곳 (뭉갠 글씨): 위 물고기 오른쪽부터 오른쪽 결 띠 앞까지
-FILL = (425, 0, 962, 256)
+FILL = (395, 14, 962, 264)
+FISH_X = 420  # 이보다 왼쪽의 어두운 칠은 물고기 테두리
 # 결을 가져올 띠 (같은 줄에서 오른쪽 깨끗한 판)
 SRC_X = (968, 1012)
 TEXT = "여울호"
@@ -58,6 +59,42 @@ def smoothstep(e0, e1, x):
     return t * t * (3 - 2 * t)
 
 
+def membrane(img, known, step=2):
+    """known 자리 값(잔결은 흐려서)을 두고 나머지를 라플라스 방정식으로 채운다. 계산은 1/step 크기로"""
+    from scipy.sparse import lil_matrix
+    from scipy.sparse.linalg import spsolve
+    k = known.astype(float)
+    soft = np.stack([gaussian_filter(img[..., c] * k, 4) for c in range(3)], -1)
+    soft /= np.maximum(gaussian_filter(k, 4), 1e-6)[..., None]
+    h, w = known.shape
+    small = soft[::step, ::step]
+    kn = known[::step, ::step]
+    sh, sw = kn.shape
+    idx = -np.ones((sh, sw), int)
+    unknown = np.argwhere(~kn)
+    idx[~kn] = np.arange(len(unknown))
+    a = lil_matrix((len(unknown), len(unknown)))
+    b = np.zeros((len(unknown), 3))
+    for n, (y, x) in enumerate(unknown):
+        cnt = 0
+        for yy, xx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+            if not (0 <= yy < sh and 0 <= xx < sw):
+                continue  # 판 가장자리는 기울기 0
+            cnt += 1
+            if kn[yy, xx]:
+                b[n] += small[yy, xx]
+            else:
+                a[n, idx[yy, xx]] = -1
+        a[n, n] = cnt
+    sol = spsolve(a.tocsr(), b)
+    out = small.copy()
+    out[~kn] = sol
+    big = np.stack([np.asarray(Image.fromarray(out[..., c].astype(np.float32), "F").resize((w, h), Image.BILINEAR))
+                    for c in range(3)], -1)
+    # 알려진 자리는 원래 흐린 값 그대로
+    return np.where(known[..., None], soft, gaussian_filter(big, (2, 2, 0)))
+
+
 def main():
     preview = sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None
     raw = subprocess.run(["git", "-C", ROOT, "show", ORIGINAL], capture_output=True, check=True).stdout
@@ -71,26 +108,24 @@ def main():
     # 다시 채울 마스크 (가장자리는 부드럽게)
     ys, xs = np.mgrid[0:RH, 0:RW].astype(float)
     x0, y0, x1, y1 = FILL
-    m = (smoothstep(x0 - 22, x0 + 40, xs) * (1 - smoothstep(x1 - 10, x1 + 6, xs))
-         * (1 - smoothstep(y1 - 14, y1 + 4, ys)))
+    m = (smoothstep(x0 - 20, x0 + 20, xs) * (1 - smoothstep(x1 - 10, x1 + 6, xs))
+         * (1 - smoothstep(y1 - 10, y1 + 4, ys)))
     if y0 > 0:
         m *= smoothstep(y0 - 20, y0 + 20, ys)
+    # 물고기 그림(검은 테두리·푸른 몸)과 물결은 지우지 않는다
+    from scipy.ndimage import binary_dilation
+    lum0 = board.mean(-1)
+    blue = board[..., 2] > board[..., 0] + 8
+    protect = blue | ((lum0 < 120) & (xs < FISH_X))
+    protect = binary_dilation(protect, iterations=4)
+    m *= 1 - gaussian_filter(protect.astype(float), 1.5)
 
-    # 밝기: 마스크 밖 깨끗한 판에서 넓게 번져 온 색 (정규화 컨볼루션)
+    # 밝기: 깨끗한 판 색을 알려진 값으로 두고 나머지를 막처럼 매끈하게 잇는다 (라플라스 방정식).
+    # 경계에서 둘레 판과 같은 값이 되어 네모난 자국이 남지 않는다. 물고기·물결 자리는 모르는 값으로 둔다
     lumi = board.mean(-1)
     keep = ((m < 0.02) & (lumi > 150) & (board[..., 2] < board[..., 0])
-            & (xs < 1014) & (ys > 4)).astype(float)
-    # 가까운 깨끗한 판이 없는 곳은 더 넓게 번진 값으로 메운다
-    low = None
-    for sigma in (300, 120, 45):
-        lum = np.stack([gaussian_filter(board[..., c] * keep, sigma) for c in range(3)], -1)
-        wsum = gaussian_filter(keep, sigma)[..., None]
-        est = lum / np.maximum(wsum, 1e-6)
-        if low is None:
-            low = est
-        else:
-            t = np.clip(wsum / 0.25, 0, 1)
-            low = low * (1 - t) + est * t
+            & (xs < 1014) & (ys > 4))
+    low = membrane(board, keep)
 
     # 결: 오른쪽 띠의 잔무늬(고주파)를 같은 줄에 조각조각 이어 붙인다
     hp = board - np.stack([gaussian_filter(board[..., c], 6) for c in range(3)], -1)
