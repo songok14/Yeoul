@@ -611,6 +611,8 @@ namespace Hanjeopsi.App.Ui
         public float ButtTopX = 0.75f, ButtBlankPx = 31;
         /// <summary>그림 위에서 손이 쥐는 곳까지 (그림 높이 비율)</summary>
         private const float ButtHold = 0.55f;
+        /// <summary>밑동 그림 맨 위 대 몸통 굵기 (화면 px, K 2.4 기준). 릴이 잘 보이게 그린 대보다 조금 굵게 시작해 이어 그린 대가 가늘어진다</summary>
+        private const float ButtWidth = 9.5f;
         private float _buttScale;
 
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
@@ -664,7 +666,7 @@ namespace Hanjeopsi.App.Ui
             if (hasButt)
             {
                 // 밑동 그림 맨 위 대 몸통 너비를 그린 대 굵기에 맞춘다
-                _buttScale = 6.2f * (K / 2.4f) / ButtBlankPx;
+                _buttScale = ButtWidth * (K / 2.4f) / ButtBlankPx;
                 float hs = ButtTex.GetHeight() * _buttScale / K;
                 butt = g + d0 * hs * ButtHold;
                 mid = butt + d0 * len * 0.36f;
@@ -726,7 +728,7 @@ namespace Hanjeopsi.App.Ui
             {
                 float f = (float)i / RodSegs;
                 bool handle = f < 0.08f && !_hasButt;
-                float w = handle ? 6.8f * u : Mathf.Lerp(4.6f, 1.1f, Mathf.Pow((f - 0.08f) / 0.92f, 0.8f)) * u;
+                float w = handle ? 6.8f * u : _hasButt ? Mathf.Lerp(ButtWidth * 0.95f, 1.1f, Mathf.Pow(f, 0.7f)) * u : Mathf.Lerp(4.6f, 1.1f, Mathf.Pow((f - 0.08f) / 0.92f, 0.8f)) * u;
                 var fill = handle ? RodHandle : body;
                 c.DrawLine(_rodPts[i], _rodPts[i + 1], fill.Darkened(0.65f), w + 1.6f * u, true);
                 c.DrawLine(_rodPts[i], _rodPts[i + 1], fill, w, true);
