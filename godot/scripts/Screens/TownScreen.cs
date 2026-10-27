@@ -54,6 +54,14 @@ namespace Hanjeopsi.App.Screens
         private readonly List<Walker> _walkers = new List<Walker>();
         /// <summary>지나가는 줄 (여울 발밑 기준 위로). 줄마다 한 사람만 걸어 서로 겹치지 않는다. 뒤 줄일수록 작다</summary>
         private static readonly float[] Lanes = { -84, -112, -140 };
+        /// <summary>마당 SD 키 (논리 좌표). 넓은 앞마당 그림에 묻히지 않게 2026-10-27 키웠다 (여울 138→168)</summary>
+        private const float YeoulSize = 168, CatSize = 66, VillagerSize = 122, ClientSize = 126;
+
+        /// <summary>고등어 포즈 바꾸기. 포즈 그림마다 높이가 달라(식빵 굽기는 낮다) 같은 몸 크기로 보이게 그림 높이에 비례해 맞춘다</summary>
+        private void SwapCat(Texture2D tex)
+        {
+            _stage.Swap(_cat, tex, CatSize * tex.GetHeight() / 302f, new Vector2(0.5f, 1));
+        }
         /// <summary>마을 사람은 이 자리 아래에 끼워 넣는다 (의뢰인·여울·고등어·간판보다 뒤)</summary>
         private Control _walkerLayer;
         private static readonly float[] StartXs = { 115, 285, 355 };
@@ -117,9 +125,9 @@ namespace Hanjeopsi.App.Screens
             _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
             AddVillagers();
             RefreshClients();
-            _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), 58);
+            _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), CatSize);
             Tappable(_cat, TapCat);
-            _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), 138);
+            _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), YeoulSize);
             Tappable(_yeoul, TapYeoul);
             _shadows.Add(_yeoul, 58);
             _shadows.Add(_cat, 44);
@@ -324,7 +332,7 @@ namespace Hanjeopsi.App.Screens
                 var t = G.Data.RequestTemplates[req.Template];
                 if (string.IsNullOrEmpty(t.Sd)) continue;
                 var at = ClientSpot(i);
-                var node = _stage.Place(Tex(t.Sd + "-stand"), at, 104);
+                var node = _stage.Place(Tex(t.Sd + "-stand"), at, ClientSize);
                 node.FlipH = at.X > ArtStage.Logical.X / 2;
                 _shadows.Add(node, 50);
                 int id = req.Id;
@@ -341,7 +349,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>머리 위 표시가 통통 튀는 높이 (논리 좌표가 아니라 화면 px)</summary>
         private const float MarkHop = 26;
         /// <summary>의뢰인 발밑에서 머리 위 표시까지 (논리 좌표)</summary>
-        private const float MarkUp = 130;
+        private const float MarkUp = 156;
 
         /// <summary>
         /// 의뢰인 머리 위 표시. 새 의뢰 ! 와 건넬 수 있는 ✔ 는 크게, 통통 튄다.
@@ -562,7 +570,7 @@ namespace Hanjeopsi.App.Screens
                 Frame = (float)rng.Next(),
                 Speed = 17 + (float)rng.Next() * 8,
                 // 뒤 줄일수록 조금 작게
-                Height = 100 * v.Height * (1 + (lane - Lanes[0]) * 0.003f),
+                Height = VillagerSize * v.Height * (1 + (lane - Lanes[0]) * 0.003f),
             };
             w.Node = _stage.Place(Tex("villagers/" + v.Id + "-walk-1"), new Vector2(w.X, _footY + w.Lane), w.Height);
             w.Node.FlipH = w.Dir < 0;
@@ -675,7 +683,7 @@ namespace Hanjeopsi.App.Screens
             if (_catTimer <= 0)
             {
                 _catTimer = 4 + (float)GameState.I.Rng.Next() * 5;
-                _stage.Swap(_cat, Tex("cat/" + CatRest[(int)(GameState.I.Rng.Next() * CatRest.Length)]));
+                SwapCat(Tex("cat/" + CatRest[(int)(GameState.I.Rng.Next() * CatRest.Length)]));
             }
         }
 
@@ -834,7 +842,7 @@ namespace Hanjeopsi.App.Screens
             var lines = G.Data.Dialogue.YeoulIdle;
             string line = lines[_yeoulLine++ % lines.Count];
             Hop(_yeoul, 10);
-            Bubble(Art, line, _stage.ToLocal(new Vector2(205, _footY - 142)), 2.2f);
+            Bubble(Art, line, _stage.ToLocal(new Vector2(205, _footY - YeoulSize - 6)), 2.2f);
         }
 
         private void TapCat()
@@ -849,7 +857,7 @@ namespace Hanjeopsi.App.Screens
                     {
                         G.FeedCat();
                         Sound.Play("meow");
-                        _stage.Swap(_cat, Tex("cat/eat"));
+                        SwapCat(Tex("cat/eat"));
                         _catTimer = 3;
                         Toast("고등어가 골골거린다 (호감 " + G.Save.CatAffinity + "/" + G.Data.Balance.Cat.MaxAffinity + ")");
                     }),
@@ -857,10 +865,10 @@ namespace Hanjeopsi.App.Screens
                 return;
             }
             var idle = G.Data.Dialogue.CatIdle;
-            _stage.Swap(_cat, Tex("cat/meow-1"));
+            SwapCat(Tex("cat/meow-1"));
             _catTimer = 1.6f;
             Hop(_cat, 14);
-            Bubble(Art, idle[(int)(GameState.I.Rng.Next() * idle.Count)], _stage.ToLocal(new Vector2(118, _footY - 62)), 1.3f);
+            Bubble(Art, idle[(int)(GameState.I.Rng.Next() * idle.Count)], _stage.ToLocal(new Vector2(118, _footY - CatSize - 4)), 1.3f);
         }
 
         /// <summary>제자리에서 톡 뛴다 (발밑 기준 크기 튕김)</summary>
@@ -935,7 +943,7 @@ namespace Hanjeopsi.App.Screens
                     Sound.Play("step", -8 - (step % 2) * 2);
                 }
                 _stage.Swap(_yeoul, Tex("yeoul/walk-" + (frame + 1)));
-                _stage.Swap(_cat, Tex("cat/walk-" + (2 - frame)));
+                SwapCat(Tex("cat/walk-" + (2 - frame)));
             }), 0f, 1f, time);
             tw.TweenCallback(Callable.From(() =>
             {
@@ -950,7 +958,7 @@ namespace Hanjeopsi.App.Screens
             _yeoul.FlipH = false;
             _cat.FlipH = false;
             _stage.Swap(_yeoul, Tex("yeoul/front"));
-            _stage.Swap(_cat, Tex("cat/sit-front"));
+            SwapCat(Tex("cat/sit-front"));
             PlaceOnFloor();
         }
 

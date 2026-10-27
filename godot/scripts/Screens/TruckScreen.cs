@@ -76,10 +76,7 @@ namespace Hanjeopsi.App.Screens
             _stage.Tint = SlotTint[Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1)];
             Art.AddChild(_stage);
 
-            // 그림 속 빈 간판에 물결과 같은 푸른 페인트로 이름을, 칠판에 분필로 오늘의 메뉴를 쓴다
-            var sign = UiKit.Text(T["truckName"], TextSize.Title, new Color("2b5288"), true, false, 5, new Color(1, 0.96f, 0.88f, 0.7f));
-            sign.MouseFilter = MouseFilterEnum.Ignore;
-            _stage.Pin(sign, new Vector2(324, 228));
+            // 간판 "여울호"는 그림에 원근대로 칠해 두었다 (2026-10-27). 칠판에는 분필로 오늘의 메뉴를 쓴다
             _chalk = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore, CustomMinimumSize = new Vector2(150, 0) };
             _chalk.AddThemeConstantOverride("separation", 2);
             _stage.Pin(_chalk, new Vector2(387, 384));

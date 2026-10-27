@@ -602,9 +602,16 @@ namespace Hanjeopsi.App.Ui
         /// <summary>포즈를 뒤집었으면 핸들이 반대쪽</summary>
         public bool ReelFlip;
         public Color ReelBody = new Color("b8bcc2"), ReelAccent = new Color("8a5a32");
-        /// <summary>가진 릴 그림 (뒤에서 본 것, 릴 다리가 위). ReelFootX 는 그림에서 다리 꼭대기의 가로 비율. 없으면 코드로 그린 릴</summary>
-        public Texture2D ReelTex;
-        public float ReelFootX = 0.6f;
+        /// <summary>
+        /// 대 밑동과 가진 릴 그림 (코르크 손잡이·릴 시트·릴, 뒤에서 본 것, 대가 위로). 손잡이 자리(RodGrip)에 그림의 ButtHold 높이를 맞추고
+        /// 대 방향으로 세운다. 그림 맨 위 대 몸통에서 게임이 대를 이어 그린다. ButtShown 은 포즈 그림에서 릴을 지운 포즈만
+        /// </summary>
+        public Texture2D ButtTex;
+        public bool ButtShown;
+        public float ButtTopX = 0.75f, ButtBlankPx = 31;
+        /// <summary>그림 위에서 손이 쥐는 곳까지 (그림 높이 비율)</summary>
+        private const float ButtHold = 0.55f;
+        private float _buttScale;
 
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
         private bool _rodReady;
@@ -615,6 +622,8 @@ namespace Hanjeopsi.App.Ui
         private static readonly float[] GuideAt = { 0.2f, 0.32f, 0.43f, 0.53f, 0.62f, 0.7f, 0.77f, 0.84f, 0.9f, 0.95f, 1f };
         private readonly Vector2[] _guideRing = new Vector2[GuideAt.Length];
         private Vector2 _reelAt, _reelCenter, _rodAlong, _reelSeat;
+        private bool _hasButt;
+        private Vector2 _gripPx, _d0;
 
         /// <summary>여울 그림 바로 아래에 끼울 대 그림 (ArtStage 안, 같은 좌표)</summary>
         public Control MakeRodView()
@@ -649,8 +658,20 @@ namespace Hanjeopsi.App.Ui
             var mid = g + d0 * len * 0.4f;
             var tip = mid + (d0 + tipDir * 1.4f).Normalized() * len * 0.6f;
             RodTip = tip;
-            // 손 안쪽에서 시작한다 (여울 그림 아래라 손에 가린다)
+            // 손 안쪽에서 시작한다 (여울 그림 아래라 손에 가린다). 밑동 그림이 있으면 그 맨 위에서
             var butt = g - d0 * len * 0.08f;
+            bool hasButt = ButtShown && ButtTex != null;
+            if (hasButt)
+            {
+                // 밑동 그림 맨 위 대 몸통 너비를 그린 대 굵기에 맞춘다
+                _buttScale = 6.2f * (K / 2.4f) / ButtBlankPx;
+                float hs = ButtTex.GetHeight() * _buttScale / K;
+                butt = g + d0 * hs * ButtHold;
+                mid = butt + d0 * len * 0.36f;
+                tip = mid + (d0 + tipDir * 1.4f).Normalized() * len * 0.56f;
+                RodTip = tip;
+            }
+            _hasButt = hasButt;
             var p0 = P(butt);
             var p1 = P(mid);
             var p2 = P(tip - tipDir * len * 0.3f);
@@ -674,11 +695,13 @@ namespace Hanjeopsi.App.Ui
             }
             // 릴 다리는 손 바로 위 대 아래에 붙는다. 그림 릴은 거기서 아래로 매달린다
             _reelSeat = _rodPts[2];
+            _gripPx = P(g);
+            _d0 = d0;
             // 원줄은 릴 스풀 앞(대 끝 쪽)에서 나와 첫 고리로 간다
-            var reel = ReelShown && ReelTex != null ? _reelSeat + new Vector2(0, ReelWidth * K * ReelTex.GetHeight() / ReelTex.GetWidth() * 0.3f)
-                : ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + Down(p1 - p0) * 6 * u;
+            var reel = _hasButt ? P(g + d0 * ButtTex.GetHeight() * _buttScale / K * (ButtHold - 0.3f)) :
+                ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + Down(p1 - p0) * 6 * u;
             var along = (p1 - p0).Normalized();
-            _reelAt = reel + along * ReelWidth * K * 0.25f;
+            _reelAt = _hasButt ? reel : reel + along * ReelWidth * K * 0.25f;
             _reelCenter = reel;
             _rodAlong = along;
             _rodReady = true;
@@ -702,14 +725,22 @@ namespace Hanjeopsi.App.Ui
             for (int i = 0; i < RodSegs; i++)
             {
                 float f = (float)i / RodSegs;
-                bool handle = f < 0.08f;
+                bool handle = f < 0.08f && !_hasButt;
                 float w = handle ? 6.8f * u : Mathf.Lerp(4.6f, 1.1f, Mathf.Pow((f - 0.08f) / 0.92f, 0.8f)) * u;
                 var fill = handle ? RodHandle : body;
                 c.DrawLine(_rodPts[i], _rodPts[i + 1], fill.Darkened(0.65f), w + 1.6f * u, true);
                 c.DrawLine(_rodPts[i], _rodPts[i + 1], fill, w, true);
             }
             int joint = Mathf.Clamp((int)(0.08f * RodSegs), 1, RodSegs);
-            c.DrawCircle(_rodPts[joint], 3.6f * u, gold);
+            if (!_hasButt) c.DrawCircle(_rodPts[joint], 3.6f * u, gold);
+            if (_hasButt)
+            {
+                // 대 밑동과 릴 그림 (대 방향으로 세운다, 포즈를 뒤집으면 핸들도 반대쪽)
+                float w = ButtTex.GetWidth() * _buttScale, h = ButtTex.GetHeight() * _buttScale;
+                c.DrawSetTransform(_gripPx, _d0.Angle() + Mathf.Pi / 2, new Vector2(ReelFlip ? -1 : 1, 1));
+                c.DrawTextureRect(ButtTex, new Rect2(-ButtTopX * w, -ButtHold * h, w, h), false);
+                c.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            }
             // 위쪽(빛 받는 쪽) 가는 빛 한 줄
             for (int i = 3; i < RodSegs - 3; i++)
             {
@@ -757,16 +788,6 @@ namespace Hanjeopsi.App.Ui
         {
             if (!_rodReady || !ReelShown) return;
             float u = K / 2.4f;
-            if (ReelTex != null)
-            {
-                // 그림 릴: 다리 꼭대기를 대에 붙이고 아래로 매단다 (포즈를 뒤집으면 핸들도 반대쪽)
-                float rw = ReelWidth * K * 1.15f;
-                float rh = rw * ReelTex.GetHeight() / ReelTex.GetWidth();
-                c.DrawSetTransform(_reelSeat, 0, new Vector2(ReelFlip ? -1 : 1, 1));
-                c.DrawTextureRect(ReelTex, new Rect2(-ReelFootX * rw, -2 * u, rw, rh), false);
-                c.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-                return;
-            }
             float w = ReelWidth * K;
             var at = _reelCenter;
             var up = _rodAlong;                 // 대 끝 쪽

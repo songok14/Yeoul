@@ -48,6 +48,13 @@ namespace Hanjeopsi.App.Screens
         private static readonly Vector2 FanApex = new Vector2(225, 560);
         private const float YeoulHeight = 168;
         private static readonly Vector2 CatFoot = new Vector2(140, 686);
+        private const float CatSize = 62;
+
+        /// <summary>고등어 포즈 바꾸기. 포즈 그림마다 높이가 달라(식빵 굽기·뛰기) 같은 몸 크기로 보이게 그림 높이에 비례해 맞춘다</summary>
+        private void SwapCat(Texture2D tex)
+        {
+            _stage.Swap(_cat, tex, CatSize * tex.GetHeight() / 306f, new Vector2(0.5f, 1));
+        }
         // 쿨러는 여울 오른쪽 방파제 위 (긴 화면에서도 잘리지 않게). 고등어는 여울 앞을 지나 쿨러 옆까지 살금살금 간다
         private static readonly Vector2 CoolerFoot = new Vector2(318, 668);
         private static readonly Vector2 CatThiefFoot = new Vector2(280, 682);
@@ -206,7 +213,7 @@ namespace Hanjeopsi.App.Screens
             var shadows = new FootShadows(_stage);
             shadows.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.AddChild(shadows);
-            _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, 62);
+            _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sit-side.png"), CatFoot, CatSize);
             _yeoul = _stage.Place(GD.Load<Texture2D>("res://art/yeoul/fish-ready.png"), YeoulFoot, YeoulHeight);
             SetPose("fish-ready");
             shadows.Add(_yeoul, 62);
@@ -400,7 +407,10 @@ namespace Hanjeopsi.App.Screens
             _field.RodDir = (e - g).Normalized();
             _field.RodLen = (e - g).Length();
             // 가진 릴을 그림 속 릴 위에 덮는다
-            _field.ReelShown = p.Reel != null;
+            // 포즈 그림에서 릴을 지운 포즈는 밑동+릴 그림을 손에 쥐어 준다 (없으면 코드로 그린 릴)
+            _field.ButtShown = p.Reel != null && _field.ButtTex != null;
+            _field.ReelShown = p.Reel != null && !_field.ButtShown;
+            _field.ReelFlip = _poseFlip;
             if (_field.ReelShown)
             {
                 _field.ReelAt = PoseToLogical(Mirror(new Vector2(p.Reel[0], p.Reel[1])));
@@ -573,7 +583,7 @@ namespace Hanjeopsi.App.Screens
             double a = _hintSpot.Angle;
             string dir = a < -0.3 ? T["left"] : a > 0.3 ? T["right"] : T["front"];
             _catBubble = Bubble(Art, F("catHint", dir), _stage.ToLocal(CatFoot + new Vector2(-30, -60)), 0);
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + (Math.Abs(a) <= 0.3 ? "sit-front" : "sit-side") + ".png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/" + (Math.Abs(a) <= 0.3 ? "sit-front" : "sit-side") + ".png"));
             _cat.FlipH = a > 0.3;
             Hop(_cat, 12);
             Sound.Play("meow-short", -4);
@@ -733,7 +743,7 @@ namespace Hanjeopsi.App.Screens
             string pose = poses[(int)(rng.Next() * poses.Length)];
             _catIdle = true;
             _cat.FlipH = false;
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/" + pose + ".png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/" + pose + ".png"));
             if (pose == "meow-1")
             {
                 var idle = G.Data.Dialogue.CatIdle;
@@ -748,7 +758,7 @@ namespace Hanjeopsi.App.Screens
         {
             if (!_catIdle || _thiefActive) return;
             _catIdle = false;
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/sit-side.png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/sit-side.png"));
             _cat.FlipH = false;
         }
 
@@ -796,7 +806,7 @@ namespace Hanjeopsi.App.Screens
             // 오른쪽으로 걸어가며 여울 앞을 지난다 (걷기 그림은 오른쪽을 본다)
             _cat.FlipH = false;
             _stage.MoveChild(_cat, _stage.GetChildCount() - 1);
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/walk-1.png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/walk-1.png"));
             Tell(T["thief"], T["thiefSub"], Palette.Gold);
         }
 
@@ -807,7 +817,7 @@ namespace Hanjeopsi.App.Screens
             float k = Mathf.Clamp(_thiefT / window, 0, 1);
             _stage.Move(_cat, CatFoot.Lerp(CatThiefFoot, Mathf.SmoothStep(0, 1, k)));
             int frame = (int)(_thiefT / 0.2f) % 2;
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/walk-" + (frame + 1) + ".png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/walk-" + (frame + 1) + ".png"));
             _field.CoolerLid = k > 0.7f ? Mathf.Abs(Mathf.Sin(_thiefT * 18)) : 0;
             if (_thiefT >= window) Steal();
         }
@@ -821,7 +831,7 @@ namespace Hanjeopsi.App.Screens
             Haptics.Tap();
             // 뛰기·먹기 그림은 왼쪽을 본다. 쿨러 쪽(오른쪽)을 보게 뒤집는다
             _cat.FlipH = true;
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/jump.png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/jump.png"));
             Hop(_cat, 20);
             Toast(T["thiefStopped"], Palette.Paper, SafeTop + 420);
             Later(0.5, ReturnCat);
@@ -836,7 +846,7 @@ namespace Hanjeopsi.App.Screens
             var fish = G.CatSteal();
             SetInfo();
             _cat.FlipH = true;
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/eat.png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/eat.png"));
             Sound.Play("steal");
             Haptics.Pulse(60, 0.3f);
             if (fish != null) Toast(F("thiefStole", G.Data.SpeciesById(fish.Species).Name), Palette.RedText, SafeTop + 420);
@@ -849,7 +859,7 @@ namespace Hanjeopsi.App.Screens
         {
             _stage.Move(_cat, CatFoot);
             _stage.MoveChild(_cat, _yeoul.GetIndex());
-            _stage.Swap(_cat, GD.Load<Texture2D>("res://art/cat/sit-side.png"));
+            SwapCat(GD.Load<Texture2D>("res://art/cat/sit-side.png"));
             _cat.FlipH = false;
         }
 
@@ -1458,8 +1468,11 @@ namespace Hanjeopsi.App.Screens
                 _field.RodTrim = new Color(look.Trim);
             }
             _field.CoolerTex = TrimmedGear("cooler", G.Save.Tackle + 1);
-            _field.ReelTex = TrimmedGear("reel-back", G.Save.Reel + 1);
-            _field.ReelFootX = SdPoses.ReelFoot(G.Save.Reel + 1);
+            // 대 밑동과 가진 릴 (릴 단계 그림). 손잡이 위로는 가진 대 색으로 이어 그린다
+            _field.ButtTex = TrimmedGear("butt", G.Save.Reel + 1);
+            var butt = SdPoses.Butt(G.Save.Reel + 1);
+            _field.ButtTopX = butt.TopX;
+            _field.ButtBlankPx = butt.BlankPx;
             var reel = G.Data.Gear.Reels[Mathf.Clamp(G.Save.Reel, 0, G.Data.Gear.Reels.Count - 1)].Look;
             if (reel != null)
             {

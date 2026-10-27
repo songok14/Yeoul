@@ -55,17 +55,16 @@ namespace Hanjeopsi.App.Ui
             return _all[name];
         }
 
-        private static List<float> _reelFoot;
+        private static Newtonsoft.Json.Linq.JObject _look;
 
-        /// <summary>뒤에서 본 릴 그림(gear/reel-back-단계)에서 릴 다리 꼭대기의 가로 위치 비율 (data/gearlook.json)</summary>
-        public static float ReelFoot(int level)
+        /// <summary>대 밑동+릴 그림(gear/butt-단계): 맨 위 대 몸통의 가로 가운데 비율과 너비(px) (data/gearlook.json)</summary>
+        public static (float TopX, float BlankPx) Butt(int level)
         {
-            if (_reelFoot == null)
-            {
-                var o = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
-                _reelFoot = o["reelFoot"].ToObject<List<float>>();
-            }
-            return _reelFoot[Mathf.Clamp(level - 1, 0, _reelFoot.Count - 1)];
+            if (_look == null) _look = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
+            var tops = _look["buttTop"].ToObject<List<float>>();
+            var w = _look["buttBlank"].ToObject<List<float>>();
+            int i = Mathf.Clamp(level - 1, 0, tops.Count - 1);
+            return (tops[i], w[i]);
         }
 
         private static List<float> _chairSeat;
