@@ -40,14 +40,15 @@ namespace Hanjeopsi.App.Ui
                 if (!IsInstanceValid(owner) || !owner.Visible) continue;
                 var foot = _stage.FootOf(owner);
                 if (foot == null) continue;
-                var c = _stage.ToLocal(foot.Value) + new Vector2(0, -2 * _stage.K);
-                float rx = width * 0.5f * _stage.K;
+                // 발바닥 바로 아래에 걸치게 (발 뒤에 숨지 않게)
+                var c = _stage.ToLocal(foot.Value) + new Vector2(0, 1.5f * _stage.K);
+                float rx = width * 0.55f * _stage.K;
                 // 가장자리가 부드럽게 겹쳐 칠한다
                 for (int i = 0; i < 3; i++)
                 {
-                    float k = 1 - i * 0.22f;
-                    DrawSetTransform(c, 0, new Vector2(1, 0.26f));
-                    DrawCircle(Vector2.Zero, rx * k, new Color(0.08f, 0.06f, 0.1f, 0.11f * owner.Modulate.A));
+                    float k = 1 - i * 0.24f;
+                    DrawSetTransform(c, 0, new Vector2(1, 0.3f));
+                    DrawCircle(Vector2.Zero, rx * k, new Color(0.1f, 0.07f, 0.12f, 0.17f * owner.Modulate.A));
                 }
                 DrawSetTransform(Vector2.Zero, 0, Vector2.One);
             }

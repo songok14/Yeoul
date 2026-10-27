@@ -56,6 +56,7 @@ namespace Hanjeopsi.App.Screens
         private static readonly float[] Lanes = { -84, -112, -140 };
         /// <summary>마을 사람은 이 자리 아래에 끼워 넣는다 (의뢰인·여울·고등어·간판보다 뒤)</summary>
         private Control _walkerLayer;
+        private static readonly float[] StartXs = { 115, 285, 355 };
         private int _walkersWanted;
         private float _spawnTimer;
 
@@ -524,7 +525,9 @@ namespace Hanjeopsi.App.Screens
             _stage.AddChild(_walkerLayer);
             _walkersWanted = Math.Min(G.VillagersWanted(), Lanes.Length);
             var rng = GameState.I.Rng;
-            for (int i = 0; i < _walkersWanted; i++) SpawnWalker(50 + (float)rng.Next() * 350);
+            // 처음 자리는 흩어 놓는다. 여울 바로 뒤(가운데)와 양옆 의뢰인 자리는 피한다
+            var starts = StartXs.OrderBy(_ => rng.Next()).ToList();
+            for (int i = 0; i < _walkersWanted; i++) SpawnWalker(starts[i % starts.Count] + ((float)rng.Next() - 0.5f) * 30);
             _spawnTimer = NextSpawn();
         }
 
@@ -611,8 +614,9 @@ namespace Hanjeopsi.App.Screens
                 _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-walk-" + (f + 1)));
                 w.Node.FlipH = w.Dir < 0;
                 _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
-                // 마당 안쪽에서 가끔 멈춰 선다
-                if (w.X > 60 && w.X < ArtStage.Logical.X - 60 && rng.Next() < dt * 0.06)
+                // 가끔 멈춰 선다. 여울 바로 뒤와 의뢰인 자리에서는 멈추지 않는다
+                bool open = (w.X > 95 && w.X < 160) || (w.X > 255 && w.X < 365);
+                if (open && rng.Next() < dt * 0.08)
                 {
                     w.Stop = 1.5f + (float)rng.Next() * 2;
                     _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));

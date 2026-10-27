@@ -514,13 +514,13 @@ namespace Hanjeopsi.App.Ui
         {
             var c = P(BobberAt);
             // 찌는 멀리 떠 있으니 작게 (사람 키의 1/10 안팎). 물테만 조금 넓게 그려 눈에 띄게 한다
-            float u = K * BobberScale * 0.45f;
+            float u = K * BobberScale * 0.62f;
             float sink = BobberSink;
             float alpha = 1 - 0.6f * sink;
             if (BobberFloating)
             {
                 float w = 1 + 0.12f * Mathf.Sin(_time * 3);
-                Ellipse(c, 17 * u * w, 0.28f, new Color(Palette.Foam, 0.6f), 2);
+                Ellipse(c, 15 * u * w, 0.28f, new Color(Palette.Foam, 0.6f), 2);
             }
             if (FloatTex != null)
             {
