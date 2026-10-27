@@ -400,12 +400,11 @@ namespace Hanjeopsi.App.Screens
             _field.RodDir = (e - g).Normalized();
             _field.RodLen = (e - g).Length();
             // 가진 릴을 그림 속 릴 위에 덮는다
-            _field.ReelShown = p.Reel != null && _field.ReelTex != null;
+            _field.ReelShown = p.Reel != null;
             if (_field.ReelShown)
             {
                 _field.ReelAt = PoseToLogical(Mirror(new Vector2(p.Reel[0], p.Reel[1])));
                 _field.ReelWidth = p.Reel[2] * (_yeoul.Size.X / _yeoul.Texture.GetWidth()) / _stage.K;
-                _field.ReelAngle = Mathf.DegToRad(_yeoul.RotationDegrees);
                 _field.ReelFlip = _poseFlip;
             }
         }
@@ -1459,7 +1458,12 @@ namespace Hanjeopsi.App.Screens
                 _field.RodTrim = new Color(look.Trim);
             }
             _field.CoolerTex = TrimmedGear("cooler", G.Save.Tackle + 1);
-            _field.ReelTex = TrimmedGear("reel-back", G.Save.Reel + 1);
+            var reel = G.Data.Gear.Reels[Mathf.Clamp(G.Save.Reel, 0, G.Data.Gear.Reels.Count - 1)].Look;
+            if (reel != null)
+            {
+                _field.ReelBody = new Color(reel.Body);
+                _field.ReelAccent = new Color(reel.Accent);
+            }
             int chair = G.KitLevel("chair");
             if (chair > 0)
             {

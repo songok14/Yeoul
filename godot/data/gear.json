@@ -111,7 +111,8 @@
       "drag": 101,
       "unlock": "start",
       "slack": 14,
-      "danger": 80
+      "danger": 80,
+      "look": { "body": "#b8bcc2", "accent": "#8a5a32" }
     },
     {
       "name": "2500번 스피닝릴",
@@ -122,7 +123,8 @@
       "drag": 90,
       "unlock": "shop",
       "slack": 12,
-      "danger": 84
+      "danger": 84,
+      "look": { "body": "#c0c4ca", "accent": "#2f6fd0" }
     },
     {
       "name": "레버브레이크릴",
@@ -133,7 +135,8 @@
       "drag": 85,
       "unlock": "shop",
       "slack": 10,
-      "danger": 87
+      "danger": 87,
+      "look": { "body": "#7a8a4a", "accent": "#c9b26a" }
     },
     {
       "name": "3000번 레버릴",
@@ -144,7 +147,8 @@
       "drag": 83,
       "unlock": "shop",
       "slack": 9,
-      "danger": 89
+      "danger": 89,
+      "look": { "body": "#2a2622", "accent": "#d4a33a" }
     },
     {
       "name": "맛집 축하 릴",
@@ -155,7 +159,8 @@
       "drag": 82,
       "unlock": "rank:1",
       "slack": 8,
-      "danger": 90
+      "danger": 90,
+      "look": { "body": "#c0222a", "accent": "#c8ccd2" }
     },
     {
       "name": "단골들의 선물 릴",
@@ -166,7 +171,8 @@
       "drag": 80,
       "unlock": "regulars:6",
       "slack": 7,
-      "danger": 91
+      "danger": 91,
+      "look": { "body": "#2a55b0", "accent": "#c8ccd2" }
     },
     {
       "name": "소문난 집 레버릴",
@@ -177,7 +183,8 @@
       "drag": 78,
       "unlock": "rank:3",
       "slack": 6,
-      "danger": 92
+      "danger": 92,
+      "look": { "body": "#7a3aa0", "accent": "#d4a33a" }
     },
     {
       "name": "흑룡 레버릴",
@@ -188,7 +195,8 @@
       "drag": 76,
       "unlock": "later",
       "slack": 5,
-      "danger": 93
+      "danger": 93,
+      "look": { "body": "#1e1c1a", "accent": "#d4a33a" }
     },
     {
       "name": "홍염 레버릴",
@@ -199,7 +207,8 @@
       "drag": 74,
       "unlock": "later",
       "slack": 4,
-      "danger": 94
+      "danger": 94,
+      "look": { "body": "#b01e1c", "accent": "#d4a33a" }
     },
     {
       "name": "청해 전설릴",
@@ -210,7 +219,8 @@
       "drag": 72,
       "unlock": "later",
       "slack": 3,
-      "danger": 95
+      "danger": 95,
+      "look": { "body": "#1f55b0", "accent": "#e0b040" }
     }
   ],
   "tackles": [

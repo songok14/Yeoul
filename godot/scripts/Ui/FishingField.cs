@@ -229,7 +229,7 @@ namespace Hanjeopsi.App.Ui
             if (ShadowVisible) DrawShadow();
             if (BobberVisible) DrawBobber();
             DrawLine();
-            if (ReelShown && ReelTex != null) DrawReel();
+            if (_rodReady && ReelShown) PaintReel(this);
             if (ShadowVisible && RunDir != 0) DrawRunArrow();
             if (ShadowVisible && ShowStamina) DrawStamina();
             foreach (var d in _drops) DrawDrop(d);
@@ -592,20 +592,26 @@ namespace Hanjeopsi.App.Ui
         /// <summary>던지기 전: 대 끝에 찌가 매달려 흔들린다</summary>
         public bool Dangle;
 
-        /// <summary>가진 릴 그림(뒤에서 본 것). 포즈 그림 속 릴 위에 덮는다. ReelAt 은 가운데(논리 좌표), ReelWidth 는 너비</summary>
-        public Texture2D ReelTex;
+        /// <summary>
+        /// 릴 (스피닝 레버브레이크 릴). 대 아래에 매달리고 스풀은 대 끝(바다) 쪽을 본다.
+        /// 뒤에서 보면 몸통 뒤쪽과 옆으로 나온 핸들만 보인다. ReelAt 은 포즈 그림 속 릴 자리(논리 좌표), ReelWidth 는 너비
+        /// </summary>
         public bool ReelShown;
         public Vector2 ReelAt;
-        public float ReelWidth, ReelAngle;
+        public float ReelWidth;
+        /// <summary>포즈를 뒤집었으면 핸들이 반대쪽</summary>
         public bool ReelFlip;
+        public Color ReelBody = new Color("b8bcc2"), ReelAccent = new Color("8a5a32");
 
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
         private bool _rodReady;
         private const int RodSegs = 28;
-        /// <summary>가이드 고리 자리 (대 위 비율). 마지막은 끝 고리</summary>
-        private static readonly float[] GuideAt = { 0.3f, 0.45f, 0.58f, 0.7f, 0.8f, 0.89f, 1f };
+        /// <summary>
+        /// 가이드 고리 자리 (대 위 비율). 찌낚시대(1호 530)는 고리가 열 개 남짓이고 릴 앞 큰 고리에서 끝으로 갈수록 작다. 마지막은 끝 고리
+        /// </summary>
+        private static readonly float[] GuideAt = { 0.2f, 0.32f, 0.43f, 0.53f, 0.62f, 0.7f, 0.77f, 0.84f, 0.9f, 0.95f, 1f };
         private readonly Vector2[] _guideRing = new Vector2[GuideAt.Length];
-        private Vector2 _reelAt;
+        private Vector2 _reelAt, _reelCenter, _rodAlong;
 
         /// <summary>여울 그림 바로 아래에 끼울 대 그림 (ArtStage 안, 같은 좌표)</summary>
         public Control MakeRodView()
@@ -627,23 +633,24 @@ namespace Hanjeopsi.App.Ui
             // 당길 때는 대 전체를 물고기 쪽으로 조금 돌려 잡는다 (최대 35도)
             float turn = Mathf.Clamp(RodDir.AngleTo(t), -0.61f, 0.61f);
             var d0 = RodDir.Rotated(turn * (Fighting ? 0.85f : 0.35f));
-            // 대 무게로 끝이 살짝 숙인다 (화면 아래 쪽)
-            var droop = (d0 + new Vector2(0, 0.28f)).Normalized();
+            // 길고 가는 대라 쉴 때도 제 무게로 끝이 숙인다 (화면 아래 쪽)
+            var droop = (d0 + new Vector2(0, 0.42f)).Normalized();
             // 팽팽할수록 대 끝이 줄 쪽으로 휜다. 찌를 띄워 둔 채 기다릴 때도 줄 무게만큼 조금
-            float k = Fighting ? 0.3f + 0.6f * Mathf.Min(1, b) : LineTo.HasValue ? 0.12f : 0;
+            float k = Fighting ? 0.35f + 0.6f * Mathf.Min(1, b) : LineTo.HasValue ? 0.15f : 0;
             var tipDir = droop.Slerp(t, k);
             float shake = (Fighting && b > 0.85f ? 0.03f : 0) + 0.08f * RodKick;
             if (shake > 0) tipDir = tipDir.Rotated(Mathf.Sin(_time * 55) * shake);
             // 휠수록 끝이 손 쪽으로 당겨진다
-            float len = RodLen * (1 - 0.1f * Mathf.Min(1, b));
-            var mid = g + d0 * len * 0.55f;
-            var tip = mid + (d0 + tipDir).Normalized() * len * 0.45f;
+            float len = RodLen * (1 - 0.12f * Mathf.Min(1, b));
+            // 찌낚시대는 허리부터 고르게 휜다: 아래 40% 만 곧고 나머지가 활처럼
+            var mid = g + d0 * len * 0.4f;
+            var tip = mid + (d0 + tipDir * 1.4f).Normalized() * len * 0.6f;
             RodTip = tip;
             // 손 안쪽에서 시작한다 (여울 그림 아래라 손에 가린다)
-            var butt = g - d0 * len * 0.1f;
+            var butt = g - d0 * len * 0.08f;
             var p0 = P(butt);
             var p1 = P(mid);
-            var p2 = P(tip - tipDir * len * 0.2f);
+            var p2 = P(tip - tipDir * len * 0.3f);
             var p3 = P(tip);
             for (int i = 0; i <= RodSegs; i++)
             {
@@ -651,7 +658,8 @@ namespace Hanjeopsi.App.Ui
                 float r = 1 - s;
                 _rodPts[i] = r * r * r * p0 + 3 * r * r * s * p1 + 3 * r * s * s * p2 + s * s * s * p3;
             }
-            // 가이드 고리: 대 아래(땅 쪽)에 짧은 다리로 달린다
+            // 가이드 고리는 대 아래에 달린다. 뒤에서 대가 바다 쪽으로 뻗어 있으니 고리는 거의 대 위에 겹쳐 보이고
+            // 화면 아래로 아주 조금만 비켜난다. 원줄은 그 고리들을 지나 대를 따라간다
             float u = K / 2.4f;
             for (int j = 0; j < GuideAt.Length; j++)
             {
@@ -659,10 +667,14 @@ namespace Hanjeopsi.App.Ui
                 float fi = f * RodSegs;
                 int i = Mathf.Clamp((int)fi, 0, RodSegs - 1);
                 var at = _rodPts[i].Lerp(_rodPts[i + 1], fi - i);
-                _guideRing[j] = at + Down(_rodPts[i + 1] - _rodPts[i]) * (j == GuideAt.Length - 1 ? 0 : Mathf.Lerp(5.5f, 2.2f, f) * u);
+                _guideRing[j] = at + Down(_rodPts[i + 1] - _rodPts[i]) * (j == GuideAt.Length - 1 ? 0 : Mathf.Lerp(2.2f, 0.6f, f) * u);
             }
-            // 원줄은 릴 스풀에서 나온다 (가진 릴 그림이 있으면 그 자리, 없으면 손 아래)
-            _reelAt = ReelShown ? P(ReelAt) : P(g - d0 * len * 0.05f) + Down(p1 - p0) * 9 * u;
+            // 원줄은 릴 스풀 앞(대 끝 쪽)에서 나와 첫 고리로 간다
+            var reel = ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + Down(p1 - p0) * 6 * u;
+            var along = (p1 - p0).Normalized();
+            _reelAt = reel + along * ReelWidth * K * 0.25f;
+            _reelCenter = reel;
+            _rodAlong = along;
             _rodReady = true;
         }
 
@@ -679,57 +691,97 @@ namespace Hanjeopsi.App.Ui
             if (!_rodReady) return;
             float u = K / 2.4f;
             var body = RodBlank;
-            var edge = body.Darkened(0.65f);
             var gold = RodTrim;
-            // 손잡이 쪽 굵고 끝은 가늘다. 처음 한 토막은 코르크 손잡이처럼 굵다
+            // 손잡이 쪽 굵고 끝은 아주 가늘다 (초릿대 0.8mm). 처음 한 토막은 손잡이처럼 굵다
             for (int i = 0; i < RodSegs; i++)
             {
                 float f = (float)i / RodSegs;
-                bool handle = f < 0.1f;
-                float w = handle ? 8.5f * u : Mathf.Lerp(6.4f, 1.5f, (f - 0.1f) / 0.9f) * u;
+                bool handle = f < 0.08f;
+                float w = handle ? 6.8f * u : Mathf.Lerp(4.6f, 1.1f, Mathf.Pow((f - 0.08f) / 0.92f, 0.8f)) * u;
                 var fill = handle ? RodHandle : body;
-                c.DrawLine(_rodPts[i], _rodPts[i + 1], fill.Darkened(0.65f), w + 1.8f * u, true);
+                c.DrawLine(_rodPts[i], _rodPts[i + 1], fill.Darkened(0.65f), w + 1.6f * u, true);
                 c.DrawLine(_rodPts[i], _rodPts[i + 1], fill, w, true);
             }
-            int joint = Mathf.Clamp((int)(0.1f * RodSegs), 1, RodSegs);
-            c.DrawCircle(_rodPts[joint], 4.4f * u, gold);
-            // 마디 이음 띠 (대 색과 다른 장식 색)
-            foreach (float f in new[] { 0.36f, 0.62f })
+            int joint = Mathf.Clamp((int)(0.08f * RodSegs), 1, RodSegs);
+            c.DrawCircle(_rodPts[joint], 3.6f * u, gold);
+            // 위쪽(빛 받는 쪽) 가는 빛 한 줄
+            for (int i = 3; i < RodSegs - 3; i++)
+            {
+                var d = _rodPts[i + 1] - _rodPts[i];
+                var off = -Down(d) * Mathf.Lerp(1.3f, 0.3f, (float)i / RodSegs) * u;
+                c.DrawLine(_rodPts[i] + off, _rodPts[i + 1] + off, new Color(1, 0.95f, 0.85f, 0.24f), 0.9f * u, true);
+            }
+            // 진출식 마디 이음 (장식 색 띠)
+            foreach (float f in new[] { 0.28f, 0.47f, 0.66f, 0.82f })
             {
                 int i = Mathf.Clamp((int)(f * RodSegs), 0, RodSegs - 1);
                 var d = (_rodPts[i + 1] - _rodPts[i]).Normalized();
-                var nrm = new Vector2(-d.Y, d.X) * Mathf.Lerp(3.6f, 2f, f) * u;
-                c.DrawLine(_rodPts[i] - nrm, _rodPts[i] + nrm, gold, 2.2f * u, true);
+                var nrm = new Vector2(-d.Y, d.X) * Mathf.Lerp(2.8f, 1.2f, f) * u;
+                c.DrawLine(_rodPts[i] - nrm, _rodPts[i] + nrm, gold, 1.6f * u, true);
             }
-            // 위쪽(빛 받는 쪽) 가는 빛 한 줄
-            for (int i = 3; i < RodSegs - 2; i++)
-            {
-                var d = _rodPts[i + 1] - _rodPts[i];
-                var off = -Down(d) * Mathf.Lerp(1.6f, 0.4f, (float)i / RodSegs) * u;
-                c.DrawLine(_rodPts[i] + off, _rodPts[i + 1] + off, new Color(1, 0.95f, 0.85f, 0.26f), 1.1f * u, true);
-            }
-            // 원줄: 릴에서 고리들을 차례로 지나 끝 고리까지 (고리 사이는 곧은 줄)
+            // 원줄: 릴 스풀 앞에서 고리들을 차례로 지나 끝 고리까지 (대를 따라 붙어 간다)
             var line = new Vector2[GuideAt.Length + 1];
             line[0] = _reelAt;
             for (int j = 0; j < GuideAt.Length; j++) line[j + 1] = _guideRing[j];
-            c.DrawPolyline(line, LineColor(0.85f), 1.2f * Mathf.Max(1, u), true);
-            // 고리: 대에서 내려온 짧은 다리와 금빛 고리
+            c.DrawPolyline(line, LineColor(0.9f), 1f * Mathf.Max(1, u), true);
+            // 고리: 뒤에서 보면 대를 가로지르는 작은 금속 고리 (릴 앞 첫 고리가 가장 크다)
             for (int j = 0; j < GuideAt.Length; j++)
             {
                 float f = GuideAt[j];
-                float fi = f * RodSegs;
-                int i = Mathf.Clamp((int)fi, 0, RodSegs - 1);
-                var on = _rodPts[i].Lerp(_rodPts[i + 1], fi - i);
-                float r = Mathf.Lerp(3.4f, 1.5f, f) * u;
-                if (j < GuideAt.Length - 1) c.DrawLine(on, _guideRing[j], gold, 1.1f * u, true);
-                c.DrawArc(_guideRing[j], r, 0, Mathf.Tau, 12, gold, 1.2f * u, true);
+                float r = (j == 0 ? 3.4f : Mathf.Lerp(2.4f, 1.1f, f)) * u;
+                var at = _guideRing[j];
+                var d = j < GuideAt.Length - 1 ? (_guideRing[j + 1] - at).Normalized() : _rodAlong;
+                var nrm = new Vector2(-d.Y, d.X);
+                // 납작한 고리 (대 방향으로 눌린 타원)
+                var pts = new Vector2[13];
+                for (int q = 0; q < pts.Length; q++)
+                {
+                    float a = Mathf.Tau * q / (pts.Length - 1);
+                    pts[q] = at + nrm * Mathf.Cos(a) * r + d * Mathf.Sin(a) * r * 0.35f;
+                }
+                c.DrawPolyline(pts, new Color("d8dce0"), 1f * u, true);
             }
+        }
+
+        /// <summary>
+        /// 릴: 뒤에서 본 스피닝 릴. 대 아래 릴 다리에 매달린 둥근 몸통, 옆으로 뻗은 핸들과 노브.
+        /// 스풀은 대 끝 쪽을 보니 위쪽에 테만 살짝 보인다. 여울 그림 위에 그려 그림 속 릴을 덮는다
+        /// </summary>
+        public void PaintReel(CanvasItem c)
+        {
+            if (!_rodReady || !ReelShown) return;
+            float u = K / 2.4f;
+            float w = ReelWidth * K;
+            var at = _reelCenter;
+            var up = _rodAlong;                 // 대 끝 쪽
+            var side = new Vector2(-up.Y, up.X); // 화면 오른쪽 쪽
+            if (side.X < 0) side = -side;
+            var ink = ReelBody.Darkened(0.6f);
+            // 릴 다리: 몸통에서 대로
+            var foot = at + up * w * 0.05f - side * 0 + (-Down(up)) * w * 0.32f;
+            c.DrawLine(at, foot, ink, 2.6f * u, true);
+            c.DrawLine(at, foot, ReelBody, 1.4f * u, true);
+            // 핸들: 몸통 옆으로 (오른손잡이는 왼쪽 핸들, 포즈를 뒤집으면 반대)
+            var hand = ReelFlip ? side : -side;
+            var knob = at + hand * w * 0.62f + Down(up) * w * 0.12f;
+            c.DrawLine(at, knob, ink, 2.6f * u, true);
+            c.DrawLine(at, knob, ReelBody, 1.4f * u, true);
+            c.DrawCircle(knob, w * 0.13f + 0.6f * u, ink);
+            c.DrawCircle(knob, w * 0.13f, ReelAccent);
+            // 스풀 테 (몸통 위, 대 끝 쪽에 살짝)
+            c.DrawCircle(at + up * w * 0.16f, w * 0.3f + 0.6f * u, ink);
+            c.DrawCircle(at + up * w * 0.16f, w * 0.3f, ReelAccent);
+            // 몸통 뒤쪽 (둥근 기어 통)
+            c.DrawCircle(at, w * 0.32f + 0.8f * u, ink);
+            c.DrawCircle(at, w * 0.32f, ReelBody);
+            c.DrawCircle(at - side * w * 0.1f - up * w * 0.08f, w * 0.12f, ReelBody.Lightened(0.35f));
         }
 
         /// <summary>원줄 색 (형광빛 도는 흰 나일론). 위험하면 금빛을 지나 빨갛게</summary>
         private Color LineColor(float alpha = 0.92f)
         {
-            var white = new Color(1, 1, 0.94f, alpha);
+            // 찌낚시 원줄은 잘 보이게 형광 노랑을 많이 쓴다
+            var white = new Color(1, 0.98f, 0.62f, alpha);
             if (!Fighting) return white;
             float bend = Mathf.Clamp(Bend, 0, 1.1f);
             var hot = new Color(1f, 0.82f, 0.36f, 1f);
@@ -783,16 +835,6 @@ namespace Hanjeopsi.App.Ui
             DrawPolyline(pts, new Color(0.05f, 0.12f, 0.18f, 0.32f), width + 2.2f * u, true);
             DrawPolyline(pts, LineColor(), width, true);
             if (Fighting && bend >= 0.85f) DrawPolyline(pts, new Color(1f, 0.35f, 0.3f, 0.25f + 0.15f * Mathf.Sin(_time * 18)), width + 6 * u, true);
-        }
-
-        /// <summary>가진 릴: 포즈 그림 속 릴 자리에 덮는다 (여울 기울기만큼 함께 기운다)</summary>
-        private void DrawReel()
-        {
-            float w = ReelWidth * K;
-            float h = w * ReelTex.GetHeight() / ReelTex.GetWidth();
-            DrawSetTransform(P(ReelAt), ReelAngle, new Vector2(ReelFlip ? -1 : 1, 1));
-            DrawTextureRect(ReelTex, new Rect2(-w / 2, -h / 2, w, h), false);
-            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
 
         /// <summary>던지기 전: 대 끝에서 찌 채비가 곧게 매달려 천천히 흔들린다</summary>

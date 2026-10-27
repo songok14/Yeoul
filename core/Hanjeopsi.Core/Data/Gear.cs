@@ -92,6 +92,13 @@ namespace Hanjeopsi.Core.Data
         public string Trim;
     }
 
+    /// <summary>릴 색: 몸통, 장식(핸들 노브·스풀 테) (#rrggbb)</summary>
+    public sealed class ReelLook
+    {
+        public string Body;
+        public string Accent;
+    }
+
     public sealed class Reel
     {
         public string Name;
@@ -109,6 +116,8 @@ namespace Hanjeopsi.Core.Data
         public double Slack;
         /// <summary>고닷 힘싸움: 이 텐션부터 위험 (0 이면 balance reel.danger). 좋은 릴일수록 초록이 넓다</summary>
         public double Danger;
+        /// <summary>낚시 화면에 그리는 릴 색 (상점 그림 reel-단계.png 에서 땄다). 없으면 기본 은색</summary>
+        public ReelLook Look;
     }
 
     /// <summary>소품(쿨러). 담을 수 있는 마릿수와 하루 신선도 감소</summary>
