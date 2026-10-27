@@ -119,6 +119,26 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 이야기_장면은_날이_되면_한_번씩_나온다()
+        {
+            var g = Game.NewGame(TestData.Full, 3);
+            g.Save.Day = 1;
+            Assert.Null(g.NextBeat());
+            g.Save.Day = 4;
+            Assert.Equal("catFloat", g.NextBeat());
+            g.MarkBeat("catFloat");
+            Assert.Equal("nossiNote", g.NextBeat());
+            g.MarkBeat("nossiNote");
+            Assert.Null(g.NextBeat());
+            // 차세라 첫 만남은 대결(20일) 전까지만
+            g.Save.Day = 21;
+            Assert.Null(g.NextBeat());
+            g.Save.Day = 16;
+            Assert.Equal("seraMeet", g.NextBeat());
+            foreach (var b in TestData.Full.Dialogue.Beats) Assert.True(TestData.Full.Dialogue.Scenes.ContainsKey(b.Scene), b.Scene);
+        }
+
+        [Fact]
         public void 좋은_낚싯대일수록_멀리_던진다()
         {
             var rods = TestData.Full.Gear.Rods;

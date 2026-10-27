@@ -296,6 +296,112 @@
         "face": "default",
         "text": "아직 바다에는 물고기가 있다.\n처음부터 다시 해 보자."
       }
+    ],
+    "catFloat": [
+      {
+        "speaker": "",
+        "face": "",
+        "text": "고등어가 발치에 와서 몸을 비빈다.\n목에 뭔가 달랑거린다."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "찌잖아? 손으로 깎은 나무 찌네."
+      },
+      {
+        "speaker": "",
+        "face": "",
+        "text": "낡은 찌 아래에 칼로 새긴 글씨가 있다.\nD.Y."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "journal",
+        "text": "D.Y....\n어디서 본 글씨 같은데."
+      }
+    ],
+    "nossiNote": [
+      {
+        "speaker": "",
+        "face": "",
+        "text": "미끼가게 문틈에 쪽지가 끼워져 있다."
+      },
+      {
+        "speaker": "",
+        "face": "",
+        "text": "「고양이 우는 쪽으로 던져라.」"
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "노씨 아저씨 글씨다.\n말로 하시면 될 텐데."
+      }
+    ],
+    "seraMeet": [
+      {
+        "speaker": "",
+        "face": "",
+        "text": "방파제 입구에 파란 승합차가 섰다.\n옆구리에 블루훅 로고가 번쩍인다."
+      },
+      {
+        "name": "차세라",
+        "text": "여기가 물비늘포구나.\n사진보다 작네."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "nervous",
+        "text": "누구세요?"
+      },
+      {
+        "name": "차세라",
+        "text": "블루훅 차세라.\n이 방파제 곧 우리 리조트 자리야."
+      },
+      {
+        "name": "차세라",
+        "text": "20일에 다시 올게.\n40cm 넘는 걸 낚으면 인정해 줄게."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "인정은 필요 없어요.\n아빠가 그랬거든요."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "journal",
+        "text": "고기는 먼저 낚은 사람 게 아니야. 제일 맛있게 먹어주는 사람 거지."
+      }
+    ],
+    "seraDuel": [
+      {
+        "name": "차세라",
+        "text": "약속대로 왔어.\n오늘 안에 40cm. 못 넘으면 구경만 해."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "오늘 저녁 메뉴 걸고 낚을게요."
+      }
     ]
-  }
+  },
+  "beats": [
+    {
+      "scene": "catFloat",
+      "day": 2,
+      "until": 0
+    },
+    {
+      "scene": "nossiNote",
+      "day": 4,
+      "until": 0
+    },
+    {
+      "scene": "seraMeet",
+      "day": 15,
+      "until": 19
+    },
+    {
+      "scene": "seraDuel",
+      "day": 20,
+      "until": 20
+    }
+  ]
 }

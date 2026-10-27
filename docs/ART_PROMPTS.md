@@ -773,6 +773,50 @@ Scene: night in front of a small closed seaside restaurant, a red seizure notice
 Style: soft anime illustration, delicate line art, subtle and natural facial acting, painterly watercolor background, cold blue night with one warm light strip, cinematic composition with her in the upper 70 percent. Keep the lower 30 percent calm and simple for a subtitle box. No text, no letters, no signature, no watermark.
 ```
 
+## 1장 이야기 장면 (2026-10-27)
+
+1장에 새로 넣은 이야기 장면(`dialogue.json beats`) 그림. 지금은 차세라 그림이 없어 이름표만 나오고, 찌·첫 만남 장면은 여울 감정 일러스트로 대신한다. 받으면 `sera` 화자와 장면 그림으로 바꾼다.
+
+### 대화 4. 차세라 표정 시트 (기본·여유 웃음·도발·놀람·짜증·진지)
+
+지금 여울·은행 직원 대화 일러스트를 같이 첨부한다.
+
+```
+Create one character expression sheet for a mobile game dialogue box, background solid light gray #EDEDED (no checkerboard, no text, no logo letters, no borders, no grid lines). Attached: my current dialogue illustrations of the heroine and the bank officer (keep exactly the same soft anime style, line weight, coloring and upper-body framing).
+
+Character: Cha Sera, 27-year-old Korean woman, heir of a big fishing gear company called Blue Hook and a tournament champion angler. Rival of the heroine but not a villain: confident, proud, a little lonely. Sleek dark navy-black hair in a high ponytail with straight bangs, sharp dark eyes, small silver ear studs. Fitted white technical fishing jacket with deep blue panels and a small plain blue fish-hook emblem on the chest (a simple shape, no letters), slim black pants, polarized sunglasses pushed up on her head.
+
+Layout: 3 columns x 2 rows, six upper-body poses from the head to the waist, all the same size, same eye height and same framing, each facing three-quarters to the viewer's left (her body turned toward the left side of the image, as if talking to someone standing on the left).
+Row 1: calm neutral face with arms crossed / small confident smirk with one hand on her hip / provoking look, chin raised, pointing forward with her index finger.
+Row 2: surprised, eyes wide and lips parted, one hand half raised / annoyed, frowning and looking away to the side / serious and quiet, sunglasses in her hand, looking straight ahead.
+
+Lighting from the upper left, soft and warm like a clear southern Korean afternoon. No text, no letters, no signature, no watermark.
+```
+
+### 컷 9. 고등어 목의 찌 (`catFloat`)
+
+```
+Create one vertical 9:16 story illustration for a mobile game cutscene. Attached: the current illustrations of the heroine and the gray tabby cat (keep both designs exactly) and my watercolor background illustration of the harbor village yard (match its palette and painterly texture).
+
+Characters: Han Yeoul, 29-year-old Korean woman, former sous-chef who lost her sense of taste. Long brown hair in a high messy bun with loose strands, brown eyes, oversized cream-white hooded jacket, dark brown cargo pants. The silver-gray mackerel tabby cat with white chest and paws, yellow-green eyes, red collar with a small gold bell.
+
+Scene: a close, low camera at the height of a crouching person, on the stone yard of the harbor village in soft morning light. Yeoul crouches on the left side of the image, facing right. The cat sits on the right side facing left, toward her, eyes half closed and calm. With her right hand she gently lifts a small old hand-carved wooden fishing float that hangs from the cat's red collar on a short faded string. The float is about the length of a finger, faded red on top and off-white below, with knife-carved scratches on the white part (only rough scratches, no readable letters). Her face is in three-quarter view: eyebrows slightly drawn together, head tilted, lips parted as if she is trying to remember something. Curious and a little uneasy, not smiling.
+
+Style: soft anime illustration, delicate line art, subtle and natural facial acting, painterly watercolor background softly blurred, light from the upper left, the float and her hand are the sharpest point in the image, characters in the upper 70 percent. Keep the lower 30 percent calm and simple for a subtitle box. No text, no letters, no signature, no watermark.
+```
+
+### 컷 10. 차세라 첫 만남 (`seraMeet`)
+
+```
+Create one vertical 9:16 story illustration for a mobile game cutscene. Attached: the current illustration of the heroine (keep her design exactly), the Cha Sera expression sheet (keep her design exactly) and my watercolor background illustration of the breakwater (match it closely).
+
+Characters: Han Yeoul, 29-year-old Korean woman, long brown hair in a high messy bun with loose strands, oversized cream-white hooded jacket, black crossbody harness bag, dark brown cargo pants, holding a simple fishing rod upright. Cha Sera, 27-year-old Korean woman, sleek dark navy-black high ponytail with straight bangs, fitted white technical fishing jacket with deep blue panels and a small plain blue fish-hook emblem (no letters), slim black pants, sunglasses pushed up on her head.
+
+Scene: the entrance of a concrete breakwater with tetrapods and a red lighthouse far behind, early afternoon. A glossy deep blue van is parked in the background with a plain blue fish-hook shape on its side (no letters). Camera behind Yeoul's left shoulder: Yeoul stands in the lower left foreground, seen from behind and a little from the side, only her back, bun and the edge of her cheek visible. Sera stands in the middle ground on the right, three or four steps away, facing the camera and Yeoul, one hand on her hip and a small confident smirk, looking slightly down at Yeoul. Sea wind pushes Sera's ponytail to the left. The feeling: a calm first meeting with tension, not a fight.
+
+Style: soft anime illustration, delicate line art, subtle and natural facial acting, painterly watercolor background, bright clear light from the upper left, cinematic composition with both characters in the upper 70 percent. Keep the lower 30 percent calm and simple for a subtitle box. No text, no letters, no logo words, no signature, no watermark.
+```
+
 ---
 
 ## 웹 버전 일러스트 기록 (v0.2)

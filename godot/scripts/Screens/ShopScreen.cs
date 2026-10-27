@@ -142,6 +142,8 @@ namespace Hanjeopsi.App.Screens
                 return TopAligned(paper);
             }
             var kinds = Tab == 0 ? FishKinds : KeepKinds;
+            // 잠긴 새 장비는 줄마다 "노씨 부탁 먼저"를 달지 않고 위에 한 번만 알린다
+            if (G.Save.Kit != null && !G.KitsOpen() && kinds.Any(k => G.KitDef(k) != null)) col.AddChild(KitsNote());
             for (int i = 0; i < kinds.Length; i++)
             {
                 if (i > 0) col.AddChild(Rule());
@@ -186,7 +188,8 @@ namespace Hanjeopsi.App.Screens
             string unlock = TierUnlock(kind, show);
             Control right;
             // 새 장비는 노씨 첫 부탁을 들어준 뒤에 판다
-            if (kit != null && !G.KitsOpen() && Unlock.IsShop(unlock)) right = UnlockTag(unlock, T["kitsLocked"]);
+            if (kit != null && !G.KitsOpen() && Unlock.IsShop(unlock))
+                return Row(GearArt(kind, show), top, name, Stat(kind, show), null, Palette.InkSoft);
             else if (Unlock.IsShop(unlock))
             {
                 int price = TierPrice(kind, show);
@@ -240,6 +243,17 @@ namespace Hanjeopsi.App.Screens
                     var c = g.Tackles[tier - 1];
                     return F("coolerStat", c.Capacity, c.Decay);
             }
+        }
+
+        /// <summary>노씨 부탁을 들어주기 전: 새 장비가 잠겨 있다는 띠 하나</summary>
+        private Control KitsNote()
+        {
+            var favor = G.Data.RequestTemplates.FirstOrDefault(t => t.Flag == "nossiFavor");
+            string text = favor == null ? T["unlockFavor"] : F("kitsNote", G.Data.SpeciesById(favor.Species).Name, favor.Count);
+            var box = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
+            box.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.Gold, 0.22f), 22, 24, 14).WithBorder(Palette.GoldDark, 3));
+            box.AddChild(UiKit.Text(text, TextSize.Tiny + 3, Palette.Ink, true, true, 0, null, HorizontalAlignment.Center));
+            return box;
         }
 
         /// <summary>보상·다음 지역 장비는 값 대신 얻는 법</summary>

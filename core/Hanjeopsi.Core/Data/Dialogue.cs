@@ -26,6 +26,8 @@ namespace Hanjeopsi.Core.Data
         public List<Speaker> Speakers = new List<Speaker>();
         /// <summary>이름 붙은 대화 장면 (welcome, chapterClear, chapterFail ...)</summary>
         public Dictionary<string, List<DialogueLine>> Scenes = new Dictionary<string, List<DialogueLine>>();
+        /// <summary>날이 되면 마을에 들어올 때 한 번 나오는 이야기 장면 (고닷 1장)</summary>
+        public List<StoryBeat> Beats = new List<StoryBeat>();
 
         public Speaker SpeakerById(string id)
         {
@@ -33,6 +35,16 @@ namespace Hanjeopsi.Core.Data
                 if (s.Id == id) return s;
             throw new KeyNotFoundException("없는 화자 id: " + id);
         }
+    }
+
+    public sealed class StoryBeat
+    {
+        /// <summary>scenes 의 장면 이름</summary>
+        public string Scene;
+        /// <summary>이 날부터</summary>
+        public int Day;
+        /// <summary>이 날까지만 (지나면 건너뛴다). 0 이면 끝까지</summary>
+        public int Until;
     }
 
     public sealed class Villager

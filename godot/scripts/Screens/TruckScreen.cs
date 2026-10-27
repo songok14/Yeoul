@@ -191,7 +191,15 @@ namespace Hanjeopsi.App.Screens
             _body.AddChild(UiKit.Text(F("rankLine", rank.Name, repText, G.CustomersNow()), TextSize.Small, Palette.GrayText, false, false, 0, null, HorizontalAlignment.Center));
             // 재료가 있는 요리만 줄로 보이고, 나머지는 한 줄로 접는다 (못 배운 요리의 ??? 가 줄줄이 늘어서지 않게)
             var ready = G.Data.Recipes.Recipes.Where(r => G.Truck.BestFishFor(s, r) != null).ToList();
-            foreach (var r in ready) _body.AddChild(MenuRow(r, slots));
+            // 고른 요리가 맨 위, 다음은 특별 요리, 생선구이는 재료 많은 순으로 맨 아래에 접어 둔다
+            var rest = ready.Where(r => !_menu.Contains(r)).OrderByDescending(r => Stock(r)).ToList();
+            foreach (var r in _menu) _body.AddChild(MenuRow(r, slots));
+            foreach (var r in rest.Where(r => !IsGrill(r))) _body.AddChild(MenuRow(r, slots));
+            var grills = rest.Where(IsGrill).ToList();
+            if (grills.Count >= GrillFoldMin)
+                _body.AddChild(GrillToggle(grills.Count, grills.Sum(Stock)));
+            if (grills.Count < GrillFoldMin || _grillOpen)
+                foreach (var r in grills) _body.AddChild(MenuRow(r, slots));
             int known = G.Data.Recipes.Recipes.Count(r => !ready.Contains(r) && s.Dex.ContainsKey(r.Species) && s.Dex[r.Species].Count > 0);
             int unknown = G.Data.Recipes.Recipes.Count - ready.Count - known;
             if (ready.Count == 0) _body.AddChild(UiKit.Text(T["noReady"], TextSize.Body, Palette.GrayText, false, true, 0, null, HorizontalAlignment.Center));
@@ -208,6 +216,37 @@ namespace Hanjeopsi.App.Screens
             _body.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4), MouseFilter = MouseFilterEnum.Ignore });
             _body.AddChild(buttons);
             if (rise) Rise();
+        }
+
+        /// <summary>생선구이가 이만큼 넘으면 한 줄로 접는다</summary>
+        private const int GrillFoldMin = 3;
+        private bool _grillOpen;
+
+        private static bool IsGrill(Recipe r)
+        {
+            return r.Id.EndsWith("-gui");
+        }
+
+        private int Stock(Recipe r)
+        {
+            return G.Save.Cooler.Count(f => f.Species == r.Species && G.Fresh.StageOf(f.Fresh) != FreshStage.Spoiled);
+        }
+
+        /// <summary>생선구이 묶음 줄. 누르면 펴고 접는다</summary>
+        private Control GrillToggle(int count, int stock)
+        {
+            var box = new PanelContainer { MouseFilter = MouseFilterEnum.Stop, MouseDefaultCursorShape = CursorShape.PointingHand };
+            box.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(1, 1, 1, 0.06f), 22, 18, 10).WithBorder(new Color(Palette.Paper, 0.25f), 2));
+            string label = _grillOpen ? T["grillOpen"] : F("grillFolded", count, stock);
+            box.AddChild(UiKit.Text(label + (_grillOpen ? "  ▲" : "  ▼"), TextSize.Small, Palette.GreenText, true, false, 0, null, HorizontalAlignment.Center));
+            box.GuiInput += e =>
+            {
+                if (!(e is InputEventMouseButton mb) || mb.ButtonIndex != MouseButton.Left || mb.Pressed) return;
+                _grillOpen = !_grillOpen;
+                Sound.Play("tick", -6);
+                CallDeferred(MethodName.ShowMenuQuiet);
+            };
+            return box;
         }
 
         /// <summary>메뉴판 한 줄. 재료가 있으면 눌러서 오늘 메뉴에 올리고 내린다 (등급만큼)</summary>
@@ -582,6 +621,10 @@ namespace Hanjeopsi.App.Screens
         {
             switch (action)
             {
+                case "grill":
+                    _grillOpen = true;
+                    ShowMenu(false);
+                    break;
                 case "cook":
                     StartShift();
                     break;

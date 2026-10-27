@@ -349,6 +349,33 @@ namespace Hanjeopsi.App.Screens
                 if (sign is SignButton sb) sb.MoveToFront();
         }
 
+        private float _nodTimer = 3, _nodT = -1;
+        private int _nodWho;
+
+        /// <summary>의뢰인은 숨 쉬고, 가끔 한 사람이 고개를 까딱한다</summary>
+        private void UpdateClients(float dt)
+        {
+            if (_clients.Count == 0) return;
+            _nodTimer -= dt;
+            if (_nodTimer <= 0 && _nodT < 0)
+            {
+                _nodT = 0;
+                _nodWho = (int)(GameState.I.Rng.Next() * _clients.Count);
+                _nodTimer = 3 + (float)GameState.I.Rng.Next() * 4;
+            }
+            for (int i = 0; i < _clients.Count; i++)
+            {
+                var n = _clients[i].Node;
+                if (i == _nodWho && _nodT >= 0) SdMotion.Nod(n, _nodT, n.FlipH);
+                else SdMotion.Breathe(n, _time, 2 + i * 1.7f, 2.0f);
+            }
+            if (_nodT >= 0)
+            {
+                _nodT += dt / 0.5f;
+                if (_nodT > 1) _nodT = -1;
+            }
+        }
+
         /// <summary>머리 위 표시가 통통 튀는 높이 (논리 좌표가 아니라 화면 px)</summary>
         private const float MarkHop = 26;
         /// <summary>의뢰인 발밑에서 머리 위 표시까지 (논리 좌표)</summary>
@@ -609,6 +636,7 @@ namespace Hanjeopsi.App.Screens
                 {
                     w.Stop -= dt;
                     if (w.Stop <= 0) w.Frame = 0;
+                    SdMotion.Breathe(w.Node, _time, w.Lane);
                     _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
                     continue;
                 }
@@ -624,6 +652,7 @@ namespace Hanjeopsi.App.Screens
                 int f = (int)(w.Frame / 0.24f) % 2;
                 _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-walk-" + (f + 1)));
                 w.Node.FlipH = w.Dir < 0;
+                SdMotion.Walk(w.Node, w.Frame / 0.24f, 0.8f);
                 _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
                 // 가끔 멈춰 선다. 여울 바로 뒤와 의뢰인 자리에서는 멈추지 않는다
                 bool open = (w.X > 95 && w.X < 160) || (w.X > 255 && w.X < 365);
@@ -669,9 +698,13 @@ namespace Hanjeopsi.App.Screens
         {
             float dt = (float)delta;
             _time += dt;
-            // 숨 쉬기
-            _yeoul.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.2f) * 0.012f);
-            _cat.Scale = new Vector2(1, 1 + Mathf.Sin(_time * 2.8f + 1) * 0.02f);
+            // 숨 쉬기 (걷는 동안은 걸음 움직임이 맡는다)
+            if (!_walking)
+            {
+                SdMotion.Breathe(_yeoul, _time);
+                SdMotion.Breathe(_cat, _time, 1, 2.8f, 0.02f);
+            }
+            UpdateClients(dt);
             _stage.Zoom = 1.01f + Mathf.Sin(_time * 0.1f) * 0.01f;
 
             UpdateVillagers(dt);
@@ -742,8 +775,13 @@ namespace Hanjeopsi.App.Screens
                     lines.Add(s.Debt > 0 ? "상환까지 " + (left > 0 ? left + "일" : "오늘이 마지막 날") : "1차 상환은 끝났다");
                 }
                 var week = sum.Week;
-                Modal(s.Day + "일차 " + G.SlotName(), string.Join("\n", lines), new[] { new ModalButton("좋아", Palette.Green, () => { if (week != null) PayDay(week); }) });
+                Modal(s.Day + "일차 " + G.SlotName(), string.Join("\n", lines), new[] { new ModalButton("좋아", Palette.Green, () =>
+                {
+                    if (week != null && !week.Seized) PayDay(week, PlayBeat);
+                    else PlayBeat();
+                }) });
             }
+            else PlayBeat();
             // 보상 장비가 생기면 노씨가 미끼가게에서 기다린다
             if (_newGoals.Count > 0)
             {
@@ -758,7 +796,7 @@ namespace Hanjeopsi.App.Screens
         /// 상환일 장면: 은행 직원이 다녀간 뒤 할머니와 여울. 다 냈으면 다음 주 이자와 몫,
         /// 못 냈으면 연체료와 경고. 차압은 결말 이야기가 맡는다
         /// </summary>
-        private void PayDay(WeekResult r)
+        private void PayDay(WeekResult r, Action then = null)
         {
             if (r.Seized) return;
             var lines = new List<DialogueLine>();
@@ -776,7 +814,18 @@ namespace Hanjeopsi.App.Screens
                 lines.Add(new DialogueLine { Speaker = "grandma", Face = "default", Text = "괜찮다. 아직 안 끝났어." });
                 lines.Add(new DialogueLine { Speaker = "yeoul", Face = "default", Text = "이번 주에 " + UiKit.Won(r.NextDue) + ".\n꼭 낸다." });
             }
-            Talk(lines);
+            Talk(lines, null, then);
+        }
+
+        /// <summary>그날 볼 이야기 장면이 있으면 한 번 보여 준다 (고등어 찌, 노씨 쪽지, 차세라)</summary>
+        private void PlayBeat()
+        {
+            // 사진 모드는 장면마다 따로 찍는다 (--shot-action=<장면 이름>)
+            if (GameState.I.ShotMode) return;
+            string beat = G.NextBeat();
+            if (beat == null) return;
+            G.MarkBeat(beat);
+            TalkScene(beat);
         }
 
         /// <summary>이번 주 목표: 진행과 보상. 다 한 목표는 금빛</summary>
@@ -831,6 +880,10 @@ namespace Hanjeopsi.App.Screens
                     break;
                 case "late":
                     PayDay(new WeekResult { No = 1, Paid = false, Short = 120_000, LateFee = 12_000, NextDue = 810_000 });
+                    break;
+                default:
+                    // 이야기 장면 (catFloat, nossiNote, seraMeet ...)
+                    if (G.Data.Dialogue.Scenes.ContainsKey(action)) TalkScene(action);
                     break;
             }
         }
@@ -947,6 +1000,8 @@ namespace Hanjeopsi.App.Screens
                 }
                 _stage.Swap(_yeoul, Tex("yeoul/walk-" + (frame + 1)));
                 SwapCat(Tex("cat/walk-" + (2 - frame)));
+                SdMotion.Walk(_yeoul, t * dist / 22);
+                SdMotion.Walk(_cat, t * dist / 16 + 0.5f, 0.7f);
             }), 0f, 1f, time);
             tw.TweenCallback(Callable.From(() =>
             {
