@@ -138,6 +138,10 @@ namespace Hanjeopsi.App.Screens
         private float _lean, _leanTarget, _leanRate = 10;
         /// <summary>포즈를 좌우로 뒤집었나 (찌·물고기가 왼쪽)</summary>
         private bool _poseFlip;
+        /// <summary>가진 낚시 의자 (뒤에서 본 그림)와 앉는 자리 높이 비율. 없으면 서서 기다린다</summary>
+        private Texture2D _chairTex;
+        private float _chairSeat = 0.45f;
+        private TextureRect _chair;
         // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
         private float _pullHold;
         private bool _shotPull;
@@ -332,6 +336,7 @@ namespace Hanjeopsi.App.Screens
             float fx = p.Foot[0] / tex.GetWidth();
             _yeoul.FlipH = _poseFlip;
             _stage.Swap(_yeoul, tex, height, new Vector2(_poseFlip ? 1 - fx : fx, p.Foot[1] / tex.GetHeight()));
+            PlaceChair(p, YeoulHeight / p.Body);
         }
 
         /// <summary>
@@ -394,6 +399,15 @@ namespace Hanjeopsi.App.Screens
             _field.RodGrip = g;
             _field.RodDir = (e - g).Normalized();
             _field.RodLen = (e - g).Length();
+            // 가진 릴을 그림 속 릴 위에 덮는다
+            _field.ReelShown = p.Reel != null && _field.ReelTex != null;
+            if (_field.ReelShown)
+            {
+                _field.ReelAt = PoseToLogical(Mirror(new Vector2(p.Reel[0], p.Reel[1])));
+                _field.ReelWidth = p.Reel[2] * (_yeoul.Size.X / _yeoul.Texture.GetWidth()) / _stage.K;
+                _field.ReelAngle = Mathf.DegToRad(_yeoul.RotationDegrees);
+                _field.ReelFlip = _poseFlip;
+            }
         }
 
         private void Tell(string main, string sub = "", Color? color = null)
@@ -1445,6 +1459,34 @@ namespace Hanjeopsi.App.Screens
                 _field.RodTrim = new Color(look.Trim);
             }
             _field.CoolerTex = TrimmedGear("cooler", G.Save.Tackle + 1);
+            _field.ReelTex = TrimmedGear("reel-back", G.Save.Reel + 1);
+            int chair = G.KitLevel("chair");
+            if (chair > 0)
+            {
+                _chairTex = TrimmedGear("chair-back", chair);
+                _chairSeat = SdPoses.ChairSeat(chair);
+            }
+        }
+
+        /// <summary>
+        /// 앉은 포즈면 가진 의자를 여울 밑에 놓는다 (뒤에서 보면 등받이가 여울 앞에 온다). 의자 앉는 자리를 엉덩이 높이에 맞춘다.
+        /// 일어서면 의자는 치운다
+        /// </summary>
+        private void PlaceChair(SdPose p, float scale)
+        {
+            bool sitting = _chairTex != null && p.Seat > 0;
+            if (_chair == null)
+            {
+                if (!sitting) return;
+                _chair = _stage.Place(_chairTex, YeoulFoot, 10);
+            }
+            _chair.Visible = sitting;
+            if (!sitting) return;
+            float seat = p.Seat * scale;
+            float h = seat / Mathf.Max(0.1f, _chairSeat);
+            _stage.Swap(_chair, _chairTex, h, new Vector2(0.5f, 1));
+            _chair.FlipH = _poseFlip;
+            _stage.MoveChild(_chair, _yeoul.GetIndex() + 1);
         }
 
         /// <summary>상점 장비 그림을 여백 없이 (없으면 null)</summary>

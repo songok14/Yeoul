@@ -229,6 +229,7 @@ namespace Hanjeopsi.App.Ui
             if (ShadowVisible) DrawShadow();
             if (BobberVisible) DrawBobber();
             DrawLine();
+            if (ReelShown && ReelTex != null) DrawReel();
             if (ShadowVisible && RunDir != 0) DrawRunArrow();
             if (ShadowVisible && ShowStamina) DrawStamina();
             foreach (var d in _drops) DrawDrop(d);
@@ -591,6 +592,13 @@ namespace Hanjeopsi.App.Ui
         /// <summary>던지기 전: 대 끝에 찌가 매달려 흔들린다</summary>
         public bool Dangle;
 
+        /// <summary>가진 릴 그림(뒤에서 본 것). 포즈 그림 속 릴 위에 덮는다. ReelAt 은 가운데(논리 좌표), ReelWidth 는 너비</summary>
+        public Texture2D ReelTex;
+        public bool ReelShown;
+        public Vector2 ReelAt;
+        public float ReelWidth, ReelAngle;
+        public bool ReelFlip;
+
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
         private bool _rodReady;
         private const int RodSegs = 28;
@@ -653,8 +661,8 @@ namespace Hanjeopsi.App.Ui
                 var at = _rodPts[i].Lerp(_rodPts[i + 1], fi - i);
                 _guideRing[j] = at + Down(_rodPts[i + 1] - _rodPts[i]) * (j == GuideAt.Length - 1 ? 0 : Mathf.Lerp(5.5f, 2.2f, f) * u);
             }
-            // 릴은 손 아래, 대 아래쪽에 달려 있다 (그림 속 릴 자리 근처)
-            _reelAt = P(g - d0 * len * 0.05f) + Down(p1 - p0) * 9 * u;
+            // 원줄은 릴 스풀에서 나온다 (가진 릴 그림이 있으면 그 자리, 없으면 손 아래)
+            _reelAt = ReelShown ? P(ReelAt) : P(g - d0 * len * 0.05f) + Down(p1 - p0) * 9 * u;
             _rodReady = true;
         }
 
@@ -775,6 +783,16 @@ namespace Hanjeopsi.App.Ui
             DrawPolyline(pts, new Color(0.05f, 0.12f, 0.18f, 0.32f), width + 2.2f * u, true);
             DrawPolyline(pts, LineColor(), width, true);
             if (Fighting && bend >= 0.85f) DrawPolyline(pts, new Color(1f, 0.35f, 0.3f, 0.25f + 0.15f * Mathf.Sin(_time * 18)), width + 6 * u, true);
+        }
+
+        /// <summary>가진 릴: 포즈 그림 속 릴 자리에 덮는다 (여울 기울기만큼 함께 기운다)</summary>
+        private void DrawReel()
+        {
+            float w = ReelWidth * K;
+            float h = w * ReelTex.GetHeight() / ReelTex.GetWidth();
+            DrawSetTransform(P(ReelAt), ReelAngle, new Vector2(ReelFlip ? -1 : 1, 1));
+            DrawTextureRect(ReelTex, new Rect2(-w / 2, -h / 2, w, h), false);
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
 
         /// <summary>던지기 전: 대 끝에서 찌 채비가 곧게 매달려 천천히 흔들린다</summary>

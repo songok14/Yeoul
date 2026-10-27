@@ -18,6 +18,10 @@ namespace Hanjeopsi.App.Ui
         /// 대는 화면이 그리고 텐션만큼 물고기 쪽으로 휜다
         /// </summary>
         public float[] Grip;
+        /// <summary>그림 속 릴 자리와 너비 [x, y, 너비]. 여기에 가진 릴 그림을 덮는다 (없으면 그림 속 릴 그대로)</summary>
+        public float[] Reel;
+        /// <summary>앉은 포즈만: 발바닥에서 엉덩이까지 높이. 가진 의자의 앉는 자리를 여기에 맞춘다</summary>
+        public float Seat;
         public float[] RodDir;
         public float RodLen;
 
@@ -49,6 +53,19 @@ namespace Hanjeopsi.App.Ui
                 _all = JsonConvert.DeserializeObject<Dictionary<string, SdPose>>(json);
             }
             return _all[name];
+        }
+
+        private static List<float> _chairSeat;
+
+        /// <summary>뒤에서 본 의자 그림(gear/chair-back-단계) 높이 중 앉는 자리 높이 비율 (data/gearlook.json)</summary>
+        public static float ChairSeat(int level)
+        {
+            if (_chairSeat == null)
+            {
+                var o = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
+                _chairSeat = o["chairSeat"].ToObject<List<float>>();
+            }
+            return _chairSeat[Mathf.Clamp(level - 1, 0, _chairSeat.Count - 1)];
         }
     }
 }
