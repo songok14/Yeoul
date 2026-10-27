@@ -12,7 +12,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 
 ## 지금까지 상황
 - 환경: cloud. 원격 https://github.com/songok14/Yeoul (공개). 브랜치는 main 과 ci-build(CI 결과 창고, 지우지 않는다)만 쓴다. 세션이 다른 이름의 작업 브랜치를 주더라도 main 에서 작업해 main 에 푸시한다(사용자 결정 2026-10-27). PR은 만들지 않는다. 시작하면 git fetch origin, git checkout main, git pull 후 docs/HANDOFF.md 부터 읽는다.
-- main 끝: 41bb49a(코드) 다음 이 문서 커밋. 사용자에게 마지막으로 보낸 APK는 빌드 #93(41bb49a).
+- main 끝: 9458dfe 다음 이 문서 커밋. 사용자에게 마지막으로 보낸 APK는 빌드 #98(2cd38d3).
 - 먼저 읽을 것: CLAUDE.md, docs/POLISH.md(다듬기 목록, 지금 단계의 중심), docs/GODOT_PLAN.md(단계표 9절, 폰에서 볼 것 10-2), docs/GAME_DESIGN.md 3·6·7·8·9절과 7절 "마을 사람"·"마을 의뢰", docs/STORY.md, docs/ART_PROMPTS.md
 - 단계: U0~U9, U11, U11-1~5 완료. 지금은 U12 전 다듬기(POLISH.md). 남은 큰 단계 U10(SD 다듬기 나머지), U12(폰에서 1장 끝까지).
 
@@ -47,7 +47,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 - 사진 여러 장은 PIL 로 한 장에 이어 붙여 본다. github raw·릴리스 다운로드는 막혀 있다.
 
 ## 이번에 해 줬으면 하는 것
-1. 사용자가 새 낚시 포즈 시트(ART_PROMPTS.md "SD 2-2", 2줄×4칸: ready·wait·cast·sit / bite·reel·pull·joy)를 주면: sd_sheet.py 로 잘라 sd_pose.py 로 godot/art/yeoul/fish-*.png 와 poses.json 에 넣는다(reel 은 --erase 로 대를 지운다). 지금 fish-wait 는 fish-ready 와 같은 그림이니 새 wait 를 연결한다(FishingScreen SetPose). 얼굴·후드 둘레가 잘리지 않았는지 어두운 바탕에서 확인. fishing-* 사진으로 대 끝(RodTip)과 줄이 맞는지 본다. 옛 포즈는 얼굴 앞쪽과 후드 위가 투명 작업에서 지워져 있었다(자동 메우기는 머리 둘레가 뿌옇게 번져 버렸다).
+1. (끝남) 새 낚시 포즈 여덟 장(SD 2-2, 뒷모습 중심)을 넣었다. 모든 포즈 그림에서 손 위 대를 지우고 대와 줄은 FishingField 가 그린다(poses.json grip·rodDir·rodLen, 길이 295 하나). 대 몸통은 Ui/FishingRodView(여울 그림 아래 층). 물고기·찌가 왼쪽이면 FaceToward 로 포즈를 뒤집는다. 기다릴 때 의자가 있으면 fish-sit, 없으면 fish-wait. 폰에서 대·줄 이음, 고리, 처짐, 던지기 전 매달린 찌가 자연스러운지 사용자 의견을 받는다.
 2. 사용자 폰 의견을 받으면 바로 반영하고 POLISH.md 에 줄을 붙인다. 볼 것은 GODOT_PLAN 10-2 "다듬기 4차".
 3. 남은 다듬기: POLISH.md 의 [ ] 줄, U10(SD 다듬기 나머지), 그다음 U12(폰에서 1장 끝까지).
 마지막: dotnet test core/Hanjeopsi.sln(129개), dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true, 균형은 AutoPlayTests(적당히 잘함 18/20 이상, 평균 21~25일). 커밋 후 git push origin main, CI 사진 확인, APK 보내기, POLISH·GODOT_PLAN 10-2·HANDOFF 갱신.
