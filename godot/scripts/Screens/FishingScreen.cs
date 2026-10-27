@@ -136,6 +136,8 @@ namespace Hanjeopsi.App.Screens
         // SD 포즈와 기울기(도). 기울기는 목표값을 부드럽게 따라간다
         private string _pose;
         private float _lean, _leanTarget, _leanRate = 10;
+        /// <summary>포즈를 좌우로 뒤집었나 (찌·물고기가 왼쪽)</summary>
+        private bool _poseFlip;
         // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
         private float _pullHold;
         private bool _shotPull;
@@ -322,7 +324,36 @@ namespace Hanjeopsi.App.Screens
             var p = SdPoses.Get(name);
             var tex = GD.Load<Texture2D>("res://art/yeoul/" + name + ".png");
             float height = tex.GetHeight() * YeoulHeight / p.Body;
-            _stage.Swap(_yeoul, tex, height, new Vector2(p.Foot[0] / tex.GetWidth(), p.Foot[1] / tex.GetHeight()));
+            float fx = p.Foot[0] / tex.GetWidth();
+            _yeoul.FlipH = _poseFlip;
+            _stage.Swap(_yeoul, tex, height, new Vector2(_poseFlip ? 1 - fx : fx, p.Foot[1] / tex.GetHeight()));
+        }
+
+        /// <summary>
+        /// 포즈 그림은 대를 오른쪽으로 내민다. 찌나 물고기가 왼쪽에 있으면 좌우를 뒤집어 그쪽을 본다.
+        /// 가운데 근처에서 깜빡이지 않게 넘어가는 자리를 조금 벌려 둔다
+        /// </summary>
+        private void FaceToward(float x)
+        {
+            bool flip = _poseFlip ? x < YeoulFoot.X + 25 : x < YeoulFoot.X - 25;
+            if (flip == _poseFlip) return;
+            _poseFlip = flip;
+            _lean = -_lean;
+            string pose = _pose;
+            _pose = null;
+            SetPose(pose);
+        }
+
+        /// <summary>포즈 쪽 기울기 부호 (뒤집었으면 -1)</summary>
+        private float Face
+        {
+            get { return _poseFlip ? -1 : 1; }
+        }
+
+        /// <summary>그림 픽셀을 뒤집은 포즈에 맞춘다</summary>
+        private Vector2 Mirror(Vector2 px)
+        {
+            return _poseFlip ? new Vector2(_yeoul.Texture.GetWidth() - px.X, px.Y) : px;
         }
 
         /// <summary>그림 속 낚싯대 끝 (논리 좌표). 기울기와 숨쉬기까지 반영한다</summary>
@@ -330,7 +361,7 @@ namespace Hanjeopsi.App.Screens
         {
             var tex = _yeoul.Texture;
             var p = SdPoses.Get(_pose);
-            var local = p.TipPx * (_yeoul.Size / tex.GetSize());
+            var local = Mirror(p.TipPx) * (_yeoul.Size / tex.GetSize());
             return _stage.ToLogical(_yeoul.GetTransform() * local);
         }
 
@@ -353,8 +384,8 @@ namespace Hanjeopsi.App.Screens
             }
             var grip = new Vector2(p.Grip[0], p.Grip[1]);
             var end = grip + new Vector2(p.RodDir[0], p.RodDir[1]) * p.RodLen;
-            var g = PoseToLogical(grip);
-            var e = PoseToLogical(end);
+            var g = PoseToLogical(Mirror(grip));
+            var e = PoseToLogical(Mirror(end));
             _field.RodGrip = g;
             _field.RodDir = (e - g).Normalized();
             _field.RodLen = (e - g).Length();
@@ -605,7 +636,8 @@ namespace Hanjeopsi.App.Screens
             _targetScale = to.Z;
             Tell(F("cast", G.Data.Texts.Zones[G.Fishing.ZoneOf(_dist01)]));
 
-            // 대를 머리 위로 휘둘러 던지고, 찌가 날아가는 동안 앞으로 내민다
+            // 대를 머리 위로 휘둘러 던지고, 찌가 날아가는 동안 앞으로 내민다. 찌가 떨어질 쪽을 본다
+            FaceToward(_target.X);
             SetPose("fish-cast");
             _lean = -6;
             _leanRate = 26;
@@ -1069,6 +1101,7 @@ namespace Hanjeopsi.App.Screens
             fx = Mathf.Clamp(fx, 30, ArtStage.Logical.X - 30);
             float fy = Mathf.Lerp(from.Y, Shore - 16, p);
             _field.ShadowAt = new Vector2(fx, fy);
+            FaceToward(fx);
             _field.ShadowWobble = _wobble;
             _field.ShadowSize = ShadowScale(p) * (running ? 1.2f : 1f);
             _field.LineTo = _field.ShadowAt;
@@ -1082,9 +1115,10 @@ namespace Hanjeopsi.App.Screens
             bool strain = _shotPull || r.Bracing || r.WrongSide || f.Tension >= danger - 4;
             _pullHold = strain ? 0.5f : _pullHold - dt;
             SetPose(_pullHold > 0 ? "fish-pull" : "fish-reel");
-            if (r.Bracing) _leanTarget = -f.RunDir * 7;
-            else if (_pullHold > 0) _leanTarget = 3 + (running ? f.RunDir * 6 : 0);
-            else _leanTarget = -6 + 15 * _field.Bend + (running ? f.RunDir * 8 : 0);
+            // 질주 쪽 기울기는 화면 기준이라 포즈를 뒤집었으면 부호를 맞춘다
+            if (r.Bracing) _leanTarget = -f.RunDir * 7 * Face;
+            else if (_pullHold > 0) _leanTarget = 3 + (running ? f.RunDir * 6 * Face : 0);
+            else _leanTarget = -6 + 15 * _field.Bend + (running ? f.RunDir * 8 * Face : 0);
             _gauge.Tension = (float)f.Tension;
             if (f.Phase == TugPhase.Calm)
             {
@@ -1501,7 +1535,7 @@ namespace Hanjeopsi.App.Screens
             float sway = _phase == Phase.Wait ? Mathf.Sin(_time * 1.3f) * 1.2f : 0;
             if (_phase == Phase.Reel && _fight != null && _fight.Tension >= _fight.DangerAt) sway = Mathf.Sin(_time * 40) * 1.5f;
             _lean = Mathf.Lerp(_lean, _leanTarget + sway, 1 - Mathf.Exp(-_leanRate * dt));
-            _yeoul.RotationDegrees = _lean;
+            _yeoul.RotationDegrees = _lean * Face;
             UpdateRod();
         }
 
