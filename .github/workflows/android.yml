@@ -147,6 +147,7 @@ jobs:
             "fishing-gear-wait:--screen=fishing --demo=gear --shot-action=wait"
             "fishing-gear-power:--screen=fishing --demo=gear --shot-action=power"
             "fishing-gear-reel:--screen=fishing --demo=gear --shot-action=reel"
+            "fishing-gear-bite:--screen=fishing --demo=gear --shot-action=bite"
             "fishing-bite:--screen=fishing --demo=lunch --shot-action=bite"
             "fishing-rain:--screen=fishing --demo=lunch --weather=rain --shot-action=wait"
             "fishing-fog:--screen=fishing --weather=fog --shot-action=wait"
