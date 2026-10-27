@@ -218,6 +218,7 @@ namespace Hanjeopsi.App.Screens
             _field.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _field.GuiInput += OnFieldInput;
             Art.AddChild(_field);
+            DressGear();
             // 낚싯대는 여울 그림 바로 아래 층에 그린다 (손이 대를 쥔 것처럼)
             var rodView = _field.MakeRodView();
             _stage.AddChild(rodView);
@@ -1427,6 +1428,35 @@ namespace Hanjeopsi.App.Screens
             _zoomTween = CreateTween();
             _zoomTween.TweenMethod(Callable.From<float>(z => _stage.Zoom = z), _stage.Zoom, peak, up).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
             _zoomTween.TweenMethod(Callable.From<float>(z => _stage.Zoom = z), peak, settle, down).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.InOut);
+        }
+
+        /// <summary>
+        /// 가진 장비를 그대로 보여 준다: 쿨러는 상점 그림, 낚싯대는 그 대의 색 (gear.json rods[].look).
+        /// 프롤로그 튜토리얼은 기본 대, 쿨러 없음
+        /// </summary>
+        private void DressGear()
+        {
+            if (_tutorial) return;
+            var look = G.Data.Gear.Rods[Mathf.Clamp(G.Save.Rod, 0, G.Data.Gear.Rods.Count - 1)].Look;
+            if (look != null)
+            {
+                _field.RodBlank = new Color(look.Blank);
+                _field.RodHandle = new Color(look.Handle);
+                _field.RodTrim = new Color(look.Trim);
+            }
+            _field.CoolerTex = TrimmedGear("cooler", G.Save.Tackle + 1);
+        }
+
+        /// <summary>상점 장비 그림을 여백 없이 (없으면 null)</summary>
+        private static Texture2D TrimmedGear(string kind, int tier)
+        {
+            string path = "res://art/gear/" + kind + "-" + tier + ".png";
+            if (!ResourceLoader.Exists(path)) return null;
+            var tex = GD.Load<Texture2D>(path);
+            var img = tex.GetImage();
+            var used = img.GetUsedRect();
+            if (used.Size.X <= 0) return tex;
+            return new AtlasTexture { Atlas = tex, Region = new Rect2(used.Position, used.Size) };
         }
 
         /// <summary>가진 찌 그림 (없으면 null: 기본 빨간 찌)</summary>

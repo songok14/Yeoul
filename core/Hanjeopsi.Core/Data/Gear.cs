@@ -80,6 +80,16 @@ namespace Hanjeopsi.Core.Data
         public double Absorb;
         /// <summary>챔질 허용 시간 추가(ms)</summary>
         public int HookBonus;
+        /// <summary>낚시 화면에 그리는 대 색 (상점 그림 rod-단계.png 에서 땄다). 없으면 기본 갈색</summary>
+        public RodLook Look;
+    }
+
+    /// <summary>낚싯대 색: 몸통, 손잡이, 고리와 띠 (#rrggbb)</summary>
+    public sealed class RodLook
+    {
+        public string Blank;
+        public string Handle;
+        public string Trim;
     }
 
     public sealed class Reel

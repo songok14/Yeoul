@@ -7,7 +7,8 @@
       "reach": 0.74,
       "absorb": 0,
       "hookBonus": 0,
-      "unlock": "start"
+      "unlock": "start",
+      "look": { "blank": "#b06a3c", "handle": "#d9a46a", "trim": "#a8acb0" }
     },
     {
       "name": "갯바위 찌낚싯대 1호",
@@ -16,7 +17,8 @@
       "reach": 0.8,
       "absorb": 0.25,
       "hookBonus": 80,
-      "unlock": "shop"
+      "unlock": "shop",
+      "look": { "blank": "#8f4a2c", "handle": "#d9a46a", "trim": "#a8acb0" }
     },
     {
       "name": "노씨의 감성돔대",
@@ -25,7 +27,8 @@
       "reach": 0.86,
       "absorb": 0.45,
       "hookBonus": 160,
-      "unlock": "shop"
+      "unlock": "shop",
+      "look": { "blank": "#1f4f9a", "handle": "#d9a46a", "trim": "#c8ccd2" }
     },
     {
       "name": "카본 갯바위대 1.5호",
@@ -34,7 +37,8 @@
       "reach": 0.9,
       "absorb": 0.5,
       "hookBonus": 190,
-      "unlock": "shop"
+      "unlock": "shop",
+      "look": { "blank": "#1f3a32", "handle": "#d9a46a", "trim": "#d4a33a" }
     },
     {
       "name": "등대지기 낚싯대",
@@ -43,7 +47,8 @@
       "reach": 0.93,
       "absorb": 0.55,
       "hookBonus": 220,
-      "unlock": "requests:4"
+      "unlock": "requests:4",
+      "look": { "blank": "#c0222a", "handle": "#d99a7a", "trim": "#c8ccd2" }
     },
     {
       "name": "물비늘 감성돔대",
@@ -52,7 +57,8 @@
       "reach": 0.95,
       "absorb": 0.6,
       "hookBonus": 250,
-      "unlock": "clear"
+      "unlock": "clear",
+      "look": { "blank": "#26221e", "handle": "#d9a46a", "trim": "#d4a33a" }
     },
     {
       "name": "줄 서는 집 명인대",
@@ -61,7 +67,8 @@
       "reach": 0.97,
       "absorb": 0.64,
       "hookBonus": 270,
-      "unlock": "rank:3"
+      "unlock": "rank:3",
+      "look": { "blank": "#6a2e6e", "handle": "#d9a46a", "trim": "#d4a33a" }
     },
     {
       "name": "흑룡 원투대",
@@ -70,7 +77,8 @@
       "reach": 0.98,
       "absorb": 0.68,
       "hookBonus": 290,
-      "unlock": "later"
+      "unlock": "later",
+      "look": { "blank": "#ece8e0", "handle": "#d9a46a", "trim": "#d4a33a" }
     },
     {
       "name": "홍염 명품대",
@@ -79,7 +87,8 @@
       "reach": 0.99,
       "absorb": 0.72,
       "hookBonus": 310,
-      "unlock": "later"
+      "unlock": "later",
+      "look": { "blank": "#b01e1c", "handle": "#8a1a18", "trim": "#d4a33a" }
     },
     {
       "name": "청해 전설대",
@@ -88,7 +97,8 @@
       "reach": 1.0,
       "absorb": 0.76,
       "hookBonus": 340,
-      "unlock": "later"
+      "unlock": "later",
+      "look": { "blank": "#1f55b0", "handle": "#1f55b0", "trim": "#e0b040" }
     }
   ],
   "reels": [

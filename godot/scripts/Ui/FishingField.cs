@@ -97,6 +97,10 @@ namespace Hanjeopsi.App.Ui
 
         // 쿨러 (고등어가 노린다)
         public Vector2 CoolerAt;
+        /// <summary>가진 쿨러 그림 (여백을 자른 것). 없으면 코드로 그린 파란 쿨러</summary>
+        public Texture2D CoolerTex;
+        /// <summary>낚싯대 색: 몸통, 손잡이, 고리·띠 (가진 대의 색)</summary>
+        public Color RodBlank = new Color("3a322b"), RodHandle = new Color("d9a46a"), RodTrim = new Color("c9a24a");
         public float CoolerLid;
 
         public FishingField() { }
@@ -666,19 +670,29 @@ namespace Hanjeopsi.App.Ui
         {
             if (!_rodReady) return;
             float u = K / 2.4f;
-            var edge = new Color("1c1714");
-            var body = new Color("3a322b");
-            var gold = new Color("c9a24a");
+            var body = RodBlank;
+            var edge = body.Darkened(0.65f);
+            var gold = RodTrim;
             // 손잡이 쪽 굵고 끝은 가늘다. 처음 한 토막은 코르크 손잡이처럼 굵다
             for (int i = 0; i < RodSegs; i++)
             {
                 float f = (float)i / RodSegs;
-                float w = f < 0.1f ? 8.5f * u : Mathf.Lerp(6.4f, 1.5f, (f - 0.1f) / 0.9f) * u;
-                c.DrawLine(_rodPts[i], _rodPts[i + 1], edge, w + 1.8f * u, true);
-                c.DrawLine(_rodPts[i], _rodPts[i + 1], body, w, true);
+                bool handle = f < 0.1f;
+                float w = handle ? 8.5f * u : Mathf.Lerp(6.4f, 1.5f, (f - 0.1f) / 0.9f) * u;
+                var fill = handle ? RodHandle : body;
+                c.DrawLine(_rodPts[i], _rodPts[i + 1], fill.Darkened(0.65f), w + 1.8f * u, true);
+                c.DrawLine(_rodPts[i], _rodPts[i + 1], fill, w, true);
             }
             int joint = Mathf.Clamp((int)(0.1f * RodSegs), 1, RodSegs);
             c.DrawCircle(_rodPts[joint], 4.4f * u, gold);
+            // 마디 이음 띠 (대 색과 다른 장식 색)
+            foreach (float f in new[] { 0.36f, 0.62f })
+            {
+                int i = Mathf.Clamp((int)(f * RodSegs), 0, RodSegs - 1);
+                var d = (_rodPts[i + 1] - _rodPts[i]).Normalized();
+                var nrm = new Vector2(-d.Y, d.X) * Mathf.Lerp(3.6f, 2f, f) * u;
+                c.DrawLine(_rodPts[i] - nrm, _rodPts[i] + nrm, gold, 2.2f * u, true);
+            }
             // 위쪽(빛 받는 쪽) 가는 빛 한 줄
             for (int i = 3; i < RodSegs - 2; i++)
             {
@@ -796,6 +810,11 @@ namespace Hanjeopsi.App.Ui
             if (CoolerAt == Vector2.Zero) return;
             var c = P(CoolerAt);
             float u = K * 1.1f;
+            if (CoolerTex != null)
+            {
+                DrawCoolerTex(c, u);
+                return;
+            }
             var ink = new Color("1f3b55");
             // 바닥 그림자
             DrawSetTransform(c + new Vector2(2 * u, 0), 0, new Vector2(1, 0.25f));
@@ -817,6 +836,24 @@ namespace Hanjeopsi.App.Ui
             DrawSetTransform(hinge, -CoolerLid * 0.3f, Vector2.One);
             DrawStyleBox(Box(new Color("f4f1e8"), ink, 3 * u, 1.6f * u), new Rect2(0, -8 * u, 46 * u, 8 * u));
             DrawLine(new Vector2(4 * u, -2.6f * u), new Vector2(42 * u, -2.6f * u), new Color("d6d0c2"), 1.4f * u);
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+        }
+
+        /// <summary>
+        /// 가진 쿨러 그림 (상점 그림 그대로). 그림 여백은 잘라 두었다. 고등어가 노리면 뚜껑 쪽이 들썩이듯 흔들린다
+        /// </summary>
+        private void DrawCoolerTex(Vector2 c, float u)
+        {
+            var tex = CoolerTex;
+            float h = 40 * K;
+            float w = tex.GetWidth() * h / tex.GetHeight();
+            // 바닥 그림자
+            DrawSetTransform(c + new Vector2(2 * u, 0), 0, new Vector2(1, 0.25f));
+            DrawCircle(Vector2.Zero, w * 0.55f, new Color(0, 0, 0, 0.24f));
+            DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            float jiggle = CoolerLid > 0 ? Mathf.Sin(_time * 40) * 0.05f * CoolerLid : 0;
+            DrawSetTransform(c, jiggle, Vector2.One);
+            DrawTextureRect(tex, new Rect2(-w / 2, -h + CoolerLid * -3 * u, w, h), false);
             DrawSetTransform(Vector2.Zero, 0, Vector2.One);
         }
 
