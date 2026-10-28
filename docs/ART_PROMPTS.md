@@ -978,6 +978,21 @@ New time: late night. Deep navy blue sky full of stars with a bright moon over t
 Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
 ```
 
+#### 받음 (2026-10-28): 낮 둘·새벽·밤 → 기준은 낮 지도
+- 낮 둘·새벽·밤 네 장은 서로 배치가 딱 맞는다(겹쳐 재면 어긋남 0). 노을 지도와는 위로 약 30px·옆으로 약 12px 어긋나고 배 한 척과 등대 자리도 다르다.
+- 그래서 **기준 배치는 낮 지도**(`town-map-day.webp`, 낮 첫째 장)로 바꾼다. 걷는 길 데이터도 낮 지도로 만든다. 새벽 `town-map-dawn`, 밤 `town-map-night`는 그대로 쓴다.
+- 노을은 낮 지도를 첨부해 아래 프롬프트로 다시 뽑는다. 그전까지는 옛 노을 지도(`town-map-dusk.webp`)를 쓰고, 그 위에 서는 사람·간판 자리는 약간 어긋날 수 있다.
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village at sunset.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs and the small island on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: sunset. The sun is setting into the sea on the right near the horizon, warm golden orange light comes from the right, long soft shadows fall toward the left, the sky glows orange, pink and purple with soft clouds, the sea reflects orange and gold. The street lamps are just turning on with a warm glow, many windows glow warm yellow, the paper lanterns at the hanok house are lit, the red lighthouse lamp is on. The food truck is open with its string lights and little lamps glowing. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
 #### 지도 1 최종 (2026-10-28, 약도로 다시 그린 네 번째 그림) → 배치가 달라 쓰지 않음
 - 약도대로 방파제(난간 있는 길, 바깥쪽 테트라포드)와 빨간 등대가 그림 안에 들어왔다. 원근이 많이 줄어 위아래 집 크기가 비슷하다. 가로등이 길 따라 여럿 있고 낮에도 불이 켜진 늦은 오후 빛이다.
 - `godot/art/backgrounds/town-map-day.webp`(941×1672). 더 큰 파일이나 업스케일을 받으면 바꾼다. 새벽·저녁·밤은 이 그림을 첨부해 아래 지도 2~4 프롬프트로 뽑는다.
