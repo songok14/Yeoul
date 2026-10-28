@@ -22,6 +22,8 @@ namespace Hanjeopsi.App.Ui
         public float[] Reel;
         /// <summary>앉은 포즈만: 발바닥에서 엉덩이까지 높이. 가진 의자의 앉는 자리를 여기에 맞춘다</summary>
         public float Seat;
+        /// <summary>앉은 포즈만: 엉덩이 높이에서 몸의 [가로 가운데, 너비]. 의자 너비와 자리를 여기에 맞춘다</summary>
+        public float[] Hip;
         public float[] RodDir;
         public float RodLen;
 
@@ -68,6 +70,7 @@ namespace Hanjeopsi.App.Ui
         }
 
         private static List<float> _chairSeat;
+        private static List<float> _chairWidth;
 
         /// <summary>뒤에서 본 의자 그림(gear/chair-back-단계) 높이 중 앉는 자리 높이 비율 (data/gearlook.json)</summary>
         public static float ChairSeat(int level)
@@ -78,6 +81,17 @@ namespace Hanjeopsi.App.Ui
                 _chairSeat = o["chairSeat"].ToObject<List<float>>();
             }
             return _chairSeat[Mathf.Clamp(level - 1, 0, _chairSeat.Count - 1)];
+        }
+
+        /// <summary>의자 그림 너비가 여울 엉덩이 너비의 몇 배인지 (data/gearlook.json chairWidth)</summary>
+        public static float ChairWidth(int level)
+        {
+            if (_chairWidth == null)
+            {
+                var o = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
+                _chairWidth = o["chairWidth"].ToObject<List<float>>();
+            }
+            return _chairWidth[Mathf.Clamp(level - 1, 0, _chairWidth.Count - 1)];
         }
     }
 }

@@ -148,6 +148,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>가진 낚시 의자 (뒤에서 본 그림)와 앉는 자리 높이 비율. 없으면 서서 기다린다</summary>
         private Texture2D _chairTex;
         private float _chairSeat = 0.45f;
+        private float _chairWidth = 1.2f;
         private TextureRect _chair;
         // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
         private float _pullHold;
@@ -1484,12 +1485,14 @@ namespace Hanjeopsi.App.Screens
             {
                 _chairTex = TrimmedGear("chair-back", chair);
                 _chairSeat = SdPoses.ChairSeat(chair);
+                _chairWidth = SdPoses.ChairWidth(chair);
             }
         }
 
         /// <summary>
-        /// 앉은 포즈면 가진 의자를 여울 밑에 놓는다 (뒤에서 보면 등받이가 여울 앞에 온다). 의자 앉는 자리를 엉덩이 높이에 맞춘다.
-        /// 일어서면 의자는 치운다
+        /// 앉은 포즈면 가진 의자를 여울 밑에 놓는다 (뒤에서 보면 등받이가 여울 앞에 온다).
+        /// 의자 너비는 엉덩이 너비에 맞추고(좁으면 다리가 양옆으로 삐져나와 붙인 그림 같다) 앉는 자리를 엉덩이 높이에 둔다.
+        /// 의자가 여울보다 보는 쪽에 가까우니 의자 다리는 여울 발보다 아래로 내려온다. 일어서면 의자는 치운다
         /// </summary>
         private void PlaceChair(SdPose p, float scale)
         {
@@ -1501,9 +1504,17 @@ namespace Hanjeopsi.App.Screens
             }
             _chair.Visible = sitting;
             if (!sitting) return;
-            float seat = p.Seat * scale;
-            float h = seat / Mathf.Max(0.1f, _chairSeat);
+            float seatY = YeoulFoot.Y - p.Seat * scale;
+            float h, dx = 0;
+            if (p.Hip != null)
+            {
+                float w = p.Hip[1] * scale * _chairWidth;
+                h = w * _chairTex.GetHeight() / _chairTex.GetWidth();
+                dx = (p.Hip[0] - p.Foot[0]) * scale * (_poseFlip ? -1 : 1);
+            }
+            else h = p.Seat * scale / Mathf.Max(0.1f, _chairSeat);
             _stage.Swap(_chair, _chairTex, h, new Vector2(0.5f, 1));
+            _stage.Move(_chair, new Vector2(YeoulFoot.X + dx, seatY + h * _chairSeat));
             _chair.FlipH = _poseFlip;
             _stage.MoveChild(_chair, _yeoul.GetIndex() + 1);
         }

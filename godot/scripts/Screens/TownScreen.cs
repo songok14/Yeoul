@@ -118,7 +118,8 @@ namespace Hanjeopsi.App.Screens
             var backdrop = new ColorRect { Color = Palette.NightDeep, MouseFilter = MouseFilterEnum.Ignore };
             backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             Art.AddChild(backdrop);
-            _stage = new ArtStage { ClampPins = false };
+            // 꼭대기를 내려 볼 때 그림 위 끝이 잘려 보이지 않게 하늘을 이어 칠한다
+            _stage = new ArtStage { ClampPins = false, SkyCap = 170 };
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             PaintWeather(s.Slot);
             Art.AddChild(_stage);
