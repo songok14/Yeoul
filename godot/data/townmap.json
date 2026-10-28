@@ -1,0 +1,59 @@
+{
+  "maps": ["town-map-morning", "town-map-day", "town-map-dusk", "town-map-night"],
+  "zoom": 1.6,
+  "walkSpeed": 78,
+  "yeoulHeight": 54,
+  "catHeight": 22,
+  "villagerHeight": 46,
+  "scale": { "topY": 80, "bottomY": 520, "top": 0.74, "bottom": 1.0, "max": 1.06 },
+  "start": "plaza",
+  "nodes": [
+    { "id": "lookout", "x": 208, "y": 80 },
+    { "id": "top1", "x": 205, "y": 110 },
+    { "id": "top2", "x": 178, "y": 140 },
+    { "id": "top3", "x": 175, "y": 165 },
+    { "id": "minbakTurn", "x": 200, "y": 190 },
+    { "id": "minbak", "x": 252, "y": 192 },
+    { "id": "mid1", "x": 238, "y": 212 },
+    { "id": "mid2", "x": 262, "y": 240 },
+    { "id": "mid3", "x": 262, "y": 265 },
+    { "id": "mid4", "x": 232, "y": 288 },
+    { "id": "low1", "x": 210, "y": 312 },
+    { "id": "low2", "x": 194, "y": 338 },
+    { "id": "shopTurn", "x": 190, "y": 362 },
+    { "id": "shop", "x": 170, "y": 360 },
+    { "id": "low3", "x": 205, "y": 392 },
+    { "id": "plazaTop", "x": 240, "y": 420 },
+    { "id": "grandmaTurn", "x": 264, "y": 388 },
+    { "id": "grandma", "x": 290, "y": 372 },
+    { "id": "plaza", "x": 245, "y": 462 },
+    { "id": "market", "x": 160, "y": 500 },
+    { "id": "pierLeft", "x": 205, "y": 528 },
+    { "id": "truck", "x": 338, "y": 516 },
+    { "id": "breakwater0", "x": 402, "y": 538 },
+    { "id": "breakwater1", "x": 382, "y": 590 },
+    { "id": "breakwater2", "x": 364, "y": 638 },
+    { "id": "breakwater", "x": 358, "y": 664 }
+  ],
+  "edges": [
+    ["lookout", "top1"], ["top1", "top2"], ["top2", "top3"], ["top3", "minbakTurn"], ["minbakTurn", "minbak"],
+    ["minbakTurn", "mid1"], ["mid1", "mid2"], ["mid2", "mid3"], ["mid3", "mid4"], ["mid4", "low1"], ["low1", "low2"],
+    ["low2", "shopTurn"], ["shopTurn", "shop"], ["shopTurn", "low3"], ["low3", "plazaTop"],
+    ["plazaTop", "grandmaTurn"], ["grandmaTurn", "grandma"],
+    ["plazaTop", "plaza"], ["low3", "plaza"], ["plaza", "market"], ["plaza", "pierLeft"], ["market", "pierLeft"],
+    ["plaza", "truck"], ["pierLeft", "truck"], ["truck", "breakwater0"], ["plaza", "breakwater0"],
+    ["breakwater0", "breakwater1"], ["breakwater1", "breakwater2"], ["breakwater2", "breakwater"]
+  ],
+  "places": [
+    { "id": "market", "name": "위판장", "node": "market", "signX": 74, "signY": 418 },
+    { "id": "shop", "name": "미끼가게", "node": "shop", "signX": 88, "signY": 292 },
+    { "id": "grandma", "name": "할머니댁", "node": "grandma", "signX": 352, "signY": 282 },
+    { "id": "truck", "name": "여울호", "node": "truck", "signX": 388, "signY": 438 },
+    { "id": "breakwater", "name": "방파제", "node": "breakwater", "signX": 404, "signY": 600 },
+    { "id": "lookout", "name": "전망대", "node": "lookout", "signX": 208, "signY": 52, "line": "여기서 보면 물비늘포가 다 보인다." }
+  ],
+  "clientSpots": [
+    { "x": 184, "y": 486 },
+    { "x": 294, "y": 440 }
+  ]
+}

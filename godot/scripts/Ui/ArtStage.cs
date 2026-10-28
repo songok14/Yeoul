@@ -101,6 +101,25 @@ void fragment() {
             }
         }
 
+        /// <summary>
+        /// 카메라 중심 (논리 좌표). 정하면 그 점이 화면 가운데에 오도록 그림을 민다(그림 밖은 보이지 않게 막는다).
+        /// 걷는 마을처럼 Zoom 으로 크게 보고 여울을 따라갈 때 쓴다. null 이면 그림 가운데
+        /// </summary>
+        public Vector2? Focus
+        {
+            get { return _focus; }
+            set
+            {
+                _focus = value;
+                Layout();
+            }
+        }
+
+        private Vector2? _focus;
+
+        /// <summary>간판(Pin)을 화면 안에 붙들지 않는다 (걷는 마을은 그림을 따라 화면 밖으로 나간다)</summary>
+        public bool ClampPins { get; set; } = true;
+
         /// <summary>배경을 아주 천천히 숨 쉬듯 확대한다 (1이면 그대로)</summary>
         public float Zoom
         {
@@ -207,6 +226,13 @@ void fragment() {
             K = Mathf.Max(Size.X / Logical.X, Size.Y / Logical.Y) * _zoom;
             var drawn = Logical * K;
             Origin = (Size - drawn) / 2;
+            if (_focus.HasValue)
+            {
+                var o = Size / 2 - _focus.Value * K;
+                Origin = new Vector2(
+                    drawn.X > Size.X ? Mathf.Clamp(o.X, Size.X - drawn.X, 0) : Origin.X,
+                    drawn.Y > Size.Y ? Mathf.Clamp(o.Y, Size.Y - drawn.Y, 0) : Origin.Y);
+            }
             _bg.Position = Origin;
             _bg.Size = drawn;
 
@@ -227,7 +253,7 @@ void fragment() {
                 a.Node.PivotOffset = size / 2;
                 // 화면이 길어 그림 양옆이 잘려도 간판은 화면 안에 남긴다
                 var pos = ToLocal(a.At) - size / 2;
-                pos.X = Mathf.Clamp(pos.X, 14, Mathf.Max(14, Size.X - size.X - 14));
+                if (ClampPins) pos.X = Mathf.Clamp(pos.X, 14, Mathf.Max(14, Size.X - size.X - 14));
                 a.Node.Position = pos;
             }
         }

@@ -12,7 +12,7 @@ namespace Hanjeopsi.Core.Data
     /// </summary>
     public sealed class GameData
     {
-        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste", "dialogue", "story", "diner", "weather", "weekly" };
+        public static readonly string[] FileNames = { "species", "gear", "balance", "texts", "recipes", "requests", "taste", "dialogue", "story", "diner", "weather", "weekly", "townmap" };
 
         public static readonly JsonSerializerSettings JsonSettings = new JsonSerializerSettings
         {
@@ -35,6 +35,8 @@ namespace Hanjeopsi.Core.Data
         public WeatherTable Weather { get; set; }
         /// <summary>1장 주간 상환 (고닷만). 웹 모양 데이터에서는 null 이라 30일 한 번 상환</summary>
         public WeeklyTable Weekly { get; set; }
+        /// <summary>걷는 언덕 마을 길 (고닷만)</summary>
+        public TownMap TownMap { get; set; }
 
         private Dictionary<string, Species> _byId;
         private Dictionary<string, int> _indexOf;
@@ -63,6 +65,7 @@ namespace Hanjeopsi.Core.Data
                 Diner = Parse<DinerTable>(readText("diner")),
                 Weather = Parse<WeatherTable>(readText("weather")),
                 Weekly = Parse<WeeklyTable>(readText("weekly")),
+                TownMap = Parse<TownMap>(readText("townmap")),
             };
             d._byId = new Dictionary<string, Species>();
             d._indexOf = new Dictionary<string, int>();

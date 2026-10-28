@@ -57,6 +57,8 @@ namespace Hanjeopsi.Core
         public Truck Truck { get; }
         /// <summary>여울호 등급과 손님. 웹 모양 데이터에서는 null</summary>
         public Diner Diner { get; }
+        /// <summary>걷는 언덕 마을 길 (고닷만, townmap.json 이 없으면 null)</summary>
+        public TownPath Town { get; }
 
         /// <summary>상태가 바뀌어 저장할 때 (웹 persist)</summary>
         public event Action<SaveData> Saved;
@@ -72,6 +74,7 @@ namespace Hanjeopsi.Core
             Spot = new SpotRules(data);
             Truck = new Truck(data, Fresh, Taste);
             if (data.Diner != null) Diner = new Diner(data.Diner);
+            if (data.TownMap != null && data.TownMap.Nodes.Count > 0) Town = new TownPath(data.TownMap);
             Load(save);
             if (save.Day > 1 || save.Flag("prologueDone")) BeginWeeks();
         }
