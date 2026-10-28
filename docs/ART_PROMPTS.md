@@ -960,3 +960,22 @@ Layout: 4 rows x 4 columns, full body, every figure exactly the same scale and s
 
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no speech bubbles, no effect marks.
 ```
+
+### 대화 4. 미식 평론가 표정 시트 (특별 손님, 2026-10-28)
+
+여울호 특별 손님(이야기 인물). 받으면 `portraits/critic*`으로 자르고 `dialogue.json` speakers에 `critic`(faces default·happy·annoyed·taste), `diner.json` specials에 넣는다.
+
+```
+Create a 2x2 character expression sheet of standing dialogue illustrations for a mobile game visual novel scene. Attached: my watercolor background illustrations (match their palette) and my current dialogue illustrations of other characters (match their art style, line weight and framing exactly).
+
+Character: a famous Korean food critic, a woman in her fifties who came down from Seoul to judge the little food truck. Sharp but fair. Silver gray chin length bob haircut, thin black rimmed glasses, light makeup, charcoal tailored long coat over a cream turtleneck, a deep green silk scarf, a small black leather notebook and a fountain pen.
+
+Layout: four panels of exactly the same size, same framing from the top of the head to just above the knees, same three-quarter pose facing slightly left, same scale and same position in every panel so the panels can be swapped during dialogue.
+Panel 1: calm appraising look, notebook held closed at her side, one eyebrow very slightly raised.
+Panel 2: genuinely impressed, a small surprised smile, pen paused above the open notebook.
+Panel 3: disappointed, lips pressed thin, closing the notebook with a snap, looking away.
+Panel 4: tasting with her eyes closed, savoring, holding chopsticks near her lips.
+
+Style: soft anime illustration, delicate clean line art, subtle natural facial acting, soft cel shading with a light watercolor texture, light from the upper left.
+Background: plain flat light gray #EDEDED in every panel. Keep hair strands as clean lines without the gray background trapped between them, no glow or white outline around the hair. No text in the notebook, no labels, no numbers, no panel borders, no grid lines, no ground shadow, no checkerboard, no signature, no watermark.
+```
