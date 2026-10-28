@@ -42,7 +42,7 @@ namespace Hanjeopsi.Core.Tests
         public void 날씨_효과()
         {
             var g = Game.NewGame(TestData.Full, 3);
-            g.Save.Slot = 2;
+            g.Save.Slot = 3;
             int clearGuests = g.CustomersNow();
             g.ForcedWeather = "rain";
             Assert.True(g.WaitMul() < 1);

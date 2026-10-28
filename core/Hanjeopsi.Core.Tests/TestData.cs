@@ -41,6 +41,10 @@ namespace Hanjeopsi.Core.Tests
                 d.Balance.Time.SlotsPerDay = 4;
                 d.Balance.Chapter1.CastsPerTrip = 6;
                 d.Balance.Time.ShopLastSlot = 99;
+                // 웹은 트럭·낚시 시간 제한과 밤낚시가 없다
+                d.Balance.Time.FishSlots.Clear();
+                d.Balance.Time.TruckSlots.Clear();
+                d.Balance.Time.NightFishBeat = null;
                 d.Diner = null;
                 d.Weather = null;
                 d.Weekly = null;

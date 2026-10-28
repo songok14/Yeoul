@@ -122,7 +122,7 @@ namespace Hanjeopsi.App
 
         /// <summary>
         /// 사진과 화면 확인용 체험 판 (웹 BootScene setupDemo). 4일차, 소지금 86,000원, 빚 264만 원, 쿨러 6마리.
-        /// kind: lunch 면 점심, evening 이면 저녁, night 면 밤, summary 면 새벽에 어제 요약이 뜬다
+        /// kind: lunch 면 낮, evening 이면 저녁, night 면 밤, summary 면 새벽에 어제 요약이 뜬다
         /// </summary>
         public void SetupDemo(string kind)
         {

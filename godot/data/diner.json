@@ -1,103 +1,330 @@
 {
   "ranks": [
-    { "name": "포장마차", "rep": 0, "menu": 2, "guests": 3 },
-    { "name": "동네 맛집", "rep": 40, "menu": 3, "guests": 4 },
-    { "name": "소문난 집", "rep": 120, "menu": 4, "guests": 5 },
-    { "name": "줄 서는 집", "rep": 260, "menu": 5, "guests": 6 }
+    {
+      "name": "포장마차",
+      "rep": 0,
+      "menu": 2,
+      "guests": 4
+    },
+    {
+      "name": "동네 맛집",
+      "rep": 40,
+      "menu": 3,
+      "guests": 6
+    },
+    {
+      "name": "소문난 집",
+      "rep": 120,
+      "menu": 4,
+      "guests": 8
+    },
+    {
+      "name": "줄 서는 집",
+      "rep": 260,
+      "menu": 5,
+      "guests": 10
+    }
   ],
-  "slotBonus": [0, 0, 1, 0, -1],
-  "maxGuests": 9,
-  "repByMood": [-1, 1, 3],
+  "slotBonus": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "maxGuests": 12,
+  "repByMood": [
+    -1,
+    1,
+    3
+  ],
   "repRequest": 5,
-  "affinityByMood": [-1, 0, 1],
+  "affinityByMood": [
+    -1,
+    0,
+    1
+  ],
   "affinityFavorite": 1,
   "affinityMax": 10,
   "regularAt": 5,
   "favoriteChance": 0.7,
+  "regularTip": 0.2,
+  "vipChance": [
+    [
+      0,
+      0
+    ],
+    [
+      0.5,
+      0
+    ],
+    [
+      0.7,
+      0.2
+    ],
+    [
+      0.85,
+      0.45
+    ]
+  ],
+  "vipSeedSalt": 313,
   "guests": [
     {
       "id": "fisher",
       "name": "어부 삼촌",
-      "slots": [1, 4],
-      "likes": ["ureok-maeun", "noraemi-maeun"],
+      "slots": [
+        1,
+        4
+      ],
+      "likes": [
+        "ureok-maeun",
+        "noraemi-maeun"
+      ],
       "regular": "늘 먹던 {0}!"
     },
     {
       "id": "mom",
       "name": "아이 엄마",
-      "slots": [2, 3],
-      "likes": ["godeungeo-jorim", "bollak-gui"],
+      "slots": [
+        2,
+        3
+      ],
+      "likes": [
+        "godeungeo-jorim",
+        "bollak-gui"
+      ],
       "regular": "애가 {0} 또 먹고 싶대요"
     },
     {
       "id": "student",
       "name": "여학생",
-      "slots": [2, 3],
-      "likes": ["hakgongchi-muchim", "gabojingeo-sukhoe"],
+      "slots": [
+        2,
+        3
+      ],
+      "likes": [
+        "hakgongchi-muchim",
+        "gabojingeo-sukhoe"
+      ],
       "regular": "언니! 오늘도 {0}요"
     },
     {
       "id": "mail",
       "name": "집배원",
-      "slots": [1, 2],
-      "likes": ["noraemi-maeun", "dodari-ssukguk"],
+      "slots": [
+        1,
+        2
+      ],
+      "likes": [
+        "noraemi-maeun",
+        "dodari-ssukguk"
+      ],
       "regular": "{0} 생각나서 들렀어요"
     },
     {
       "id": "grandpa",
       "name": "할아버지",
-      "slots": [1, 3],
-      "likes": ["dodari-ssukguk", "gamseongdom-hoe", "bollak-gui"],
+      "slots": [
+        1,
+        3
+      ],
+      "likes": [
+        "dodari-ssukguk",
+        "gamseongdom-hoe",
+        "bollak-gui"
+      ],
       "regular": "{0} 그거 또 주게"
     },
     {
       "id": "tourist",
       "name": "관광객",
-      "slots": [2, 3, 4],
-      "likes": ["chamdom-hoe", "nongeo-gui", "gamseongdom-hoe"],
+      "slots": [
+        2,
+        3,
+        4
+      ],
+      "likes": [
+        "chamdom-hoe",
+        "nongeo-gui",
+        "gamseongdom-hoe"
+      ],
       "regular": "후기 보고 또 왔어요! {0}요"
     },
     {
       "id": "haenyeo",
       "name": "해녀 할머니",
-      "slots": [1, 2],
-      "likes": ["gabojingeo-sukhoe", "chamdom-hoe"],
+      "slots": [
+        1,
+        2
+      ],
+      "likes": [
+        "gabojingeo-sukhoe",
+        "chamdom-hoe"
+      ],
       "regular": "오늘도 {0}! 우리 여울이 솜씨가 제일이야"
     },
     {
       "id": "taxi",
       "name": "택시 기사 아저씨",
-      "slots": [2, 4],
-      "likes": ["ureok-maeun", "godeungeo-jorim"],
+      "slots": [
+        2,
+        4
+      ],
+      "likes": [
+        "ureok-maeun",
+        "godeungeo-jorim"
+      ],
       "regular": "기사 식당보다 낫다니까. {0}!"
     },
     {
       "id": "nurse",
       "name": "간호사",
-      "slots": [1, 4],
-      "likes": ["dodari-ssukguk", "bollak-gui"],
+      "slots": [
+        1,
+        4
+      ],
+      "likes": [
+        "dodari-ssukguk",
+        "bollak-gui"
+      ],
       "regular": "퇴근길에 {0} 먹으러 왔어요"
     },
     {
       "id": "welder",
       "name": "조선소 청년",
-      "slots": [2, 3, 4],
-      "likes": ["nongeo-gui", "godeungeo-jorim"],
+      "slots": [
+        2,
+        3,
+        4
+      ],
+      "likes": [
+        "nongeo-gui",
+        "godeungeo-jorim"
+      ],
       "regular": "{0}... 곱빼기 되나요?"
     },
     {
       "id": "boy",
       "name": "동네 꼬마",
-      "slots": [3],
-      "likes": ["bollak-gui", "hakgongchi-muchim"],
+      "slots": [
+        3
+      ],
+      "likes": [
+        "bollak-gui",
+        "hakgongchi-muchim"
+      ],
       "regular": "누나! {0} 또 먹을래!"
     },
     {
       "id": "pension",
       "name": "민박집 사장님",
-      "slots": [1, 3],
-      "likes": ["noraemi-maeun", "gamseongdom-hoe"],
+      "slots": [
+        1,
+        3
+      ],
+      "likes": [
+        "noraemi-maeun",
+        "gamseongdom-hoe"
+      ],
       "regular": "민박 손님들이 {0} 또 찾아요"
+    }
+  ],
+  "vips": [
+    {
+      "id": "blogger",
+      "name": "맛집 블로거",
+      "art": "tourist",
+      "wants": [
+        "chamdom-hoe",
+        "gabojingeo-sukhoe",
+        "hakgongchi-muchim"
+      ],
+      "fresh": 0,
+      "order": "블로그에 올릴 거예요. 활어 {0} 되나요?",
+      "thanks": "사진도 맛도 완벽해요. 오늘 바로 올릴게요!",
+      "miss": "오늘은 {0} 안 되나 봐요. 아쉽네요.",
+      "tipMul": 1.0,
+      "rep": 8,
+      "missRep": -3
+    },
+    {
+      "id": "hotelchef",
+      "name": "호텔 주방장",
+      "art": "pension",
+      "wants": [
+        "gamseongdom-hoe",
+        "nongeo-gui",
+        "chamdom-hoe"
+      ],
+      "fresh": 0,
+      "order": "쉬는 날이라 내려왔어요. 활어로 {0} 부탁해요.",
+      "thanks": "이 바닷가에 이런 집이 있었네. 명함 두고 갈게요.",
+      "miss": "{0} 먹으러 왔는데 다음에 와야겠네.",
+      "tipMul": 1.2,
+      "rep": 10,
+      "missRep": -4
+    },
+    {
+      "id": "yacht",
+      "name": "요트 손님",
+      "art": "taxi",
+      "wants": [
+        "ureok-maeun",
+        "nongeo-gui",
+        "godeungeo-jorim"
+      ],
+      "fresh": 1,
+      "order": "배 대 놓고 왔어요. {0} 넉넉하게요.",
+      "thanks": "바다 보면서 먹으니 최고네요. 잔돈은 됐어요.",
+      "miss": "{0} 없으면 다른 데 가 볼게요.",
+      "tipMul": 0.8,
+      "rep": 6,
+      "missRep": -2
+    },
+    {
+      "id": "writer",
+      "name": "여행 작가",
+      "art": "grandpa",
+      "wants": [
+        "dodari-ssukguk",
+        "noraemi-maeun",
+        "bollak-gui"
+      ],
+      "fresh": 1,
+      "order": "이 동네 맛을 쓰러 왔어요. {0} 주세요.",
+      "thanks": "책에 꼭 넣을게요. 물비늘포 여울호.",
+      "miss": "{0} 맛을 못 봐서 아쉽네요.",
+      "tipMul": 0.8,
+      "rep": 6,
+      "missRep": -2
+    }
+  ],
+  "specials": [
+    {
+      "id": "sera",
+      "name": "차세라",
+      "speaker": "sera",
+      "day": 16,
+      "until": 19,
+      "after": "seraMeet",
+      "wants": [],
+      "order": "소문 듣고 왔어.\n제일 자신 있는 걸로 줘.",
+      "face": "smirk",
+      "lines": [
+        "이걸로 손님을 받아?\n대결 날 보자.",
+        "나쁘지 않네.\n그래도 이기는 건 나야.",
+        "…맛있네.\n대결 날 봐주진 않을 거야."
+      ],
+      "faces": [
+        "annoyed",
+        "smirk",
+        "surprised"
+      ],
+      "rep": [
+        -2,
+        4,
+        12
+      ]
     }
   ]
 }

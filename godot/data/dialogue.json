@@ -351,6 +351,33 @@
         "text": "노씨 아저씨 글씨다.\n말로 하시면 될 텐데."
       }
     ],
+    "nossiLamp": [
+      {
+        "speaker": "",
+        "face": "",
+        "text": "미끼가게 앞에서 노씨가 손짓한다.\n작은 봉지 하나를 내민다."
+      },
+      {
+        "speaker": "nossi",
+        "face": "default",
+        "text": "케미라이트다. 찌 끝에 꽂아."
+      },
+      {
+        "speaker": "nossi",
+        "face": "default",
+        "text": "밤엔 갈치가 붙는다.\n장사 끝나고 나가 봐라. 발밑 조심하고."
+      },
+      {
+        "speaker": "yeoul",
+        "face": "default",
+        "text": "밤낚시는 아빠랑 딱 한 번 가 봤는데.\n고맙습니다."
+      },
+      {
+        "speaker": "",
+        "face": "",
+        "text": "이제 장사를 마친 밤에도 방파제에 나갈 수 있다."
+      }
+    ],
     "seraMeet": [
       {
         "speaker": "",
@@ -412,6 +439,11 @@
     {
       "scene": "nossiNote",
       "day": 4,
+      "until": 0
+    },
+    {
+      "scene": "nossiLamp",
+      "day": 8,
       "until": 0
     },
     {

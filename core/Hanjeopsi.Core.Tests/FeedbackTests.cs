@@ -130,6 +130,10 @@ namespace Hanjeopsi.Core.Tests
             Assert.Equal("nossiNote", g.NextBeat());
             g.MarkBeat("nossiNote");
             Assert.Null(g.NextBeat());
+            // 8일: 노씨가 케미라이트를 건넨다 (밤낚시가 열린다)
+            g.Save.Day = 8;
+            Assert.Equal("nossiLamp", g.NextBeat());
+            g.MarkBeat("nossiLamp");
             // 차세라 첫 만남은 대결(20일) 전까지만
             g.Save.Day = 21;
             Assert.Null(g.NextBeat());

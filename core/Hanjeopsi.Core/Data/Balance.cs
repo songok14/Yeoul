@@ -74,7 +74,7 @@ namespace Hanjeopsi.Core.Data
     /// <summary>하루 시간 칸</summary>
     public sealed class TimeBalance
     {
-        /// <summary>새벽 · 아침 · 점심 · 저녁 · 밤</summary>
+        /// <summary>새벽 · 아침 · 낮 · 저녁 · 밤</summary>
         public int SlotsPerDay;
         /// <summary>경매는 이 칸까지 (아침)</summary>
         public int MarketLastSlot;
@@ -84,6 +84,12 @@ namespace Hanjeopsi.Core.Data
         public int ShopLastSlot = 99;
         /// <summary>시간대마다 마을 배경 그림 이름 (godot/art/backgrounds)</summary>
         public List<string> TownArt = new List<string>();
+        /// <summary>낚시하러 나갈 수 있는 칸 (고닷: 새벽 · 아침 · 낮 · 밤). 비어 있으면 언제나</summary>
+        public List<int> FishSlots = new List<int>();
+        /// <summary>트럭을 여는 칸 (고닷: 저녁만). 비어 있으면 TruckFirstSlot 부터</summary>
+        public List<int> TruckSlots = new List<int>();
+        /// <summary>밤낚시를 여는 이야기 장면. 이 장면을 보기 전에는 밤에 방파제에 못 간다. 비어 있으면 처음부터</summary>
+        public string NightFishBeat;
     }
 
     /// <summary>식당 납품 의뢰</summary>
@@ -103,7 +109,7 @@ namespace Hanjeopsi.Core.Data
     /// <summary>마을 마당을 지나가는 사람 수</summary>
     public sealed class TownBalance
     {
-        /// <summary>시간대마다 마당에 있는 사람 수 (새벽 · 아침 · 점심 · 저녁 · 밤)</summary>
+        /// <summary>시간대마다 마당에 있는 사람 수 (새벽 · 아침 · 낮 · 저녁 · 밤)</summary>
         public List<int> Walkers = new List<int>();
         /// <summary>궂은 날씨면 이만큼 줄어든다 (날씨 id → 줄어드는 수)</summary>
         public Dictionary<string, int> WeatherLess = new Dictionary<string, int>();

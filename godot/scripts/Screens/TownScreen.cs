@@ -114,7 +114,7 @@ namespace Hanjeopsi.App.Screens
             _stage.Pin(Sign("위판장", G.IsMarketOpen() ? "경매 중" : "경매 마감", true, OpenMarket), new Vector2(150, 222));
             _stage.Pin(Sign("미끼가게", G.IsShopOpen() ? null : "닫음", G.IsShopOpen(), OpenShop), new Vector2(96, 318));
             _stage.Pin(Sign("할머니댁", "상환 · 잠", true, Restaurant), new Vector2(370, 262));
-            _stage.Pin(Sign("방파제 →", !G.CanFishToday() ? "출입 금지" : G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시" : null, G.CanFishToday(), GoFishing), new Vector2(330, 196));
+            _stage.Pin(Sign("방파제 →", FishSignState(), G.CanFishNow(), GoFishing), new Vector2(330, 196));
 
             // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
             Rect2 truckArea;
@@ -122,7 +122,7 @@ namespace Hanjeopsi.App.Screens
             _truck = _stage.Place(Clear(truckArea.Size), truckArea.End, truckArea.Size.Y, new Vector2(1, 1));
             _truckX = truckArea.GetCenter().X;
             Tappable(_truck, OpenTruck);
-            _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
+            _stage.Pin(Sign("여울호", TruckSignState(), G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
             AddVillagers();
             RefreshClients();
             _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), CatSize);
@@ -234,6 +234,22 @@ namespace Hanjeopsi.App.Screens
             sb.BorderWidthTop = 3;
             sb.ContentMarginBottom = 30 + SafeBottom;
             _menu.AddThemeStyleboxOverride("panel", sb);
+        }
+
+        /// <summary>방파제 간판 아래 줄: 태풍, 저녁 장사 시간, 밤낚시가 열렸는지</summary>
+        private string FishSignState()
+        {
+            if (!G.CanFishToday()) return "출입 금지";
+            if (G.IsTruckOpen()) return "저녁엔 장사";
+            if (G.IsNight()) return G.NightFishingOpen() ? "밤낚시" : "밤엔 위험";
+            return null;
+        }
+
+        /// <summary>여울호 간판 아래 줄: 저녁이면 오늘 손님 수, 낮에는 여는 시간</summary>
+        private string TruckSignState()
+        {
+            if (G.IsTruckOpen()) return "손님 " + G.GuestsTonight();
+            return G.IsNight() ? "오늘 장사 끝" : "저녁에 열어요";
         }
 
         private Control NewsRibbon()
@@ -505,6 +521,10 @@ namespace Hanjeopsi.App.Screens
         {
             foreach (Node c in _tracker.GetChildren()) c.QueueFree();
             foreach (var line in QuestLines(G)) _tracker.AddChild(Riser(TrackerPill(line)));
+            // 오늘 저녁 VIP 예약: 낮 동안 그 고기를 노릴 수 있게 미리 보여 준다
+            if (!G.IsNight())
+                foreach (var v in G.VipsToday())
+                    _tracker.AddChild(Riser(TrackerPill("VIP " + v.Vip.Name + " · " + v.Recipe.Name + " (" + G.Data.Texts.Truck["fresh" + v.Vip.Fresh] + ")")));
         }
 
         /// <summary>맡은 의뢰 한 줄씩 (낚시 화면도 쓴다)</summary>
@@ -945,6 +965,16 @@ namespace Hanjeopsi.App.Screens
                 Toast("태풍이 와서 방파제 출입이 막혔다");
                 return;
             }
+            if (G.IsTruckOpen())
+            {
+                Toast("저녁엔 여울호 장사 시간이다");
+                return;
+            }
+            if (!G.IsFishingTime())
+            {
+                Toast("밤 방파제는 아직 위험하다");
+                return;
+            }
             if (G.BaitLeft() <= 0 && !G.IsShopOpen())
             {
                 Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 새벽에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
@@ -1029,7 +1059,7 @@ namespace Hanjeopsi.App.Screens
         {
             if (!G.IsTruckOpen())
             {
-                Toast("새벽엔 손님이 없다");
+                Toast(G.IsNight() ? "오늘 장사는 끝났다" : "여울호는 저녁에 연다");
                 return;
             }
             WalkThen(_truckX, () => GameState.I.GoTo("truck"));
@@ -1063,15 +1093,18 @@ namespace Hanjeopsi.App.Screens
             int step = G.Data.Balance.Chapter1.RepayStep;
             var lines = G.Data.Dialogue.Grandma;
             string line = lines[(int)(GameState.I.Rng.Next() * lines.Count)];
-            Say("grandma", "default", line, new[]
+            var choices = new List<ModalButton>
             {
                 new ModalButton(G.IsWeekly ? "이번 주 몫 갚기 (" + UiKit.Won(Math.Min(s.Money, G.DueNow())) + ")" : "10만 원 갚기", Palette.GoldDark,
                     () => Pay(G.IsWeekly ? Math.Min(s.Money, G.DueNow()) : step),
                     G.IsWeekly ? G.DueNow() <= 0 || s.Money <= 0 : s.Debt <= 0 || s.Money < step),
                 new ModalButton("있는 돈 전부 갚기 (" + UiKit.Won(canPay) + ")", Palette.Red, () => Pay(canPay), canPay <= 0),
-                new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep),
-                new ModalButton("나가기", Palette.GrayDark, WalkBack),
-            });
+            };
+            // 저녁 장사 전에는 쉬었다 갈 수 있다 (태풍이거나 미끼가 떨어졌을 때)
+            if (CanRest()) choices.Add(new ModalButton("저녁까지 쉬기", Palette.GreenDark, RestUntilEvening));
+            choices.Add(new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep));
+            choices.Add(new ModalButton("나가기", Palette.GrayDark, WalkBack));
+            Say("grandma", "default", line, choices);
         }
 
         private void Pay(int amount)
@@ -1082,6 +1115,26 @@ namespace Hanjeopsi.App.Screens
             FloatText("-" + UiKit.Won(paid), new Vector2(GetViewportRect().Size.X / 2, SafeTop + 420), Palette.RedText);
             if (G.Save.Debt <= 0) GetTree().CreateTimer(0.9).Timeout += OnEnter;
             else Toast("할머니가 말없이 손을 잡아 주셨다");
+        }
+
+        /// <summary>저녁 장사 전이면 쉴 수 있다 (태풍이나 미끼가 떨어져 낚시를 못 갈 때)</summary>
+        private bool CanRest()
+        {
+            var t = G.Data.Balance.Time;
+            return t.TruckSlots.Count > 0 && G.Save.Slot < t.TruckSlots.Min();
+        }
+
+        private void RestUntilEvening()
+        {
+            Modal("저녁까지 쉴까요?", G.SlotName() + "부터 저녁까지 할머니댁에서 쉽니다.\n저녁이 되면 여울호를 열 수 있어요.", new[]
+            {
+                new ModalButton("아니", Palette.GrayDark),
+                new ModalButton("쉬기", Palette.GreenDark, () =>
+                {
+                    G.RestUntilTruck();
+                    GameState.I.GoTo("town");
+                }),
+            });
         }
 
         private void Sleep()

@@ -59,7 +59,7 @@ namespace Hanjeopsi.App.Screens
         private static readonly Vector2 CoolerFoot = new Vector2(318, 668);
         private static readonly Vector2 CatThiefFoot = new Vector2(280, 682);
         // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
-        // 새벽 · 아침 · 점심 · 저녁 · 밤
+        // 새벽 · 아침 · 낮 · 저녁 · 밤
         private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
 
         private CoreGame G

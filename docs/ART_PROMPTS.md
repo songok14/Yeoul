@@ -865,3 +865,98 @@ Expression sheet of the same grandmother as the attached reference (gray curly s
 8. 고양이 고등어 소품 시트
 The same gray tabby cat as the attached reference with red collar and gold bell, 6 poses in two rows with wide spacing: meowing while looking to the left, meowing while looking to the right, eating a fish, sitting on a blue cooler box, sleeping on a truck roof rack, stretching.
 ```
+
+---
+
+## 걷는 언덕 마을 (2026-10-28)
+
+마을을 직접 걸어 다니게 바꾼다(사용자 결정: B 세로 언덕 마을). 남해 언덕 마을처럼 아래 항구에서 위 언덕으로 골목이 오르고, 화면은 여울을 따라 위아래(조금 좌우)로 흐른다. 그래서 **내려다본 마을 지도 한 장**과 **앞·뒤로 걷는 SD**가 새로 필요하다.
+- 지도는 화면보다 크게 확대해서 쓴다(가로 약 1.8배). 이미지 AI가 낼 수 있는 **가장 높은 해상도**로 받는다.
+- 먼저 **지도 1 낮**을 뽑고, 받으면 길과 건물 문 자리를 재서 걷는 길(코드)을 만든다. 새벽·저녁·밤은 지도 1 결과를 첨부해 같은 구도로 시간만 바꾼다.
+- SD는 지금 옆걸음 그림과 같은 사람으로 보이게 지금 SD 시트를 꼭 첨부한다.
+
+### 지도 1. 물비늘포 언덕 마을 낮 (`town-map-day`)
+
+```
+Create one vertical game map illustration. Attached: my current watercolor village background illustrations (match their palette, light and painterly texture exactly) and my current SD characters (only for scale reference, do not draw them).
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, built on a hillside that rises from the sea. Seen from a high three-quarter bird's-eye view, about 45 degrees from above, like a cozy RPG town map. The whole village fits in the picture.
+
+Layout from bottom to top:
+- Bottom 20 percent: calm sea with small waves, a concrete pier with two small fishing boats. At the bottom right edge a breakwater with gray tetrapods leads off the picture toward a small red lighthouse.
+- Above the sea: a wide flat harbor plaza of worn concrete running across the whole width. On the left side of the plaza a fish auction shed with a blue metal roof and stacked blue and yellow fish crates. On the right side of the plaza a small blue and white food truck with a striped awning and a little chalkboard, parked with empty space in front of it.
+- Middle: one wide stone paved path starts at the middle of the plaza and climbs the hill in a gentle S shape (first to the left, then to the right, then to the left again). Along the first bend, a tiny bait and tackle shop with a green and white striped awning and fishing rods by the door. At the second bend, a traditional Korean hanok house with a dark tiled roof, wooden lattice doors, warm paper lanterns and a small yard (the grandmother's house).
+- Upper part: small houses with colorful roofs (blue, orange, mint) and painted walls, a cozy guesthouse with a pink door and a laundry line, potted plants, low stone walls, a few camellia trees.
+- Top: the path ends at a small lookout with a wooden bench and a big old tree, green hills and sky above.
+
+Very important for a game map:
+- The S shaped path and the harbor plaza must be wide, flat, clearly visible and empty everywhere, about three times wider than a person, so small characters can walk on them. Every building door opens onto the path or the plaza with a little empty space in front of it.
+- Nothing covers the path: no people, no animals, no cars except the parked food truck, no crates or plants on the path itself, no overhanging roofs.
+- Keep the left and right 8 percent of the picture as simple scenery (hills, sea, trees) because the screen will crop them a little.
+- Light from the upper left, bright clear early afternoon, deep blue sea with sparkles.
+
+Style: soft painterly watercolor illustration matching the attached backgrounds (same palette, brush texture and level of detail), gentle anime background art, clean readable shapes. Vertical 9:16, the highest resolution you can make. No people, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+### SD 3-1. 여울 앞·뒤 걷기 (언덕 마을용)
+
+```
+Create one game SD character sheet. Attached: my current SD sheet of the heroine (match her design, chibi proportions, line art and coloring exactly) and watercolor background illustrations from my game (color palette and lighting only).
+
+Character: Han Yeoul, a 29-year-old Korean woman. Long brown hair pulled up into a high messy bun with a few loose strands, brown eyes, calm slightly tired face. Oversized cream-white hooded jacket with toggle buttons, plain white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants, chunky white-gray sneakers.
+
+The figures are seen from slightly above, about 20 degrees, because they will walk on a high-angle village map.
+Row 1, facing the viewer (walking down the map toward the camera): 1. standing still, 2. walking with the right foot forward, 3. walking with the left foot forward.
+Row 2, back view (walking up the map away from the camera, we see the bun and the back of the jacket and bag): 1. standing still, 2. walking with the right foot forward, 3. walking with the left foot forward.
+Walking frames have a small natural arm swing and a slight bounce.
+
+Style: cute chibi SD, 2.5 heads tall, big head, small rounded body, short limbs, soft anime face, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 2 rows x 3 columns, full body, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no effect marks.
+```
+
+### SD 3-2. 고등어 앞·뒤 걷기 (언덕 마을용)
+
+```
+Create one game SD character sheet. Attached: my current SD sheet of the cat (match its design, chibi proportions, line art and coloring exactly) and watercolor background illustrations from my game (color palette and lighting only).
+
+Character: Godeungeo, a small silver gray mackerel tabby street cat with dark stripes, white chest, muzzle and paws, yellow green eyes, pink nose and inner ears, a red collar with a tiny gold bell and an old handmade wooden fishing float tied to the collar (faded red and white, no letters).
+
+The cat is seen from slightly above, about 20 degrees, because it will walk on a high-angle village map.
+Row 1, facing the viewer (walking toward the camera): 1. sitting, 2. walking with the front right paw forward, 3. walking with the front left paw forward.
+Row 2, back view (walking away, tail up and slightly curved): 1. sitting seen from behind, 2. walking with the front right paw forward, 3. walking with the front left paw forward.
+
+Style: cute chibi SD animal, big round head, small body, soft anime style, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 2 rows x 3 columns, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no effect marks.
+```
+
+### 손님 3. VIP 손님 SD 시트 (넷, 여울호 VIP 예약)
+
+VIP 손님 넷은 아직 그림이 없어 손님 그림을 빌려 쓴다(`diner.json` vips art: 블로거→관광객, 호텔 주방장→민박집 사장님, 요트 손님→택시 기사, 여행 작가→할아버지). 받으면 `godot/art/customers/<id>-stand|walk|happy|sad.png`로 자르고 `art`를 자기 id로 바꾼다.
+
+```
+Create one game SD character sheet. Attached: watercolor background illustrations from my game (color palette and lighting only) and my current SD customer sheet (match its chibi proportions, line art, coloring and pose style exactly).
+
+Characters, one per row. They are special guests who came from the city, so they look a little more stylish than the village people:
+Row 1: Food blogger young woman: wavy shoulder length hair, beige beret, round glasses, cream trench coat over a striped shirt, small crossbody bag, a smartphone in one hand and a camera strap around the neck (no logos).
+Row 2: Hotel head chef, a man in his fifties: neat short gray hair and trimmed gray beard, white double breasted chef jacket under an open navy coat, dark trousers, polished shoes, a rolled leather knife bag under his arm.
+Row 3: Yacht guest, a cheerful man in his forties: navy captain cap without any logo, sunglasses, white linen shirt with rolled sleeves, light khaki shorts, boat shoes, a coiled rope keychain on his belt.
+Row 4: Travel writer woman in her thirties: short neat hair, khaki vest with many pockets over a white shirt, jeans, hiking shoes, a big backpack, a small notebook and a pen in her hands.
+
+Columns, the same for every row, every figure facing LEFT in side or three quarter view:
+1. standing still, relaxed, waiting to order
+2. walking to the left, one foot forward, a small bounce
+3. delighted after tasting: both arms up or hands clapping, big happy smile, a little hop
+4. disappointed: shoulders dropped, head slightly down, small frown
+
+Style: cute chibi SD, 2 to 2.5 heads tall, big head, small rounded body, short limbs, soft anime face, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 4 rows x 4 columns, full body, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps, props stay inside each figure's own space.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no speech bubbles, no effect marks.
+```

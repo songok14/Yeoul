@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Hanjeopsi.Core.Tests
 {
-    /// <summary>고닷 하루 다섯 칸: 새벽 · 아침 · 점심 · 저녁 · 밤</summary>
+    /// <summary>고닷 하루 다섯 칸: 새벽 · 아침 · 낮 · 저녁 · 밤</summary>
     public class TimeTests
     {
         private static Game At(int slot)
@@ -17,7 +17,7 @@ namespace Hanjeopsi.Core.Tests
         public void 하루는_다섯_칸이고_밤이_지나면_다음_날_새벽()
         {
             var g = At(0);
-            Assert.Equal(new[] { "새벽", "아침", "점심", "저녁", "밤" }, g.Data.Texts.Slots);
+            Assert.Equal(new[] { "새벽", "아침", "낮", "저녁", "밤" }, g.Data.Texts.Slots);
             int day = g.Save.Day;
             for (int i = 0; i < 4; i++) g.UseSlot();
             Assert.Equal("밤", g.SlotName());
@@ -30,23 +30,52 @@ namespace Hanjeopsi.Core.Tests
         [Fact]
         public void 시간대마다_할_수_있는_일이_다르다()
         {
-            // 새벽: 경매, 트럭 쉼 / 아침: 경매, 트럭 / 점심·저녁: 트럭 / 밤: 트럭(야식), 미끼가게 닫음
+            // 새벽·아침: 경매 / 새벽·아침·낮: 낚시 / 저녁: 장사만 / 밤: 밤낚시(열리면), 미끼가게 닫음
             Assert.True(At(0).IsMarketOpen());
-            Assert.False(At(0).IsTruckOpen());
             Assert.True(At(1).IsMarketOpen());
             Assert.False(At(2).IsMarketOpen());
-            Assert.True(At(4).IsTruckOpen());
+            for (int slot = 0; slot < 3; slot++)
+            {
+                Assert.True(At(slot).CanFishNow());
+                Assert.False(At(slot).IsTruckOpen());
+                Assert.Equal(0, At(slot).CustomersNow());
+            }
+            Assert.True(At(3).IsTruckOpen());
+            Assert.False(At(3).CanFishNow());
+            Assert.True(At(3).CustomersNow() > 0);
             Assert.True(At(3).IsShopOpen());
             var night = At(4);
+            Assert.False(night.IsTruckOpen());
             Assert.False(night.IsShopOpen());
             night.Save.Money = 100_000;
             Assert.False(night.BuyBait());
             Assert.False(night.UpgradeGear(GearSlot.Tackle));
             Assert.Equal(100_000, night.Save.Money);
-            // 점심에 손님이 가장 많고 밤엔 적다 (같은 등급)
-            Assert.True(At(2).CustomersNow() > At(1).CustomersNow());
-            Assert.True(At(4).CustomersNow() < At(3).CustomersNow());
-            Assert.Equal(0, At(0).CustomersNow());
+        }
+
+        [Fact]
+        public void 밤낚시는_노씨가_케미라이트를_건넨_뒤에_열린다()
+        {
+            var g = At(4);
+            Assert.True(g.IsNight());
+            Assert.False(g.NightFishingOpen());
+            Assert.False(g.CanFishNow());
+            // 8일에 마을에 들어오면 노씨 장면이 나온다
+            g.Save.Day = 8;
+            foreach (var b in new[] { "catFloat", "nossiNote" }) g.MarkBeat(b);
+            Assert.Equal("nossiLamp", g.NextBeat());
+            g.MarkBeat("nossiLamp");
+            Assert.True(g.CanFishNow());
+        }
+
+        [Fact]
+        public void 낚시를_못_가면_저녁까지_쉰다()
+        {
+            var g = At(1);
+            Assert.True(g.RestUntilTruck());
+            Assert.Equal(3, g.Save.Slot);
+            Assert.True(g.IsTruckOpen());
+            Assert.False(g.RestUntilTruck());
         }
 
         [Fact]

@@ -38,7 +38,10 @@
     "marketLastSlot": 1,
     "truckFirstSlot": 1,
     "shopLastSlot": 3,
-    "townArt": ["village-2", "village-0", "village-1", "village-3", "village-night"]
+    "townArt": ["village-2", "village-0", "village-1", "village-3", "village-night"],
+    "fishSlots": [0, 1, 2, 4],
+    "truckSlots": [3],
+    "nightFishBeat": "nossiLamp"
   },
   "requests": {
     "max": 2,

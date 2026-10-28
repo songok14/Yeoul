@@ -102,6 +102,8 @@ namespace Hanjeopsi.Core.Tests
         public int Dishes;
         public int AuctionIncome;
         public int TruckIncome;
+        /// <summary>받은 손님 수, VIP 만족 · 놓침</summary>
+        public int Guests, VipServed, VipMissed;
         public int RequestIncome;
         public int GearSpent;
         public string Gear;
@@ -199,15 +201,19 @@ namespace Hanjeopsi.Core.Tests
             int day0 = S.Day;
             int money0 = S.Money;
             int debt0 = S.Debt;
-            // 새벽 낚시 → 아침 위판장과 트럭 → 점심 낚시 → 저녁 트럭 → 밤낚시 → 잠
+            // 아침에 마을에 들어오면 이야기 장면을 본다 (밤낚시는 장면을 봐야 열린다)
+            for (var beat = _g.NextBeat(); beat != null; beat = _g.NextBeat()) _g.MarkBeat(beat);
+            // 새벽 낚시 → 아침 위판장 → 아침 낚시 → 낮 낚시 → 저녁 트럭 → 밤낚시(열렸으면) → 잠
             FishingTrip();
             if (_g.IsMarketOpen()) Market();
+            FishingTrip();
+            FishingTrip();
+            // 태풍이나 미끼가 없어 못 나갔으면 저녁까지 쉰다
+            _g.RestUntilTruck();
             TruckShift();
-            if (S.Slot <= 2) FishingTrip();
-            if (S.Slot <= 3 && S.Slot >= D.Balance.Time.TruckFirstSlot) TruckShift();
             // 상환일이면 밤이 지나기 전에 식당에서 이번 주 몫을 낸다
             Repay();
-            if (S.Day == day0 && S.Slot <= 4) FishingTrip();
+            if (S.Day == day0 && _g.IsNight()) FishingTrip();
             // 밤낚시가 끝나면 시간이 다 가서 날이 저절로 바뀐다. 아니면 식당에서 잠자기.
             // 미끼가게가 밤에 닫혀 있었으면 다음 날 새벽에 장을 본다
             Town();
@@ -226,8 +232,8 @@ namespace Hanjeopsi.Core.Tests
 
         private void FishingTrip()
         {
-            // 태풍 날은 방파제 출입 금지
-            if (!_g.CanFishToday()) return;
+            // 태풍 날은 방파제 출입 금지. 저녁엔 장사만 하고, 밤낚시는 열려야 간다
+            if (!_g.CanFishNow()) return;
             if (S.Bait <= 0) BuyBait(12);
             if (S.Bait <= 0) return;
             int casts = 0;
@@ -412,6 +418,12 @@ namespace Hanjeopsi.Core.Tests
                     var t = D.RequestTemplates[req.Template];
                     foreach (var f in S.Cooler.Where(f => f.Species == t.Species).OrderByDescending(f => f.Fresh).Take(t.Count)) keep.Add(f.Uid);
                 }
+                // 오늘 저녁 VIP 가 바라는 고기도 가장 싱싱한 걸로 남긴다
+                foreach (var v in _g.VipsToday())
+                {
+                    var f = S.Cooler.Where(c => c.Species == v.Recipe.Species && !keep.Contains(c.Uid)).OrderByDescending(c => c.Fresh).FirstOrDefault();
+                    if (f != null) keep.Add(f.Uid);
+                }
             }
             var sell = S.Cooler.Where(f => !keep.Contains(f.Uid) && _g.Fresh.StageOf(f.Fresh) != FreshStage.Spoiled).Select(f => f.Uid).ToList();
             if (sell.Count == 0) return;
@@ -459,7 +471,14 @@ namespace Hanjeopsi.Core.Tests
             {
                 var left = menu.Where(r => _g.Truck.BestFishFor(S, r) != null).ToList();
                 if (left.Count == 0) break;
-                var recipe = _g.Diner.Order(guest, left, _rng);
+                var recipe = _g.Diner.Order(guest, left, _rng, D.RecipeById);
+                // VIP 가 바란 요리를 바라는 신선도로 못 내면 그냥 돌아간다
+                if (guest.Kind == GuestKind.Vip && _g.VipFish(guest) == null)
+                {
+                    _g.MissVip(guest);
+                    _r.VipMissed += 1;
+                    continue;
+                }
                 var results = new List<SeasonResult>();
                 foreach (var step in recipe.Steps)
                 {
@@ -473,7 +492,9 @@ namespace Hanjeopsi.Core.Tests
                 }
                 var dish = _g.ServeGuest(recipe, results, guest);
                 if (dish == null) throw new InvalidOperationException("만들 수 있다던 요리를 못 만들었다");
-                _r.TruckIncome += dish.Pay;
+                _r.TruckIncome += dish.Pay + dish.Guest.Tip;
+                _r.Guests += 1;
+                if (guest.Kind == GuestKind.Vip && dish.Guest.VipOk) _r.VipServed += 1;
                 Check("요리");
             }
             _g.CheckDinerRankUp();

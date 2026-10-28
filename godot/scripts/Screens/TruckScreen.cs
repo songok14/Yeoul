@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Hanjeopsi.App.Ui;
+using Hanjeopsi.Core;
 using Hanjeopsi.Core.Data;
 using Hanjeopsi.Core.Systems;
 using CoreGame = Hanjeopsi.Core.Game;
@@ -11,7 +12,9 @@ namespace Hanjeopsi.App.Screens
 {
     /// <summary>
     /// 여울호 푸드트럭 장사 (웹 TruckScene). 오늘의 메뉴 고르기 → 장사 시작 → SD 손님이 걸어와 메뉴에서 주문 → 간 맞추기 게이지 → 손님 반응과 계산 → 다음 손님.
-    /// 메뉴 칸과 손님 수는 여울호 등급(평판)과 시간대, 단골로 정한다(코어 Diner). 손님을 다 받거나 메뉴 재료가 떨어지면 장사가 끝나고 시간이 한 칸 지난다.
+    /// 장사는 저녁에만 한다. 메뉴 칸과 손님 수는 평판(명성)으로, 손님 등급은 친밀도와 예약으로 정한다(코어 Diner).
+    /// VIP 는 예약한 요리를 메뉴와 상관없이 시키고, 특별 손님(이야기 인물)은 대화창 일러스트로 나온다.
+    /// 손님을 다 받거나 메뉴 재료가 떨어지면 장사가 끝나고 시간이 한 칸 지난다.
     /// 손님은 SD(그림은 왼쪽을 보고 있어서 트럭 쪽으로 걸어올 때는 뒤집는다), 반응은 포즈와 말풍선으로 한다.
     /// </summary>
     public partial class TruckScreen : Screen
@@ -27,7 +30,7 @@ namespace Hanjeopsi.App.Screens
         private const float OffLeft = -80;
         /// <summary>장사 중 판 안쪽 높이 (간 맞추기 판이 들어가는 만큼)</summary>
         private const float ShiftPanelHeight = 540;
-        // 새벽 · 아침 · 점심 · 저녁 · 밤
+        // 새벽 · 아침 · 낮 · 저녁 · 밤
         private static readonly Color[] SlotTint = { new Color("b8b8e0"), new Color("fff2e2"), new Color("fff8ee"), Colors.White, new Color("8a90c4") };
 
         private CoreGame G
@@ -53,6 +56,10 @@ namespace Hanjeopsi.App.Screens
         private PanelContainer _counterPill;
         private TextureRect _customer;
         private TruckCustomer _who;
+        /// <summary>지금 손님 (일반·단골·VIP·특별 손님)</summary>
+        private PlannedGuest _guest;
+        /// <summary>VIP 머리 위 금빛 표</summary>
+        private Control _badge;
         private Control _bubble;
         private SeasonGauge _gauge;
         private float _footY = 600;
@@ -63,7 +70,7 @@ namespace Hanjeopsi.App.Screens
         private string _auto;
         // 오늘의 메뉴 (등급만큼 고른다)와 이번 장사 손님 차례
         private readonly List<Recipe> _menu = new List<Recipe>();
-        private List<string> _plan = new List<string>();
+        private List<PlannedGuest> _plan = new List<PlannedGuest>();
         private VBoxContainer _chalk;
 
         protected override void Build()
@@ -189,6 +196,12 @@ namespace Hanjeopsi.App.Screens
             var next = G.Diner.NextRank(s);
             string repText = next != null ? F("repTo", s.Diner.Rep, next.Rep) : F("repMax", s.Diner.Rep);
             _body.AddChild(UiKit.Text(F("rankLine", rank.Name, repText, G.CustomersNow()), TextSize.Small, Palette.GrayText, false, false, 0, null, HorizontalAlignment.Center));
+            // 오늘 저녁 VIP 예약과 특별 손님 (메뉴에 없어도 VIP 는 그 요리를 시킨다)
+            foreach (var v in G.VipsToday())
+                _body.AddChild(UiKit.Text(F("vipBooked", v.Vip.Name, v.Recipe.Name, T["fresh" + v.Vip.Fresh]), TextSize.Small, Palette.Gold, true, true, 0, null, HorizontalAlignment.Center));
+            var special = G.SpecialToday();
+            if (special != null)
+                _body.AddChild(UiKit.Text(F("specialComing", special.Name + IGa(special.Name)), TextSize.Small, Palette.Gold, true, true, 0, null, HorizontalAlignment.Center));
             // 재료가 있는 요리만 줄로 보이고, 나머지는 한 줄로 접는다 (못 배운 요리의 ??? 가 줄줄이 늘어서지 않게)
             var ready = G.Data.Recipes.Recipes.Where(r => G.Truck.BestFishFor(s, r) != null).ToList();
             // 고른 요리가 맨 위, 다음은 특별 요리, 생선구이는 재료 많은 순으로 맨 아래에 접어 둔다
@@ -210,8 +223,17 @@ namespace Hanjeopsi.App.Screens
             buttons.AddThemeConstantOverride("separation", 24);
             buttons.AddChild(new GameButton(T["toTown"], Palette.BlueDark, () => GameState.I.GoTo("town"), null, TextSize.Body, 120));
             bool can = _menu.Count > 0;
-            var start = new GameButton(T["start"], Palette.Red, StartShift, can ? F("startSub", G.CustomersNow()) : G.Truck.Cookable(s).Count > 0 ? T["pickFirst"] : T["emptyCooler"], TextSize.Body, 120);
-            start.SetEnabled(can);
+            GameButton start;
+            if (G.Truck.Cookable(s).Count == 0)
+            {
+                // 요리할 고기가 없으면 장사를 쉬고 밤으로 넘어간다
+                start = new GameButton(T["skip"], Palette.GrayDark, SkipShift, T["skipSub"], TextSize.Body, 120);
+            }
+            else
+            {
+                start = new GameButton(T["start"], Palette.Red, StartShift, can ? F("startSub", G.GuestsTonight()) : T["pickFirst"], TextSize.Body, 120);
+                start.SetEnabled(can);
+            }
             buttons.AddChild(start);
             _body.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4), MouseFilter = MouseFilterEnum.Ignore });
             _body.AddChild(buttons);
@@ -324,7 +346,7 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>first 가 있으면 그 손님이 맨 먼저 온다 (사진 확인용)</summary>
-        private void StartShift(string first)
+        private void StartShift(PlannedGuest first)
         {
             if (_menu.Count == 0) return;
             _served = 0;
@@ -346,14 +368,24 @@ namespace Hanjeopsi.App.Screens
                 return;
             }
             var rng = GameState.I.Rng;
-            string guest = _plan[_served];
-            _who = G.Data.Dialogue.Customers.First(c => c.Id == guest);
-            var recipe = G.Diner.Order(guest, menu, rng);
+            _guest = _plan[_served];
+            var recipe = G.Diner.Order(_guest, menu, rng, G.Data.RecipeById);
             _counter.Text = F("customer", _served + 1, max);
             _counterPill.Visible = true;
 
-            // 판을 비우고 손님이 왼쪽에서 트럭 쪽으로 걸어온다
+            // 판을 비우고 손님이 왼쪽에서 트럭 쪽으로 걸어온다. 특별 손님은 대화창 일러스트로 온다
             ClearBody();
+            if (_guest.Kind == GuestKind.Special)
+            {
+                _who = null;
+                var sp = G.Diner.SpecialById(_guest.Id);
+                Sound.Play("good", -6, 0.8f);
+                Talk(new[] { new DialogueLine { Speaker = sp.Speaker, Face = sp.Face, Text = sp.Order } }, null, () => Cook(recipe, 0, new List<SeasonResult>()));
+                return;
+            }
+            // VIP 는 아직 그림이 없어 손님 그림을 빌려 쓴다
+            string art = _guest.Kind == GuestKind.Vip ? G.Diner.VipById(_guest.Id).Art : _guest.Id;
+            _who = G.Data.Dialogue.Customers.First(c => c.Id == art);
             // 손님마다 키가 다르다 (꼬마는 작게)
             _stage.Swap(_customer, Tex(_who.Id + "-walk"), CustomerHeight * _who.Height, new Vector2(0.5f, 1));
             // 걷기 그림은 오른쪽을 본다 (트럭 쪽)
@@ -413,10 +445,67 @@ namespace Hanjeopsi.App.Screens
         {
             bool known = G.Save.Dex.ContainsKey(recipe.Species) && G.Save.Dex[recipe.Species].Count > 0;
             string dish = known ? recipe.Name : F("unknownDish", G.Data.SpeciesById(recipe.Species).Name);
+            if (_guest.Kind == GuestKind.Vip)
+            {
+                var vip = G.Diner.VipById(_guest.Id);
+                ShowBadge(T["vipBadge"]);
+                // 바라는 신선도의 재료가 없으면 실망하고 돌아간다
+                if (G.VipFish(_guest) == null)
+                {
+                    VipMissed(vip, dish);
+                    return;
+                }
+                SetBubble(string.Format(vip.Order, dish));
+                Cook(recipe, 0, new List<SeasonResult>());
+                return;
+            }
             // 단골은 늘 하던 말로 시킨다
-            bool regular = G.Diner.IsRegular(G.Save, _who.Id);
-            SetBubble(string.Format(regular ? G.Data.Diner.GuestById(_who.Id).Regular : _who.Order, dish));
+            if (_guest.Kind == GuestKind.Regular) ShowBadge(T["regularBadge"]);
+            SetBubble(string.Format(_guest.Kind == GuestKind.Regular ? G.Data.Diner.GuestById(_guest.Id).Regular : _who.Order, dish));
             Cook(recipe, 0, new List<SeasonResult>());
+        }
+
+        /// <summary>손님 머리 위 작은 표 (VIP, 단골)</summary>
+        private void ShowBadge(string text)
+        {
+            HideBadge();
+            var pill = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
+            pill.AddThemeStyleboxOverride("panel", UiKit.Box(Palette.Gold, 22, 14, 2).WithBorder(Palette.Ink, 3).WithShadow(0.3f, 8, 3));
+            pill.AddChild(UiKit.Text(text, TextSize.Tiny, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center));
+            float h = CustomerHeight * (_who != null ? _who.Height : 1);
+            _badge = pill;
+            _stage.Pin(pill, new Vector2(CustomerX - 34, _footY - h - 8));
+        }
+
+        private void HideBadge()
+        {
+            if (_badge != null && IsInstanceValid(_badge)) _stage.Remove(_badge);
+            _badge = null;
+        }
+
+        /// <summary>VIP 가 바란 요리를 못 냈다: 실망한 얼굴로 한마디, 명성이 깎인다</summary>
+        private void VipMissed(DinerVip vip, string dish)
+        {
+            int rep = G.MissVip(_guest);
+            _served += 1;
+            _stage.Swap(_customer, Tex(_who.Id + "-sad"));
+            React(0);
+            Sound.Play("bad", -2);
+            SetBubble(string.Format(vip.Miss, dish));
+            ClearBody();
+            _body.AddChild(UiKit.Text(F("vipMissTitle", vip.Name + IGa(vip.Name)), TextSize.H1, Palette.Paper, true, true, 0, null, HorizontalAlignment.Center));
+            _body.AddChild(UiKit.Text(F("vipMissLine", T["fresh" + vip.Fresh], rep), TextSize.Small, Palette.RedText, false, true, 0, null, HorizontalAlignment.Center));
+            _body.AddChild(NextButton());
+            Rise();
+        }
+
+        private GameButton NextButton()
+        {
+            bool last = _served >= _plan.Count || !_menu.Any(r => G.Truck.BestFishFor(G.Save, r) != null);
+            var next = new GameButton(last ? T["finish"] : T["next"], Palette.Green, Leave, null, TextSize.Body, 120);
+            next.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+            next.CustomMinimumSize = new Vector2(520, 120);
+            return next;
         }
 
         // ───────── 간 맞추기 ─────────
@@ -490,24 +579,45 @@ namespace Hanjeopsi.App.Screens
 
         private void Serve(Recipe recipe, List<SeasonResult> results)
         {
-            var dish = G.ServeGuest(recipe, results, _who.Id);
+            var dish = G.ServeGuest(recipe, results, _guest);
             if (dish == null)
             {
+                _served += 1;
                 NextCustomer();
                 return;
             }
             _served += 1;
-            _sales += dish.Pay;
+            int tip = dish.Guest != null ? dish.Guest.Tip : 0;
+            _sales += dish.Pay + tip;
             _hud.Refresh();
 
             int mood = G.Truck.MoodOf(dish.Avg);
-            var lines = G.Truck.ReviewLines(G.Save, recipe, results, dish.Stage, mood);
-            _stage.Swap(_customer, Tex(_who.Id + (mood == 2 ? "-happy" : mood == 0 ? "-sad" : "-stand")));
-            React(mood);
             Sound.Play(mood == 2 ? "good" : mood == 0 ? "bad" : "okay", -2);
             Sound.Play("coin", -3);
+            if (_guest.Kind == GuestKind.Special)
+            {
+                // 특별 손님은 대화창에서 한마디 하고 결과를 본다
+                var sp = G.Diner.SpecialById(_guest.Id);
+                Talk(new[] { new DialogueLine { Speaker = sp.Speaker, Face = sp.Faces[mood], Text = sp.Lines[mood] } }, null, () => ShowResult(recipe, dish));
+                return;
+            }
+            var lines = G.Truck.ReviewLines(G.Save, recipe, results, dish.Stage, mood);
+            // VIP 는 바란 대로 먹었으면 고맙다는 말, 아니면 아쉽다는 말
+            if (_guest.Kind == GuestKind.Vip)
+            {
+                var vip = G.Diner.VipById(_guest.Id);
+                lines = new List<string> { dish.Guest.VipOk ? vip.Thanks : string.Format(vip.Miss, recipe.Name) };
+            }
+            _stage.Swap(_customer, Tex(_who.Id + (mood == 2 ? "-happy" : mood == 0 ? "-sad" : "-stand")));
+            React(mood);
             SetBubble(string.Join("\n", lines.Select(l => "“" + l + "”")));
-            FloatText("+" + UiKit.Won(dish.Pay), OverHead() - new Vector2(0, 260), Palette.Gold);
+            FloatText("+" + UiKit.Won(dish.Pay + tip), OverHead() - new Vector2(0, 260), Palette.Gold);
+            ShowResult(recipe, dish);
+        }
+
+        /// <summary>요리 결과 판: 요리 그림, 받은 돈과 팁, 손님 한 줄, 별</summary>
+        private void ShowResult(Recipe recipe, ServedDish dish)
+        {
 
             ClearBody();
             var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
@@ -518,29 +628,30 @@ namespace Hanjeopsi.App.Screens
             text.AddChild(UiKit.Text(F("done", recipe.Name), TextSize.H1, Palette.Paper, true));
             if (dish.FirstTime) text.AddChild(UiKit.Text(T["firstRecipe"], TextSize.Small, Palette.Gold));
             text.AddChild(UiKit.Text(F("pay", UiKit.Won(dish.Pay)), TextSize.Body, Palette.Gold, true));
+            if (dish.Guest != null && dish.Guest.Tip > 0) text.AddChild(UiKit.Text(F("tip", UiKit.Won(dish.Guest.Tip)), TextSize.Small, Palette.Gold, true));
             if (dish.Guest != null) text.AddChild(GuestLine(dish.Guest));
             row.AddChild(text);
             _body.AddChild(row);
             _body.AddChild(Stars(dish.Avg));
-
-            bool last = _served >= _plan.Count || !_menu.Any(r => G.Truck.BestFishFor(G.Save, r) != null);
-            var next = new GameButton(last ? T["finish"] : T["next"], Palette.Green, Leave, null, TextSize.Body, 120);
-            next.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
-            next.CustomMinimumSize = new Vector2(520, 120);
-            _body.AddChild(next);
+            _body.AddChild(NextButton());
             Rise();
         }
 
         /// <summary>손님 친밀도 한 줄. 단골이 되는 순간은 금빛으로</summary>
         private Control GuestLine(GuestResult g)
         {
-            var guest = G.Data.Diner.GuestById(_who.Id);
+            string rep0 = g.RepGain >= 0 ? "+" + g.RepGain : g.RepGain.ToString();
+            if (g.Kind == GuestKind.Vip)
+                return UiKit.Text(F(g.VipOk ? "vipOkLine" : "vipBadLine", G.Diner.VipById(_guest.Id).Name, rep0), TextSize.Small, g.VipOk ? Palette.Gold : Palette.RedText, true);
+            if (g.Kind == GuestKind.Special)
+                return UiKit.Text(F("specialLine", G.Diner.SpecialById(_guest.Id).Name, rep0), TextSize.Small, g.RepGain >= 0 ? Palette.Gold : Palette.RedText, true);
+            var guest = G.Data.Diner.GuestById(_guest.Id);
             if (g.BecameRegular)
             {
                 Sound.Play("good", -4, 1.2f);
                 return UiKit.Text(F("becameRegular", guest.Name + IGa(guest.Name)), TextSize.Small, Palette.Gold, true);
             }
-            string key = G.Diner.IsRegular(G.Save, _who.Id) ? "regularLine" : "affinityLine";
+            string key = G.Diner.IsRegular(G.Save, _guest.Id) ? "regularLine" : "affinityLine";
             string rep = g.RepGain >= 0 ? "+" + g.RepGain : g.RepGain.ToString();
             return UiKit.Text(F(key, guest.Name, g.Affinity, G.Data.Diner.RegularAt, rep), TextSize.Small, g.RepGain >= 0 ? Palette.GreenText : Palette.RedText);
         }
@@ -585,7 +696,13 @@ namespace Hanjeopsi.App.Screens
         {
             if (_walking) return;
             SetBubble(null);
+            HideBadge();
             ClearBody();
+            if (_who == null)
+            {
+                NextCustomer();
+                return;
+            }
             _stage.Swap(_customer, Tex(_who.Id + "-walk"));
             _customer.FlipH = true;
             Walk(CustomerX, OffLeft, 0.7, () =>
@@ -595,11 +712,18 @@ namespace Hanjeopsi.App.Screens
             });
         }
 
+        private void SkipShift()
+        {
+            if (G.IsTruckOpen()) G.UseSlot();
+            GameState.I.GoTo("town");
+        }
+
         private void EndShift(bool ranOut)
         {
             _counterPill.Visible = false;
             _customer.Visible = false;
             SetBubble(null);
+            HideBadge();
             G.UseSlot();
             _hud.Refresh();
             string body = F("endBody", _served, UiKit.Won(_sales));
@@ -648,7 +772,25 @@ namespace Hanjeopsi.App.Screens
                     break;
                 case "boy":
                     // 꼬마 손님은 어른보다 작게 선다
-                    StartShift("boy");
+                    StartShift(new PlannedGuest { Id = "boy" });
+                    break;
+                case "booked":
+                    // 줄 서는 집: 메뉴판에 VIP 예약이 보인다
+                    G.Save.Diner.Rep = G.Data.Diner.Ranks[3].Rep;
+                    ShowMenu(false);
+                    break;
+                case "vip":
+                {
+                    // VIP 가 활어 요리를 바란다 (재료는 쿨러에 넣어 둔다)
+                    var vip = G.Data.Diner.Vips[0];
+                    var wish = G.Data.RecipeById(vip.Wants[0]);
+                    G.AddToCooler(wish.Species, G.Data.SpeciesById(wish.Species).AvgSize + 3);
+                    StartShift(new PlannedGuest { Id = vip.Id, Kind = GuestKind.Vip, Wish = wish.Id });
+                    break;
+                }
+                case "sera":
+                    // 특별 손님 차세라는 대화창 일러스트로 온다
+                    StartShift(new PlannedGuest { Id = "sera", Kind = GuestKind.Special });
                     break;
                 case "end":
                     _served = 5;

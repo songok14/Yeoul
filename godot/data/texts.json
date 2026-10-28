@@ -14,7 +14,7 @@
   "slots": [
     "새벽",
     "아침",
-    "점심",
+    "낮",
     "저녁",
     "밤"
   ],
@@ -289,7 +289,7 @@
     "regularLine": "단골 {0} · 평판 {3}",
     "becameRegular": "{0} 단골이 됐다!",
     "rankUpTitle": "여울호 소문이 났다!",
-    "rankUp": "이제 여울호는 {0}\n메뉴 {1}칸 · 기본 손님 {2}명",
+    "rankUp": "이제 여울호는 {0}\n메뉴 {1}칸 · 저녁 손님 {2}명부터",
     "emptyCooler": "쿨러가 비었다",
     "toTown": "마을로",
     "customer": "손님 {0}/{1}",
@@ -311,6 +311,21 @@
     "finish": "장사 마치기",
     "endTitle": "오늘 장사 끝!",
     "ranOut": "재료가 다 떨어졌다",
-    "endBody": "손님 {0}명\n매출 {1}"
+    "endBody": "손님 {0}명\n매출 {1}",
+    "skip": "장사 쉬기",
+    "skipSub": "쿨러가 비었다 · 밤이 된다",
+    "vipBadge": "VIP",
+    "regularBadge": "단골",
+    "vipBooked": "VIP 예약 · {0} · {1} ({2})",
+    "fresh0": "활어",
+    "fresh1": "선어 이상",
+    "fresh2": "숙성 이상",
+    "specialComing": "오늘 저녁 {0} 온다는 소문",
+    "tip": "팁 {0}",
+    "vipOkLine": "{0} 만족 · 명성 {1}",
+    "vipBadLine": "{0} 실망 · 명성 {1}",
+    "vipMissTitle": "{0} 그냥 돌아갔다",
+    "vipMissLine": "{0} 재료가 없었다 · 명성 {1}",
+    "specialLine": "{0} · 명성 {1}"
   }
 }
