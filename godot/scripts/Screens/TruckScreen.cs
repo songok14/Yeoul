@@ -470,11 +470,12 @@ namespace Hanjeopsi.App.Screens
         {
             HideBadge();
             var pill = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
-            pill.AddThemeStyleboxOverride("panel", UiKit.Box(Palette.Gold, 22, 14, 2).WithBorder(Palette.Ink, 3).WithShadow(0.3f, 8, 3));
-            pill.AddChild(UiKit.Text(text, TextSize.Tiny, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center));
+            pill.AddThemeStyleboxOverride("panel", UiKit.Box(Palette.Gold, 28, 18, 4).WithBorder(Palette.Ink, 4).WithShadow(0.35f, 10, 4));
+            pill.AddChild(UiKit.Text(text, TextSize.Body, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center));
             float h = CustomerHeight * (_who != null ? _who.Height : 1);
             _badge = pill;
-            _stage.Pin(pill, new Vector2(CustomerX - 34, _footY - h - 8));
+            // 말풍선은 머리 오른쪽 위에 뜨니 표는 머리 왼쪽 옆에 둔다
+            _stage.Pin(pill, new Vector2(CustomerX - 78, _footY - h * 0.78f));
         }
 
         private void HideBadge()
