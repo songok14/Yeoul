@@ -1,4 +1,4 @@
-# 이어가기 (2026-10-28, cloud, 브랜치 ccr-1656a8a0-hqkk4r, 하루·손님 개편 뒤)
+# 이어가기 (2026-10-28 밤, cloud, 브랜치 ccr-1656a8a0-hqkk4r, 하루 네 칸·걷는 언덕 마을 뒤)
 
 다음 세션 첫 메시지로 아래 코드 블록을 그대로 붙여 넣는다.
 
@@ -12,10 +12,16 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 ## 지금까지 상황
 - 환경: cloud. 원격 https://github.com/songok14/Yeoul (공개). ci-build 브랜치는 CI 결과 창고라 지우지 않는다.
 - **브랜치 주의**: 2026-10-27까지는 main 에서 작업해 main 에 푸시했다(사용자 결정). 2026-10-28 세션은 세션이 준 작업 브랜치 `ccr-1656a8a0-hqkk4r` 에 올렸고 **main 에 아직 합치지 않았다**. 시작하면 git fetch origin 후 이 브랜치와 main 차이를 보고, main 에 합칠지(빨리 감기) 사용자에게 먼저 묻는다. PR은 만들지 않는다.
-- 끝 커밋: fdf1dd7(코드) 다음 이 문서 커밋. 마지막 APK는 빌드 #115(fdf1dd7, 릴리스 test-latest).
+- 끝 커밋: d85f0ad(코드) 다음 문서 커밋. 마지막 APK는 빌드 #123(d85f0ad, 릴리스 test-latest).
 - 먼저 읽을 것: CLAUDE.md, docs/GAME_DESIGN.md 6·7절(새 하루, 여울호 손님 등급), 9절(이야기 장면), docs/GODOT_PLAN.md 9절 단계표(U11-6, U11-7)와 10-2 "지금 APK에서 볼 것", docs/ART_PROMPTS.md 끝 "걷는 언덕 마을"과 "대화 4. 미식 평론가", docs/POLISH.md.
 
-### 2026-10-28 세션에 한 일
+### 2026-10-28 세션 뒷부분 (하루 네 칸, 걷는 언덕 마을)
+- 사용자 결정: 하루를 **아침·점심·저녁·밤 네 칸**으로(데이브 더 다이브의 아침·오후 잠수 → 저녁 스시 바 → 밤 잠수). 아침·점심 낚시(경매는 아침·점심), 저녁 장사만, 밤낚시는 8일 노씨 장면 뒤, 미끼가게는 저녁까지. balance.json time slotsPerDay 4, fishSlots [0,1,3], truckSlots [2]. 어종 시간대 가중치는 species.json 다섯 칸(웹 골든) 그대로 두고 time.speciesSlots [[0,1],[2],[3],[4]]로 잇는다(코어 FishingRoll.SlotWeight). 힌트의 새벽은 아침, 낮은 점심. 출조당 캐스팅 5번. 자동 플레이 20/20 평균 21.6일.
+- 걷는 언덕 마을(U11-7): 지도 네 장 godot/art/backgrounds/town-map-morning·day·dusk·night.webp(941×1672, 서로 배치가 같다. 사용자가 고른 S자 길·한옥·광장 가로등·오른쪽 아래 방파제와 빨간 등대). 길 그물 godot/data/townmap.json(점 26, 장소 6, 의뢰인 자리 2, 확대 1.4, 원근 0.74~1.06), 코어 Systems/TownPath(가장 가까운 길 위 점, 다익스트라, ScaleAt, 테스트 4), ArtStage.Focus·ClampPins, TownScreen 개편(땅 누르면 걷기, 간판 누르면 문 앞까지 걸어가 들어가기, 돌아오면 그 문 앞, 위로 오르면 back·내려오면 front 그림, 마을 사람은 길 점 사이를 오감, 깊이 순 그리기, 날씨는 색·효과만). 사진 town-walk·town-top·town-sea.
+- 고친 것: HUD 시간 칩이 다섯 칸을 가정해 네 칸에서 마을이 멈추던 것(빌드 #120 실패 원인).
+- 그림 프롬프트 흐름: 약도(docs/art/town-layout.png, scripts/town_layout.py)를 붙여 다시 그리면 배치가 잘 맞았다. 시간대 그림은 "relighting task only" 편집 프롬프트로 같은 배치를 지켰다(ART_PROMPTS "노을 지도에서 시간만 바꾸기").
+
+### 2026-10-28 세션 앞부분
 - 사용자 요청: 데이브 더 다이브(인 정글)처럼 마을을 직접 걸어 NPC를 찾아가고, 새벽·아침·낮은 낚시, 저녁은 장사만, 손님 수는 친밀도와 명성으로.
 - 하루 개편(코어 Game.IsFishingTime/CanFishNow/IsNight/NightFishingOpen/RestUntilTruck, balance.json time fishSlots [0,1,2,4]·truckSlots [3]·nightFishBeat "nossiLamp"): 새벽·아침·낮 낚시 → 저녁 여울호 장사만 → 밤낚시(8일 노씨 케미라이트 장면 `nossiLamp` 뒤) → 잠. "점심"은 "낮"으로 이름을 바꿨다. 할머니댁 "저녁까지 쉬기", 트럭 메뉴판 "장사 쉬기"(쿨러가 비었을 때).
 - 손님 개편(코어 Systems/Diner.cs, data/diner.json): 명성(평판)이 손님 수(포장마차 4명 → 줄 서는 집 10명, 등급 사이는 평판만큼 한 명씩), 친밀도가 등급. 등급 네 단계: 일반 / 단골(친밀도 5, 늘 좋아하는 요리, 20% 팁, "단골" 표) / VIP(그날 아침 예약, 등급별 확률, 예약한 요리를 메뉴와 상관없이 정해진 신선도로, 팁과 명성, 못 내면 명성 깎임. 넷: 맛집 블로거·호텔 주방장·요트 손님·여행 작가, 그림은 손님 그림을 빌려 씀) / 특별 손님(차세라 16~19일, 첫 만남 뒤 한 번, 대화창 일러스트로). PlanGuests 는 List<PlannedGuest>(Kind, Wish). 마을 추적 카드와 트럭 메뉴판에 VIP 예약이 보인다.
@@ -49,13 +55,14 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 
 ## 이번에 해 줬으면 하는 것
 0. 브랜치: main 에 합칠지 먼저 묻고 정한다.
+0-1. 걷는 마을 폰 의견(빌드 #123): 걷는 속도·확대(1.4)·원근·간판 자리·누르기 편한지. townmap.json 수치로 맞춘다.
 1. 사용자 폰 의견(빌드 #115, 하루·손님 개편)이 오면 그것부터. 특히 하루 수입과 손님 수가 적당한지, VIP 예약이 보이고 맞추기가 너무 어렵지 않은지.
 2. 그림이 오면 연결:
-   - 지도 1(언덕 마을 낮): godot/art/backgrounds/town-map-day.png. 길(S자)과 문 자리를 재서 걷는 길 데이터(예: godot/data/town.json 의 길 점·문 자리·NPC 자리)를 만들고, 새 화면(또는 TownScreen 개편)에서 지도를 확대해 카메라가 여울을 따라 위아래로 흐르게, 누른 곳까지 길을 따라 걷기, 문 앞에 서면 들어가기(위판장·미끼가게·할머니댁·여울호·방파제 입구). 간판·HUD·추적 카드는 그대로. 새 화면이면 워크플로 shots 에 줄 추가.
-   - SD 3-1/3-2(앞·뒤 걷기): sd_sheet.py 로 잘라 godot/art/yeoul/, godot/art/cat/ 에 walk-front-1/2, walk-back-1/2, front/back stand.
+   - (지도·걷는 마을은 끝났다. 지도를 더 큰 파일로 받으면 같은 이름으로 바꿔 넣고, 배치가 달라졌으면 townmap.json 좌표를 다시 잰다: 길 색 마스크로 재는 방법은 이번 세션처럼 PIL 로 밝고 채도 낮은 화소를 걸러 본다.)
+   - SD 3-1/3-2(앞·뒤 걷기): sd_sheet.py 로 잘라 godot/art/yeoul/, godot/art/cat/ 에 walk-front-1/2, walk-back-1/2 를 넣고 TownScreen.StepYeoul 의 위·아래 걸음(지금은 back·front 한 장)을 두 장 걷기로 바꾼다. 고등어도.
    - VIP 넷: godot/art/customers/<id>-stand|walk|happy|sad.png 로 자르고 diner.json vips art 를 자기 id로.
    - 미식 평론가: portraits/critic*, dialogue.json speakers critic, diner.json specials 에 넣는다(날은 사용자와 정하기, 예: 24~27일).
-3. 지도를 받으면 새벽·저녁·밤 지도와 마을 사람(손님 12명) 앞·뒤 걷기 프롬프트를 준다. 마을 사람에게 말 걸기 → 친밀도 +1(하루 한 번) 코어 규칙(Diner)을 넣는다.
+3. 마을 사람과 손님 합치기(사용자 결정): 지금 마을을 걷는 SD(villagers 아홉)와 트럭 손님(customers 열둘)이 다르다. 손님 열둘이 마을을 걷게 하고, 말 걸기 → 친밀도 +1(하루 한 번) 코어 규칙(Diner)을 넣는다. 손님 앞·뒤 걷기 그림은 필요해 보이면 그때 프롬프트를 준다.
 마지막: dotnet test core/Hanjeopsi.sln(139개 이상), dotnet build godot/Hanjeopsi.csproj -p:HanjeopsiNet8=true, 균형은 AutoPlayTests(적당히 잘함 18/20 이상, 평균 21~25일). 커밋 후 푸시, CI 사진 확인, APK 보내기, GAME_DESIGN·GODOT_PLAN 10-2·HANDOFF 갱신.
 ````
 
