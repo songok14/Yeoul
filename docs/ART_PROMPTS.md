@@ -933,6 +933,21 @@ Style: soft painterly watercolor illustration matching the attached backgrounds 
 - 방파제는 오른쪽 아래에 짧게 보이고 화면 밖으로 이어진다. 오른쪽 아래 끝으로 걸어가면 낚시 화면으로 넘어가고 "방파제 →" 표지를 단다. 등대를 그림에 넣고 싶으면 아래 (선택) 편집 프롬프트.
 - 낮 그림에 가로등이 있으니 새벽·저녁·밤은 **같은 가로등을 켜고 끄기만** 한다. 새 가로등이나 물건을 더하지 않는다.
 
+#### 지도 1 약도와 함께 다시 그리기 (방파제·등대를 그림 안에)
+약도 `docs/art/town-layout.png`(글자 없는 단색 배치도, `scripts/town_layout.py`로 그린다. 이름표판 `town-layout-labeled.png`)를 고른 낮 지도와 같이 첨부한다.
+
+```
+Repaint the attached village map illustration so that it follows the attached flat color layout sketch. Attached: (1) the flat layout sketch: a placement guide only, (2) my village map illustration: keep its painterly watercolor style, colors, light, level of detail and all its buildings, (3) optionally my other watercolor backgrounds for the palette.
+
+How to read the sketch: beige is the stone paved S shaped path and the harbor plaza, gray bands are low stone walls and the concrete pier, blue roofs, orange roofs and the mint roof are small houses, the dark gray roof with the brown wall is the traditional hanok house, the blue roof with the green and white striped awning is the bait and tackle shop, the big blue roof at the bottom left with yellow and blue boxes is the fish auction shed, the white and blue box with wheels is the food truck, yellow dots on poles are street lamps, white shapes are two small fishing boats, green blobs are trees, the big tree with the brown bench at the top is the lookout.
+
+Bottom right, very important: follow the sketch here. A straight concrete breakwater starts at the right end of the harbor plaza and runs down into the sea. Its top is a flat walkway with a low metal railing on both sides. Gray tetrapods are stacked neatly along its outer right side only. A small red cylindrical lighthouse with a white balcony railing stands on a round concrete base at the tip of the breakwater, fully inside the picture. Waves break softly on the tetrapods.
+
+Keep everything else as it is in the attached illustration: the same camera angle, the same places, the same street lamps, the same boats and the same food truck. The path, the plaza and the breakwater walkway stay wide, flat and completely empty.
+
+Style: soft painterly watercolor illustration exactly like the attached map, gentle anime background art, crisp fine details. Vertical 9:16, the highest resolution available, at least 1800 pixels wide. Do not copy the flat colors or hard edges of the sketch. No people, no text, no letters, no signature, no watermark.
+```
+
 #### 지도 2~4. 새벽 · 저녁 · 밤 (확정한 낮 지도를 첨부해 시간만 바꾼다)
 
 ```
