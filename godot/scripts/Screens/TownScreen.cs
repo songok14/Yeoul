@@ -361,8 +361,8 @@ namespace Hanjeopsi.App.Screens
             if (!_tex.TryGetValue(path, out t))
             {
                 // 최적화 배경은 WebP를 우선 사용하고 기존 PNG도 지원한다.
-                t = GD.Load<Texture2D>("res://art/" + path + ".webp");
-                if (t == null) t = GD.Load<Texture2D>("res://art/" + path + ".png");
+                string webp = "res://art/" + path + ".webp";
+                t = ResourceLoader.Exists(webp) ? GD.Load<Texture2D>(webp) : GD.Load<Texture2D>("res://art/" + path + ".png");
                 _tex[path] = t;
             }
             return t;
