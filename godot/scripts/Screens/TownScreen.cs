@@ -114,6 +114,10 @@ namespace Hanjeopsi.App.Screens
             var s = G.Save;
 
             // ── 그림: 내려다본 언덕 마을 지도를 크게 보고 여울을 따라간다 ──
+            // 지도 꼭대기를 위 띠 아래로 내려 볼 때 지도 위 여백은 짙은 남색 (HUD 와 같은 색)
+            var backdrop = new ColorRect { Color = Palette.NightDeep, MouseFilter = MouseFilterEnum.Ignore };
+            backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            Art.AddChild(backdrop);
             _stage = new ArtStage { ClampPins = false };
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             PaintWeather(s.Slot);
