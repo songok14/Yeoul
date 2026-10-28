@@ -928,30 +928,45 @@ Game map rules:
 Style: soft painterly watercolor illustration matching the attached backgrounds (same palette, brush texture and level of detail), gentle anime background art, clean readable shapes, crisp fine details. Vertical 9:16, the highest resolution available, at least 1800 pixels wide. No people, no text, no readable signs, no letters, no signature, no watermark.
 ```
 
-#### 지도 2~4. 새벽 · 저녁 · 밤 (새 지도를 첨부해 시간만 바꾼다)
+#### 지도 1 확정 (2026-10-28, 세 번째 그림, 가로등 있는 것)
+- 사용자가 고른 그림: 광장·부두 가로등, 넓은 항구, 배 둘. 원근은 남아 있어 SD 크기·걸음을 높이에 따라 코드로 맞춘다. 해상도 941×1672(더 큰 파일이나 업스케일을 받으면 바꾼다).
+- 방파제는 오른쪽 아래에 짧게 보이고 화면 밖으로 이어진다. 오른쪽 아래 끝으로 걸어가면 낚시 화면으로 넘어가고 "방파제 →" 표지를 단다. 등대를 그림에 넣고 싶으면 아래 (선택) 편집 프롬프트.
+- 낮 그림에 가로등이 있으니 새벽·저녁·밤은 **같은 가로등을 켜고 끄기만** 한다. 새 가로등이나 물건을 더하지 않는다.
+
+#### 지도 2~4. 새벽 · 저녁 · 밤 (확정한 낮 지도를 첨부해 시간만 바꾼다)
 
 ```
-Repaint the attached village map illustration at dawn. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, boats, food truck, lighthouse and every object in the same place and size. Only change the time of day and lighting.
+Repaint the attached village map illustration at dawn. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, pier, boats, food truck, street lamps and every object in the same place and size. Do not add or remove any object. Only change the time of day and lighting.
 
-Dawn: the sun has not risen yet, soft pink and lavender sky with a pale gold glow on the horizon at the left, cool blue shadows, light mist floating over the sea and between the islands, a few windows glowing warm yellow, the lighthouse lamp on, calm sea with soft pink reflections. The path and the plaza stay clearly visible and empty.
+Dawn: the sun has not risen yet, soft pink and lavender sky with a pale gold glow on the horizon at the left, cool blue shadows, light mist floating over the sea and between the islands. The existing street lamps are still on with a soft warm glow, and a few windows glow warm yellow. Calm sea with soft pink reflections. The path and the plaza stay clearly visible and empty.
 
 Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
 ```
 
 ```
-Repaint the attached village map illustration at sunset. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, boats, food truck, lighthouse and every object in the same place and size. Only change the time of day and lighting.
+Repaint the attached village map illustration at sunset. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, pier, boats, food truck, street lamps and every object in the same place and size. Do not add or remove any object. Only change the time of day and lighting.
 
-Sunset: warm golden orange light from the left, long soft shadows, orange and pink sky with glowing clouds, the sea reflecting orange and gold, the food truck open with its string lights and little lamps glowing warmly, paper lanterns lit at the hanok house, some windows glowing. The path and the plaza stay clearly visible and empty.
+Sunset: warm golden orange light from the left, long soft shadows, orange and pink sky with glowing clouds, the sea reflecting orange and gold. The existing street lamps are just turning on with a warm glow. The food truck is open with its string lights and little lamps glowing warmly, paper lanterns are lit at the hanok house, and some windows glow. The path and the plaza stay clearly visible and empty.
 
 Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
 ```
 
 ```
-Repaint the attached village map illustration at night. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, boats, food truck, lighthouse and every object in the same place and size. Only change the time of day and lighting.
+Repaint the attached village map illustration at night. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, pier, boats, food truck, street lamps and every object in the same place and size. Do not add any new lamps or objects. Only change the time of day and lighting.
 
-Night: deep blue night sky with stars and a bright moon, moonlight on the sea, warm yellow windows in the houses, small street lamps along the S shaped path and around the plaza casting soft pools of light so the whole path is still easy to see, the food truck closed with its awning rolled up and lights off, the lighthouse beam glowing red, small lights on the fishing boats. The path and the plaza stay clearly visible and empty.
+Night: deep blue night sky with stars and a bright moon, moonlight on the sea. The existing street lamps on the plaza and the pier shine brightly and cast soft warm pools of light on the ground. Warm yellow windows in the houses light the S shaped path, so the whole path is still easy to see. The food truck is closed with its awning rolled up and its lights off. Small lights glow on the fishing boats. The path and the plaza stay clearly visible and empty.
 
 Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+#### (선택) 오른쪽 아래에 등대 더하기 (편집이 되는 도구에서, 시간대 그림을 뽑기 전에)
+
+```
+Edit the attached village map illustration. Keep everything exactly the same: composition, camera angle, colors, buildings, path, plaza, boats, food truck and street lamps. Only change the bottom right corner of the picture.
+
+In the bottom right corner, extend the short concrete breakwater that starts at the right end of the pier: it continues a little further into the sea as a flat walkway with a low metal railing, gray tetrapods are stacked neatly along its outer sea side, and a small red cylindrical lighthouse with a white balcony railing stands on a round concrete base at its tip, fully inside the picture. Waves break softly on the tetrapods. Match the same soft painterly watercolor style and lighting.
+
+No people, no text, no signature, no watermark.
 ```
 
 ### SD 3-1. 여울 앞·뒤 걷기 (언덕 마을용)
