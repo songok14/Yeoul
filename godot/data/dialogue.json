@@ -238,6 +238,7 @@
       "name": "은행 직원",
       "color": "#3b5b8a",
       "side": "right",
+      "scale": 0.5,
       "faces": {
         "default": "banker",
         "relieved": "banker-relieved",

@@ -76,6 +76,8 @@ namespace Hanjeopsi.Core.Data
         public string Color;
         /// <summary>일러스트가 서는 쪽: left, right</summary>
         public string Side;
+        /// <summary>대화 일러스트 크기 배율. 머리·어깨만 그린 그림(은행 직원)은 작게</summary>
+        public float Scale = 1;
         /// <summary>감정 이름 → godot/art/portraits/ 파일 이름. default 는 꼭 있어야 한다</summary>
         public Dictionary<string, string> Faces = new Dictionary<string, string>();
 

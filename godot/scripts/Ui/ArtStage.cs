@@ -117,6 +117,9 @@ void fragment() {
 
         private Vector2? _focus;
 
+        /// <summary>카메라가 지도 맨 위를 이만큼(화면 px) 더 내려 보일 수 있다. 위 HUD 에 가리는 높이만큼 준다</summary>
+        public float PadTop { get; set; }
+
         /// <summary>간판(Pin)을 화면 안에 붙들지 않는다 (걷는 마을은 그림을 따라 화면 밖으로 나간다)</summary>
         public bool ClampPins { get; set; } = true;
 
@@ -231,7 +234,7 @@ void fragment() {
                 var o = Size / 2 - _focus.Value * K;
                 Origin = new Vector2(
                     drawn.X > Size.X ? Mathf.Clamp(o.X, Size.X - drawn.X, 0) : Origin.X,
-                    drawn.Y > Size.Y ? Mathf.Clamp(o.Y, Size.Y - drawn.Y, 0) : Origin.Y);
+                    drawn.Y > Size.Y ? Mathf.Clamp(o.Y, Size.Y - drawn.Y, PadTop) : Origin.Y);
             }
             _bg.Position = Origin;
             _bg.Size = drawn;
