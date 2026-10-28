@@ -768,7 +768,9 @@ namespace Hanjeopsi.App.Screens
             UpdateClients(dt);
             UpdateVillagers(dt);
             // 카메라는 여울을 부드럽게 따라간다. 지도 꼭대기(전망대)는 위 HUD 아래까지 내려 보인다
-            _stage.PadTop = Mathf.Max(0, _hud.GetGlobalRect().End.Y - _stage.GetGlobalRect().Position.Y);
+            // 마을 소식·목표·의뢰 띠까지 비켜서 전망대가 가리지 않게
+            float top = Mathf.Max(_hud.GetGlobalRect().End.Y, _tracker.GetGlobalRect().End.Y);
+            _stage.PadTop = Mathf.Max(0, top - _stage.GetGlobalRect().Position.Y);
             _camera = _camera.Lerp(CameraTarget(), 1 - Mathf.Exp(-dt * 5));
             _stage.Focus = _camera;
             SortByDepth();
