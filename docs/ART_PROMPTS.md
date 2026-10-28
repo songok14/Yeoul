@@ -933,7 +933,19 @@ Style: soft painterly watercolor illustration matching the attached backgrounds 
 - 방파제는 오른쪽 아래에 짧게 보이고 화면 밖으로 이어진다. 오른쪽 아래 끝으로 걸어가면 낚시 화면으로 넘어가고 "방파제 →" 표지를 단다. 등대를 그림에 넣고 싶으면 아래 (선택) 편집 프롬프트.
 - 낮 그림에 가로등이 있으니 새벽·저녁·밤은 **같은 가로등을 켜고 끄기만** 한다. 새 가로등이나 물건을 더하지 않는다.
 
-#### 지도 1 최종 (2026-10-28, 약도로 다시 그린 네 번째 그림)
+#### 지도 기준 바꿈 (2026-10-28, 사용자 결정): 노을 지도
+- 사용자가 고른 기준 그림은 S자 길·할머니댁 한옥·광장 가로등·오른쪽 아래 방파제와 빨간 등대가 있는 **노을 지도**(`godot/art/backgrounds/town-map-dusk.webp`, 941×1672)다. 걷는 길 데이터는 이 배치로 만든다.
+- 아래 "지도 1 최종"(네 번째 그림)은 배치가 달라서 레포에서 뺐다. 낮·새벽·밤은 **노을 지도를 첨부**해 "지도 낮" 프롬프트와 지도 2~4의 새벽·밤 프롬프트로 다시 뽑는다.
+
+```
+Repaint the attached village map illustration in bright daylight. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, pier, breakwater, lighthouse, tetrapods, boats, food truck, street lamps and every object in the same place and size. Do not add or remove any object. Only change the time of day and lighting.
+
+Day: bright clear early afternoon, blue sky with a few soft white clouds, light from the upper left, deep blue sea with white sparkles, green islands on the horizon, fresh green trees and colorful flowers. The street lamps and the windows are off. The food truck is open with its awning out. The path, the plaza and the breakwater walkway stay clearly visible and empty.
+
+Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+#### 지도 1 최종 (2026-10-28, 약도로 다시 그린 네 번째 그림) → 배치가 달라 쓰지 않음
 - 약도대로 방파제(난간 있는 길, 바깥쪽 테트라포드)와 빨간 등대가 그림 안에 들어왔다. 원근이 많이 줄어 위아래 집 크기가 비슷하다. 가로등이 길 따라 여럿 있고 낮에도 불이 켜진 늦은 오후 빛이다.
 - `godot/art/backgrounds/town-map-day.webp`(941×1672). 더 큰 파일이나 업스케일을 받으면 바꾼다. 새벽·저녁·밤은 이 그림을 첨부해 아래 지도 2~4 프롬프트로 뽑는다.
 
