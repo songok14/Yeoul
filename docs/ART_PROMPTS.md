@@ -945,6 +945,39 @@ Day: bright clear early afternoon, blue sky with a few soft white clouds, light 
 Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
 ```
 
+#### 노을 지도에서 시간만 바꾸기 (편집으로 빛만, 2026-10-28)
+노을 지도를 첨부하고 도구의 편집 기능으로 뽑는다. 해가 오른쪽 바다로 지니 오른쪽이 서쪽: 낮 해는 왼쪽 위, 새벽은 왼쪽 산 너머가 밝아 온다. 받으면 노을 지도와 겹쳐 보고 어긋나면 맞춘다.
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village a few hours earlier.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: bright clear early afternoon. The sun is high in the upper left outside the picture, so short soft shadows fall toward the lower right. Clear blue sky with a few soft white clouds, the sea on the right is deep blue with white sparkles and a clear horizon. Trees are fresh green, flowers are bright. All street lamps, the lighthouse lamp and the windows are turned off. The food truck is open in daylight. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village just before sunrise.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: early dawn, the sun has not risen yet. The sky glows soft pink and pale gold behind the hills on the upper left and fades to lavender and light blue over the sea on the right. Cool blue shadows everywhere, a thin morning mist over the sea and the harbor. The street lamps are still on with a soft warm glow, a few windows glow warm yellow, the red lighthouse lamp is on. The sea is calm and reflects pink and lavender. The food truck is closed. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village late at night.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: late night. Deep navy blue sky full of stars with a bright moon over the sea on the right, silver moonlight shimmering on the water. The existing street lamps shine brightly and cast warm round pools of light on the path, the plaza and the pier, so the whole path is easy to see. Warm yellow light in many house windows and the hanok. The food truck is closed with its awning rolled up and its lights off. The red lighthouse lamp glows, and small lights glow on the two fishing boats. Everything outside the lamp light is cool blue and dark but still readable. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
 #### 지도 1 최종 (2026-10-28, 약도로 다시 그린 네 번째 그림) → 배치가 달라 쓰지 않음
 - 약도대로 방파제(난간 있는 길, 바깥쪽 테트라포드)와 빨간 등대가 그림 안에 들어왔다. 원근이 많이 줄어 위아래 집 크기가 비슷하다. 가로등이 길 따라 여럿 있고 낮에도 불이 켜진 늦은 오후 빛이다.
 - `godot/art/backgrounds/town-map-day.webp`(941×1672). 더 큰 파일이나 업스케일을 받으면 바꾼다. 새벽·저녁·밤은 이 그림을 첨부해 아래 지도 2~4 프롬프트로 뽑는다.
