@@ -1,6 +1,6 @@
 {
   "maps": ["town-map-morning", "town-map-day", "town-map-dusk", "town-map-night"],
-  "zoom": 1.6,
+  "zoom": 1.4,
   "walkSpeed": 78,
   "yeoulHeight": 54,
   "catHeight": 22,
@@ -45,10 +45,10 @@
     ["breakwater0", "breakwater1"], ["breakwater1", "breakwater2"], ["breakwater2", "breakwater"]
   ],
   "places": [
-    { "id": "market", "name": "위판장", "node": "market", "signX": 74, "signY": 418 },
+    { "id": "market", "name": "위판장", "node": "market", "signX": 96, "signY": 420 },
     { "id": "shop", "name": "미끼가게", "node": "shop", "signX": 88, "signY": 292 },
     { "id": "grandma", "name": "할머니댁", "node": "grandma", "signX": 352, "signY": 282 },
-    { "id": "truck", "name": "여울호", "node": "truck", "signX": 388, "signY": 438 },
+    { "id": "truck", "name": "여울호", "node": "truck", "signX": 364, "signY": 436 },
     { "id": "breakwater", "name": "방파제", "node": "breakwater", "signX": 404, "signY": 600 },
     { "id": "lookout", "name": "전망대", "node": "lookout", "signX": 208, "signY": 52, "line": "여기서 보면 물비늘포가 다 보인다." }
   ],

@@ -433,8 +433,8 @@ namespace Hanjeopsi.App.Screens
 
         /// <summary>머리 위 표시가 통통 튀는 높이 (논리 좌표가 아니라 화면 px)</summary>
         private const float MarkHop = 26;
-        /// <summary>의뢰인 머리에서 표시까지 띄우는 틈 (논리 좌표)</summary>
-        private const float MarkGap = 4;
+        /// <summary>의뢰인 발밑에서 표시 가운데까지 키에 더하는 높이 (논리 좌표). 표시는 가운데를 맞춰 다니 반 높이만큼 더 띄운다</summary>
+        private const float MarkGap = 24;
 
         /// <summary>
         /// 의뢰인 머리 위 표시. 새 의뢰 ! 와 건넬 수 있는 ✔ 는 크게, 통통 튄다.
