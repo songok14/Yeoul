@@ -203,10 +203,9 @@ namespace Hanjeopsi.Core.Tests
             int debt0 = S.Debt;
             // 아침에 마을에 들어오면 이야기 장면을 본다 (밤낚시는 장면을 봐야 열린다)
             for (var beat = _g.NextBeat(); beat != null; beat = _g.NextBeat()) _g.MarkBeat(beat);
-            // 새벽 낚시 → 아침 위판장 → 아침 낚시 → 낮 낚시 → 저녁 트럭 → 밤낚시(열렸으면) → 잠
+            // 아침 낚시 → 점심 위판장 → 점심 낚시 → 저녁 트럭 → 밤낚시(열렸으면) → 잠
             FishingTrip();
             if (_g.IsMarketOpen()) Market();
-            FishingTrip();
             FishingTrip();
             // 태풍이나 미끼가 없어 못 나갔으면 저녁까지 쉰다
             _g.RestUntilTruck();
@@ -378,7 +377,7 @@ namespace Hanjeopsi.Core.Tests
                 double wsum = 0, vsum = 0;
                 foreach (var sp in D.Species)
                 {
-                    double w = sp.Zone[zone] * sp.Slot[Math.Min(S.Slot, sp.Slot.Length - 1)];
+                    double w = sp.Zone[zone] * _g.Fishing.SlotWeight(sp, S.Slot);
                     if (sp.Rare) w *= hot ? D.Balance.Fishing.RareHotMul : D.Balance.Fishing.RareColdMul;
                     wsum += w;
                     vsum += w * sp.BasePrice;

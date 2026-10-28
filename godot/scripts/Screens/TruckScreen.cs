@@ -30,8 +30,8 @@ namespace Hanjeopsi.App.Screens
         private const float OffLeft = -80;
         /// <summary>장사 중 판 안쪽 높이 (간 맞추기 판이 들어가는 만큼)</summary>
         private const float ShiftPanelHeight = 540;
-        // 새벽 · 아침 · 낮 · 저녁 · 밤
-        private static readonly Color[] SlotTint = { new Color("b8b8e0"), new Color("fff2e2"), new Color("fff8ee"), Colors.White, new Color("8a90c4") };
+        // 아침 · 점심 · 저녁 · 밤 (장사는 저녁에만 하지만 사진 확인용으로 모두 둔다)
+        private static readonly Color[] SlotTint = { new Color("fff2e2"), new Color("fff8ee"), Colors.White, new Color("8a90c4") };
 
         private CoreGame G
         {

@@ -45,6 +45,7 @@ namespace Hanjeopsi.Core.Tests
                 d.Balance.Time.FishSlots.Clear();
                 d.Balance.Time.TruckSlots.Clear();
                 d.Balance.Time.NightFishBeat = null;
+                d.Balance.Time.SpeciesSlots.Clear();
                 d.Diner = null;
                 d.Weather = null;
                 d.Weekly = null;

@@ -92,7 +92,7 @@ namespace Hanjeopsi.Core.Tests
         public void 주말_이벤트()
         {
             var g = New();
-            g.Save.Slot = 3;
+            g.Save.Slot = 2;
             int guests = g.CustomersNow();
             g.Save.Day = 6;
             Assert.Equal("market", g.EventToday().Id);

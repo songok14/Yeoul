@@ -99,7 +99,7 @@ namespace Hanjeopsi.App.Screens
             string w = G.WeatherToday().Id;
             if (s.Slot != G.Data.Balance.Time.SlotsPerDay - 1 && w != "typhoon" && w != "snow")
             {
-                var gulls = new Gulls(_stage, 4, s.Slot == 3 ? new Color("4a3a40") : new Color("33404d"));
+                var gulls = new Gulls(_stage, 4, G.IsTruckOpen() ? new Color("4a3a40") : new Color("33404d"));
                 gulls.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(gulls);
             }
@@ -174,7 +174,7 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>
-        /// 오늘 날씨에 맞는 마을 그림과 비·눈·안개. 날씨 그림은 낮·밤 두 장이라 새벽과 저녁은 색만 입힌다.
+        /// 오늘 날씨에 맞는 마을 그림과 비·눈·안개. 날씨 그림은 낮·밤 두 장이라 아침과 저녁은 색만 입힌다.
         /// 날씨 효과는 배경 바로 위, 간판·캐릭터 아래에 둔다
         /// </summary>
         private void PaintWeather(int slot)
@@ -183,7 +183,8 @@ namespace Hanjeopsi.App.Screens
             bool night = slot == G.Data.Balance.Time.SlotsPerDay - 1;
             string art = G.TownArt();
             Color tint = Colors.White;
-            var dayTint = slot == 0 ? new Color("c8c6e8") : slot == 3 ? new Color("ffd6bc") : Colors.White;
+            bool evening = G.IsTruckOpen();
+            var dayTint = slot == 0 ? new Color("ffeedd") : evening ? new Color("ffd6bc") : Colors.White;
             switch (id)
             {
                 case "rain":
@@ -193,7 +194,7 @@ namespace Hanjeopsi.App.Screens
                         art = "village-night";
                         tint = new Color("aab0cc");
                     }
-                    else art = slot == 3 ? "village-rain-dusk" : "village-rain";
+                    else art = evening ? "village-rain-dusk" : "village-rain";
                     if (slot == 0) tint = dayTint;
                     break;
                 case "typhoon":
@@ -574,7 +575,7 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>
-        /// 마을 사람: 시간대와 날씨만큼(새벽·밤·궂은 날은 적게) 마당을 지나간다. 처음엔 이미 걷고 있고,
+        /// 마을 사람: 시간대와 날씨만큼(밤·궂은 날은 적게) 마당을 지나간다. 처음엔 이미 걷고 있고,
         /// 나간 사람이 있으면 잠시 뒤 다른 사람이 화면 가장자리에서 걸어 들어온다
         /// </summary>
         private void AddVillagers()
@@ -977,7 +978,7 @@ namespace Hanjeopsi.App.Screens
             }
             if (G.BaitLeft() <= 0 && !G.IsShopOpen())
             {
-                Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 새벽에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
+                Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 아침에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
                 return;
             }
             if (G.BaitLeft() <= 0)
@@ -1139,7 +1140,7 @@ namespace Hanjeopsi.App.Screens
 
         private void Sleep()
         {
-            Modal("오늘을 마칠까요?", G.SlotName() + " 이후의 시간이 지나가고\n다음 날 새벽이 됩니다.\n쿨러의 생선 신선도가 떨어져요.", new[]
+            Modal("오늘을 마칠까요?", G.SlotName() + " 이후의 시간이 지나가고\n다음 날 아침이 됩니다.\n쿨러의 생선 신선도가 떨어져요.", new[]
             {
                 new ModalButton("아니", Palette.GrayDark),
                 new ModalButton("잠자기", Palette.BlueDark, () =>

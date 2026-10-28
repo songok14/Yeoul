@@ -10,7 +10,7 @@ namespace Hanjeopsi.Core.Tests
     /// <summary>여울호 등급과 손님 (고닷 diner.json)</summary>
     public class DinerTests
     {
-        private static Game New(int slot = 3)
+        private static Game New(int slot = 2)
         {
             var g = Game.NewGame(TestData.Full, 11);
             g.Save.Slot = slot;

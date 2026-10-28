@@ -42,7 +42,7 @@ namespace Hanjeopsi.Core.Tests
         public void 날씨_효과()
         {
             var g = Game.NewGame(TestData.Full, 3);
-            g.Save.Slot = 3;
+            g.Save.Slot = 2;
             int clearGuests = g.CustomersNow();
             g.ForcedWeather = "rain";
             Assert.True(g.WaitMul() < 1);
@@ -57,16 +57,15 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
-        public void 마을_사람은_아침과_저녁에_많고_새벽과_밤과_궂은_날엔_적다()
+        public void 마을_사람은_아침과_저녁에_많고_밤과_궂은_날엔_적다()
         {
             var g = Game.NewGame(TestData.Full, 3);
             g.ForcedWeather = "clear";
-            var bySlot = Enumerable.Range(0, 5).Select(s => { g.Save.Slot = s; return g.VillagersWanted(); }).ToList();
-            Assert.True(bySlot[1] > bySlot[0] && bySlot[3] > bySlot[4]);
-            Assert.True(bySlot[1] >= bySlot[2]);
-            g.Save.Slot = 1;
+            var bySlot = Enumerable.Range(0, 4).Select(s => { g.Save.Slot = s; return g.VillagersWanted(); }).ToList();
+            Assert.True(bySlot[0] > bySlot[1] && bySlot[2] > bySlot[3]);
+            g.Save.Slot = 0;
             g.ForcedWeather = "rain";
-            Assert.True(g.VillagersWanted() < bySlot[1]);
+            Assert.True(g.VillagersWanted() < bySlot[0]);
             g.ForcedWeather = "typhoon";
             Assert.Equal(0, g.VillagersWanted());
         }

@@ -4,7 +4,7 @@
     "debt": 3000000,
     "startMoney": 20000,
     "startBait": 12,
-    "castsPerTrip": 4,
+    "castsPerTrip": 5,
     "customersPerShift": 5,
     "startMonth": 4,
     "startDate": 16,
@@ -34,14 +34,15 @@
     "agedFactorAging": 1.3
   },
   "time": {
-    "slotsPerDay": 5,
+    "slotsPerDay": 4,
     "marketLastSlot": 1,
     "truckFirstSlot": 1,
-    "shopLastSlot": 3,
-    "townArt": ["village-2", "village-0", "village-1", "village-3", "village-night"],
-    "fishSlots": [0, 1, 2, 4],
-    "truckSlots": [3],
-    "nightFishBeat": "nossiLamp"
+    "shopLastSlot": 2,
+    "townArt": ["village-0", "village-1", "village-3", "village-night"],
+    "fishSlots": [0, 1, 3],
+    "truckSlots": [2],
+    "nightFishBeat": "nossiLamp",
+    "speciesSlots": [[0, 1], [2], [3], [4]]
   },
   "requests": {
     "max": 2,
@@ -203,7 +204,7 @@
     "tiredReelMul": 1.4
   },
   "town": {
-    "walkers": [1, 3, 2, 3, 1],
+    "walkers": [3, 2, 3, 1],
     "weatherLess": { "rain": 1, "fog": 1, "snow": 2, "typhoon": 3 },
     "spawnMin": 4,
     "spawnMax": 11

@@ -58,9 +58,9 @@ namespace Hanjeopsi.App.Screens
         // 쿨러는 여울 오른쪽 방파제 위 (긴 화면에서도 잘리지 않게). 고등어는 여울 앞을 지나 쿨러 옆까지 살금살금 간다
         private static readonly Vector2 CoolerFoot = new Vector2(318, 668);
         private static readonly Vector2 CatThiefFoot = new Vector2(280, 682);
-        // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
-        // 새벽 · 아침 · 낮 · 저녁 · 밤
-        private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
+        // 시간대 배경 색: 아침 · 점심 · 저녁 · 밤 (2026-10-28 하루 네 칸)
+        private static readonly Color[] SlotTint = { new Color("ffeedd"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
+        private const int EveningTint = 2;
 
         private CoreGame G
         {
@@ -167,7 +167,7 @@ namespace Hanjeopsi.App.Screens
             // ── 그림: 방파제 배경, 여울 뒷모습(SD), 고등어 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            int tintSlot = _tutorial ? 3 : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1);
+            int tintSlot = _tutorial ? EveningTint : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1);
             bool night = tintSlot == SlotTint.Length - 1;
             // 밤 그림(breakwater-night)이 있으면 그대로 쓰고, 없으면 낮 그림을 흰 구름까지 어둡게 칠한다
             bool nightArt = night && (ResourceLoader.Exists("res://art/backgrounds/breakwater-night.png") || ResourceLoader.Exists("res://art/backgrounds/breakwater-night.webp"));
@@ -205,7 +205,7 @@ namespace Hanjeopsi.App.Screens
             // 하늘에 갈매기 (밤과 궂은 날은 빼고)
             if (!night && weather != "typhoon" && weather != "snow" && weather != "rain")
             {
-                var gulls = new Gulls(_stage, 3, tintSlot == 3 ? new Color("4a3a40") : new Color("33404d"));
+                var gulls = new Gulls(_stage, 3, tintSlot == EveningTint ? new Color("4a3a40") : new Color("33404d"));
                 gulls.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(gulls);
             }

@@ -74,9 +74,9 @@ namespace Hanjeopsi.Core.Data
     /// <summary>하루 시간 칸</summary>
     public sealed class TimeBalance
     {
-        /// <summary>새벽 · 아침 · 낮 · 저녁 · 밤</summary>
+        /// <summary>하루 칸 수. 고닷은 아침 · 점심 · 저녁 · 밤 (2026-10-28, 데이브 더 다이브처럼), 웹은 새벽 · 아침 · 낮 · 저녁</summary>
         public int SlotsPerDay;
-        /// <summary>경매는 이 칸까지 (아침)</summary>
+        /// <summary>경매는 이 칸까지</summary>
         public int MarketLastSlot;
         /// <summary>트럭은 이 칸부터 (아침)</summary>
         public int TruckFirstSlot;
@@ -90,6 +90,11 @@ namespace Hanjeopsi.Core.Data
         public List<int> TruckSlots = new List<int>();
         /// <summary>밤낚시를 여는 이야기 장면. 이 장면을 보기 전에는 밤에 방파제에 못 간다. 비어 있으면 처음부터</summary>
         public string NightFishBeat;
+        /// <summary>
+        /// 하루 칸마다 쓰는 어종 시간대 가중치 칸 (species.json slot 은 새벽 · 아침 · 점심 · 저녁 · 밤 다섯 칸).
+        /// 여러 칸이면 평균. 비어 있으면 같은 번호 칸
+        /// </summary>
+        public List<List<int>> SpeciesSlots = new List<List<int>>();
     }
 
     /// <summary>식당 납품 의뢰</summary>
