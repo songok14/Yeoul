@@ -37,7 +37,6 @@ namespace Hanjeopsi.App.Ui
             set
             {
                 _bg.Texture = value;
-                BuildSky();
                 Layout();
             }
         }
@@ -124,117 +123,30 @@ void fragment() {
         public float PadTop { get; set; }
 
         /// <summary>
-        /// 그림 맨 위 위로 하늘을 이만큼(논리 좌표) 이어 칠한다. 0 이면 끈다.
-        /// 걷는 마을은 꼭대기(전망대)를 HUD 아래까지 내려 보여 그림 위 끝이 칼로 자른 듯 보였다.
-        /// 그림 맨 위 줄 색을 가로로 크게 흐려 위로 늘이고, 꼭대기는 짙은 남색(HUD)으로 녹인다. 그림과 닿는 곳은 살짝 겹쳐 이음매를 감춘다
+        /// 그림 맨 위 위로 이어 붙이는 하늘 그림 (없으면 null). 걷는 마을은 꼭대기(전망대)를 HUD 아래까지 내려 보여
+        /// 그림 위 끝이 칼로 자른 듯 보였다. 지도 속 진짜 하늘 조각을 이어 붙인 그림을 scripts/town_sky.py 가 만든다.
+        /// 그림 높이는 SkyCap + SkyFeather (논리 좌표). 아래 SkyFeather 만큼은 지도 위 끝에 겹쳐 점점 투명해진다
         /// </summary>
-        public float SkyCap
+        public Texture2D SkyTexture
         {
-            get { return _skyCap; }
+            get { return _sky?.Texture; }
             set
             {
-                _skyCap = value;
-                BuildSky();
+                if (_sky == null)
+                {
+                    _sky = new TextureRect { ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore };
+                    AddChild(_sky);
+                    MoveChild(_sky, _bg.GetIndex() + 1);
+                }
+                _sky.Texture = value;
+                _sky.Visible = value != null;
+                _sky.SelfModulate = _tint;
                 Layout();
             }
         }
 
-        private float _skyCap;
-        private const float SkyFeather = 26;
-
-        private void BuildSky()
-        {
-            if (_skyCap <= 0 || _bg.Texture == null)
-            {
-                if (_sky != null) _sky.Visible = false;
-                return;
-            }
-            var src = _bg.Texture.GetImage();
-            if (src == null) return;
-            if (src.IsCompressed()) src.Decompress();
-            int sw = src.GetWidth(), rows = Math.Max(2, (int)(src.GetHeight() * 0.02f));
-            // 맨 위 띠의 세로 평균 → 가로로 세 번 상자 흐리기 (구름 자국이 세로 줄로 남지 않게)
-            const int w = 128;
-            var col = new Color[w];
-            for (int x = 0; x < w; x++)
-            {
-                int x0 = x * sw / w, x1 = Math.Max(x0 + 1, (x + 1) * sw / w);
-                float r = 0, g = 0, b = 0;
-                int n = 0;
-                for (int y = 0; y < rows; y += 2)
-                    for (int xx = x0; xx < x1; xx += 2)
-                    {
-                        var c = src.GetPixel(xx, y);
-                        r += c.R; g += c.G; b += c.B; n++;
-                    }
-                col[x] = new Color(r / n, g / n, b / n);
-            }
-            int rad = w / 6;
-            for (int pass = 0; pass < 3; pass++)
-            {
-                var next = new Color[w];
-                for (int x = 0; x < w; x++)
-                {
-                    float r = 0, g = 0, b = 0;
-                    for (int k = -rad; k <= rad; k++)
-                    {
-                        var c = col[Math.Clamp(x + k, 0, w - 1)];
-                        r += c.R; g += c.G; b += c.B;
-                    }
-                    int n = rad * 2 + 1;
-                    next[x] = new Color(r / n, g / n, b / n);
-                }
-                col = next;
-            }
-            float lum = 0;
-            foreach (var c in col) lum += (c.R + c.G + c.B) / 3;
-            bool night = lum / w < 0.3f;
-
-            // 세로: 이어 칠한 하늘(불투명) + 그림 위 끝에 겹치는 띠(점점 투명)
-            int h = 128;
-            int capRows = (int)(h * _skyCap / (_skyCap + SkyFeather));
-            var deep = Palette.NightDeep;
-            var data = new byte[w * h * 4];
-            var rng = new Random(7);
-            for (int y = 0; y < h; y++)
-            {
-                float a = 1, m = 1;
-                if (y < capRows)
-                {
-                    float t = (float)y / Math.Max(1, capRows - 1);
-                    m = Mathf.SmoothStep(0, 1, Mathf.Clamp((t - 0.3f) / 0.55f, 0, 1));
-                }
-                else a = 1 - Mathf.SmoothStep(0, 1, (float)(y - capRows) / Math.Max(1, h - capRows));
-                for (int x = 0; x < w; x++)
-                {
-                    var c = deep.Lerp(col[x], m);
-                    int i = (y * w + x) * 4;
-                    data[i] = (byte)(c.R * 255);
-                    data[i + 1] = (byte)(c.G * 255);
-                    data[i + 2] = (byte)(c.B * 255);
-                    data[i + 3] = (byte)(a * 255);
-                }
-            }
-            // 밤하늘이면 늘인 하늘에도 별 몇 개
-            if (night)
-                for (int k = 0; k < 18; k++)
-                {
-                    int x = rng.Next(w), y = rng.Next((int)(capRows * 0.4f), capRows);
-                    float s = 0.4f + (float)rng.NextDouble() * 0.4f;
-                    int i = (y * w + x) * 4;
-                    for (int ch = 0; ch < 3; ch++) data[i + ch] = (byte)(data[i + ch] + (255 - data[i + ch]) * s);
-                }
-            var img = Image.CreateFromData(w, h, false, Image.Format.Rgba8, data);
-            if (_sky == null)
-            {
-                _sky = new TextureRect { ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore };
-                AddChild(_sky);
-                MoveChild(_sky, _bg.GetIndex() + 1);
-            }
-            _sky.Texture = ImageTexture.CreateFromImage(img);
-            _sky.SelfModulate = _tint;
-            _sky.Visible = true;
-        }
+        /// <summary>하늘 그림 중 지도 위로 나가는 높이와 지도에 겹치는 높이 (논리 좌표, scripts/town_sky.py 의 CAP·FEATHER)</summary>
+        public const float SkyCap = 170, SkyFeather = 26;
 
         /// <summary>간판(Pin)을 화면 안에 붙들지 않는다 (걷는 마을은 그림을 따라 화면 밖으로 나간다)</summary>
         public bool ClampPins { get; set; } = true;
@@ -356,8 +268,8 @@ void fragment() {
             _bg.Size = drawn;
             if (_sky != null && _sky.Visible)
             {
-                _sky.Position = Origin - new Vector2(0, _skyCap * K);
-                _sky.Size = new Vector2(drawn.X, (_skyCap + SkyFeather) * K);
+                _sky.Position = Origin - new Vector2(0, SkyCap * K);
+                _sky.Size = new Vector2(drawn.X, (SkyCap + SkyFeather) * K);
             }
 
             foreach (var it in _items)

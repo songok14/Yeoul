@@ -118,8 +118,7 @@ namespace Hanjeopsi.App.Screens
             var backdrop = new ColorRect { Color = Palette.NightDeep, MouseFilter = MouseFilterEnum.Ignore };
             backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             Art.AddChild(backdrop);
-            // 꼭대기를 내려 볼 때 그림 위 끝이 잘려 보이지 않게 하늘을 이어 칠한다
-            _stage = new ArtStage { ClampPins = false, SkyCap = 170 };
+            _stage = new ArtStage { ClampPins = false };
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             PaintWeather(s.Slot);
             Art.AddChild(_stage);
@@ -255,7 +254,11 @@ namespace Hanjeopsi.App.Screens
         {
             string id = G.WeatherToday().Id;
             bool night = G.IsNight();
-            _stage.Background = ArtStage.LoadBackground(M.Maps[Math.Min(slot, M.Maps.Count - 1)]);
+            string map = M.Maps[Math.Min(slot, M.Maps.Count - 1)];
+            _stage.Background = ArtStage.LoadBackground(map);
+            // 꼭대기를 내려 볼 때 그림 위 끝이 잘려 보이지 않게 지도 속 하늘을 이어 붙인 그림 (scripts/town_sky.py)
+            string sky = "res://art/backgrounds/" + map + "-sky.webp";
+            _stage.SkyTexture = ResourceLoader.Exists(sky) ? GD.Load<Texture2D>(sky) : null;
             _stage.KeepClouds = false;
             switch (id)
             {
