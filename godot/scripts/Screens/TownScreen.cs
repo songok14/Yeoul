@@ -889,10 +889,10 @@ namespace Hanjeopsi.App.Screens
             {
                 // 옆 걷기는 네 박자: 다리 벌림 → 모음(옆모습) → 벌림 → 모음. 벌린 그림 두 장만 번갈면 다리가 오가지 않아 미끄러져 보였다
                 // (walk-2 는 웃는 얼굴이라 섞으면 얼굴이 깜빡인다)
-                // side 는 걷기 그림과 달리 왼쪽을 본다. 그대로 쓰면 한 걸음마다 얼굴이 앞뒤로 돌아서 그 장만 반대로 뒤집는다
+                // 투명 배경 그림(2026-10-29)부터 side 도 걷기 그림처럼 오른쪽을 본다. 둘 다 같은 규칙으로 뒤집어야 얼굴이 앞뒤로 돌지 않는다
                 bool legsTogether = (int)_step % 2 == 1;
                 pose = legsTogether ? "yeoul/side" : "yeoul/walk-1";
-                _yeoul.FlipH = legsTogether ? d.X >= 0 : d.X < 0;
+                _yeoul.FlipH = d.X < 0;
             }
             SwapYeoul(Tex(pose));
             SdMotion.Walk(_yeoul, _step);

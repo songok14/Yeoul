@@ -705,7 +705,7 @@ namespace Hanjeopsi.App.Ui
                 float fi = f * RodSegs;
                 int i = Mathf.Clamp((int)fi, 0, RodSegs - 1);
                 var at = _rodPts[i].Lerp(_rodPts[i + 1], fi - i);
-                _guideRing[j] = at + Down(_rodPts[i + 1] - _rodPts[i]) * (j == GuideAt.Length - 1 ? 0 : Mathf.Lerp(2.2f, 0.6f, f) * u);
+                _guideRing[j] = at + RodSide(_rodPts[i + 1] - _rodPts[i]) * (j == GuideAt.Length - 1 ? 0 : Mathf.Lerp(2.2f, 0.6f, f) * u);
             }
             // 릴 다리는 손 바로 위 대 아래에 붙는다. 그림 릴은 거기서 아래로 매달린다
             _reelSeat = _rodPts[2];
@@ -713,13 +713,20 @@ namespace Hanjeopsi.App.Ui
             _d0 = d0;
             // 원줄은 릴 스풀 앞(대 끝 쪽)에서 나와 첫 고리로 간다
             var reel = _hasButt ? P(g + d0 * ButtTex.GetHeight() * _buttScale / K * (ButtHold - 0.3f)) :
-                ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + Down(p1 - p0) * 6 * u;
+                ReelShown ? P(ReelAt) : P(g - d0 * len * 0.04f) + RodSide(p1 - p0) * 6 * u;
             var along = (p1 - p0).Normalized();
             _reelAt = _hasButt ? reel : reel + along * ReelWidth * K * 0.25f;
             _reelCenter = reel;
             _rodAlong = along;
             _rodReady = true;
         }
+
+        /// <summary>
+        /// 대 마디에 수직인 고리 쪽. 밑동 그림처럼 포즈 방향(ReelFlip)으로 한 번 정한다.
+        /// 화면 아래 쪽(Down)으로 고르면 대가 거의 수직으로 설 때 휘는 도중 기울기가 좌우로 넘어가며 쪽이 뒤집혀
+        /// 고리와 원줄이 대 이쪽저쪽을 넘나들고 몸통 띠도 뒤틀려 줄이 꼬인 것처럼 보였다
+        /// </summary>
+        private Vector2 RodSide(Vector2 seg) => new Vector2(-seg.Y, seg.X).Normalized() * (ReelFlip ? -1 : 1);
 
         /// <summary>대 마디 방향에 수직인 두 쪽 중 화면 아래(땅) 쪽</summary>
         private static Vector2 Down(Vector2 seg)
@@ -740,7 +747,7 @@ namespace Hanjeopsi.App.Ui
             float left = BlankCenter * texW, right = (1 - BlankCenter) * texW;
             var nrm = new Vector2[n];
             for (int i = 0; i < n; i++)
-                nrm[i] = Down(_rodPts[Mathf.Min(n - 1, i + 1)] - _rodPts[Mathf.Max(0, i - 1)]);
+                nrm[i] = RodSide(_rodPts[Mathf.Min(n - 1, i + 1)] - _rodPts[Mathf.Max(0, i - 1)]);
             // 대 위 비율 at 에서 대 가운데로부터 옆으로 off 만큼 떨어진 자리
             Vector2 OnRod(float at, float off)
             {
@@ -815,7 +822,7 @@ namespace Hanjeopsi.App.Ui
             for (int i = 3; i < RodSegs - 3; i++)
             {
                 var d = _rodPts[i + 1] - _rodPts[i];
-                var off = -Down(d) * Mathf.Lerp(1.3f, 0.3f, (float)i / RodSegs) * u;
+                var off = -RodSide(d) * Mathf.Lerp(1.3f, 0.3f, (float)i / RodSegs) * u;
                 c.DrawLine(_rodPts[i] + off, _rodPts[i + 1] + off, new Color(1, 0.95f, 0.85f, 0.24f), 0.9f * u, true);
             }
             // 진출식 마디 이음 (장식 색 띠)
