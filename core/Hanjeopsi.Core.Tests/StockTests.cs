@@ -43,6 +43,31 @@ namespace Hanjeopsi.Core.Tests
         }
 
         [Fact]
+        public void 밤에만_자기_전에_수조를_묻고_비싼_활어부터_빈자리만큼_고른다()
+        {
+            var g = New();
+            var small = g.AddToCooler("bollak", 15);
+            var big = g.AddToCooler("bollak", 30);
+            var old = g.AddToCooler("bollak", 32);
+            old.Fresh = 60;
+            Assert.False(g.AsksTankBeforeSleep());
+            g.Save.Slot = g.Data.Balance.Time.SlotsPerDay - 1;
+            Assert.True(g.AsksTankBeforeSleep());
+            Assert.Equal(new[] { big, small }, g.TankCandidates());
+            Assert.DoesNotContain(old, g.TankCandidates());
+
+            int cap = g.TankCapacity();
+            for (int i = 0; i < cap - 1; i++) g.Save.Tank.Fish.Add(new FishItem { Uid = 9000 + i, Species = "bollak", Size = 20, Fresh = 100 });
+            Assert.Equal(1, g.TankRoom());
+            Assert.Equal(new[] { big }, g.TankPicks());
+
+            Assert.True(g.MoveToTank(big.Uid));
+            Assert.False(g.AsksTankBeforeSleep());
+            g.UseSlot();
+            Assert.Equal(FreshStage.Live, g.Fresh.StageOf(big.Fresh));
+        }
+
+        [Fact]
         public void 수조가_차면_더_못_넣고_넓히면_더_들어간다()
         {
             var g = New();
