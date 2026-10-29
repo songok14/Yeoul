@@ -136,6 +136,7 @@ jobs:
             "fishing-result:--screen=fishing --shot-action=result"
             "fishing-swap:--screen=fishing --shot-action=swap"
             "fishing-swap-pick:--screen=fishing --shot-action=swapPick"
+            "fishing-tank-night:--screen=fishing --demo=night --shot-action=tankNight"
             "fishing-new:--screen=fishing --shot-action=new"
             "fishing-pull:--screen=fishing --demo=evening --shot-action=pull"
             "fishing-joy:--screen=fishing --shot-action=joy"

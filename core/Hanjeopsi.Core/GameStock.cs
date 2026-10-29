@@ -105,6 +105,38 @@ namespace Hanjeopsi.Core
             return true;
         }
 
+        /// <summary>수조 빈자리</summary>
+        public int TankRoom()
+        {
+            return HasTank() ? System.Math.Max(0, TankCapacity() - TankFish().Count) : 0;
+        }
+
+        /// <summary>수조에 넣을 수 있는 쿨러 고기 (활어만, 비싼 것부터)</summary>
+        public List<FishItem> TankCandidates()
+        {
+            if (!HasTank()) return new List<FishItem>();
+            return Save.Cooler
+                .Where(f => Fresh.StageOf(f.Fresh) == FreshStage.Live)
+                .OrderByDescending(f => FishValue(f))
+                .ThenBy(f => f.Uid)
+                .ToList();
+        }
+
+        /// <summary>미리 골라 둘 고기: 비싼 활어부터 수조 빈자리만큼</summary>
+        public List<FishItem> TankPicks()
+        {
+            return TankCandidates().Take(TankRoom()).ToList();
+        }
+
+        /// <summary>
+        /// 밤낚시를 마치고 날을 넘기기 전에 수조에 넣을지 물어야 하나.
+        /// 밤이 지나면 쿨러 신선도가 깎여 활어가 아니게 되니 그 전에 한 번 고를 틈을 준다
+        /// </summary>
+        public bool AsksTankBeforeSleep()
+        {
+            return IsNight() && TankRoom() > 0 && TankCandidates().Count > 0;
+        }
+
         /// <summary>수조 고기를 쿨러로 꺼낸다 (쿨러에 자리가 있어야)</summary>
         public bool MoveToCooler(int uid)
         {

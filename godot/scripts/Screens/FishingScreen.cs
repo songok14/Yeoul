@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Godot;
 using Hanjeopsi.App.Ui;
 using Hanjeopsi.Core.Data;
@@ -1488,8 +1489,81 @@ namespace Hanjeopsi.App.Screens
         {
             _phase = Phase.Busy;
             Sound.StopLoops();
+            // 밤낚시 뒤에는 바로 날이 넘어가니 그 전에 활어를 수조에 넣을 틈을 준다
+            if (_castsDone > 0 && G.AsksTankBeforeSleep()) TankBeforeSleep();
+            else GoHome();
+        }
+
+        private void GoHome()
+        {
             if (_castsDone > 0) G.UseSlot();
             GameState.I.GoTo("town");
+        }
+
+        /// <summary>자기 전 수조 창: 쿨러 활어를 비싼 것부터 빈자리만큼 미리 골라 두고, 눌러서 넣고 뺀다</summary>
+        private void TankBeforeSleep()
+        {
+            var fish = G.TankCandidates();
+            int room = G.TankRoom();
+            var picked = new HashSet<int>(G.TankPicks().Select(f => f.Uid));
+            var list = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
+            list.AddThemeConstantOverride("separation", 10);
+            foreach (var f in fish)
+            {
+                var item = f;
+                var bg = new PanelContainer { MouseFilter = MouseFilterEnum.Pass };
+                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                row.AddThemeConstantOverride("separation", 18);
+                bg.AddChild(row);
+                row.AddChild(PlaceScreen.FishIcon(f.Species, 120));
+                var name = UiKit.Text(G.Data.SpeciesById(f.Species).Name + " " + f.Size.ToString("0.0", CultureInfo.InvariantCulture) + "cm", TextSize.Small, Palette.Ink, true);
+                name.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                name.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(name);
+                var value = UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Small, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Right);
+                value.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(value);
+                void Paint()
+                {
+                    bool on = picked.Contains(item.Uid);
+                    bg.AddThemeStyleboxOverride("panel", on
+                        ? UiKit.Box(new Color(Palette.Teal, 0.22f), 22, 18, 6).WithBorder(Palette.Teal, 0, 5)
+                        : UiKit.Box(new Color(Palette.PaperDark, 0.5f), 22, 18, 6));
+                }
+                Paint();
+                PlaceScreen.OnTap(bg, () =>
+                {
+                    if (picked.Contains(item.Uid)) picked.Remove(item.Uid);
+                    else if (picked.Count >= room)
+                    {
+                        Toast(T["tankRoomFull"], Palette.BlueText, SafeTop + 420);
+                        return;
+                    }
+                    else picked.Add(item.Uid);
+                    Sound.Play("plop", -8);
+                    Paint();
+                });
+                list.AddChild(bg);
+            }
+            var scroll = new ScrollContainer
+            {
+                HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
+                ScrollDeadzone = 24,
+                MouseFilter = MouseFilterEnum.Pass,
+                CustomMinimumSize = new Vector2(0, Mathf.Min(fish.Count * 106, GetViewportRect().Size.Y * 0.45f)),
+            };
+            scroll.AddChild(list);
+            Modal(T["tankTitle"], F("tankBody", room), new[]
+            {
+                new ModalButton(T["tankSkip"], Palette.GrayDark, GoHome),
+                new ModalButton(T["tankPut"], Palette.Teal, () =>
+                {
+                    int moved = fish.Count(f => picked.Contains(f.Uid) && G.MoveToTank(f.Uid));
+                    if (moved > 0) Sound.Play("plop", -4);
+                    GoHome();
+                }),
+            }, scroll);
         }
 
         // ───────── 연출 ─────────
@@ -1857,6 +1931,14 @@ namespace Hanjeopsi.App.Screens
                     });
                     break;
                 }
+                case "tankNight":
+                    // 밤낚시를 마치고 자기 전 수조 창 (--demo=night)
+                    G.AddToCooler("godeungeo", 31.2);
+                    G.AddToCooler("bollak", 22.4);
+                    G.AddToCooler("noraemi", 27.3);
+                    _castsDone = 1;
+                    Leave();
+                    break;
                 case "joy":
                     _phase = Phase.Result;
                     Celebrate(() => { });
