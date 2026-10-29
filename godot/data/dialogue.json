@@ -286,12 +286,12 @@
       {
         "speaker": "grandma",
         "face": "stew",
-        "text": "(말없이 볼락구이 한 접시를 내민다)"
+        "text": "(여울이 낚아 온 볼락을 구워 말없이 마주 앉는다)"
       },
       {
         "speaker": "yeoul",
         "face": "saltyTear",
-        "text": "이번엔 짠맛 말고 다른 맛도 조금 났다."
+        "text": "할머니랑 마주 앉아 먹으니까\n짠맛 말고 다른 맛도 조금 났다."
       }
     ],
     "chapterFail": [

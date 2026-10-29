@@ -122,7 +122,7 @@ namespace Hanjeopsi.App
 
         /// <summary>
         /// 사진과 화면 확인용 체험 판 (웹 BootScene setupDemo). 4일차, 소지금 86,000원, 빚 264만 원, 쿨러 6마리.
-        /// kind: lunch 면 점심, evening 이면 저녁, night 면 밤, summary 면 새벽에 어제 요약이 뜬다
+        /// kind: lunch 면 점심, evening 이면 저녁, night 면 밤, summary 면 새벽에 어제 요약이 뜬다. gear 는 장비를 갖춘 판, chair1~chair10 은 그 의자만 갖춘 판
         /// </summary>
         public void SetupDemo(string kind)
         {
@@ -156,6 +156,10 @@ namespace Hanjeopsi.App
                 s.Kit.Own["float"] = 4;
                 s.Kit.Own["chair"] = 4;
             }
+            // chair1 ~ chair10: 그 단계 의자만 갖춘 판 (앉은 포즈와 의자가 맞는지 사진으로 본다)
+            int chair;
+            if (kind.StartsWith("chair") && int.TryParse(kind.Substring(5), out chair) && s.Kit != null)
+                s.Kit.Own["chair"] = chair;
             if (kind == "summary") s.PendingSummary = new DaySummary { Day = 3, Earned = 124_300, Spoiled = 1, ExpiredRequests = 0 };
             Game.Persist();
         }
