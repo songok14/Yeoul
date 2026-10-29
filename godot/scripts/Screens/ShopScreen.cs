@@ -190,12 +190,13 @@ namespace Hanjeopsi.App.Screens
             // 새 장비는 노씨 첫 부탁을 들어준 뒤에 판다
             if (kit != null && !G.KitsOpen() && Unlock.IsShop(unlock))
                 return Row(GearArt(kind, show), top, name, Stat(kind, show), null, Palette.InkSoft);
-            else if (Unlock.IsShop(unlock))
+            // 보상 단계는 조건을 채우면 가게에 들어와 값을 내고 산다 (노씨 부탁 보상은 노씨가 그냥 준다)
+            else if (Unlock.IsShop(unlock) || G.InStock(kind))
             {
                 int price = TierPrice(kind, show);
                 right = PriceButton(price, Palette.Blue, () => Buy(kind));
             }
-            else right = UnlockTag(unlock);
+            else right = UnlockTag(G.NextUnlock(kind) ?? unlock);
             return Row(GearArt(kind, show), top, name, Stat(kind, show), right, Palette.Ink);
         }
 
@@ -256,7 +257,7 @@ namespace Hanjeopsi.App.Screens
             return box;
         }
 
-        /// <summary>보상·다음 지역 장비는 값 대신 얻는 법</summary>
+        /// <summary>보상·다음 지역 장비는 값 대신 얻는 법 (노씨 부탁은 받는 법, 나머지는 가게에 들어오는 때)</summary>
         private Control UnlockTag(string unlock, string lockedText = null)
         {
             string text = lockedText ?? UnlockText(unlock);
@@ -265,7 +266,7 @@ namespace Hanjeopsi.App.Screens
             box.AddThemeStyleboxOverride("panel", UiKit.Box(later ? new Color(Palette.Ink, 0.12f) : new Color(Palette.Gold, 0.22f), 22, 14, 8).WithBorder(later ? new Color(Palette.Ink, 0.25f) : Palette.GoldDark, 3));
             var v = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
             v.AddThemeConstantOverride("separation", 0);
-            if (!later && lockedText == null) v.AddChild(UiKit.Text(T["gift"], TextSize.Tiny, Palette.GoldDark, true, false, 0, null, HorizontalAlignment.Center));
+            if (!later && lockedText == null) v.AddChild(UiKit.Text(unlock == "favor" ? T["gift"] : T["stockWhen"], TextSize.Tiny, Palette.GoldDark, true, false, 0, null, HorizontalAlignment.Center));
             var l = UiKit.Text(text, TextSize.Tiny, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
             l.CustomMinimumSize = new Vector2(172, 0);
             v.AddChild(l);

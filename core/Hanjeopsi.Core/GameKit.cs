@@ -8,7 +8,7 @@ using Hanjeopsi.Core.Util;
 
 namespace Hanjeopsi.Core
 {
-    /// <summary>받은 보상 하나 (노씨가 챙겨 준다)</summary>
+    /// <summary>보상 장비 하나. 노씨가 챙겨 준 것, 또는 가게에 새로 들어온 것</summary>
     public sealed class GearGift
     {
         public string Kind;
@@ -18,12 +18,18 @@ namespace Hanjeopsi.Core
 
     /// <summary>
     /// 고닷 장비: 상점 단계(1~4), 보상 단계(5~7, 여울호 등급·단골·의뢰·노씨·1장 클리어), 다음 지역(8~10).
+    /// 노씨 부탁 보상은 노씨가 그냥 주고, 나머지 보상은 조건을 채우면 가게에 들어와 값을 내고 산다.
     /// 낚싯대·릴·쿨러는 웹과 같은 Save.Rod/Reel/Tackle 단계(0부터)를 쓰고, 나머지는 Save.Kit.
     /// 미끼 열 가지, 밤새 통발. 웹 데이터(장비 셋, 세 단계)에서는 웹과 같은 계산이 된다
     /// </summary>
     public sealed partial class Game
     {
         public static readonly string[] CoreKinds = { "rod", "reel", "cooler" };
+
+        public static string SlotKind(GearSlot slot)
+        {
+            return slot == GearSlot.Rod ? "rod" : slot == GearSlot.Reel ? "reel" : "cooler";
+        }
 
         // ───────── 단계와 얻는 법 ─────────
 
@@ -66,9 +72,12 @@ namespace Hanjeopsi.Core
             int next = KitLevel(id);
             if (next >= k.Levels.Count) return false;
             var lv = k.Levels[next];
-            if (!Unlock.IsShop(lv.Unlock) || Save.Money < lv.Price) return false;
+            string stock = null;
+            if (!Unlock.IsShop(lv.Unlock) && (stock = StockKey(id)) == null) return false;
+            if (Save.Money < lv.Price) return false;
             Save.Money -= lv.Price;
             Save.Kit.Own[id] = next + 1;
+            if (stock != null) Save.Kit.Gifts.Add(stock);
             Persist();
             return true;
         }
@@ -97,49 +106,163 @@ namespace Hanjeopsi.Core
         }
 
         /// <summary>
-        /// 조건을 채운 보상 장비를 준다. 조건 하나마다 지금보다 한 단계씩만 오른다 (2026-10-26 폰 의견).
-        /// 받은 것 목록을 돌려준다
+        /// 노씨 부탁 보상을 준다. 조건 하나마다 지금보다 한 단계씩만 오른다 (2026-10-26 폰 의견).
+        /// 다른 보상은 주지 않고 가게에 들어온다(CheckStock). 받은 것 목록을 돌려준다
         /// </summary>
         public List<GearGift> CheckGifts()
         {
             return Gifts(true);
         }
 
-        /// <summary>받을 보상이 있나 (주지는 않는다)</summary>
+        /// <summary>노씨가 챙겨 둔 보상이 있나 (주지는 않는다)</summary>
         public bool HasGift()
         {
             return Gifts(false).Count > 0;
+        }
+
+        /// <summary>장비 종류 하나의 단계 목록. 단계 번호는 1부터</summary>
+        private sealed class Ladder
+        {
+            public string Kind;
+            public int Have;
+            public int Count;
+            public Func<int, string> Unlock;
+            public Func<int, string> Name;
+            public Action<int> Set;
+        }
+
+        private IEnumerable<Ladder> Ladders()
+        {
+            var g = Data.Gear;
+            yield return new Ladder { Kind = "rod", Have = Save.Rod + 1, Count = g.Rods.Count, Unlock = t => g.Rods[t - 1].Unlock, Name = t => g.Rods[t - 1].Name, Set = t => Save.Rod = t - 1 };
+            yield return new Ladder { Kind = "reel", Have = Save.Reel + 1, Count = g.Reels.Count, Unlock = t => g.Reels[t - 1].Unlock, Name = t => g.Reels[t - 1].Name, Set = t => Save.Reel = t - 1 };
+            yield return new Ladder { Kind = "cooler", Have = Save.Tackle + 1, Count = g.Tackles.Count, Unlock = t => g.Tackles[t - 1].Unlock, Name = t => g.Tackles[t - 1].Name, Set = t => Save.Tackle = t - 1 };
+            foreach (var k in g.Kits)
+            {
+                var kit = k;
+                yield return new Ladder { Kind = kit.Id, Have = KitLevel(kit.Id), Count = kit.Levels.Count, Unlock = t => kit.Levels[t - 1].Unlock, Name = t => kit.Levels[t - 1].Name, Set = t => Save.Kit.Own[kit.Id] = t };
+            }
+        }
+
+        private Ladder LadderOf(string kind)
+        {
+            return Ladders().FirstOrDefault(l => l.Kind == kind);
         }
 
         private List<GearGift> Gifts(bool give)
         {
             var gifts = new List<GearGift>();
             if (Save.Kit == null) return gifts;
-            void Try(string kind, int have, int count, Func<int, string> unlock, Func<int, string> name, Action<int> set)
+            foreach (var l in Ladders())
             {
-                // 단계 번호는 1부터. have 는 지금 단계. 채운 조건(t 단계 보상) 하나로 have + 1 단계를 받는다
-                for (int t = have + 1; t <= count; t++)
+                // have 는 지금 단계. 채운 노씨 부탁(t 단계 보상) 하나로 have + 1 단계를 받는다
+                for (int t = l.Have + 1; t <= l.Count; t++)
                 {
-                    string key = kind + "-" + t;
-                    if (Save.Kit.Gifts.Contains(key) || !UnlockMet(unlock(t))) continue;
-                    int to = have + 1;
+                    string key = l.Kind + "-" + t;
+                    if (l.Unlock(t) != "favor" || Save.Kit.Gifts.Contains(key) || !UnlockMet(l.Unlock(t))) continue;
+                    int to = l.Have + 1;
                     if (give)
                     {
                         Save.Kit.Gifts.Add(key);
-                        set(to);
+                        l.Set(to);
                     }
-                    gifts.Add(new GearGift { Kind = kind, Tier = to, Name = name(to) });
+                    gifts.Add(new GearGift { Kind = l.Kind, Tier = to, Name = l.Name(to) });
                     break;
                 }
             }
-            var g = Data.Gear;
-            Try("rod", Save.Rod + 1, g.Rods.Count, t => g.Rods[t - 1].Unlock, t => g.Rods[t - 1].Name, t => Save.Rod = t - 1);
-            Try("reel", Save.Reel + 1, g.Reels.Count, t => g.Reels[t - 1].Unlock, t => g.Reels[t - 1].Name, t => Save.Reel = t - 1);
-            Try("cooler", Save.Tackle + 1, g.Tackles.Count, t => g.Tackles[t - 1].Unlock, t => g.Tackles[t - 1].Name, t => Save.Tackle = t - 1);
-            foreach (var k in g.Kits)
-                Try(k.Id, KitLevel(k.Id), k.Levels.Count, t => k.Levels[t - 1].Unlock, t => k.Levels[t - 1].Name, t => Save.Kit.Own[k.Id] = t);
             if (give && gifts.Count > 0) Persist();
             return gifts;
+        }
+
+        /// <summary>노씨 부탁이 아닌 보상 조건 (가게에 들어오는 것)</summary>
+        private static bool IsStock(string u)
+        {
+            return Unlock.IsReward(u) && u != "favor";
+        }
+
+        /// <summary>
+        /// 다음 단계를 살 때 쓸 보상 조건 (없으면 null). 다음 단계가 보상 단계일 때만 쓴다.
+        /// 채운 조건 하나로 한 단계만 들어온다. 더 높은 단계 조건을 먼저 채웠으면 그 조건으로 다음 단계를 산다
+        /// </summary>
+        private string StockKey(string kind)
+        {
+            var l = LadderOf(kind);
+            if (l == null || Save.Kit == null || l.Have >= l.Count) return null;
+            if (!Unlock.IsReward(l.Unlock(l.Have + 1))) return null;
+            for (int t = l.Have + 1; t <= l.Count; t++)
+            {
+                string key = l.Kind + "-" + t;
+                if (IsStock(l.Unlock(t)) && !Save.Kit.Gifts.Contains(key) && UnlockMet(l.Unlock(t))) return key;
+            }
+            return null;
+        }
+
+        /// <summary>보상 단계가 가게에 들어와 값을 내면 살 수 있나</summary>
+        public bool InStock(string kind)
+        {
+            return StockKey(kind) != null;
+        }
+
+        /// <summary>
+        /// 다음 보상 단계를 얻으려면 채울 조건. 아직 쓰지 않았고 채우지 못한 것 중 가장 낮은 단계 (없으면 null)
+        /// </summary>
+        public string NextUnlock(string kind)
+        {
+            var l = LadderOf(kind);
+            if (l == null || Save.Kit == null) return null;
+            for (int t = l.Have + 1; t <= l.Count; t++)
+            {
+                string u = l.Unlock(t);
+                if (u == "later") return u;
+                if (Unlock.IsReward(u) && !Save.Kit.Gifts.Contains(l.Kind + "-" + t) && !UnlockMet(u)) return u;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 보상 조건을 새로 채웠으면 그 장비가 가게에 들어왔다고 알리고, 그 자리에서 미끼를 준다(gear.json stockGift).
+        /// 조건마다 한 번만. 새로 들어온 장비 목록을 돌려준다
+        /// </summary>
+        public List<GearGift> CheckStock()
+        {
+            var news = new List<GearGift>();
+            if (Save.Kit == null) return news;
+            bool changed = false;
+            foreach (var l in Ladders())
+            {
+                for (int t = 1; t <= l.Count; t++)
+                {
+                    string key = l.Kind + "-" + t;
+                    if (!IsStock(l.Unlock(t)) || Save.Kit.Stocked.Contains(key) || !UnlockMet(l.Unlock(t))) continue;
+                    Save.Kit.Stocked.Add(key);
+                    changed = true;
+                    // 옛 세이브에서 노씨가 이미 준 보상은 알리지 않는다
+                    if (Save.Kit.Gifts.Contains(key)) continue;
+                    news.Add(new GearGift { Kind = l.Kind, Tier = t, Name = l.Name(t) });
+                }
+            }
+            if (news.Count == 0)
+            {
+                if (changed) Persist();
+                return news;
+            }
+            var gift = Data.Gear.StockGift;
+            var bait = gift == null ? null : BaitDef(gift.Bait);
+            if (bait != null && gift.Packs > 0)
+            {
+                int n = bait.Amount * gift.Packs * news.Count;
+                if (bait.Id == "krill") Save.Bait += n;
+                else Save.Kit.Bait[bait.Id] = BaitCount(bait.Id) + n;
+            }
+            Persist();
+            return news;
+        }
+
+        /// <summary>CheckStock 이 준 미끼 이름과 봉지 수 (선물이 없으면 null)</summary>
+        public BaitKind StockBait()
+        {
+            var gift = Data.Gear.StockGift;
+            return gift == null || gift.Packs <= 0 ? null : BaitDef(gift.Bait);
         }
 
         // ───────── 낚시에 쓰는 장비 값 ─────────

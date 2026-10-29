@@ -17,11 +17,22 @@ namespace Hanjeopsi.Core.Data
         public double BaitLikeMul = 1;
         /// <summary>통발에 드는 어종</summary>
         public List<string> TrapPool = new List<string>();
+        /// <summary>보상 조건을 채워 가게에 장비가 들어올 때 바로 주는 미끼</summary>
+        public StockGift StockGift = new StockGift();
+    }
+
+    public sealed class StockGift
+    {
+        /// <summary>미끼 id (krill 이면 크릴)</summary>
+        public string Bait;
+        /// <summary>몇 봉지</summary>
+        public int Packs;
     }
 
     /// <summary>
     /// 장비를 얻는 법: start 시작 장비, shop 상점, later 다음 지역,
     /// 그 밖은 보상(rank:N 여울호 등급, regulars:N 단골 수, requests:N 마친 납품 의뢰, favor 노씨 의뢰, clear 1장 클리어).
+    /// favor 는 노씨가 그냥 준다. 나머지는 조건을 채우면 가게에 들어오고 값을 내고 산다(2026-10-29).
     /// 비어 있으면 상점 (웹 데이터)
     /// </summary>
     public static class Unlock

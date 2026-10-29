@@ -71,14 +71,47 @@ namespace Hanjeopsi.Core.Tests
             Assert.Equal(1, g.KitLevel("chair"));
             Assert.Equal(1, g.Save.Tackle);
             Assert.Empty(g.CheckGifts());
+            // 다른 보상은 노씨가 주지 않는다
             g.Save.Diner.Rep = g.Data.Diner.Ranks[1].Rep;
-            var gifts = g.CheckGifts();
-            Assert.Contains(gifts, x => x.Kind == "reel" && x.Tier == 2);
-            Assert.Contains(gifts, x => x.Kind == "line" && x.Tier == 1);
-            Assert.Equal(1, g.Save.Reel);
             Assert.Empty(g.CheckGifts());
-            g.Save.Flags["ch1Clear"] = true;
-            Assert.Contains(g.CheckGifts(), x => x.Kind == "rod" && x.Tier == 2);
+            Assert.Equal(0, g.Save.Reel);
+        }
+
+        [Fact]
+        public void 보상_조건을_채우면_가게에_들어오고_값을_내고_산다()
+        {
+            var g = New();
+            g.Save.Money = 10000000;
+            // 릴 5단계(rank:1)는 4단계까지 산 뒤에야 보인다
+            while (g.GearLevel(GearSlot.Reel) < 3) Assert.True(g.UpgradeGear(GearSlot.Reel));
+            Assert.False(g.InStock("reel"));
+            Assert.False(g.UpgradeGear(GearSlot.Reel));
+            Assert.Equal("rank:1", g.NextUnlock("reel"));
+
+            // 조건을 채운 그 자리에서 알리고 미끼를 준다. 한 번만
+            int worm = g.BaitCount("worm");
+            g.Save.Diner.Rep = g.Data.Diner.Ranks[1].Rep;
+            var news = g.CheckStock();
+            Assert.Contains(news, x => x.Kind == "reel" && x.Tier == 5);
+            Assert.Equal(worm + g.BaitDef("worm").Amount * news.Count, g.BaitCount("worm"));
+            Assert.Empty(g.CheckStock());
+
+            // 값을 내고 산다. 조건 하나로 한 단계만
+            int money = g.Save.Money;
+            Assert.True(g.InStock("reel"));
+            Assert.True(g.UpgradeGear(GearSlot.Reel));
+            Assert.Equal(4, g.GearLevel(GearSlot.Reel));
+            Assert.Equal(money - g.GearPrice(GearSlot.Reel, 4), g.Save.Money);
+            Assert.False(g.InStock("reel"));
+            Assert.False(g.UpgradeGear(GearSlot.Reel));
+            Assert.Equal("regulars:6", g.NextUnlock("reel"));
+
+            // 새 장비도 같다: 낚싯줄 5단계(rank:1)
+            g.Save.Flags["nossiFavor"] = true;
+            while (g.KitLevel("line") < 4) Assert.True(g.BuyKit("line"));
+            Assert.True(g.BuyKit("line"));
+            Assert.Equal(5, g.KitLevel("line"));
+            Assert.False(g.BuyKit("line"));
         }
 
         [Fact]

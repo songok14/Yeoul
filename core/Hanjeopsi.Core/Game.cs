@@ -547,7 +547,9 @@ namespace Hanjeopsi.Core
             if (!IsShopOpen()) return false;
             int next = GearLevel(slot) + 1;
             if (next >= GearCount(slot)) return false;
-            if (!Unlock.IsShop(GearUnlock(slot, next))) return false;
+            // 보상 단계는 조건을 채워 가게에 들어왔을 때만 판다
+            string stock = null;
+            if (!Unlock.IsShop(GearUnlock(slot, next)) && (stock = StockKey(SlotKind(slot))) == null) return false;
             int price = GearPrice(slot, next);
             if (Save.Money < price) return false;
             Save.Money -= price;
@@ -557,6 +559,7 @@ namespace Hanjeopsi.Core
                 case GearSlot.Reel: Save.Reel = next; break;
                 default: Save.Tackle = next; break;
             }
+            if (stock != null) Save.Kit.Gifts.Add(stock);
             Persist();
             return true;
         }
