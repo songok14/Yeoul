@@ -557,9 +557,28 @@ namespace Hanjeopsi.App.Screens
             Talk(new[] { ClientLine(t, string.IsNullOrEmpty(t.Thanks) ? "고마워요!" : t.Thanks) }, null, () =>
             {
                 AfterQuest();
-                // 보상 장비(노씨 부탁 등)가 생겼으면 알린다
-                if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold);
+                // 보상 조건을 채웠으면 그 자리에서 알린다. 노씨 부탁 보상은 노씨가 미끼가게에서 준다
+                string stock = StockText();
+                if (stock != null) Toast(stock, Palette.Gold);
+                else if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold);
             });
+        }
+
+        /// <summary>
+        /// 보상 조건을 새로 채웠으면 장비가 가게에 들어오고 미끼 선물을 받는다. 알릴 글 (없으면 null)
+        /// </summary>
+        private string StockText()
+        {
+            var news = G.CheckStock();
+            if (news.Count == 0) return null;
+            var t = G.Data.Texts.Shop;
+            string names = news.Count <= 2 ? string.Join(", ", news.Select(x => x.Name)) : string.Format(t["stockMany"], news[0].Name, news.Count - 1);
+            string text = string.Format(t["stockNew"], names);
+            var bait = G.StockBait();
+            if (bait != null) text += "\n" + string.Format(t["stockBait"], bait.Name, G.Data.Gear.StockGift.Packs * news.Count);
+            Sound.Play("good", -4);
+            _hud.Refresh();
+            return text;
         }
 
         private void AfterQuest()
@@ -981,13 +1000,16 @@ namespace Hanjeopsi.App.Screens
                 }) });
             }
             else PlayBeat();
-            // 보상 장비가 생기면 노씨가 미끼가게에서 기다린다
+            // 보상 조건을 채웠으면 장비가 가게에 들어온다. 노씨 부탁 보상은 노씨가 미끼가게에서 기다린다
+            string stock = StockText();
             if (_newGoals.Count > 0)
             {
-                Toast("목표 달성! " + string.Join(", ", _newGoals.Select(x => x.Text)) + " (+" + UiKit.Won(_newGoals.Sum(x => x.Reward)) + ")", Palette.Gold, SafeTop + 520);
+                string goals = "목표 달성! " + string.Join(", ", _newGoals.Select(x => x.Text)) + " (+" + UiKit.Won(_newGoals.Sum(x => x.Reward)) + ")";
+                Toast(stock == null ? goals : goals + "\n" + stock, Palette.Gold, SafeTop + 520);
                 Sound.Play("good", -4);
                 _hud.Refresh();
             }
+            else if (stock != null) Toast(stock, Palette.Gold, SafeTop + 520);
             else if (G.HasGift()) Toast("노씨가 미끼가게에서 부른다", Palette.Gold, SafeTop + 520);
         }
 

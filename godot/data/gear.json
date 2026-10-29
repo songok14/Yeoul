@@ -43,7 +43,7 @@
     {
       "name": "등대지기 낚싯대",
       "desc": "마을 일을 도운 값. 노씨가 손봐 줬다",
-      "price": 0,
+      "price": 600000,
       "reach": 0.93,
       "absorb": 0.55,
       "hookBonus": 220,
@@ -53,7 +53,7 @@
     {
       "name": "물비늘 감성돔대",
       "desc": "1장을 마친 기념. 아버지 대를 닮았다",
-      "price": 0,
+      "price": 800000,
       "reach": 0.95,
       "absorb": 0.6,
       "hookBonus": 250,
@@ -63,7 +63,7 @@
     {
       "name": "줄 서는 집 명인대",
       "desc": "여울호가 줄 서는 집이 되면",
-      "price": 0,
+      "price": 1000000,
       "reach": 0.97,
       "absorb": 0.64,
       "hookBonus": 270,
@@ -153,7 +153,7 @@
     {
       "name": "맛집 축하 릴",
       "desc": "여울호가 동네 맛집이 된 날 받는다",
-      "price": 0,
+      "price": 600000,
       "speed": 11,
       "tensionMul": 0.72,
       "drag": 82,
@@ -165,7 +165,7 @@
     {
       "name": "단골들의 선물 릴",
       "desc": "단골 여섯 명이 돈을 모았다",
-      "price": 0,
+      "price": 800000,
       "speed": 12,
       "tensionMul": 0.68,
       "drag": 80,
@@ -177,7 +177,7 @@
     {
       "name": "소문난 집 레버릴",
       "desc": "여울호가 줄 서는 집이 되면",
-      "price": 0,
+      "price": 1000000,
       "speed": 13,
       "tensionMul": 0.64,
       "drag": 78,
@@ -259,7 +259,7 @@
     {
       "name": "노씨의 낡은 쿨러",
       "desc": "40마리를 담던 노씨의 보물",
-      "price": 0,
+      "price": 600000,
       "capacity": 34,
       "decay": 10,
       "unlock": "favor"
@@ -267,7 +267,7 @@
     {
       "name": "물비늘 아이스박스",
       "desc": "1장을 마친 기념",
-      "price": 0,
+      "price": 800000,
       "capacity": 40,
       "decay": 8,
       "unlock": "clear"
@@ -275,7 +275,7 @@
     {
       "name": "맛집 대형 쿨러",
       "desc": "여울호가 소문난 집이 되면",
-      "price": 0,
+      "price": 1000000,
       "capacity": 45,
       "decay": 6,
       "unlock": "rank:2"
@@ -343,19 +343,19 @@
         },
         {
           "name": "맛집 축하 원줄",
-          "price": 0,
+          "price": 200000,
           "value": 11,
           "unlock": "rank:1"
         },
         {
           "name": "마을 의뢰 원줄",
-          "price": 0,
+          "price": 300000,
           "value": 13,
           "unlock": "requests:6"
         },
         {
           "name": "명인 합사",
-          "price": 0,
+          "price": 400000,
           "value": 15,
           "unlock": "rank:3"
         },
@@ -410,19 +410,19 @@
         },
         {
           "name": "단골이 준 바늘",
-          "price": 0,
+          "price": 200000,
           "value": 0.55,
           "unlock": "regulars:2"
         },
         {
           "name": "물비늘 바늘",
-          "price": 0,
+          "price": 300000,
           "value": 0.65,
           "unlock": "clear"
         },
         {
           "name": "명인 바늘",
-          "price": 0,
+          "price": 400000,
           "value": 0.75,
           "unlock": "regulars:8"
         },
@@ -477,13 +477,13 @@
         },
         {
           "name": "노씨의 수제찌",
-          "price": 0,
+          "price": 200000,
           "value": 110,
           "unlock": "favor"
         },
         {
           "name": "소문난 집 찌",
-          "price": 0,
+          "price": 300000,
           "value": 130,
           "unlock": "rank:2"
         },
@@ -544,19 +544,19 @@
         },
         {
           "name": "의뢰 감사 미끼통",
-          "price": 0,
+          "price": 200000,
           "value": 5,
           "unlock": "requests:3"
         },
         {
           "name": "소문난 집 미끼통",
-          "price": 0,
+          "price": 300000,
           "value": 6,
           "unlock": "rank:2"
         },
         {
           "name": "물비늘 미끼통",
-          "price": 0,
+          "price": 400000,
           "value": 7,
           "unlock": "clear"
         },
@@ -611,13 +611,13 @@
         },
         {
           "name": "맛집 축하 뜰채",
-          "price": 0,
+          "price": 200000,
           "value": 2.2,
           "unlock": "rank:1"
         },
         {
           "name": "단골들의 뜰채",
-          "price": 0,
+          "price": 300000,
           "value": 2.6,
           "unlock": "regulars:5"
         },
@@ -678,13 +678,13 @@
         },
         {
           "name": "단골이 준 랜턴",
-          "price": 0,
+          "price": 200000,
           "value": 22,
           "unlock": "regulars:3"
         },
         {
           "name": "의뢰 감사 랜턴",
-          "price": 0,
+          "price": 300000,
           "value": 26,
           "unlock": "requests:8"
         },
@@ -745,19 +745,19 @@
         },
         {
           "name": "노씨의 의자",
-          "price": 0,
+          "price": 200000,
           "value": 12,
           "unlock": "favor"
         },
         {
           "name": "소문난 집 의자",
-          "price": 0,
+          "price": 300000,
           "value": 14,
           "unlock": "rank:2"
         },
         {
           "name": "단골들의 의자",
-          "price": 0,
+          "price": 400000,
           "value": 16,
           "unlock": "regulars:10"
         },
@@ -812,19 +812,19 @@
         },
         {
           "name": "의뢰 감사 장화",
-          "price": 0,
+          "price": 200000,
           "value": 11,
           "unlock": "requests:2"
         },
         {
           "name": "물비늘 장화",
-          "price": 0,
+          "price": 300000,
           "value": 13,
           "unlock": "clear"
         },
         {
           "name": "줄 서는 집 장화",
-          "price": 0,
+          "price": 400000,
           "value": 15,
           "unlock": "rank:3"
         },
@@ -879,13 +879,13 @@
         },
         {
           "name": "소문난 집 통발",
-          "price": 0,
+          "price": 200000,
           "value": 3,
           "unlock": "rank:2"
         },
         {
           "name": "물비늘 통발",
-          "price": 0,
+          "price": 300000,
           "value": 3,
           "unlock": "clear"
         },
@@ -1049,6 +1049,7 @@
     }
   ],
   "baitLikeMul": 2.5,
+  "stockGift": { "bait": "worm", "packs": 1 },
   "trapPool": [
     "muneo",
     "jukkumi",

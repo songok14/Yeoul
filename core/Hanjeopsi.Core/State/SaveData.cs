@@ -73,8 +73,10 @@ namespace Hanjeopsi.Core.State
         public string Pick = "krill";
         /// <summary>마친 납품 의뢰 수</summary>
         public int Requests;
-        /// <summary>받은 보상 ("rod-5" 처럼 종류-단계)</summary>
+        /// <summary>쓴 보상 조건 ("rod-5" 처럼 종류-단계). 노씨가 준 것과 가게에서 산 것</summary>
         public List<string> Gifts = new List<string>();
+        /// <summary>가게에 들어왔다고 알린 보상 조건 (종류-단계)</summary>
+        public List<string> Stocked = new List<string>();
     }
 
     /// <summary>이번 주 상환과 목표</summary>
