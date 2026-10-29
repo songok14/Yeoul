@@ -405,6 +405,10 @@ namespace Hanjeopsi.App.Screens
         {
             _walking = true;
             _stepCount = 0;
+            // 걸음 가운데(몸이 가장 높을 때)는 다리를 모은 그림 (scripts/sd_pass.py). 없는 손님(지팡이, 엄마와 아이)은 한 장 그대로
+            Texture2D stride = _who != null ? Tex(_who.Id + "-walk") : null;
+            Texture2D pass = _who != null && ResourceLoader.Exists("res://art/customers/" + _who.Id + "-pass.png") ? Tex(_who.Id + "-pass") : null;
+            bool together = false;
             var tw = CreateTween();
             tw.TweenMethod(Callable.From<float>(t =>
             {
@@ -417,6 +421,13 @@ namespace Hanjeopsi.App.Screens
                     _stepCount = stepNow;
                     Sound.Play("step", -6, 1, 0.12f);
                 }
+                float phase = t * 5 - Mathf.Floor(t * 5);
+                bool now = pass != null && phase > 0.25f && phase < 0.75f;
+                if (now != together)
+                {
+                    together = now;
+                    _stage.Swap(_customer, together ? pass : stride);
+                }
                 _stage.Move(_customer, new Vector2(x, _footY - bob));
                 _customer.RotationDegrees = Mathf.Sin(t * Mathf.Pi * 5) * 2.5f;
             }), 0f, 1f, seconds).SetTrans(Tween.TransitionType.Sine).SetEase(Tween.EaseType.Out);
@@ -424,6 +435,7 @@ namespace Hanjeopsi.App.Screens
             {
                 _walking = false;
                 _customer.RotationDegrees = 0;
+                if (together) _stage.Swap(_customer, stride);
                 _stage.Move(_customer, new Vector2(to, _footY));
                 then();
             }));

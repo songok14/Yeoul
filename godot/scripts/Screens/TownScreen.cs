@@ -716,9 +716,21 @@ namespace Hanjeopsi.App.Screens
                 }
                 else w.At += d.Normalized() * stepLen;
                 w.Frame += dt;
-                int f = (int)(w.Frame / 0.26f) % 2;
-                _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-walk-" + (f + 1)), h, new Vector2(0.5f, 1));
-                if (Mathf.Abs(d.X) > 0.5f) w.Node.FlipH = d.X < 0;
+                // 여울처럼: 아래로 내려오면 앞모습 걷기 두 장(발을 한쪽씩 든다, scripts/sd_step.py).
+                // 옆(과 위, 뒷모습 그림이 없다)은 네 박자 벌림 → 모음 → 벌림 → 모음 (모음은 scripts/sd_pass.py)
+                int f = (int)(w.Frame / 0.26f);
+                string pose;
+                if (d.Y > 0 && d.Y > Mathf.Abs(d.X) * 1.4f)
+                {
+                    pose = "-walk-front-" + (f % 2 + 1);
+                    w.Node.FlipH = false;
+                }
+                else
+                {
+                    pose = f % 2 == 1 ? "-pass" : "-walk-" + (f / 2 % 2 + 1);
+                    if (Mathf.Abs(d.X) > 0.5f) w.Node.FlipH = d.X < 0;
+                }
+                _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + pose), h, new Vector2(0.5f, 1));
                 SdMotion.Walk(w.Node, w.Frame / 0.26f, 0.8f);
                 _stage.Move(w.Node, w.At);
             }

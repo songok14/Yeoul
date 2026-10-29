@@ -41,8 +41,10 @@ def step(im, side):
     out = a.copy()
     x0, x1 = (0, split) if side == 0 else (split, w)
     bottom = np.where(a[:, x0:x1, 3].max(1) > 40)[0].max() + 1
-    lift = int(h * LIFT)
-    shoe_y = bottom - int(h * SHOE)
+    # 다리가 짧은 그림(마을 사람)은 다리 길이에 맞춰 줄인다
+    leg = bottom - top
+    lift = int(min(h * LIFT, leg * 0.32))
+    shoe_y = bottom - int(min(h * SHOE, leg * 0.45))
     pants = a[top:shoe_y, x0:x1]
     shoe = a[shoe_y:bottom, x0:x1]
     new = np.asarray(Image.fromarray(pants).resize((x1 - x0, pants.shape[0] - lift), Image.LANCZOS))
