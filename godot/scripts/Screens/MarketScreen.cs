@@ -10,7 +10,7 @@ using Hanjeopsi.Core.Systems;
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 물비늘포 위판장 (웹 MarketScene). 경매 탭: 오늘 시세판과 내 쿨러·수조. 고르기 칸으로 한 마리씩 또는 묶음째 골라 판다.
+    /// 물비늘포 위판장 (웹 MarketScene). 경매 탭: 오늘 시세판과 내 쿨러·수조. 고르기 칸으로 한 마리씩 골라 판다.
     /// 납품 의뢰 탭: 식당 의뢰 카드와 납품. 노씨 의뢰를 채우면 노씨가 대화창으로 고맙다고 한다.
     /// </summary>
     public partial class MarketScreen : PlaceScreen
@@ -137,14 +137,10 @@ namespace Hanjeopsi.App.Screens
             var rows = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
             rows.AddThemeConstantOverride("separation", 8);
             scroll.AddChild(rows);
+            // 한 마리씩 한 줄 (어종 순서, 같은 어종이면 신선한 것 · 큰 것부터). 고르기 칸은 줄마다 하나
             int i = 0;
             foreach (var grp in groups)
-            {
-                rows.AddChild(GroupRow(grp, i++, open));
-                // 같은 어종이라도 한 마리씩 골라 판다. 큰 것부터 (한 마리 묶음은 머리 줄 하나로)
-                if (grp.Items.Count > 1)
-                    foreach (var f in grp.Items.OrderByDescending(f => f.Size)) rows.AddChild(FishRow(f, grp.Stage, open));
-            }
+                foreach (var f in grp.Items.OrderByDescending(f => f.Size)) rows.AddChild(FishRow(f, grp.Stage, open, i++));
             // 스크롤 위치를 다시 그린 뒤에도 지킨다
             int keep = _scrollY;
             scroll.Ready += () => Callable.From(() => scroll.ScrollVertical = keep).CallDeferred();
@@ -194,69 +190,32 @@ namespace Hanjeopsi.App.Screens
             return board;
         }
 
-        /// <summary>어종·신선도 묶음 머리 줄. 칸을 누르면 묶음을 모두 고르거나 푼다</summary>
-        private Control GroupRow(CoolerGroup grp, int i, bool open)
-        {
-            bool can = open && grp.Stage != FreshStage.Spoiled;
-            bool all = can && grp.Items.All(f => _picked.Contains(f.Uid));
-            var bg = new PanelContainer { MouseFilter = MouseFilterEnum.Pass };
-            bg.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.PaperDark, 0.55f), 26, 18, 6));
-            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            row.AddThemeConstantOverride("separation", 18);
-            bg.AddChild(row);
-
-            row.AddChild(TickBox(all, can));
-            var icon = FishIcon(grp.Species, 120);
-            if (grp.Stage == FreshStage.Spoiled) icon.Modulate = new Color(0.7f, 0.62f, 0.55f);
-            row.AddChild(icon);
-            var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
-            text.AddThemeConstantOverride("separation", 4);
-            var sp = G.Data.SpeciesById(grp.Species);
-            // 한 마리면 크기를 이름 옆에
-            string title = grp.Items.Count > 1 ? sp.Name + " ×" + grp.Items.Count : sp.Name + " " + grp.Items[0].Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "cm";
-            text.AddChild(UiKit.Text(title, TextSize.Body, Palette.Ink, true));
-            var meta = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            meta.AddThemeConstantOverride("separation", 14);
-            meta.AddChild(StagePill(grp.Stage));
-            meta.AddChild(UiKit.Text(UiKit.Won(grp.Value), TextSize.Small, Palette.InkSoft));
-            if (grp.Items.Count == 1 && G.InTank(grp.Items[0])) meta.AddChild(Pill(T["inTank"], new Color("8cd3e0"), new Color("1d4c57"), TextSize.Tiny));
-            text.AddChild(meta);
-            row.AddChild(text);
-            if (can)
-                OnTap(bg, () =>
-                {
-                    foreach (var f in grp.Items)
-                    {
-                        if (all) _picked.Remove(f.Uid);
-                        else _picked.Add(f.Uid);
-                    }
-                    Sound.Play("tick", -6, all ? 0.9f : 1.15f);
-                    Redraw();
-                });
-            return bg;
-        }
-
-        /// <summary>한 마리 줄: 고르기 칸 · 크기 · 수조 표 · 값</summary>
-        private Control FishRow(FishItem f, FreshStage stage, bool open)
+        /// <summary>고기 한 마리 줄: 고르기 칸 · 그림 · 이름과 크기 · 신선도와 값 (수조 고기는 표). 줄을 누르면 고르고 푼다</summary>
+        private Control FishRow(FishItem f, FreshStage stage, bool open, int i)
         {
             bool can = open && stage != FreshStage.Spoiled;
             bool on = can && _picked.Contains(f.Uid);
             var bg = new PanelContainer { MouseFilter = MouseFilterEnum.Pass };
-            bg.AddThemeStyleboxOverride("panel", UiKit.Box(on ? new Color(Palette.Green, 0.18f) : new Color(Palette.PaperLight, 0.7f), 22, 18, 4));
-            var pad = new MarginContainer { MouseFilter = MouseFilterEnum.Ignore };
-            pad.AddThemeConstantOverride("margin_left", 46);
-            bg.AddChild(pad);
+            var plain = i % 2 == 0 ? new Color(Palette.PaperDark, 0.45f) : new Color(Palette.PaperLight, 0.7f);
+            bg.AddThemeStyleboxOverride("panel", on ? UiKit.Box(new Color(Palette.Green, 0.2f), 26, 18, 6).WithBorder(Palette.GreenDark, 3) : UiKit.Box(plain, 26, 18, 6).WithBorder(new Color(0, 0, 0, 0), 3));
             var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             row.AddThemeConstantOverride("separation", 18);
-            pad.AddChild(row);
+            bg.AddChild(row);
             row.AddChild(TickBox(on, can));
-            var size = UiKit.Text(f.Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "cm", TextSize.Small, Palette.Ink, true);
-            size.VerticalAlignment = VerticalAlignment.Center;
-            size.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-            row.AddChild(size);
-            if (G.InTank(f)) row.AddChild(Pill(T["inTank"], new Color("8cd3e0"), new Color("1d4c57"), TextSize.Tiny));
-            var value = UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Small, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Right);
-            value.CustomMinimumSize = new Vector2(170, 0);
+            var icon = FishIcon(f.Species, 120);
+            if (stage == FreshStage.Spoiled) icon.Modulate = new Color(0.7f, 0.62f, 0.55f);
+            row.AddChild(icon);
+            var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 4);
+            var sp = G.Data.SpeciesById(f.Species);
+            text.AddChild(UiKit.Text(sp.Name + " " + f.Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "cm", TextSize.Body, Palette.Ink, true));
+            var meta = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            meta.AddThemeConstantOverride("separation", 14);
+            meta.AddChild(StagePill(stage));
+            if (G.InTank(f)) meta.AddChild(Pill(T["inTank"], new Color("8cd3e0"), new Color("1d4c57"), TextSize.Tiny));
+            text.AddChild(meta);
+            row.AddChild(text);
+            var value = UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Body, Palette.Ink, true, false, 0, null, HorizontalAlignment.Right);
             value.VerticalAlignment = VerticalAlignment.Center;
             row.AddChild(value);
             if (can)
