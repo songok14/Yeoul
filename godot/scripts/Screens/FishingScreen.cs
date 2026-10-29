@@ -676,8 +676,9 @@ namespace Hanjeopsi.App.Screens
             Later(0.3, () =>
             {
                 if (_phase != Phase.Flying && _phase != Phase.Wait) return;
-                // 찌가 자리를 잡으면 기다린다. 낚시 의자가 있으면 앉고, 없으면 선 채로
-                SetPose(G.KitLevel("chair") > 0 ? "fish-sit" : "fish-wait");
+                // 찌가 자리를 잡으면 기다린다. 낚시 의자가 있으면 앉고, 없으면 대를 세운 채 찌 쪽(바다)을 본다.
+                // fish-wait 는 고개를 옆으로 돌린 그림이라 기다릴 때 어색해서 쓰지 않는다
+                SetPose(G.KitLevel("chair") > 0 ? "fish-sit" : "fish-ready");
                 _leanRate = 8;
                 _leanTarget = 0;
             });
@@ -911,7 +912,7 @@ namespace Hanjeopsi.App.Screens
             }
             // 의자에 앉아 있다가 깜짝 놀라 대를 붙잡는다
             if (_pose == "fish-sit") SetPose("fish-bite");
-            else if (_pose == "fish-wait") SetPose("fish-ready");
+            else if (_pose == "fish-ready") SetPose("fish-reel");
             // 대 끝이 물 쪽으로 쿡 끌려간다
             _leanRate = 20;
             _leanTarget = _big ? 9 : 5;
