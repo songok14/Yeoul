@@ -26,8 +26,8 @@
     ],
     "p2": [
       { "bg": "grill", "pic": "fish/bollak", "text": "손바닥만 한 볼락 한 마리.\n할머니 몰래 불을 피워 대충 구웠다.\n소금은 감으로 쳤다.", "event": "salt" },
-      { "bg": "grill", "pic": "yeoul-eat", "text": "한 입 베어 문 순간.\n\n...짜다." },
-      { "bg": "grill", "pic": "yeoul-eat", "text": "짠맛이 느껴진다.\n6개월 만의 맛이었다." },
+      { "bg": "grill", "pic": "yeoul-salty-tear", "text": "한 입 베어 문 순간.\n\n...짜다." },
+      { "bg": "grill", "pic": "yeoul-salty-tear", "text": "짠맛이 느껴진다.\n6개월 만의 맛이었다." },
       { "bg": "grill", "pic": "fish/bollak", "text": "그때 고등어무늬 고양이 한 마리가 남은 볼락을 물고 달아났다.\n목에 낡은 찌 하나가 달랑거렸다.", "event": "cat" },
       { "bg": "night", "pic": "yeoul-journal", "text": "내 손으로 낚은 물고기라면.\n어쩌면 맛을 되찾을 수 있을지도 모른다.\n\n그리고 할머니댁도." }
     ],
