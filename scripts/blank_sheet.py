@@ -64,7 +64,11 @@ for k, s in enumerate(objs, 1):
         ny = int(round(cy * f - (sl[0].stop - sl[0].start) / 2))
         im = Image.fromarray(big); im.alpha_composite(Image.fromarray(piece), (sl[1].start, max(0, ny)))
         big = np.array(im)
-        guides.append(round(1 - cy / h, 3))          # 밑동 0, 끝 1
+        # 고리 눈 가운데: 늘인 그림에서 위치 (밑동 0 끝 1, 그림 너비 비율)
+        gy = max(0, ny) + (sl[0].stop - sl[0].start) / 2
+        gx = (sl[1].start + sl[1].stop) / 2
+        if gx / W > C / W + 0.08:                      # 몸통 왼쪽에 떨어진 부스러기는 고리가 아니다
+            guides.append([round(1 - gy / H, 4), round(gx / W, 3)])
     out = f'{OUT}/blank-{k}.png'
     Image.fromarray(big).save(out, optimize=True)
     info.append({'center': round(C / W, 3), 'base': round(float(bw[-1]), 1), 'guides': guides})

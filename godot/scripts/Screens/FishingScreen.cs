@@ -1479,6 +1479,7 @@ namespace Hanjeopsi.App.Screens
                 _field.BlankCenter = bl.Center;
                 _field.BlankBase = bl.Base;
                 _field.BlankGuides = bl.Guides;
+                _field.ReelSpool = SdPoses.ReelSpool();
             }
             var butt = SdPoses.Butt(G.Save.Reel + 1);
             _field.ButtTopX = butt.TopX;

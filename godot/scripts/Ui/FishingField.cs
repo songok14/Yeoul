@@ -617,11 +617,14 @@ namespace Hanjeopsi.App.Ui
         private float _buttScale;
         /// <summary>
         /// 가진 낚싯대 몸통 그림 (gear/blank-단계, 곧게 선 대, 끝이 위). 밑동 그림 맨 위에서 휘는 대를 따라 늘여 붙인다.
-        /// BlankCenter: 그림 너비 중 몸통 가운데 비율, BlankBase: 맨 아래 몸통 굵기(px), BlankGuides: 고리 자리(밑동 0, 끝 1). 고리는 그림 오른쪽 = 화면 아래쪽
+        /// BlankCenter: 그림 너비 중 몸통 가운데 비율, BlankBase: 맨 아래 몸통 굵기(px),
+        /// BlankGuides: 고리 눈 자리 [대 위 비율(밑동 0, 끝 1), 그림 너비 비율]. 고리는 그림 오른쪽 = 화면 아래쪽(대 밑으로 매달린다)
+        /// ReelSpool: 밑동 그림에서 원줄이 감긴 스풀 앞쪽 (너비·높이 비율). 원줄은 여기서 나와 고리를 차례로 지난다
         /// </summary>
         public Texture2D BlankTex;
         public float BlankCenter = 0.23f, BlankBase = 45;
-        public float[] BlankGuides;
+        public float[][] BlankGuides;
+        public Vector2 ReelSpool = new Vector2(0.66f, 0.36f);
 
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
         private bool _rodReady;
@@ -652,9 +655,10 @@ namespace Hanjeopsi.App.Ui
             var g = RodGrip;
             // 줄이 가는 쪽 (없으면 대 방향)
             var t = LineTo.HasValue ? (LineTo.Value - g).Normalized() : RodDir;
-            // 당길 때는 대 전체를 물고기 쪽으로 조금 돌려 잡는다 (최대 35도)
+            // 당길 때도 대는 물고기를 바로 겨누지 않는다. 대를 세워 줄과 대가 거의 직각이 되게 버텨야 대가 휘며 힘을 받는다.
+            // 그래서 물고기 쪽으로는 조금만 돌린다 (최대 35도의 40%)
             float turn = Mathf.Clamp(RodDir.AngleTo(t), -0.61f, 0.61f);
-            var d0 = RodDir.Rotated(turn * (Fighting ? 0.85f : 0.35f));
+            var d0 = RodDir.Rotated(turn * (Fighting ? 0.4f : 0.35f));
             // 길고 가는 대라 쉴 때도 제 무게로 끝이 숙인다 (화면 아래 쪽)
             var droop = (d0 + new Vector2(0, 0.42f)).Normalized();
             // 팽팽할수록 대 끝이 줄 쪽으로 휜다. 찌를 띄워 둔 채 기다릴 때도 줄 무게만큼 조금
@@ -732,10 +736,31 @@ namespace Hanjeopsi.App.Ui
             for (int i = 1; i < n; i++) len[i] = len[i - 1] + (_rodPts[i] - _rodPts[i - 1]).Length();
             float total = Mathf.Max(1, len[n - 1]);
             float s = ButtWidth * 0.95f * u / BlankBase;
-            float left = BlankCenter * BlankTex.GetWidth() * s, right = (1 - BlankCenter) * BlankTex.GetWidth() * s;
+            float texW = BlankTex.GetWidth() * s;
+            float left = BlankCenter * texW, right = (1 - BlankCenter) * texW;
             var nrm = new Vector2[n];
             for (int i = 0; i < n; i++)
                 nrm[i] = Down(_rodPts[Mathf.Min(n - 1, i + 1)] - _rodPts[Mathf.Max(0, i - 1)]);
+            // 대 위 비율 at 에서 대 가운데로부터 옆으로 off 만큼 떨어진 자리
+            Vector2 OnRod(float at, float off)
+            {
+                float l = Mathf.Clamp(at, 0, 1) * total;
+                int i = 0;
+                while (i < RodSegs - 1 && len[i + 1] < l) i++;
+                float f = Mathf.Clamp((l - len[i]) / Mathf.Max(0.001f, len[i + 1] - len[i]), 0, 1);
+                return _rodPts[i].Lerp(_rodPts[i + 1], f) + nrm[i].Lerp(nrm[i + 1], f).Normalized() * off;
+            }
+            // 1) 원줄을 먼저 긋는다: 스풀 앞에서 나와 고리 눈을 차례로 지나 끝까지.
+            //    그 위에 대와 릴을 그리니 대 몸통과 고리 쇠에 가린 데는 숨고 고리 눈 속과 사이만 보인다
+            float bw = ButtTex.GetWidth() * _buttScale, bh = ButtTex.GetHeight() * _buttScale;
+            var ex = new Vector2(-_d0.Y, _d0.X) * (ReelFlip ? -1 : 1);
+            var line = new List<Vector2> { _gripPx + ex * (ReelSpool.X - ButtTopX) * bw - _d0 * (ReelSpool.Y - ButtHold) * bh };
+            if (BlankGuides != null)
+                foreach (var g in BlankGuides.OrderBy(x => x[0]))
+                    line.Add(OnRod(g[0], (g[1] - BlankCenter) * texW));
+            line.Add(_rodPts[RodSegs]);
+            c.DrawPolyline(line.ToArray(), LineColor(0.95f), 1.1f * Mathf.Max(1, u), true);
+            // 2) 대 몸통 그림을 곡선을 따라 띠로
             var white = new[] { Colors.White, Colors.White, Colors.White, Colors.White };
             for (int i = 0; i < RodSegs; i++)
             {
@@ -748,25 +773,10 @@ namespace Hanjeopsi.App.Ui
                 var uv = new[] { new Vector2(0, v0), new Vector2(1, v0), new Vector2(1, v1), new Vector2(0, v1) };
                 c.DrawPolygon(pts, white, uv, BlankTex);
             }
-            float w = ButtTex.GetWidth() * _buttScale, h = ButtTex.GetHeight() * _buttScale;
+            // 3) 밑동과 릴
             c.DrawSetTransform(_gripPx, _d0.Angle() + Mathf.Pi / 2, new Vector2(ReelFlip ? -1 : 1, 1));
-            c.DrawTextureRect(ButtTex, new Rect2(-ButtTopX * w, -ButtHold * h, w, h), false);
+            c.DrawTextureRect(ButtTex, new Rect2(-ButtTopX * bw, -ButtHold * bh, bw, bh), false);
             c.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
-            // 원줄: 릴에서 그림 속 고리들을 지나 끝까지
-            var line = new List<Vector2> { _reelAt };
-            var guides = BlankGuides ?? GuideAt;
-            foreach (float g in guides.OrderBy(x => x))
-            {
-                float at = Mathf.Clamp(g, 0, 1) * total;
-                int i = 0;
-                while (i < RodSegs - 1 && len[i + 1] < at) i++;
-                float f = Mathf.Clamp((at - len[i]) / Mathf.Max(0.001f, len[i + 1] - len[i]), 0, 1);
-                var p = _rodPts[i].Lerp(_rodPts[i + 1], f);
-                var d = nrm[i].Lerp(nrm[i + 1], f);
-                line.Add(p + d * BlankBase * s * 0.9f * (1 - 0.8f * g));
-            }
-            line.Add(_rodPts[RodSegs]);
-            c.DrawPolyline(line.ToArray(), LineColor(0.9f), 1f * Mathf.Max(1, u), true);
         }
 
         /// <summary>대 몸통, 가이드 고리, 고리를 지나는 원줄 (RodView 가 여울 그림 아래에 그린다)</summary>
