@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
@@ -67,6 +68,24 @@ namespace Hanjeopsi.App.Ui
             var w = _look["buttBlank"].ToObject<List<float>>();
             int i = Mathf.Clamp(level - 1, 0, tops.Count - 1);
             return (tops[i], w[i]);
+        }
+
+        /// <summary>낚싯대 몸통 그림(gear/blank-단계): 몸통 가운데 비율, 맨 아래 굵기(px), 고리 자리 (data/gearlook.json blanks)</summary>
+        public static (float Center, float Base, float[][] Guides) Blank(int level)
+        {
+            if (_look == null) _look = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
+            var list = _look["blanks"];
+            if (list == null) return (0.23f, 45, null);
+            var b = list[Mathf.Clamp(level - 1, 0, list.Count() - 1)];
+            return (b["center"].ToObject<float>(), b["base"].ToObject<float>(), b["guides"].ToObject<float[][]>());
+        }
+
+        /// <summary>밑동 그림에서 원줄이 나오는 스풀 앞쪽 (너비·높이 비율)</summary>
+        public static Vector2 ReelSpool()
+        {
+            if (_look == null) _look = Newtonsoft.Json.Linq.JObject.Parse(FileAccess.GetFileAsString("res://data/gearlook.json"));
+            var v = _look["reelSpool"];
+            return v == null ? new Vector2(0.66f, 0.36f) : new Vector2(v[0].ToObject<float>(), v[1].ToObject<float>());
         }
 
         private static List<float> _chairSeat;

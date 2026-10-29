@@ -41,6 +41,8 @@
 ### 받은 SD 시트
 - 2026-10-27: **차세라 표정 시트**(대화 4)와 **컷 9 고등어 찌·컷 10 차세라 첫 만남**. 옷은 파랑 대신 빨강·흰 바람막이에 검은 탱크톱, 빨간 고글로 나와 그대로 쓴다(앞으로 차세라 그림은 이 디자인). 시트는 칸 사이가 고르지 않아 칸을 직접 잘라 `sd_sheet.py`(1×1)와 `clean_halo.py --fringe`로 `portraits/sera*.png`에. 컷은 `godot/art/cuts/`.
 - 2026-10-27: **뒤에서 본 릴 열 개 다시**(두 번째 시트: 릴 다리 위, 스풀 너머, 핸들 왼쪽). `godot/art/gear/reel-back-N.png`, 다리 꼭대기 가로 위치는 `data/gearlook.json reelFoot`. 낚시 화면에서 손 위 대 아래에 매단다. 앞 시트(스풀 앞면이 보이던 것)는 버렸다.
+- 2026-10-29: **낚싯대 몸통 열 개** (SD 7-4). 곧게 선 대를 `scripts/blank_sheet.py`로 펴고(조금 기울어 왔다), 코르크 손잡이를 자르고, 몸통만 세로로 늘여(고리는 둥근 채로) `godot/art/gear/blank-N.png`에 넣었다. 게임이 휘는 대 곡선을 따라 띠로 붙이고 그림 속 고리로 원줄을 지나게 한다(`gearlook.json` blanks).
+- 2026-10-29: **투명 배경으로 전부 다시** (SD 7). 이미지 도구가 진짜 투명 PNG를 준다(채팅 미리보기엔 투명한 곳 밑 색이 비쳐 배경처럼 보이니 파일로 확인한다). 흰 배경을 지울 필요가 없어 머리카락 사이 흰 조각이 사라졌다. 여울 SD 기본 8장, 낚시 8장(빈 주먹, 대와 릴은 게임이 쥐여 준다), 여울 일러스트 다섯 장(yeoul-eat, yeoul-serve, yeoul-hands, 새 yeoul-salty-tear(프롤로그 첫 짠맛), 새 yeoul-rod-broken(프롤로그 창고)), 세라 표정 여섯 장을 바꿨다. 시트는 칸 경계 둘레 빈 줄에서 자르고, 낚시 포즈의 주먹 자리(grip)와 앉는 높이(seat)는 손으로 재서 `poses.json`에 넣었다. 캠핑 의자에 앉은 일러스트는 쓸 곳을 정하지 않아 보류.
 - 2026-10-27: **여울 낚시 포즈 다시**(SD 2-2, 뒷모습 중심 2×4). `sd_sheet.py`로 자르고 `godot/art/yeoul/fish-*.png`, `poses.json`에 넣었다. 테두리가 또렷해 `clean_halo.py`는 쓰지 않았다(쓰면 가는 낚싯대가 끊긴다). 감기는 손 위 대를 지웠다. 놀람(bite) 옆 주황 표시는 잘릴 때 빠진다.
 - 2026-10-22: **손님 SD 시트 두 장**(6명 × 서기·걷기·기쁨·실망). `scripts/sd_cells.py`로 잘라 `godot/art/customers/<id>-<포즈>.png`. 두 번째 시트는 체크무늬가 박혀 있어도 지워진다. 흰 수염 할아버지는 `--hair=0`.
 - 2026-10-27: **마을 의뢰인 SD 2**(노씨·바다횟집 사장·읍내 일식집·포장마차 아저씨·민박집 할머니)를 `godot/art/villagers/{nossi,sashimi,sushi,stall,minbak}-*.png`로 넣고 `requests.json sd`를 바꿨다.
@@ -165,6 +167,116 @@ Style: the same painted game icon style as the attached icons, soft shading, lig
 Layout: 2 rows x 5 columns, all reels at the same scale, centered in their cells, wide equal spacing so nothing touches.
 
 Background: plain solid light gray #EDEDED. No checkerboard, no text, no numbers, no labels, no borders, no grid lines, no shadow.
+```
+
+## SD 7. 투명 배경 시트 (2026-10-29)
+
+이미지 도구가 투명 PNG를 만들 수 있으면 이 판을 쓴다. 회색 배경 판보다 머리 둘레가 훨씬 깨끗하다.
+받으면 파일의 투명도부터 확인한다(배경 픽셀 알파가 0이어야 한다). 자를 때는 배경 지우기 없이 칸만 나눈다.
+낚시 포즈는 손이 비어 있으니 주먹 구멍 가운데를 `grip`, 대가 뻗을 방향을 `rodDir`로 재고, 앉은 포즈는 발바닥에서 엉덩이 아랫선까지를 `seat`로 적는다.
+
+### SD 7-1. 여울 기본 시트
+
+첨부: 지금 여울 SD 시트, 방파제 배경.
+
+```
+Create one game character sheet as a PNG with a fully transparent background (real alpha transparency). Attached images: the current chibi SD sheet of the heroine (keep exactly her design and chibi style) and watercolor background illustrations from my game (use them only for color palette and lighting).
+
+Character: Han Yeoul, a 29-year-old Korean woman, former sous-chef. Long brown hair pulled up into a neat high bun, brown eyes, calm and slightly tired face. Oversized cream-white hooded jacket with toggle buttons, plain white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants with side pockets, chunky white-gray sneakers.
+
+Hair: a tidy bun with a smooth closed silhouette. Only two or three loose strands near the face, drawn as solid brown locks attached to the hair mass. No thin flyaway hairs, no hair loops or rings, no gaps between strands, no white glow or rim light around the hair.
+
+Style: cute chibi SD character, 2.5 heads tall, big head, small rounded body, short limbs, soft anime face with big gentle eyes, soft cel shading with a light watercolor texture, warm sunny Korean seaside colors, light always from the upper left. A clean continuous dark brown outline around the whole silhouette, including the hair, face, white hood and sneakers.
+
+Layout: 2 rows x 4 columns, every figure full body, exactly the same scale, all standing on the same baseline, wide equal spacing so nothing touches or overlaps.
+Row 1: front view standing relaxed, three-quarter front view, side view facing right, back view.
+Row 2: idle pose with hands in jacket pockets, waving hello with a small smile, walking side view facing right with right foot forward, walking side view facing right with left foot forward.
+
+Transparent background everywhere outside the character. No background color, no white edge, no halo, no drop shadow, no ground shadow, no checkerboard pattern, no text, no labels, no numbers, no borders, no grid lines.
+```
+
+### SD 7-2. 여울 낚시 시트 (빈 손)
+
+첨부: SD 7-1 시트, 대 밑동 시트(`godot/art/gear/butt-*.png`, 손잡이 굵기 참고), 방파제 배경.
+
+```
+Create one game character pose sheet for a mobile fishing game as a PNG with a fully transparent background (real alpha transparency). Attached images: the chibi SD sheet of the heroine (keep exactly her design, hairstyle, scale and chibi style), my fishing rod handle sheet (only to show how thick the handle in her hands is) and a watercolor seawall background (use it only for colors and light).
+
+Character: Han Yeoul, a 29-year-old Korean woman. Long brown hair pulled up into a neat high bun, brown eyes, oversized cream-white hooded jacket with toggle buttons, white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants with side pockets, chunky white-gray sneakers.
+
+Hair: a tidy bun with a smooth closed silhouette, only two or three solid loose locks near the face. No thin flyaway hairs, no hair loops, no gaps between strands.
+
+Hands: she mimes fishing with empty hands. Draw no fishing rod, no reel, no handle, no line, no float, no fish. Her hands are closed in loose fists around an invisible rod handle as thick as the attached handle, with a small round hole through the fists, the hole lined up with the direction the invisible rod would point. The game draws the rod and reel into her hands later.
+
+Scene idea: she stands in the middle of a seawall facing the open sea, so the player mostly sees her from behind. She is right-handed. The invisible rod points up and forward toward the sea, leaning a little to the right.
+
+Style: cute chibi SD, 2.5 heads tall, big head, small rounded body, soft anime coloring, soft cel shading with a light watercolor texture, light from the upper left. A clean continuous dark brown outline around the whole silhouette, including her face, cheeks, hands and the white hood.
+
+Layout: exactly 2 rows x 4 columns, 8 figures in total, full body with both feet visible, exactly the same scale as the attached sheet, all on the same baseline, wide equal spacing so nothing touches.
+Row 1:
+1. ready: standing back view, both fists together at chest height, right fist above left fist, as if holding the rod pointing up and forward.
+2. waiting: standing back view, relaxed, right fist at waist height holding the invisible rod, left hand in the jacket pocket, head tilted slightly.
+3. casting: back view, both fists raised over her right shoulder, about to throw forward.
+4. sitting: back view, sitting on an invisible seat at the height of a low camping chair, both fists together at chest height. Do not draw any chair, stool or seat.
+Row 2:
+5. bite: sitting the same way on the invisible seat, three-quarter back view turned slightly to the right, startled, fists gripping tight, a small part of her surprised face visible. No chair.
+6. reeling: standing back view, leaning back a little, left fist holding the invisible rod at chest height, right hand turning an invisible reel handle just below it.
+7. fighting: three-quarter back view turned slightly to the right, feet planted wide, leaning back hard, both fists pulling up and to the right.
+8. joy: front view facing the viewer, big happy smile, right fist at chest height holding the invisible rod, left fist raised.
+
+Transparent background everywhere outside the character. No background color, no white edge, no halo, no glow, no drop shadow, no ground shadow, no effect marks or music notes, no checkerboard pattern, no text, no labels, no numbers, no borders, no grid lines.
+```
+
+### SD 7-3. 의자에 앉은 두 포즈 (빈 손)
+
+첨부: SD 7-2 시트, 뒤에서 본 의자(`godot/art/gear/chair-back-3.png`). 다리는 바닥에 닿지 않아도 된다. 게임이 엉덩이 아랫선에 가진 의자 앉는 자리를 맞춘다.
+
+```
+Create one game character pose sheet for a mobile fishing game as a PNG with a fully transparent background (real alpha transparency). Attached images: my current chibi SD fishing pose sheet of the heroine (keep exactly her design, hairstyle, scale, empty-fist hands and chibi style) and a back view of my camping chair (use it only for the seat height and the viewing angle, do not draw it).
+
+Character: Han Yeoul, a 29-year-old Korean woman. Long brown hair pulled up into a neat high bun, brown eyes, oversized cream-white hooded jacket with toggle buttons, white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants with side pockets, chunky white-gray sneakers.
+
+Hair: a tidy bun with a smooth closed silhouette, only two or three solid loose locks near the face. No thin flyaway hairs, no hair loops, no gaps between strands.
+
+Sitting: she sits on an invisible camping chair, seen from behind and slightly above like the attached chair. Her bottom rests on a flat horizontal seat, so the underside of her bottom and thighs forms one straight horizontal line at the same height in both poses. Her lower legs hang down relaxed from the front edge of the seat. Her feet do not need to touch the ground and may dangle a little. Do not draw any chair, stool, seat, ground or shadow.
+
+Hands: she mimes fishing with empty hands, exactly like the attached sheet. Draw no fishing rod, no reel, no handle, no line, no float. Both hands are closed in loose fists around an invisible rod handle at chest height, with a small round hole through the fists, lined up with the invisible rod pointing up and forward toward the sea, leaning a little to the right.
+
+Style: cute chibi SD, 2.5 heads tall, big head, small rounded body, soft anime coloring, soft cel shading with a light watercolor texture, light from the upper left. A clean continuous dark brown outline around the whole silhouette, including her face, hands and the white hood.
+
+Layout: exactly 1 row x 2 columns, 2 figures in total, exactly the same scale as the attached fishing sheet, the seat line at the same height in both, wide spacing so nothing touches.
+1. sitting and waiting: back view, calm, shoulders relaxed, head tilted slightly, both fists together at chest height.
+2. bite: three-quarter back view turned slightly to the right, startled, shoulders up, fists gripping tight and pulled a little up, a small part of her surprised face visible.
+
+Transparent background everywhere outside the character. No background color, no white edge, no halo, no glow, no drop shadow, no ground shadow, no effect marks, no checkerboard pattern, no text, no labels, no numbers, no borders, no grid lines.
+```
+
+### SD 7-4. 낚싯대 몸통 열 개 (곧게 선 대)
+
+첨부: 낚싯대 상점 아이콘 10개, 대 밑동·릴 시트. 손잡이 위부터 끝까지만, 곧게 세로로. 게임이 휘는 곡선을 따라 늘여 붙인다.
+
+```
+Create one item sheet for a mobile fishing game as a PNG with a fully transparent background (real alpha transparency). Attached images: my 10 fishing rod shop icons (keep each rod's colors, wraps and decorations exactly, in the same order) and my rod handle and reel sheet (shows how thick the rod is where it leaves the handle).
+
+Draw only the upper part of each of the 10 float fishing rods, from just above the reel seat to the very tip: no handle, no cork grip, no reel, no fishing line, no float, no hands. Each rod is perfectly straight and perfectly vertical, tip at the top, seen from behind the angler. It starts as thick as the top of the attached handle and tapers smoothly to a very thin tip. Include small line guide rings along one side, the joint wraps between sections, and each rod's own color and decoration, so every rod looks clearly different. Keep the decoration simple and readable at small size.
+
+Order and look:
+1. Cheap brown starter rod, plain, silver guides.
+2. Dark brown rock fishing rod, silver guides.
+3. Old man's blue black porgy rod, silver wraps, a little worn.
+4. Deep green carbon rod with gold wraps.
+5. Red lighthouse keeper's rod with silver wraps.
+6. Almost black rod with gold wraps, looks handmade like an old master's rod.
+7. Purple master's rod with gold wraps.
+8. Ivory white long casting rod with gold wraps.
+9. Crimson premium rod with gold flame pattern wraps.
+10. Royal blue legendary rod with gold wraps and a faint wave pattern.
+
+Style: the same painted game icon style as the attached icons, soft shading, light from the upper left, a thin clean dark outline along each rod.
+
+Layout: exactly 1 row x 10 columns, all rods exactly the same length and the same width at the bottom, bottoms on the same baseline, tips at the same height, wide equal spacing so nothing touches. The rods should be as tall as the canvas allows.
+
+Transparent background everywhere outside the rods. No background color, no white edge, no halo, no glow, no shadow, no checkerboard pattern, no text, no labels, no numbers, no borders, no grid lines.
 ```
 
 ## SD 3. 여울 표정 시트

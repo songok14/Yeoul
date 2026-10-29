@@ -1471,6 +1471,17 @@ namespace Hanjeopsi.App.Screens
             _field.CoolerTex = TrimmedGear("cooler", G.Save.Tackle + 1);
             // 대 밑동과 가진 릴 (릴 단계 그림). 손잡이 위로는 가진 대 색으로 이어 그린다
             _field.ButtTex = TrimmedGear("butt", G.Save.Reel + 1);
+            // 가진 낚싯대 몸통 그림 (없으면 대 색으로 그린다)
+            string blank = "res://art/gear/blank-" + (G.Save.Rod + 1) + ".png";
+            if (ResourceLoader.Exists(blank))
+            {
+                _field.BlankTex = GD.Load<Texture2D>(blank);
+                var bl = SdPoses.Blank(G.Save.Rod + 1);
+                _field.BlankCenter = bl.Center;
+                _field.BlankBase = bl.Base;
+                _field.BlankGuides = bl.Guides;
+                _field.ReelSpool = SdPoses.ReelSpool();
+            }
             var butt = SdPoses.Butt(G.Save.Reel + 1);
             _field.ButtTopX = butt.TopX;
             _field.ButtBlankPx = butt.BlankPx;
