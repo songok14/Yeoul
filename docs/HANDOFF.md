@@ -13,7 +13,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "여울호"(옛 제목 �
 
 ## 지금까지 상황
 - 환경: cloud. 원격 https://github.com/songok14/Yeoul. 2026-10-29 오후에 갈라져 있던 작업 브랜치(걷는 언덕 마을, 제목·글꼴, 낚싯대 그림·투명 포즈)를 모두 main 에 합치고 다 쓴 브랜치는 지웠다. 원격에는 main, ci-build, 그때의 작업 브랜치만 있다.
-- **시작하면 먼저 git fetch origin main && git merge origin/main** (CLAUDE.md "브랜치" 절). 세션이 준 작업 브랜치에서 하되 푸시할 때 main 에도 합쳐 올린다.
+- **시작하면 먼저 git fetch origin main && git merge origin/main** (CLAUDE.md "브랜치" 절). 세션이 준 작업 브랜치에 푸시하고 main 으로 PR 을 올린다(main 직접 푸시 금지).
 - 먼저 읽을 것: CLAUDE.md(고닷 절, 새 그림 방식 줄), docs/ART_PROMPTS.md(SD 7: 투명 배경 프롬프트 7-1~7-4), docs/STORY.md 맨 위(맛이 돌아오는 규칙), docs/POLISH.md, docs/GODOT_PLAN.md 10-2.
 - 마지막 APK: 빌드 #145(e981a6e, 모두 합친 main), 릴리스 test-latest.
 
