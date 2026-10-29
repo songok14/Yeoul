@@ -10,7 +10,7 @@ using Hanjeopsi.Core.Systems;
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 물비늘포 위판장 (웹 MarketScene). 경매 탭: 오늘 시세판과 내 쿨러, 묶음마다 팔기.
+    /// 물비늘포 위판장 (웹 MarketScene). 경매 탭: 오늘 시세판과 내 쿨러·수조. 고르기 칸으로 한 마리씩 골라 판다.
     /// 납품 의뢰 탭: 식당 의뢰 카드와 납품. 노씨 의뢰를 채우면 노씨가 대화창으로 고맙다고 한다.
     /// </summary>
     public partial class MarketScreen : PlaceScreen
@@ -80,9 +80,19 @@ namespace Hanjeopsi.App.Screens
 
             var head = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             head.AddChild(UiKit.Text(F("cooler", G.Save.Cooler.Count, G.CoolerCapacity()), TextSize.H1, Palette.Ink, true));
+            if (G.HasTank())
+            {
+                head.AddChild(Spacer());
+                var tank = UiKit.Text(F("tank", G.TankFish().Count, G.TankCapacity()), TextSize.Small, Palette.InkSoft);
+                tank.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+                head.AddChild(tank);
+            }
             list.AddChild(head);
 
             var groups = G.CoolerGroups();
+            // 팔았거나 사라진 고기는 고른 목록에서 뺀다
+            var have = new HashSet<int>(G.SellableFish().Select(f => f.Uid));
+            _picked.RemoveWhere(u => !have.Contains(u));
             if (groups.Count == 0)
             {
                 var empty = UiKit.Text(T["empty"], TextSize.Body, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
@@ -93,7 +103,7 @@ namespace Hanjeopsi.App.Screens
             }
 
             bool open = G.IsMarketOpen();
-            // 전부 팔기는 맨 위에, 목록은 손가락으로 밀어 내리는 스크롤
+            // 고른 것만 팔기와 전부 팔기는 맨 위에, 목록은 손가락으로 밀어 내리는 스크롤
             if (!open)
             {
                 list.AddChild(UiKit.Text(T["closedNote"], TextSize.Small, Palette.RedDark, false, false, 0, null, HorizontalAlignment.Center));
@@ -103,8 +113,16 @@ namespace Hanjeopsi.App.Screens
                 var sellable = G.SellableFish();
                 if (sellable.Count > 0)
                 {
+                    var buttons = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                    buttons.AddThemeConstantOverride("separation", 18);
+                    var picked = sellable.Where(f => _picked.Contains(f.Uid)).ToList();
+                    var some = new GameButton(picked.Count > 0 ? F("sellPicked", picked.Count) : T["pickNone"], Palette.Green, () => Auction(picked),
+                        picked.Count > 0 ? UiKit.Won(picked.Sum(f => G.FishValue(f))) : T["pickHint"], TextSize.Body, 112) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+                    some.SetEnabled(picked.Count > 0);
+                    buttons.AddChild(some);
                     int total = sellable.Sum(f => G.FishValue(f));
-                    list.AddChild(new GameButton(F("sellAll", UiKit.Won(total)), Palette.Red, () => Auction(sellable), null, TextSize.Body, 96));
+                    buttons.AddChild(new GameButton(T["sellAllShort"], Palette.Red, () => Auction(sellable), UiKit.Won(total), TextSize.Body, 112) { SizeFlagsHorizontal = SizeFlags.ExpandFill });
+                    list.AddChild(buttons);
                 }
             }
             var scroll = new ScrollContainer
@@ -117,16 +135,21 @@ namespace Hanjeopsi.App.Screens
             };
             list.AddChild(scroll);
             var rows = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
-            rows.AddThemeConstantOverride("separation", 14);
+            rows.AddThemeConstantOverride("separation", 8);
             scroll.AddChild(rows);
+            // 한 마리씩 한 줄 (어종 순서, 같은 어종이면 신선한 것 · 큰 것부터). 고르기 칸은 줄마다 하나
             int i = 0;
-            foreach (var grp in groups) rows.AddChild(GroupRow(grp, i++, open));
+            foreach (var grp in groups)
+                foreach (var f in grp.Items.OrderByDescending(f => f.Size)) rows.AddChild(FishRow(f, grp.Stage, open, i++));
             // 스크롤 위치를 다시 그린 뒤에도 지킨다
             int keep = _scrollY;
             scroll.Ready += () => Callable.From(() => scroll.ScrollVertical = keep).CallDeferred();
             scroll.GetVScrollBar().ValueChanged += v => _scrollY = (int)v;
             return col;
         }
+
+        /// <summary>경매에 낼 고기로 고른 것 (uid). 다시 그려도 남는다</summary>
+        private readonly HashSet<int> _picked = new HashSet<int>();
 
         /// <summary>오늘 시세판: 다섯 어종 그림과 값, 어제보다 오르내린 정도</summary>
         private Control PriceBoard()
@@ -167,36 +190,42 @@ namespace Hanjeopsi.App.Screens
             return board;
         }
 
-        private Control GroupRow(CoolerGroup grp, int i, bool open)
+        /// <summary>고기 한 마리 줄: 고르기 칸 · 그림 · 이름과 크기 · 신선도와 값 (수조 고기는 표). 줄을 누르면 고르고 푼다</summary>
+        private Control FishRow(FishItem f, FreshStage stage, bool open, int i)
         {
-            var bg = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
-            bg.AddThemeStyleboxOverride("panel", UiKit.Box(i % 2 == 0 ? new Color(Palette.PaperDark, 0.45f) : new Color(Palette.PaperLight, 0.7f), 26, 18, 8));
+            bool can = open && stage != FreshStage.Spoiled;
+            bool on = can && _picked.Contains(f.Uid);
+            var bg = new PanelContainer { MouseFilter = MouseFilterEnum.Pass };
+            var plain = i % 2 == 0 ? new Color(Palette.PaperDark, 0.45f) : new Color(Palette.PaperLight, 0.7f);
+            bg.AddThemeStyleboxOverride("panel", on ? UiKit.Box(new Color(Palette.Green, 0.2f), 26, 18, 6).WithBorder(Palette.GreenDark, 3) : UiKit.Box(plain, 26, 18, 6).WithBorder(new Color(0, 0, 0, 0), 3));
             var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             row.AddThemeConstantOverride("separation", 18);
             bg.AddChild(row);
-
-            var icon = FishIcon(grp.Species, 136);
-            if (grp.Stage == FreshStage.Spoiled) icon.Modulate = new Color(0.7f, 0.62f, 0.55f);
+            row.AddChild(TickBox(on, can));
+            var icon = FishIcon(f.Species, 120);
+            if (stage == FreshStage.Spoiled) icon.Modulate = new Color(0.7f, 0.62f, 0.55f);
             row.AddChild(icon);
             var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
             text.AddThemeConstantOverride("separation", 4);
-            var sp = G.Data.SpeciesById(grp.Species);
-            text.AddChild(UiKit.Text(sp.Name + " ×" + grp.Items.Count, TextSize.Body, Palette.Ink, true));
-            // 크기가 클수록 비싸다: 한 마리씩 크기를 큰 순서로
-            var sizes = grp.Items.OrderByDescending(f => f.Size).Select(f => f.Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)).ToList();
-            string sizeText = string.Join(" · ", sizes.Take(4)) + "cm" + (sizes.Count > 4 ? " 외 " + (sizes.Count - 4) + "마리" : "");
-            text.AddChild(UiKit.Text(sizeText, TextSize.Tiny + 2, Palette.InkSoft));
+            var sp = G.Data.SpeciesById(f.Species);
+            text.AddChild(UiKit.Text(sp.Name + " " + f.Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "cm", TextSize.Body, Palette.Ink, true));
             var meta = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             meta.AddThemeConstantOverride("separation", 14);
-            meta.AddChild(StagePill(grp.Stage));
-            meta.AddChild(UiKit.Text(UiKit.Won(grp.Value), TextSize.Small, Palette.InkSoft));
+            meta.AddChild(StagePill(stage));
+            if (G.InTank(f)) meta.AddChild(Pill(T["inTank"], new Color("8cd3e0"), new Color("1d4c57"), TextSize.Tiny));
             text.AddChild(meta);
             row.AddChild(text);
-
-            var items = grp.Items;
-            var sell = SmallButton(T["sell"], Palette.Red, () => Auction(items), 180, 92);
-            sell.SetEnabled(open && grp.Stage != FreshStage.Spoiled);
-            row.AddChild(sell);
+            var value = UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Body, Palette.Ink, true, false, 0, null, HorizontalAlignment.Right);
+            value.VerticalAlignment = VerticalAlignment.Center;
+            row.AddChild(value);
+            if (can)
+                OnTap(bg, () =>
+                {
+                    if (on) _picked.Remove(f.Uid);
+                    else _picked.Add(f.Uid);
+                    Sound.Play("tick", -6, on ? 0.9f : 1.15f);
+                    Redraw();
+                });
             return bg;
         }
 
@@ -301,6 +330,7 @@ namespace Hanjeopsi.App.Screens
             steps.TweenCallback(Callable.From(() =>
             {
                 int total = G.SellFish(uids, finalMul);
+                foreach (var u in uids) _picked.Remove(u);
                 Sound.Play("stamp");
                 Sound.Play("sold", -3);
                 Haptics.Pulse(40, 0.7f);
@@ -348,6 +378,11 @@ namespace Hanjeopsi.App.Screens
             {
                 case "auction":
                     Auction(G.CoolerGroups()[0].Items);
+                    break;
+                case "pick":
+                    // 볼락 큰 것 하나와 고등어를 골라 둔 모습
+                    foreach (var g in G.CoolerGroups().Take(2)) _picked.Add(g.Items.OrderByDescending(f => f.Size).First().Uid);
+                    Redraw();
                     break;
             }
         }

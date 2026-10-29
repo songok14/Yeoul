@@ -1284,17 +1284,67 @@ namespace Hanjeopsi.App.Screens
             if (sp.Rare) tags.Add(T["rare"]);
             var body = new List<string> { string.Join(" · ", tags) };
             body.Add(F("value", UiKit.Won(value)));
+            // 쿨러가 가득 찼어도 쿨러의 활어 한 마리를 놓아주고 바꿔 담을 수 있다
+            bool swap = full && rule == null && G.ReleasableFish().Count > 0;
             if (rule != null) body.Add(rule);
+            else if (swap) body.Add(T["fullSwap"]);
             else if (full) body.Add(T["full"]);
 
-            ResultCard(sp, isNew, string.Join("\n", body), rule != null ? T["mustRelease"] : full ? T["coolerFull"] : T["keep"], full || rule != null);
+            ResultCard(sp, isNew, string.Join("\n", body), rule != null ? T["mustRelease"] : swap ? T["swap"] : full ? T["coolerFull"] : T["keep"], (full && !swap) || rule != null, swap ? SwapPicker : (Action<Action>)null);
+        }
+
+        /// <summary>
+        /// 쿨러가 가득 찼을 때: 쿨러 안 활어 중 한 마리를 골라 바다로 돌려보내고 방금 낚은 고기를 담는다.
+        /// 값싼 고기가 위에 온다. 고르면 then (담기)
+        /// </summary>
+        private void SwapPicker(Action then)
+        {
+            Control root = null;
+            var fish = G.ReleasableFish();
+            var list = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
+            list.AddThemeConstantOverride("separation", 10);
+            foreach (var f in fish)
+            {
+                var item = f;
+                var bg = new PanelContainer { MouseFilter = MouseFilterEnum.Pass };
+                bg.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.PaperDark, 0.5f), 22, 18, 6));
+                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                row.AddThemeConstantOverride("separation", 18);
+                bg.AddChild(row);
+                row.AddChild(PlaceScreen.FishIcon(f.Species, 120));
+                var name = UiKit.Text(G.Data.SpeciesById(f.Species).Name + " " + f.Size.ToString("0.0", CultureInfo.InvariantCulture) + "cm", TextSize.Small, Palette.Ink, true);
+                name.SizeFlagsHorizontal = SizeFlags.ExpandFill;
+                name.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(name);
+                var value = UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Small, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Right);
+                value.VerticalAlignment = VerticalAlignment.Center;
+                row.AddChild(value);
+                PlaceScreen.OnTap(bg, () =>
+                {
+                    if (!G.ReleaseFromCooler(item.Uid)) return;
+                    CloseModal(root);
+                    Toast(F("swapped", G.Data.SpeciesById(item.Species).Name), Palette.BlueText, SafeTop + 420);
+                    then();
+                });
+                list.AddChild(bg);
+            }
+            var scroll = new ScrollContainer
+            {
+                HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
+                ScrollDeadzone = 24,
+                MouseFilter = MouseFilterEnum.Pass,
+                CustomMinimumSize = new Vector2(0, Mathf.Min(fish.Count * 106, GetViewportRect().Size.Y * 0.45f)),
+            };
+            scroll.AddChild(list);
+            root = Modal(T["swapTitle"], T["swapBody"], new[] { new ModalButton(T["swapCancel"], Palette.GrayDark) }, scroll);
         }
 
         /// <summary>
         /// 결과 카드: 화면 가운데를 가리지 않게 아래 안내판 자리에 작게 뜬다. 물고기 그림 · 이름과 값 · 놓아주기/챙기기.
         /// 하나를 누르면 바로 다음 던지기로
         /// </summary>
-        private void ResultCard(Species sp, bool isNew, string body, string keepLabel, bool keepOff)
+        private void ResultCard(Species sp, bool isNew, string body, string keepLabel, bool keepOff, Action<Action> beforeKeep = null)
         {
             var card = new PanelContainer { MouseFilter = MouseFilterEnum.Stop };
             card.SetAnchorsAndOffsetsPreset(LayoutPreset.BottomWide);
@@ -1330,7 +1380,12 @@ namespace Hanjeopsi.App.Screens
                 Finish(released);
             }
             var release = new GameButton(T["release"], Palette.BlueDark, () => Pick(true), null, TextSize.Body, 104) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
-            var keep = new GameButton(keepLabel, Palette.Green, () => Pick(false), null, TextSize.Body, 104) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            // 바꿔 담기는 놓아줄 고기를 먼저 고른다
+            var keep = new GameButton(keepLabel, Palette.Green, () =>
+            {
+                if (beforeKeep != null) beforeKeep(() => Pick(false));
+                else Pick(false);
+            }, null, TextSize.Body, 104) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
             keep.SetEnabled(!keepOff);
             buttons.AddChild(release);
             buttons.AddChild(keep);
@@ -1786,6 +1841,22 @@ namespace Hanjeopsi.App.Screens
                     _phase = Phase.Result;
                     Celebrate(ShowResult);
                     break;
+                case "swap":
+                case "swapPick":
+                {
+                    // 쿨러가 가득 찼을 때 좋은 고기를 낚았다: 바꿔 담기 (swapPick 은 놓아줄 고기 고르기 창까지)
+                    while (!G.CoolerFull()) G.AddToCooler("jeongaengi", 14.5);
+                    _species = G.Data.SpeciesById("gamseongdom");
+                    _size = 38.6;
+                    _phase = Phase.Result;
+                    bool pick = action == "swapPick";
+                    Celebrate(() =>
+                    {
+                        ResultModal(false);
+                        if (pick) SwapPicker(() => { });
+                    });
+                    break;
+                }
                 case "joy":
                     _phase = Phase.Result;
                     Celebrate(() => { });

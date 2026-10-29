@@ -463,12 +463,22 @@ namespace Hanjeopsi.Core.Tests
             if (!_g.IsTruckOpen()) return;
             if (_g.Truck.Cookable(S).Count == 0) return;
             // 오늘의 메뉴: 생각 있는 사람은 값이 큰 요리를, 초보는 아무거나 메뉴 칸만큼
-            var menu = _s.Thoughtful
-                ? _g.SuggestMenu()
-                : _g.Truck.Cookable(S).OrderBy(_ => _rng.Next()).Take(_g.Diner.MenuSlots(S)).ToList();
+            // 칸마다 접시 수를 잡아 한 고기가 두 요리에 겹치지 않는다
+            List<MenuEntry> menu;
+            if (_s.Thoughtful) menu = _g.SuggestMenuPlan();
+            else
+            {
+                menu = new List<MenuEntry>();
+                foreach (var r in _g.Truck.Cookable(S).OrderBy(_ => _rng.Next()))
+                {
+                    if (menu.Count >= _g.Diner.MenuSlots(S)) break;
+                    int free = _g.MenuFree(menu, r);
+                    if (free > 0) menu.Add(new MenuEntry { Recipe = r, Count = free });
+                }
+            }
             foreach (var guest in _g.PlanGuests(_rng))
             {
-                var left = menu.Where(r => _g.Truck.BestFishFor(S, r) != null).ToList();
+                var left = _g.MenuOpen(menu);
                 if (left.Count == 0) break;
                 var recipe = _g.Diner.Order(guest, left, _rng, D.RecipeById);
                 // VIP 가 바란 요리를 바라는 신선도로 못 내면 그냥 돌아간다
@@ -491,6 +501,7 @@ namespace Hanjeopsi.Core.Tests
                 }
                 var dish = _g.ServeGuest(recipe, results, guest);
                 if (dish == null) throw new InvalidOperationException("만들 수 있다던 요리를 못 만들었다");
+                Game.MarkServed(menu, recipe);
                 _r.TruckIncome += dish.Pay + dish.Guest.Tip;
                 _r.Guests += 1;
                 if (guest.Kind == GuestKind.Vip && dish.Guest.VipOk) _r.VipServed += 1;

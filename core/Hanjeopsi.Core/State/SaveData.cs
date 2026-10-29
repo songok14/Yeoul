@@ -44,6 +44,9 @@ namespace Hanjeopsi.Core.State
         /// <summary>1장 주간 상환 (고닷만)</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public WeekState Week;
+        /// <summary>여울호 활어 수조 (고닷만)</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public TankState Tank;
 
         public bool Flag(string name)
         {
@@ -77,6 +80,14 @@ namespace Hanjeopsi.Core.State
         public List<string> Gifts = new List<string>();
         /// <summary>가게에 들어왔다고 알린 보상 조건 (종류-단계)</summary>
         public List<string> Stocked = new List<string>();
+    }
+
+    /// <summary>활어 수조: 단계와 든 고기. 수조 안 고기는 신선도가 떨어지지 않는다</summary>
+    public sealed class TankState
+    {
+        /// <summary>gear.json tanks 순서 (0부터)</summary>
+        public int Level;
+        public List<FishItem> Fish = new List<FishItem>();
     }
 
     /// <summary>이번 주 상환과 목표</summary>

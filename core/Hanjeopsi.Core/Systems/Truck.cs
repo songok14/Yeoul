@@ -37,7 +37,7 @@ namespace Hanjeopsi.Core.Systems
         /// <summary>이 요리에 쓸 가장 좋은 물고기. 요리 배율이 높은 것, 같으면 큰 것. 없으면 null</summary>
         public FishItem BestFishFor(SaveData save, Recipe recipe)
         {
-            return save.Cooler
+            return Game.AllFish(save)
                 .Where(f => f.Species == recipe.Species && _fresh.StageOf(f.Fresh) != FreshStage.Spoiled)
                 .OrderByDescending(f => DishFresh(recipe, _fresh.StageOf(f.Fresh)))
                 .ThenByDescending(f => f.Size)

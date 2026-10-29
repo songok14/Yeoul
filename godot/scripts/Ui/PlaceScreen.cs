@@ -283,6 +283,49 @@ namespace Hanjeopsi.App.Ui
             return row;
         }
 
+        /// <summary>
+        /// 눌러서 고르는 상자 (스크롤 안에서도). 누른 자리에서 손가락이 거의 안 움직이고 뗐을 때만 부른다.
+        /// 스크롤로 밀어 내린 것은 누른 것으로 치지 않는다
+        /// </summary>
+        public static void OnTap(Control c, Action onTap)
+        {
+            c.MouseFilter = MouseFilterEnum.Pass;
+            c.MouseDefaultCursorShape = CursorShape.PointingHand;
+            Vector2 down = Vector2.Zero;
+            c.GuiInput += e =>
+            {
+                if (!(e is InputEventMouseButton mb) || mb.ButtonIndex != MouseButton.Left) return;
+                if (mb.Pressed)
+                {
+                    down = mb.GlobalPosition;
+                    return;
+                }
+                if (mb.GlobalPosition.DistanceTo(down) < 24) onTap();
+            };
+        }
+
+        /// <summary>네모 고르기 칸. 켜지면 초록 바탕에 흰 체크</summary>
+        public static Control TickBox(bool on, bool enabled = true)
+        {
+            return new Tick { On = on, Enabled = enabled, CustomMinimumSize = new Vector2(64, 64), SizeFlagsVertical = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
+        }
+
+        private partial class Tick : Control
+        {
+            public bool On;
+            public bool Enabled = true;
+
+            public override void _Draw()
+            {
+                var r = new Rect2(Vector2.Zero, Size);
+                var box = UiKit.Box(On ? Palette.Green : new Color(Palette.PaperLight, Enabled ? 1 : 0.4f), 14).WithBorder(On ? Palette.GreenDark : new Color(Palette.InkSoft, Enabled ? 0.7f : 0.25f), 4);
+                DrawStyleBox(box, r);
+                if (!On) return;
+                var s = Size;
+                DrawPolyline(new[] { new Vector2(s.X * 0.24f, s.Y * 0.52f), new Vector2(s.X * 0.43f, s.Y * 0.7f), new Vector2(s.X * 0.77f, s.Y * 0.3f) }, Colors.White, 7, true);
+            }
+        }
+
         /// <summary>줄 안에 놓는 작은 버튼 (팔기, 사기)</summary>
         public static GameButton SmallButton(string label, Color color, Action onPress, float width = 210, int height = 96)
         {
