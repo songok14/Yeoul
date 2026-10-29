@@ -863,7 +863,7 @@ namespace Hanjeopsi.App.Screens
                 _route.RemoveAt(0);
             }
             else _yeoulAt += d.Normalized() * stepLen;
-            // 걸음: 옆으로 가면 걷기 두 장(왼쪽이면 뒤집기), 위로 오르면 뒷모습, 내려오면 앞모습 걷기 두 장 (scripts/sd_step.py)
+            // 걸음: 옆으로 가면 벌림·모음 두 장(왼쪽이면 뒤집기), 위로 오르면 뒷모습, 내려오면 앞모습 걷기 두 장 (scripts/sd_step.py)
             int before = (int)_step;
             _step += stepLen / (16 * k);
             if ((int)_step != before) Sound.Play("step", -10 - ((int)_step % 2) * 2);
@@ -875,7 +875,9 @@ namespace Hanjeopsi.App.Screens
             }
             else
             {
-                pose = "yeoul/walk-" + ((int)_step % 2 + 1);
+                // 옆 걷기는 네 박자: 다리 벌림 → 모음(옆모습) → 벌림 → 모음. 벌린 그림 두 장만 번갈면 다리가 오가지 않아 미끄러져 보였다
+                // (walk-2 는 웃는 얼굴이라 섞으면 얼굴이 깜빡인다)
+                pose = (int)_step % 2 == 0 ? "yeoul/walk-1" : "yeoul/side";
                 _yeoul.FlipH = d.X < 0;
             }
             SwapYeoul(Tex(pose));
