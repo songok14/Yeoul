@@ -176,7 +176,7 @@ namespace Hanjeopsi.Core
             double bestDecay = g.Tackles.Min(t => t.Decay);
             var list = new List<AbilityLine>
             {
-                Line("Cast", Reel.CastMeters(rod.Reach), Reel.CastMeters(rod.Reach) / Reel.CastMeters(bestReach)),
+                Line("Cast", System.Math.Round(Reel.CastMeters(rod.Reach), 1), Reel.CastMeters(rod.Reach) / Reel.CastMeters(bestReach)),
                 Line("Hook", rod.HookBonus, bestHook > 0 ? rod.HookBonus / bestHook : 0),
                 Line("Absorb", System.Math.Round(rod.Absorb * 100), bestAbsorb > 0 ? rod.Absorb / bestAbsorb : 0),
                 Line("Speed", reel.Speed, reel.Speed / bestSpeed),

@@ -1334,7 +1334,7 @@ namespace Hanjeopsi.App.Screens
                 VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
                 ScrollDeadzone = 24,
                 MouseFilter = MouseFilterEnum.Pass,
-                CustomMinimumSize = new Vector2(0, Mathf.Min(fish.Count * 152, GetViewportRect().Size.Y * 0.45f)),
+                CustomMinimumSize = new Vector2(0, Mathf.Min(fish.Count * 106, GetViewportRect().Size.Y * 0.45f)),
             };
             scroll.AddChild(list);
             root = Modal(T["swapTitle"], T["swapBody"], new[] { new ModalButton(T["swapCancel"], Palette.GrayDark) }, scroll);

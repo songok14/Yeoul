@@ -166,7 +166,9 @@ namespace Hanjeopsi.App.Screens
         private void Cooler(VBoxContainer col)
         {
             var cooler = G.Save.Cooler;
-            col.AddChild(Heading(F("cooler", cooler.Count, G.CoolerCapacity()), G.HasTank() ? T["coolerSubTank"] : T["coolerSub"]));
+            // 수조가 있으면 위 알약에 마릿수가 있어 설명만 한 줄
+            if (G.HasTank()) col.AddChild(UiKit.Text(T["coolerSubTank"], TextSize.Tiny + 2, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Right));
+            else col.AddChild(Heading(F("cooler", cooler.Count, G.CoolerCapacity()), T["coolerSub"]));
             if (cooler.Count == 0)
             {
                 col.AddChild(EmptyNote(T["coolerEmpty"]));
@@ -198,7 +200,7 @@ namespace Hanjeopsi.App.Screens
         {
             var tank = G.TankNow();
             var fish = G.TankFish();
-            col.AddChild(Heading(F("tank", fish.Count, G.TankCapacity()), T["tankSub"]));
+            col.AddChild(UiKit.Text(T["tankSub"], TextSize.Tiny + 2, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Right));
             // 수조 단계와 넓히기
             var box = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
             box.AddThemeStyleboxOverride("panel", UiKit.Box(new Color("8cd3e0", 0.3f), 24, 24, 14).WithBorder(new Color("3f7a8a", 0.6f), 3));

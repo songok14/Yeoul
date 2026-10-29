@@ -339,7 +339,7 @@ namespace Hanjeopsi.App.Screens
                     VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
                     ScrollDeadzone = 24,
                     MouseFilter = MouseFilterEnum.Pass,
-                    CustomMinimumSize = new Vector2(0, Mathf.Min(ready.Count * 132, GetViewportRect().Size.Y * 0.5f)),
+                    CustomMinimumSize = new Vector2(0, Mathf.Min(ready.Count * 101, GetViewportRect().Size.Y * 0.5f)),
                 };
                 scroll.AddChild(list);
                 extra = scroll;
@@ -373,8 +373,8 @@ namespace Hanjeopsi.App.Screens
                 minus.SetEnabled(n > 1);
                 plus.SetEnabled(n < max);
             }
-            minus = PlaceScreen.SmallButton("−", Palette.GrayDark, () => { Sound.Play("tick", -6, 0.9f); Set(n - 1); }, 130, 110);
-            plus = PlaceScreen.SmallButton("+", Palette.GrayDark, () => { Sound.Play("tick", -6, 1.15f); Set(n + 1); }, 130, 110);
+            minus = new GameButton("−", Palette.GrayDark, () => { Sound.Play("tick", -6, 0.9f); Set(n - 1); }, null, TextSize.Title, 110) { CustomMinimumSize = new Vector2(130, 110), SizeFlagsVertical = SizeFlags.ShrinkCenter };
+            plus = new GameButton("+", Palette.GrayDark, () => { Sound.Play("tick", -6, 1.15f); Set(n + 1); }, null, TextSize.Title, 110) { CustomMinimumSize = new Vector2(130, 110), SizeFlagsVertical = SizeFlags.ShrinkCenter };
             row.AddChild(minus);
             row.AddChild(count);
             row.AddChild(plus);

@@ -141,8 +141,9 @@ namespace Hanjeopsi.App.Screens
             foreach (var grp in groups)
             {
                 rows.AddChild(GroupRow(grp, i++, open));
-                // 같은 어종이라도 한 마리씩 골라 판다. 큰 것부터
-                foreach (var f in grp.Items.OrderByDescending(f => f.Size)) rows.AddChild(FishRow(f, grp.Stage, open));
+                // 같은 어종이라도 한 마리씩 골라 판다. 큰 것부터 (한 마리 묶음은 머리 줄 하나로)
+                if (grp.Items.Count > 1)
+                    foreach (var f in grp.Items.OrderByDescending(f => f.Size)) rows.AddChild(FishRow(f, grp.Stage, open));
             }
             // 스크롤 위치를 다시 그린 뒤에도 지킨다
             int keep = _scrollY;
@@ -211,11 +212,14 @@ namespace Hanjeopsi.App.Screens
             var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
             text.AddThemeConstantOverride("separation", 4);
             var sp = G.Data.SpeciesById(grp.Species);
-            text.AddChild(UiKit.Text(sp.Name + " ×" + grp.Items.Count, TextSize.Body, Palette.Ink, true));
+            // 한 마리면 크기를 이름 옆에
+            string title = grp.Items.Count > 1 ? sp.Name + " ×" + grp.Items.Count : sp.Name + " " + grp.Items[0].Size.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + "cm";
+            text.AddChild(UiKit.Text(title, TextSize.Body, Palette.Ink, true));
             var meta = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             meta.AddThemeConstantOverride("separation", 14);
             meta.AddChild(StagePill(grp.Stage));
             meta.AddChild(UiKit.Text(UiKit.Won(grp.Value), TextSize.Small, Palette.InkSoft));
+            if (grp.Items.Count == 1 && G.InTank(grp.Items[0])) meta.AddChild(Pill(T["inTank"], new Color("8cd3e0"), new Color("1d4c57"), TextSize.Tiny));
             text.AddChild(meta);
             row.AddChild(text);
             if (can)
