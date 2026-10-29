@@ -863,12 +863,16 @@ namespace Hanjeopsi.App.Screens
                 _route.RemoveAt(0);
             }
             else _yeoulAt += d.Normalized() * stepLen;
-            // 걸음: 옆으로 가면 걷기 두 장(왼쪽이면 뒤집기), 위로 오르면 뒷모습, 내려오면 앞모습
+            // 걸음: 옆으로 가면 걷기 두 장(왼쪽이면 뒤집기), 위로 오르면 뒷모습, 내려오면 앞모습 걷기 두 장 (scripts/sd_step.py)
             int before = (int)_step;
             _step += stepLen / (16 * k);
             if ((int)_step != before) Sound.Play("step", -10 - ((int)_step % 2) * 2);
             string pose;
-            if (Mathf.Abs(d.Y) > Mathf.Abs(d.X) * 1.4f) pose = d.Y < 0 ? "yeoul/back" : "yeoul/front";
+            if (Mathf.Abs(d.Y) > Mathf.Abs(d.X) * 1.4f)
+            {
+                pose = (d.Y < 0 ? "yeoul/walk-back-" : "yeoul/walk-front-") + ((int)_step % 2 + 1);
+                _yeoul.FlipH = false;
+            }
             else
             {
                 pose = "yeoul/walk-" + ((int)_step % 2 + 1);

@@ -21,10 +21,18 @@ CAP, FEATHER = 170, 26          # 논리 좌표 (지도 너비 450)
 
 # 지도마다 나무·산·달이 없는 하늘 조각 (원본 픽셀: x0, x1, y0, y1)
 PATCH = {
-    'morning': (160, 941, 0, 46),
+    'morning': (150, 941, 0, 44),
     'day': (150, 941, 0, 44),
-    'dusk': (150, 941, 0, 44),
+    'dusk': (160, 941, 0, 46),
     'night': (130, 800, 0, 42),
+}
+# 조각 안에서 하늘색으로 지울 곳 (원본 픽셀 x0, x1, y0, y1). 가는 새털구름은 크게 키우면 찢어진 모양이 된다
+ERASE = {
+    'day': [(690, 800, 0, 34), (850, 941, 0, 44)],
+}
+# 노을빛을 뺄 하늘 (저녁): 구름 사이 주황·분홍 빛을 이 연보라로 바꾼다. 구름은 그대로. 지도와 닿는 아래는 원래 색
+CALM = {
+    'dusk': (196, 182, 232),
 }
 
 
@@ -63,7 +71,18 @@ def build(name):
     k = W / 450
     cap, feat = int(CAP * k), int(FEATHER * k)
     x0, x1, y0, y1 = PATCH[name]
-    patch = im[y0:y1, x0:x1]
+    patch = im[y0:y1, x0:x1].copy()
+    for ex0, ex1, ey0, ey1 in ERASE.get(name, []):
+        # 그 줄의 맑은 하늘(흰 구름이 아닌 곳) 색으로 채우고 가장자리는 녹인다
+        for y in range(ey0, ey1):
+            row = patch[y - y0]
+            clear = row[row.min(1) < 200]
+            sky_c = np.median(clear, 0) if len(clear) else row.mean(0)
+            xs = np.arange(ex0 - x0, ex1 - x0)
+            edge = np.minimum(xs - xs[0], xs[-1] - xs) / 12.0
+            edge = np.minimum(edge, (ey1 - y) / 6.0)
+            m = smooth(edge)[:, None]
+            row[xs] = row[xs] * (1 - m) + sky_c * m
     # 조각 안 위아래 밝기 차이(위는 짙고 아래는 옅다)를 펴 둔다. 그대로 쌓으면 띠마다 가로 줄이 생긴다
     rowmean = patch.mean(1, keepdims=True)
     patch = np.clip(patch - rowmean + patch.mean((0, 1), keepdims=True), 0, 255).astype(np.uint8)
@@ -96,6 +115,12 @@ def build(name):
     t = smooth(np.linspace(1, 0, total) ** 0.8)[:, None, None]
     grad = c_bottom * (1 - t) + c_top * t
     sky += grad - patch.mean((0, 1))
+    if name in CALM:
+        lav = np.array(CALM[name], float)
+        warm = smooth((sky[..., 0] - sky[..., 2] + 5) / 40.0)[..., None]   # 빨강이 파랑보다 센 곳 = 노을빛
+        lum = sky.mean(2, keepdims=True) / lav.mean()
+        ramp = smooth((1 - np.linspace(0, 1, total) - FEATHER / (CAP + FEATHER)) / 0.35)[:, None, None]
+        sky = sky * (1 - warm * ramp) + lav * np.clip(lum, 0.85, 1.15) * warm * ramp
     # 맨 위 끝(보통 HUD 밑에 숨는다)은 HUD 남색으로 녹인다. 의뢰 띠가 길어 더 내려 보여도 끝 선이 안 보이게
     deep = np.array([0x0f, 0x1a, 0x2b], float)
     m = smooth(np.linspace(0, 1, int(total * 0.14)))[:, None, None]
