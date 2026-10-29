@@ -60,8 +60,9 @@
 - [x] 상점 업데이트: 장비 10단계(상점 1~4, 보상 5~7, 다음 지역 8~10), 새 장비 아홉 가지, 미끼 열 가지, 통발 (고닷)
 - [x] 다듬기 1차(폰 의견): 손맛 연출, 대·줄·찌, 방파제 어종만, 지친 물고기, 릴별 게이지, 낚싯대별 거리, 시세판, 할머니댁, 트럭 간판, 상점 그림 (고닷)
 - [x] 제목을 "여울호"로 바꾸고 챕터 부제 정하기 (문서, 2026-10-29)
-- [ ] 코드와 앱 이름의 제목 바꾸기: 타이틀 화면(`TitleScreen.cs`, `TitleScene.ts`), `project.godot`·`export_presets.cfg` 앱 이름, `package.json`, 웹 글꼴 샘플 `src/fonts.ts`
-- [ ] 타이틀 부제: 챕터 데이터(`godot/data/`)에 부제를 두고 타이틀이 세이브의 챕터를 읽어 띄운다. 트루 엔딩 뒤 부제 따로
+- [x] 코드와 앱 이름의 제목 바꾸기: 타이틀 화면(`TitleScreen.cs`, `TitleScene.ts`), `project.godot`·`export_presets.cfg` 앱 이름, `package.json`, `index.html`, 웹 글꼴 샘플 `src/fonts.ts`
+- [x] 타이틀 부제: `texts.json` title에 일곱 챕터 부제, 코어 `TitleCard`가 저장된 판의 챕터로 고른다. 트루 엔딩 뒤(`endingTrue` 플래그) 부제 따로. 사진 title, title-ending (고닷)
+- [ ] 2장이 생기면 세이브에 챕터를 두고 `TitleCard.Chapter`가 읽게 한다. 트루 엔딩을 만들 때 `endingTrue` 플래그를 켠다
 - [ ] 다듬기 목록 `docs/POLISH.md` 나머지 (화면별, 폰 사진을 받으며 하나씩)
 - [x] U10 일부: 낚시 기다릴 때 앉은 뒷모습, 입질 "!" (고닷)
 - [ ] 물때표(사리·조금)와 날씨 → 출조 날짜 고르기의 재미

@@ -35,7 +35,7 @@ namespace Hanjeopsi.App
                 CallDeferred(MethodName.Go, "core_lab");
                 return;
             }
-            if (gs.ShotMode && target != "title") gs.SetupDemo(gs.Demo ?? "1");
+            if (gs.ShotMode && (target != "title" || gs.Demo != null)) gs.SetupDemo(gs.Demo ?? "1");
             CallDeferred(MethodName.Go, target);
         }
 

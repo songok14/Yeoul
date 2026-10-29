@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { C, GAME_W, T } from '../config';
+import { TITLE } from '../data/story';
 import { newGame } from '../state/actions';
 import { hasSave, loadSave } from '../state/save';
 import { backdrop, sprite, Button, fadeIn, goTo, modal, txt } from '../ui/ui';
@@ -21,8 +22,9 @@ export class TitleScene extends Phaser.Scene {
     const cat = sprite(this, 'ch-cat-sleep', 330, 600, 52);
     this.tweens.add({ targets: cat, scaleY: cat.scaleY * 1.04, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
 
-    txt(this, GAME_W / 2, 150, '한 접시의 바다', { size: 'title', color: T.paper, origin: [0.5, 0.5], stroke: '#1b2a41' });
-    txt(this, GAME_W / 2, 210, '나는 맛을 잃었다.\n다시 맛을 느낄 수 있는 건\n내 손으로 낚은 물고기뿐이다.', {
+    txt(this, GAME_W / 2, 140, TITLE.name, { size: 'title', color: T.paper, origin: [0.5, 0.5], stroke: '#1b2a41' });
+    txt(this, GAME_W / 2, 186, TITLE.subtitle, { size: 'h1', color: '#f3d9a4', origin: [0.5, 0.5], stroke: '#1b2a41' });
+    txt(this, GAME_W / 2, 226, '나는 맛을 잃었다.\n다시 맛을 느낄 수 있는 건\n내 손으로 낚은 물고기뿐이다.', {
       size: 'small', color: '#fbf3e0', origin: [0.5, 0], align: 'center', lineSpacing: 8, stroke: '#1b2a41',
     });
 

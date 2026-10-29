@@ -28,6 +28,26 @@ namespace Hanjeopsi.Core.Data
         public Dictionary<string, string> Notebook = new Dictionary<string, string>();
         /// <summary>여울호 푸드트럭 화면</summary>
         public Dictionary<string, string> Truck = new Dictionary<string, string>();
+        /// <summary>타이틀 화면 제목과 챕터 부제</summary>
+        public TitleTexts Title = new TitleTexts();
+    }
+
+    public sealed class TitleTexts
+    {
+        /// <summary>게임 제목</summary>
+        public string Name;
+        /// <summary>챕터 순서대로 (1장부터)</summary>
+        public List<ChapterTitle> Chapters = new List<ChapterTitle>();
+        /// <summary>트루 엔딩을 본 뒤의 부제</summary>
+        public string AfterEnding;
+        /// <summary>타이틀 아래 작은 글씨. {0} 챕터 번호, {1} 지역</summary>
+        public string Foot;
+    }
+
+    public sealed class ChapterTitle
+    {
+        public string Place;
+        public string Subtitle;
     }
 
     public sealed class MarketTexts

@@ -108,6 +108,7 @@ jobs:
             "lab:--screen=lab"
             "checks:--screen=lab --shot-checks"
             "title:--screen=title"
+            "title-ending:--screen=title --demo=ending"
             "town:--screen=town"
             "town-restaurant:--screen=town --shot-action=restaurant"
             "town-goals:--screen=town --shot-action=goals"

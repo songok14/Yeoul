@@ -1,11 +1,12 @@
 using Godot;
 using Hanjeopsi.App.Ui;
+using Hanjeopsi.Core.Systems;
 
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 타이틀 (웹 TitleScene). 노을 지는 마을, 잠든 고등어, 제목과 세 줄 머리말이 차례로 떠오르고 버튼이 올라온다.
-    /// 새로 시작 / 이어하기. 아래 작은 글씨를 누르면 점검 화면.
+    /// 타이틀 (웹 TitleScene). 노을 지는 마을, 잠든 고등어, 제목과 챕터 부제, 세 줄 머리말이 차례로 떠오르고 버튼이 올라온다.
+    /// 부제는 저장된 판의 챕터를 따른다 (코어 TitleCard). 새로 시작 / 이어하기. 아래 작은 글씨를 누르면 점검 화면.
     /// </summary>
     public partial class TitleScreen : Screen
     {
@@ -50,10 +51,20 @@ namespace Hanjeopsi.App.Screens
             Safe.AddChild(col);
             col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 230), MouseFilter = MouseFilterEnum.Ignore });
 
-            var title = UiKit.Shadowed("한 접시의 바다", TextSize.Hero, Palette.Paper, true, 14);
+            var titleTexts = gs.Data.Texts.Title;
+            var peek = gs.PeekSave();
+            int chapter = TitleCard.Chapter(peek);
+            var title = UiKit.Shadowed(titleTexts.Name, TextSize.Hero, Palette.Paper, true, 14);
             title.LabelSettings.OutlineSize = 6;
             title.LabelSettings.OutlineColor = new Color(Palette.NightDeep, 0.6f);
             col.AddChild(Riser(title));
+            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 6), MouseFilter = MouseFilterEnum.Ignore });
+
+            // 챕터 부제
+            var subtitle = UiKit.Shadowed(TitleCard.Subtitle(titleTexts, peek), TextSize.H1, new Color("f3d9a4"), true, 10);
+            subtitle.LabelSettings.OutlineSize = 4;
+            subtitle.LabelSettings.OutlineColor = new Color(Palette.NightDeep, 0.5f);
+            col.AddChild(Riser(subtitle));
             col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 44), MouseFilter = MouseFilterEnum.Ignore });
 
             var lines = new[] { "나는 맛을 잃었다.", "다시 맛을 느낄 수 있는 건", "내 손으로 낚은 물고기뿐이다." };
@@ -93,7 +104,7 @@ namespace Hanjeopsi.App.Screens
 
             col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 70), MouseFilter = MouseFilterEnum.Ignore });
             var foot = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
-            var version = UiKit.Text("v" + GameState.Version + " · 1장 물비늘포", TextSize.Tiny, new Color("d8d0c0"), false, false, 0, null, HorizontalAlignment.Center);
+            var version = UiKit.Text("v" + GameState.Version + " · " + TitleCard.Foot(titleTexts, chapter), TextSize.Tiny, new Color("d8d0c0"), false, false, 0, null, HorizontalAlignment.Center);
             foot.AddChild(version);
             var lab = new Button { Text = "  점검  ", Flat = true, FocusMode = FocusModeEnum.None };
             lab.AddThemeFontSizeOverride("font_size", TextSize.Tiny);
@@ -103,9 +114,10 @@ namespace Hanjeopsi.App.Screens
             col.AddChild(Riser(foot));
             col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 40), MouseFilter = MouseFilterEnum.Ignore });
 
-            // 등장 연출: 제목 → 머리말 한 줄씩 → 버튼
+            // 등장 연출: 제목 → 부제 → 머리말 한 줄씩 → 버튼
             FadeUp(title, 0.15, 40);
-            for (int i = 0; i < lineLabels.Length; i++) FadeUp(lineLabels[i], 0.7 + i * 0.32, 18);
+            FadeUp(subtitle, 0.5, 12, 1.0);
+            for (int i = 0; i < lineLabels.Length; i++) FadeUp(lineLabels[i], 0.8 + i * 0.3, 18);
             FadeUp(btnBox, 1.6, 60);
             FadeUp(foot, 1.9, 0);
         }

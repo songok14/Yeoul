@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "한 접시의 바다 - 모바일 웹 낚시 경영 게임",
+  "description": "여울호 - 모바일 웹 낚시 경영 게임",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",

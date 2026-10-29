@@ -5,6 +5,7 @@ using Hanjeopsi.App.Boot;
 using Hanjeopsi.App.Ui;
 using Hanjeopsi.Core.Data;
 using Hanjeopsi.Core.State;
+using Hanjeopsi.Core.Systems;
 using Hanjeopsi.Core.Util;
 using CoreGame = Hanjeopsi.Core.Game;
 
@@ -101,6 +102,24 @@ namespace Hanjeopsi.App
             return true;
         }
 
+        /// <summary>
+        /// 붙이지 않고 저장된 판만 읽는다 (타이틀 부제). 없거나 못 읽으면 null.
+        /// 사진 모드는 체험 판이 있으면 그 판
+        /// </summary>
+        public SaveData PeekSave()
+        {
+            if (ShotMode) return Game?.Save;
+            if (!SaveStore.Has()) return null;
+            try
+            {
+                return SaveStore.Load(Data);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         public void DeleteSave()
         {
             if (!ShotMode) SaveStore.Delete();
@@ -156,6 +175,7 @@ namespace Hanjeopsi.App
                 s.Kit.Own["float"] = 4;
                 s.Kit.Own["chair"] = 4;
             }
+            if (kind == "ending") s.Flags[TitleCard.TrueEndingFlag] = true;
             if (kind == "summary") s.PendingSummary = new DaySummary { Day = 3, Earned = 124_300, Spoiled = 1, ExpiredRequests = 0 };
             Game.Persist();
         }

@@ -1,5 +1,8 @@
 // 프롤로그와 1장 엔딩 대사
 
+/** 타이틀 제목과 부제. 웹은 1장뿐이라 부제 하나 (고닷은 챕터마다 texts.json title) */
+export const TITLE = { name: '여울호', subtitle: '짠맛이 돌아온 봄' };
+
 export type StoryBg = 'kitchen' | 'ash' | 'phone' | 'harbor' | 'notice' | 'storage' | 'memory' | 'breakwater' | 'grill' | 'night' | 'dawn' | 'seize';
 
 export interface StoryPage {

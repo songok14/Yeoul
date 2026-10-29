@@ -2,7 +2,7 @@ import '@fontsource/gowun-dodum/400.css';
 import '@fontsource/gowun-batang/700.css';
 import { FONT, FONT_BOLD } from './config';
 
-const SAMPLE = '한 접시의 바다 물비늘포 여울식당 위판장 0123456789,원';
+const SAMPLE = '여울호 짠맛이 돌아온 봄 물비늘포 할머니댁 위판장 0123456789,원';
 
 /** Phaser 텍스트가 대체 글꼴로 그려지지 않도록 게임 시작 전에 글꼴을 불러온다 */
 export async function loadFonts(): Promise<void> {

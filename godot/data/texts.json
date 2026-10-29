@@ -312,5 +312,40 @@
     "endTitle": "오늘 장사 끝!",
     "ranOut": "재료가 다 떨어졌다",
     "endBody": "손님 {0}명\n매출 {1}"
+  },
+  "title": {
+    "name": "여울호",
+    "chapters": [
+      {
+        "place": "물비늘포",
+        "subtitle": "짠맛이 돌아온 봄"
+      },
+      {
+        "place": "동해",
+        "subtitle": "집어등 아래 여름밤"
+      },
+      {
+        "place": "저수지",
+        "subtitle": "비 오는 날의 매운탕"
+      },
+      {
+        "place": "서해",
+        "subtitle": "전어 굽는 냄새"
+      },
+      {
+        "place": "강원",
+        "subtitle": "얼음 밑의 바다"
+      },
+      {
+        "place": "제주",
+        "subtitle": "날짜가 틀린 일지"
+      },
+      {
+        "place": "흰등대섬",
+        "subtitle": "물그림자"
+      }
+    ],
+    "afterEnding": "제일 맛있게 먹어주는 사람",
+    "foot": "{0}장 {1}"
   }
 }
