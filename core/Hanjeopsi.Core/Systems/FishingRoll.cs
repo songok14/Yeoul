@@ -35,11 +35,21 @@ namespace Hanjeopsi.Core.Systems
             var weights = new double[list.Count];
             for (int i = 0; i < list.Count; i++)
             {
-                double w = list[i].Zone[zone] * list[i].Slot[slot];
+                double w = list[i].Zone[zone] * SlotWeight(list[i], slot);
                 if (list[i].Rare) w *= hot ? B.RareHotMul : B.RareColdMul;
                 weights[i] = w;
             }
             return WeightedPick(list, weights, rng.Next());
+        }
+
+        /// <summary>하루 칸(slot)의 어종 시간대 가중치. 고닷은 아침 칸이 새벽·아침 가중치의 평균이다 (time.speciesSlots)</summary>
+        public double SlotWeight(Species sp, int slot)
+        {
+            var map = _data.Balance.Time.SpeciesSlots;
+            if (map == null || slot >= map.Count || map[slot].Count == 0) return sp.Slot[Math.Min(slot, sp.Slot.Length - 1)];
+            double sum = 0;
+            foreach (int c in map[slot]) sum += sp.Slot[Math.Min(c, sp.Slot.Length - 1)];
+            return sum / map[slot].Count;
         }
 
         /// <summary>작은 쪽으로 치우친 크기. 물 좋은 곳이면 조금 더 크다. 0.1cm 단위</summary>
@@ -66,7 +76,7 @@ namespace Hanjeopsi.Core.Systems
                     weights[i] = 0;
                     continue;
                 }
-                double w = list[i].Zone[zone] * list[i].Slot[slot] * MonthWeight(list[i], month);
+                double w = list[i].Zone[zone] * SlotWeight(list[i], slot) * MonthWeight(list[i], month);
                 if (list[i].Rare) w *= rareMul;
                 if (bias != null) w *= bias(list[i]);
                 weights[i] = w;

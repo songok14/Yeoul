@@ -865,3 +865,269 @@ Expression sheet of the same grandmother as the attached reference (gray curly s
 8. 고양이 고등어 소품 시트
 The same gray tabby cat as the attached reference with red collar and gold bell, 6 poses in two rows with wide spacing: meowing while looking to the left, meowing while looking to the right, eating a fish, sitting on a blue cooler box, sleeping on a truck roof rack, stretching.
 ```
+
+---
+
+## 걷는 언덕 마을 (2026-10-28)
+
+마을을 직접 걸어 다니게 바꾼다(사용자 결정: B 세로 언덕 마을). 남해 언덕 마을처럼 아래 항구에서 위 언덕으로 골목이 오르고, 화면은 여울을 따라 위아래(조금 좌우)로 흐른다. 그래서 **내려다본 마을 지도 한 장**과 **앞·뒤로 걷는 SD**가 새로 필요하다.
+- 지도는 화면보다 크게 확대해서 쓴다(가로 약 1.8배). 이미지 AI가 낼 수 있는 **가장 높은 해상도**로 받는다.
+- 먼저 **지도 1 낮**을 뽑고, 받으면 길과 건물 문 자리를 재서 걷는 길(코드)을 만든다. 새벽·저녁·밤은 지도 1 결과를 첨부해 같은 구도로 시간만 바꾼다.
+- SD는 지금 옆걸음 그림과 같은 사람으로 보이게 지금 SD 시트를 꼭 첨부한다.
+
+### 지도 1. 물비늘포 언덕 마을 낮 (`town-map-day`)
+
+```
+Create one vertical game map illustration. Attached: my current watercolor village background illustrations (match their palette, light and painterly texture exactly) and my current SD characters (only for scale reference, do not draw them).
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, built on a hillside that rises from the sea. Seen from a high three-quarter bird's-eye view, about 45 degrees from above, like a cozy RPG town map. The whole village fits in the picture.
+
+Layout from bottom to top:
+- Bottom 20 percent: calm sea with small waves, a concrete pier with two small fishing boats. At the bottom right edge a breakwater with gray tetrapods leads off the picture toward a small red lighthouse.
+- Above the sea: a wide flat harbor plaza of worn concrete running across the whole width. On the left side of the plaza a fish auction shed with a blue metal roof and stacked blue and yellow fish crates. On the right side of the plaza a small blue and white food truck with a striped awning and a little chalkboard, parked with empty space in front of it.
+- Middle: one wide stone paved path starts at the middle of the plaza and climbs the hill in a gentle S shape (first to the left, then to the right, then to the left again). Along the first bend, a tiny bait and tackle shop with a green and white striped awning and fishing rods by the door. At the second bend, a traditional Korean hanok house with a dark tiled roof, wooden lattice doors, warm paper lanterns and a small yard (the grandmother's house).
+- Upper part: small houses with colorful roofs (blue, orange, mint) and painted walls, a cozy guesthouse with a pink door and a laundry line, potted plants, low stone walls, a few camellia trees.
+- Top: the path ends at a small lookout with a wooden bench and a big old tree, green hills and sky above.
+
+Very important for a game map:
+- The S shaped path and the harbor plaza must be wide, flat, clearly visible and empty everywhere, about three times wider than a person, so small characters can walk on them. Every building door opens onto the path or the plaza with a little empty space in front of it.
+- Nothing covers the path: no people, no animals, no cars except the parked food truck, no crates or plants on the path itself, no overhanging roofs.
+- Keep the left and right 8 percent of the picture as simple scenery (hills, sea, trees) because the screen will crop them a little.
+- Light from the upper left, bright clear early afternoon, deep blue sea with sparkles.
+
+Style: soft painterly watercolor illustration matching the attached backgrounds (same palette, brush texture and level of detail), gentle anime background art, clean readable shapes. Vertical 9:16, the highest resolution you can make. No people, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 지도 1 받음 (2026-10-28, 941×1672) → 다시 뽑기
+- 배치는 좋았다(광장 왼쪽 위판장, 오른쪽 트럭, 첫 굽이 미끼가게, 둘째 굽이 한옥, 위 민박, 꼭대기 벤치와 큰 나무).
+- 고칠 점: 원근이 세서 위로 갈수록 집과 길이 작아진다(SD 크기·걷는 속도를 위치마다 바꿔야 하고 꼭대기에선 너무 작다). 등대가 부두 모서리에 그냥 서 있고 테트라포드가 바다에 흩어져 어색하다. 해상도가 작다(뽑는 도구의 고화질·업스케일로 가로 1800px 이상).
+- 앞 지도를 배치 참고로 첨부하고 아래 프롬프트로 다시 뽑는다. 새벽·저녁·밤은 새 지도를 첨부해 시간만 바꾼다.
+
+```
+Create one vertical game map illustration. Attached: (1) my previous village map: use it as the layout reference and keep the same places in the same order, (2) my watercolor village background illustrations: match their palette, light and painterly texture exactly.
+
+Scene: the small harbor village Mulbinulpo on the south coast of Korea, built on a hillside that rises from the sea.
+
+Camera, very important: a high three-quarter view from about 45 degrees above with almost no perspective, like a hand painted 2D RPG town map. No strong vanishing point. Buildings, trees, stone walls and the path keep nearly the same size and the same angle from the bottom of the picture to the top. Only the far islands and the sea horizon in the top corners may look small and distant.
+
+Layout from bottom to top (same as the attached map):
+- Bottom: calm sea. A harbor basin on the left with a concrete pier and two small fishing boats moored inside it.
+- Breakwater, very important: from the right end of the harbor plaza, one long straight concrete breakwater runs out into the sea diagonally toward the bottom center of the picture and protects the harbor basin. Its top is a flat walkway about three people wide with a low metal railing on both sides, clearly walkable from the plaza. Gray tetrapods are stacked neatly in a tidy row only along the outer sea side of the breakwater, never inside the harbor and never on the walkway. A small red cylindrical lighthouse with a white balcony railing stands on a round concrete base at the far tip of the breakwater. Waves break softly on the tetrapods.
+- Above the sea: a wide flat harbor plaza of worn concrete across the whole width. On the left, a fish auction shed with a blue metal roof and stacked blue and yellow fish crates. On the right, near the start of the breakwater, a small blue and white food truck with a striped awning, little stools and a chalkboard, parked with empty space in front of it.
+- Middle: one wide stone paved path climbs the hill in a gentle S shape. At the first bend, a tiny bait and tackle shop with a green and white striped awning and fishing rods by the door. At the second bend, a traditional Korean hanok house with a dark tiled roof, wooden lattice doors, warm paper lanterns and a small yard with an open gate facing the path.
+- Upper part: small houses with blue, orange and mint roofs, a guesthouse with a pink door and a laundry line, potted plants, low stone walls, camellia trees.
+- Top: the path ends at a small lookout with a wooden bench and a big old tree. Green hills, and the sea with small islands in the top corners.
+
+Game map rules:
+- The S shaped path, the plaza and the breakwater walkway are wide, flat, clearly visible and completely empty, at least three times wider than a person, the same width from bottom to top.
+- Every building door opens onto the path or the plaza with a little empty space in front of it.
+- Nothing covers the path: no people, no animals, no cars except the parked food truck, no crates or plants on the path, no overhanging roofs.
+- Keep the left and right 8 percent of the picture as simple scenery (trees, rocks, sea) because the screen will crop them a little.
+- Light from the upper left, bright clear early afternoon, deep blue sea with sparkles.
+
+Style: soft painterly watercolor illustration matching the attached backgrounds (same palette, brush texture and level of detail), gentle anime background art, clean readable shapes, crisp fine details. Vertical 9:16, the highest resolution available, at least 1800 pixels wide. No people, no text, no readable signs, no letters, no signature, no watermark.
+```
+
+#### 지도 1 확정 (2026-10-28, 세 번째 그림, 가로등 있는 것)
+- 사용자가 고른 그림: 광장·부두 가로등, 넓은 항구, 배 둘. 원근은 남아 있어 SD 크기·걸음을 높이에 따라 코드로 맞춘다. 해상도 941×1672(더 큰 파일이나 업스케일을 받으면 바꾼다).
+- 방파제는 오른쪽 아래에 짧게 보이고 화면 밖으로 이어진다. 오른쪽 아래 끝으로 걸어가면 낚시 화면으로 넘어가고 "방파제 →" 표지를 단다. 등대를 그림에 넣고 싶으면 아래 (선택) 편집 프롬프트.
+- 낮 그림에 가로등이 있으니 새벽·저녁·밤은 **같은 가로등을 켜고 끄기만** 한다. 새 가로등이나 물건을 더하지 않는다.
+
+#### 지도 기준 바꿈 (2026-10-28, 사용자 결정): 노을 지도
+- 사용자가 고른 기준 그림은 S자 길·할머니댁 한옥·광장 가로등·오른쪽 아래 방파제와 빨간 등대가 있는 **해 뜨는 주황 지도**(`godot/art/backgrounds/town-map-morning.webp`, 941×1672. 처음엔 노을 지도로 받았는데 2026-10-29 사용자 의견으로 아침 그림과 맞바꿨다)다. 걷는 길 데이터는 이 배치로 만든다.
+- 아래 "지도 1 최종"(네 번째 그림)은 배치가 달라서 레포에서 뺐다. 낮·새벽·밤은 **노을 지도를 첨부**해 "지도 낮" 프롬프트와 지도 2~4의 새벽·밤 프롬프트로 다시 뽑는다.
+
+```
+Repaint the attached village map illustration in bright daylight. Keep exactly the same composition, camera angle, buildings, S shaped path, plaza, pier, breakwater, lighthouse, tetrapods, boats, food truck, street lamps and every object in the same place and size. Do not add or remove any object. Only change the time of day and lighting.
+
+Day: bright clear early afternoon, blue sky with a few soft white clouds, light from the upper left, deep blue sea with white sparkles, green islands on the horizon, fresh green trees and colorful flowers. The street lamps and the windows are off. The food truck is open with its awning out. The path, the plaza and the breakwater walkway stay clearly visible and empty.
+
+Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+#### 노을 지도에서 시간만 바꾸기 (편집으로 빛만, 2026-10-28)
+노을 지도를 첨부하고 도구의 편집 기능으로 뽑는다. 해가 오른쪽 바다로 지니 오른쪽이 서쪽: 낮 해는 왼쪽 위, 새벽은 왼쪽 산 너머가 밝아 온다. 받으면 노을 지도와 겹쳐 보고 어긋나면 맞춘다.
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village a few hours earlier.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: bright clear early afternoon. The sun is high in the upper left outside the picture, so short soft shadows fall toward the lower right. Clear blue sky with a few soft white clouds, the sea on the right is deep blue with white sparkles and a clear horizon. Trees are fresh green, flowers are bright. All street lamps, the lighthouse lamp and the windows are turned off. The food truck is open in daylight. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village just before sunrise.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: early dawn, the sun has not risen yet. The sky glows soft pink and pale gold behind the hills on the upper left and fades to lavender and light blue over the sea on the right. Cool blue shadows everywhere, a thin morning mist over the sea and the harbor. The street lamps are still on with a soft warm glow, a few windows glow warm yellow, the red lighthouse lamp is on. The sea is calm and reflects pink and lavender. The food truck is closed. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village late at night.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: late night. Deep navy blue sky full of stars with a bright moon over the sea on the right, silver moonlight shimmering on the water. The existing street lamps shine brightly and cast warm round pools of light on the path, the plaza and the pier, so the whole path is easy to see. Warm yellow light in many house windows and the hanok. The food truck is closed with its awning rolled up and its lights off. The red lighthouse lamp glows, and small lights glow on the two fishing boats. Everything outside the lamp light is cool blue and dark but still readable. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+#### 받음 (2026-10-28): 낮 둘·새벽·밤 → 기준은 낮 지도
+- 낮 둘·새벽·밤 네 장은 서로 배치가 딱 맞는다(겹쳐 재면 어긋남 0). 노을 지도와는 위로 약 30px·옆으로 약 12px 어긋나고 배 한 척과 등대 자리도 다르다.
+- 그래서 **기준 배치는 낮 지도**(`town-map-day.webp`, 낮 첫째 장)로 바꾼다. 걷는 길 데이터도 낮 지도로 만든다. 새벽 `town-map-dawn`, 밤 `town-map-night`는 그대로 쓴다.
+- 노을은 낮 지도를 첨부해 아래 프롬프트로 다시 뽑는다. 그전까지는 옛 노을 지도(`town-map-dusk.webp`)를 쓰고, 그 위에 서는 사람·간판 자리는 약간 어긋날 수 있다.
+
+```
+Edit the attached image. This is a relighting task only: produce the exact same picture at a different time of day, as if the same camera took a photo of the same village at sunset.
+
+Do not change anything except light, sky and colors. Keep pixel for pixel the same: the camera angle and framing, the S shaped stone path and every curve and step of it, the harbor plaza and its paving lines, every house with the same roof color, shape, windows and position, the hanok house, the bait and tackle shop with the striped awning, the fish auction shed with the same crates, the food truck in the same place, every street lamp and utility pole, the stone walls, every tree and flower bush, the big tree and the bench at the top, the cliffs and the small island on the right, the pier with the same bollards and tires, the two fishing boats in the same position, the breakwater with its railing, the tetrapods and the red lighthouse. Do not add, remove, move or resize anything.
+
+New time: sunset. The sun is setting into the sea on the right near the horizon, warm golden orange light comes from the right, long soft shadows fall toward the left, the sky glows orange, pink and purple with soft clouds, the sea reflects orange and gold. The street lamps are just turning on with a warm glow, many windows glow warm yellow, the paper lanterns at the hanok house are lit, the red lighthouse lamp is on. The food truck is open with its string lights and little lamps glowing. The path, the plaza and the breakwater walkway stay empty.
+
+Style: exactly the same soft painterly watercolor, brush texture and level of detail as the attached image. Same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+#### 지도 1 최종 (2026-10-28, 약도로 다시 그린 네 번째 그림) → 배치가 달라 쓰지 않음
+- 약도대로 방파제(난간 있는 길, 바깥쪽 테트라포드)와 빨간 등대가 그림 안에 들어왔다. 원근이 많이 줄어 위아래 집 크기가 비슷하다. 가로등이 길 따라 여럿 있고 낮에도 불이 켜진 늦은 오후 빛이다.
+- `godot/art/backgrounds/town-map-day.webp`(941×1672). 더 큰 파일이나 업스케일을 받으면 바꾼다. 새벽·저녁·밤은 이 그림을 첨부해 아래 지도 2~4 프롬프트로 뽑는다.
+
+#### 지도 1 약도와 함께 다시 그리기 (방파제·등대를 그림 안에)
+약도 `docs/art/town-layout.png`(글자 없는 단색 배치도, `scripts/town_layout.py`로 그린다. 이름표판 `town-layout-labeled.png`)를 고른 낮 지도와 같이 첨부한다.
+
+```
+Repaint the attached village map illustration so that it follows the attached flat color layout sketch. Attached: (1) the flat layout sketch: a placement guide only, (2) my village map illustration: keep its painterly watercolor style, colors, light, level of detail and all its buildings, (3) optionally my other watercolor backgrounds for the palette.
+
+How to read the sketch: beige is the stone paved S shaped path and the harbor plaza, gray bands are low stone walls and the concrete pier, blue roofs, orange roofs and the mint roof are small houses, the dark gray roof with the brown wall is the traditional hanok house, the blue roof with the green and white striped awning is the bait and tackle shop, the big blue roof at the bottom left with yellow and blue boxes is the fish auction shed, the white and blue box with wheels is the food truck, yellow dots on poles are street lamps, white shapes are two small fishing boats, green blobs are trees, the big tree with the brown bench at the top is the lookout.
+
+Bottom right, very important: follow the sketch here. A straight concrete breakwater starts at the right end of the harbor plaza and runs down into the sea. Its top is a flat walkway with a low metal railing on both sides. Gray tetrapods are stacked neatly along its outer right side only. A small red cylindrical lighthouse with a white balcony railing stands on a round concrete base at the tip of the breakwater, fully inside the picture. Waves break softly on the tetrapods.
+
+Keep everything else as it is in the attached illustration: the same camera angle, the same places, the same street lamps, the same boats and the same food truck. The path, the plaza and the breakwater walkway stay wide, flat and completely empty.
+
+Style: soft painterly watercolor illustration exactly like the attached map, gentle anime background art, crisp fine details. Vertical 9:16, the highest resolution available, at least 1800 pixels wide. Do not copy the flat colors or hard edges of the sketch. No people, no text, no letters, no signature, no watermark.
+```
+
+#### 지도 2~4. 새벽 · 저녁 · 밤 (최종 낮 지도를 첨부해 시간만 바꾼다, 2026-10-28 방파제·등대·길가 가로등 반영)
+
+```
+Repaint the attached village map illustration at dawn. Keep exactly the same composition, camera angle, buildings, path, plaza, pier, breakwater, lighthouse, tetrapods, boats, food truck, street lamps and every object in the same place and size. Do not add or remove any object. Only change the time of day and lighting.
+
+Dawn: the sun has not risen yet, soft pink and lavender sky with a pale gold glow on the horizon at the left, cool blue shadows, light mist floating over the sea and between the islands. The existing street lamps are still on with a soft warm glow, a few windows glow warm yellow, and the lighthouse lamp is on. Calm sea with soft pink reflections. The path, the plaza and the breakwater walkway stay clearly visible and empty.
+
+Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+```
+Repaint the attached village map illustration at sunset. Keep exactly the same composition, camera angle, buildings, path, plaza, pier, breakwater, lighthouse, tetrapods, boats, food truck, street lamps and every object in the same place and size. Do not add or remove any object. Only change the time of day and lighting.
+
+Sunset: warm golden orange light from the left, long soft shadows, orange and pink sky with glowing clouds, the sea reflecting orange and gold. The existing street lamps glow warmly. The food truck is open with its string lights and little lamps glowing, paper lanterns are lit at the hanok house, and many windows glow. The path, the plaza and the breakwater walkway stay clearly visible and empty.
+
+Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+```
+Repaint the attached village map illustration at night. Keep exactly the same composition, camera angle, buildings, path, plaza, pier, breakwater, lighthouse, tetrapods, boats, food truck, street lamps and every object in the same place and size. Do not add any new lamps or objects. Only change the time of day and lighting.
+
+Night: deep blue night sky with stars and a bright moon, moonlight shimmering on the sea. The existing street lamps along the path, on the plaza and on the pier shine brightly and cast soft warm pools of light on the ground, so the whole path is easy to see. Warm yellow windows in the houses. The food truck is closed with its awning rolled up and its lights off. The red lighthouse lamp glows at the tip of the breakwater, and small lights glow on the fishing boats. The path, the plaza and the breakwater walkway stay clearly visible and empty.
+
+Style: the same soft painterly watercolor as the attached map, gentle anime background art. Vertical 9:16, the same size as the attached image or larger. No people, no text, no signature, no watermark.
+```
+
+- 마을 사람(손님 12명) 앞·뒤 걷기는 미룬다. 처음엔 길가 자리에 서 있거나 광장을 옆으로만 걷는다(지금 옆걸음 그림).
+
+#### (선택) 오른쪽 아래에 등대 더하기 (편집이 되는 도구에서, 시간대 그림을 뽑기 전에)
+
+```
+Edit the attached village map illustration. Keep everything exactly the same: composition, camera angle, colors, buildings, path, plaza, boats, food truck and street lamps. Only change the bottom right corner of the picture.
+
+In the bottom right corner, extend the short concrete breakwater that starts at the right end of the pier: it continues a little further into the sea as a flat walkway with a low metal railing, gray tetrapods are stacked neatly along its outer sea side, and a small red cylindrical lighthouse with a white balcony railing stands on a round concrete base at its tip, fully inside the picture. Waves break softly on the tetrapods. Match the same soft painterly watercolor style and lighting.
+
+No people, no text, no signature, no watermark.
+```
+
+### SD 3-1. 여울 앞·뒤 걷기 (언덕 마을용)
+
+```
+Create one game SD character sheet. Attached: my current SD sheet of the heroine (match her design, chibi proportions, line art and coloring exactly) and watercolor background illustrations from my game (color palette and lighting only).
+
+Character: Han Yeoul, a 29-year-old Korean woman. Long brown hair pulled up into a high messy bun with a few loose strands, brown eyes, calm slightly tired face. Oversized cream-white hooded jacket with toggle buttons, plain white t-shirt, black crossbody harness bag with small blue accents, dark brown cargo jogger pants, chunky white-gray sneakers.
+
+The figures are seen from slightly above, about 20 degrees, because they will walk on a high-angle village map.
+Row 1, facing the viewer (walking down the map toward the camera): 1. standing still, 2. walking with the right foot forward, 3. walking with the left foot forward.
+Row 2, back view (walking up the map away from the camera, we see the bun and the back of the jacket and bag): 1. standing still, 2. walking with the right foot forward, 3. walking with the left foot forward.
+Walking frames have a small natural arm swing and a slight bounce.
+
+Style: cute chibi SD, 2.5 heads tall, big head, small rounded body, short limbs, soft anime face, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 2 rows x 3 columns, full body, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no effect marks.
+```
+
+### SD 3-2. 고등어 앞·뒤 걷기 (언덕 마을용)
+
+```
+Create one game SD character sheet. Attached: my current SD sheet of the cat (match its design, chibi proportions, line art and coloring exactly) and watercolor background illustrations from my game (color palette and lighting only).
+
+Character: Godeungeo, a small silver gray mackerel tabby street cat with dark stripes, white chest, muzzle and paws, yellow green eyes, pink nose and inner ears, a red collar with a tiny gold bell and an old handmade wooden fishing float tied to the collar (faded red and white, no letters).
+
+The cat is seen from slightly above, about 20 degrees, because it will walk on a high-angle village map.
+Row 1, facing the viewer (walking toward the camera): 1. sitting, 2. walking with the front right paw forward, 3. walking with the front left paw forward.
+Row 2, back view (walking away, tail up and slightly curved): 1. sitting seen from behind, 2. walking with the front right paw forward, 3. walking with the front left paw forward.
+
+Style: cute chibi SD animal, big round head, small body, soft anime style, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 2 rows x 3 columns, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no effect marks.
+```
+
+### 손님 3. VIP 손님 SD 시트 (넷, 여울호 VIP 예약)
+
+VIP 손님 넷은 아직 그림이 없어 손님 그림을 빌려 쓴다(`diner.json` vips art: 블로거→관광객, 호텔 주방장→민박집 사장님, 요트 손님→택시 기사, 여행 작가→할아버지). 받으면 `godot/art/customers/<id>-stand|walk|happy|sad.png`로 자르고 `art`를 자기 id로 바꾼다.
+
+```
+Create one game SD character sheet. Attached: watercolor background illustrations from my game (color palette and lighting only) and my current SD customer sheet (match its chibi proportions, line art, coloring and pose style exactly).
+
+Characters, one per row. They are special guests who came from the city, so they look a little more stylish than the village people:
+Row 1: Food blogger young woman: wavy shoulder length hair, beige beret, round glasses, cream trench coat over a striped shirt, small crossbody bag, a smartphone in one hand and a camera strap around the neck (no logos).
+Row 2: Hotel head chef, a man in his fifties: neat short gray hair and trimmed gray beard, white double breasted chef jacket under an open navy coat, dark trousers, polished shoes, a rolled leather knife bag under his arm.
+Row 3: Yacht guest, a cheerful man in his forties: navy captain cap without any logo, sunglasses, white linen shirt with rolled sleeves, light khaki shorts, boat shoes, a coiled rope keychain on his belt.
+Row 4: Travel writer woman in her thirties: short neat hair, khaki vest with many pockets over a white shirt, jeans, hiking shoes, a big backpack, a small notebook and a pen in her hands.
+
+Columns, the same for every row, every figure facing LEFT in side or three quarter view:
+1. standing still, relaxed, waiting to order
+2. walking to the left, one foot forward, a small bounce
+3. delighted after tasting: both arms up or hands clapping, big happy smile, a little hop
+4. disappointed: shoulders dropped, head slightly down, small frown
+
+Style: cute chibi SD, 2 to 2.5 heads tall, big head, small rounded body, short limbs, soft anime face, clean thin dark brown line art, soft cel shading with a light watercolor texture, light from the upper left.
+
+Layout: 4 rows x 4 columns, full body, every figure exactly the same scale and standing on the same baseline in its row, generous empty space between figures so nothing touches or overlaps, props stay inside each figure's own space.
+
+Background: plain solid light gray #EDEDED. No checkerboard, no text, no letters, no labels, no numbers, no borders, no frames, no grid lines, no ground shadow, no speech bubbles, no effect marks.
+```
+
+### 대화 4. 미식 평론가 표정 시트 (특별 손님, 2026-10-28)
+
+여울호 특별 손님(이야기 인물). 받으면 `portraits/critic*`으로 자르고 `dialogue.json` speakers에 `critic`(faces default·happy·annoyed·taste), `diner.json` specials에 넣는다.
+
+```
+Create a 2x2 character expression sheet of standing dialogue illustrations for a mobile game visual novel scene. Attached: my watercolor background illustrations (match their palette) and my current dialogue illustrations of other characters (match their art style, line weight and framing exactly).
+
+Character: a famous Korean food critic, a woman in her fifties who came down from Seoul to judge the little food truck. Sharp but fair. Silver gray chin length bob haircut, thin black rimmed glasses, light makeup, charcoal tailored long coat over a cream turtleneck, a deep green silk scarf, a small black leather notebook and a fountain pen.
+
+Layout: four panels of exactly the same size, same framing from the top of the head to just above the knees, same three-quarter pose facing slightly left, same scale and same position in every panel so the panels can be swapped during dialogue.
+Panel 1: calm appraising look, notebook held closed at her side, one eyebrow very slightly raised.
+Panel 2: genuinely impressed, a small surprised smile, pen paused above the open notebook.
+Panel 3: disappointed, lips pressed thin, closing the notebook with a snap, looking away.
+Panel 4: tasting with her eyes closed, savoring, holding chopsticks near her lips.
+
+Style: soft anime illustration, delicate clean line art, subtle natural facial acting, soft cel shading with a light watercolor texture, light from the upper left.
+Background: plain flat light gray #EDEDED in every panel. Keep hair strands as clean lines without the gray background trapped between them, no glow or white outline around the hair. No text in the notebook, no labels, no numbers, no panel borders, no grid lines, no ground shadow, no checkerboard, no signature, no watermark.
+```

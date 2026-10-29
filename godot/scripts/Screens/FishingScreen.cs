@@ -58,9 +58,9 @@ namespace Hanjeopsi.App.Screens
         // 쿨러는 여울 오른쪽 방파제 위 (긴 화면에서도 잘리지 않게). 고등어는 여울 앞을 지나 쿨러 옆까지 살금살금 간다
         private static readonly Vector2 CoolerFoot = new Vector2(318, 668);
         private static readonly Vector2 CatThiefFoot = new Vector2(280, 682);
-        // 시간대 [새벽, 아침, 낮, 저녁] 배경 색
-        // 새벽 · 아침 · 점심 · 저녁 · 밤
-        private static readonly Color[] SlotTint = { new Color("c4c0e2"), new Color("fff4e6"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
+        // 시간대 배경 색: 아침 · 점심 · 저녁 · 밤 (2026-10-28 하루 네 칸)
+        private static readonly Color[] SlotTint = { new Color("ffeedd"), Colors.White, new Color("ffcfb2"), new Color("5a66a6") };
+        private const int EveningTint = 2;
 
         private CoreGame G
         {
@@ -148,6 +148,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>가진 낚시 의자 (뒤에서 본 그림)와 앉는 자리 높이 비율. 없으면 서서 기다린다</summary>
         private Texture2D _chairTex;
         private float _chairSeat = 0.45f;
+        private float _chairWidth = 1.2f;
         private TextureRect _chair;
         // 옆으로 버티는 포즈를 잠깐 유지하는 시간 (텐션이 오르내릴 때 깜빡이지 않게)
         private float _pullHold;
@@ -167,7 +168,7 @@ namespace Hanjeopsi.App.Screens
             // ── 그림: 방파제 배경, 여울 뒷모습(SD), 고등어 ──
             _stage = new ArtStage();
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-            int tintSlot = _tutorial ? 3 : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1);
+            int tintSlot = _tutorial ? EveningTint : Mathf.Clamp(s.Slot, 0, SlotTint.Length - 1);
             bool night = tintSlot == SlotTint.Length - 1;
             // 밤 그림(breakwater-night)이 있으면 그대로 쓰고, 없으면 낮 그림을 흰 구름까지 어둡게 칠한다
             bool nightArt = night && (ResourceLoader.Exists("res://art/backgrounds/breakwater-night.png") || ResourceLoader.Exists("res://art/backgrounds/breakwater-night.webp"));
@@ -205,7 +206,7 @@ namespace Hanjeopsi.App.Screens
             // 하늘에 갈매기 (밤과 궂은 날은 빼고)
             if (!night && weather != "typhoon" && weather != "snow" && weather != "rain")
             {
-                var gulls = new Gulls(_stage, 3, tintSlot == 3 ? new Color("4a3a40") : new Color("33404d"));
+                var gulls = new Gulls(_stage, 3, tintSlot == EveningTint ? new Color("4a3a40") : new Color("33404d"));
                 gulls.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(gulls);
             }
@@ -1484,12 +1485,14 @@ namespace Hanjeopsi.App.Screens
             {
                 _chairTex = TrimmedGear("chair-back", chair);
                 _chairSeat = SdPoses.ChairSeat(chair);
+                _chairWidth = SdPoses.ChairWidth(chair);
             }
         }
 
         /// <summary>
-        /// 앉은 포즈면 가진 의자를 여울 밑에 놓는다 (뒤에서 보면 등받이가 여울 앞에 온다). 의자 앉는 자리를 엉덩이 높이에 맞춘다.
-        /// 일어서면 의자는 치운다
+        /// 앉은 포즈면 가진 의자를 여울 밑에 놓는다 (뒤에서 보면 등받이가 여울 앞에 온다).
+        /// 의자 너비는 엉덩이 너비에 맞추고(좁으면 다리가 양옆으로 삐져나와 붙인 그림 같다) 앉는 자리를 엉덩이 높이에 둔다.
+        /// 의자가 여울보다 보는 쪽에 가까우니 의자 다리는 여울 발보다 아래로 내려온다. 일어서면 의자는 치운다
         /// </summary>
         private void PlaceChair(SdPose p, float scale)
         {
@@ -1501,9 +1504,17 @@ namespace Hanjeopsi.App.Screens
             }
             _chair.Visible = sitting;
             if (!sitting) return;
-            float seat = p.Seat * scale;
-            float h = seat / Mathf.Max(0.1f, _chairSeat);
+            float seatY = YeoulFoot.Y - p.Seat * scale;
+            float h, dx = 0;
+            if (p.Hip != null)
+            {
+                float w = p.Hip[1] * scale * _chairWidth;
+                h = w * _chairTex.GetHeight() / _chairTex.GetWidth();
+                dx = (p.Hip[0] - p.Foot[0]) * scale * (_poseFlip ? -1 : 1);
+            }
+            else h = p.Seat * scale / Mathf.Max(0.1f, _chairSeat);
             _stage.Swap(_chair, _chairTex, h, new Vector2(0.5f, 1));
+            _stage.Move(_chair, new Vector2(YeoulFoot.X + dx, seatY + h * _chairSeat));
             _chair.FlipH = _poseFlip;
             _stage.MoveChild(_chair, _yeoul.GetIndex() + 1);
         }

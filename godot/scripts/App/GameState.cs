@@ -141,7 +141,7 @@ namespace Hanjeopsi.App
 
         /// <summary>
         /// 사진과 화면 확인용 체험 판 (웹 BootScene setupDemo). 4일차, 소지금 86,000원, 빚 264만 원, 쿨러 6마리.
-        /// kind: lunch 면 점심, evening 이면 저녁, night 면 밤, summary 면 새벽에 어제 요약이 뜬다
+        /// kind: lunch 면 점심, evening 이면 저녁, night 면 밤, summary 면 아침에 어제 요약이 뜬다. 그 밖에는 아침
         /// </summary>
         public void SetupDemo(string kind)
         {
@@ -150,7 +150,7 @@ namespace Hanjeopsi.App
             Game.CompletePrologue();
             s.Money = 86_000;
             s.Day = 4;
-            s.Slot = kind == "night" ? 4 : kind == "lunch" ? 2 : kind == "evening" ? 3 : kind == "summary" ? 0 : 1;
+            s.Slot = kind == "night" ? 3 : kind == "lunch" ? 1 : kind == "evening" ? 2 : 0;
             s.Debt = 2_640_000;
             var catches = new (string Species, double Size, int Fresh)[]
             {

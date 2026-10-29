@@ -6,12 +6,14 @@ using Hanjeopsi.App.Ui;
 using Hanjeopsi.Core;
 using Hanjeopsi.Core.Data;
 using Hanjeopsi.Core.State;
+using Hanjeopsi.Core.Systems;
 using CoreGame = Hanjeopsi.Core.Game;
 
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 물비늘포 마을 (웹 TownScene). 시간대별 배경, 건물 간판, SD 여울과 고등어, 트럭, 아래 메뉴 여섯 개.
+    /// 물비늘포 마을 (웹 TownScene). 2026-10-28부터 걷는 언덕 마을: 내려다본 지도(시간대마다 한 장)를 크게 보고
+    /// 누른 곳까지 길을 따라 걸으며 카메라가 따라간다(길 그물은 townmap.json, 길 찾기는 코어 TownPath). 간판을 누르면 그곳에 들어간다.
     /// 들어올 때 1장 결말과 어제 요약을 확인한다. 할머니댁에서 빚을 갚고 잠을 잔다.
     /// </summary>
     public partial class TownScreen : Screen
@@ -29,111 +31,143 @@ namespace Hanjeopsi.App.Screens
             get { return GameState.I.Game; }
         }
 
+        /// <summary>걷는 언덕 마을 길 (코어 TownPath, townmap.json)</summary>
+        private TownPath P
+        {
+            get { return G.Town; }
+        }
+
+        private TownMap M
+        {
+            get { return G.Data.TownMap; }
+        }
+
         private ArtStage _stage;
         private Hud _hud;
         private PanelContainer _menu;
-        private TextureRect _yeoul, _cat, _truck;
+        private TextureRect _yeoul, _cat;
         private FootShadows _shadows;
         private readonly Dictionary<string, Texture2D> _tex = new Dictionary<string, Texture2D>();
         private float _time;
         private float _catTimer = 5;
         private float _yeoulReset;
-        private float _footY = 636;
-        /// <summary>간판을 눌러 여울이 그쪽으로 걸어가는 중 (다른 누름은 받지 않는다)</summary>
+        /// <summary>여울이 걷는 중 (다른 장소 누름은 받지 않는다. 땅을 누르면 길을 바꾼다)</summary>
         private bool _walking;
+        /// <summary>여울과 고등어 발밑 (지도 논리 좌표)</summary>
+        private Vector2 _yeoulAt, _catAt;
+        /// <summary>여울이 따라 걷는 남은 길 점들과 닿으면 할 일</summary>
+        private readonly List<Vector2> _route = new List<Vector2>();
+        private Action _arrive;
+        private float _step;
+        /// <summary>카메라 중심 (여울을 부드럽게 따라간다)</summary>
+        private Vector2 _camera;
+        /// <summary>마지막으로 들어간 곳의 문 앞 점. 마을로 돌아오면 거기서 시작한다</summary>
+        private static string _lastNode;
+        /// <summary>땅을 누르는 판 (배경 바로 위, 사람·간판 아래)</summary>
+        private Control _ground;
 
-        /// <summary>마당을 지나가는 마을 사람 (걷기 그림은 오른쪽을 본다)</summary>
+        /// <summary>길 위를 오가는 마을 사람 (걷기 그림은 오른쪽을 본다)</summary>
         private sealed class Walker
         {
             public Villager Def;
             public TextureRect Node;
-            public float X, Lane, Dir, Frame, Stop, Speed;
-            public float Height;
+            public Vector2 At;
+            public readonly List<Vector2> Route = new List<Vector2>();
+            public float Frame, Stop, Speed;
         }
 
         private readonly List<Walker> _walkers = new List<Walker>();
-        /// <summary>지나가는 줄 (여울 발밑 기준 위로). 줄마다 한 사람만 걸어 서로 겹치지 않는다. 뒤 줄일수록 작다</summary>
-        private static readonly float[] Lanes = { -84, -112, -140 };
-        /// <summary>마당 SD 키 (논리 좌표). 넓은 앞마당 그림에 묻히지 않게 2026-10-27 키웠다 (여울 138→168)</summary>
-        private const float YeoulSize = 168, CatSize = 66, VillagerSize = 122, ClientSize = 126;
+        private int _walkersWanted;
+
+        /// <summary>원근: 언덕 위일수록 작게 그린 키</summary>
+        private float HeightAt(float baseHeight, float y)
+        {
+            return baseHeight * P.ScaleAt(y);
+        }
 
         /// <summary>고등어 포즈 바꾸기. 포즈 그림마다 높이가 달라(식빵 굽기는 낮다) 같은 몸 크기로 보이게 그림 높이에 비례해 맞춘다</summary>
         private void SwapCat(Texture2D tex)
         {
-            _stage.Swap(_cat, tex, CatSize * tex.GetHeight() / 302f, new Vector2(0.5f, 1));
+            _stage.Swap(_cat, tex, HeightAt(M.CatHeight, _catAt.Y) * tex.GetHeight() / 302f, new Vector2(0.5f, 1));
         }
-        /// <summary>마을 사람은 이 자리 아래에 끼워 넣는다 (의뢰인·여울·고등어·간판보다 뒤)</summary>
-        private Control _walkerLayer;
-        private static readonly float[] StartXs = { 115, 285, 355 };
-        private int _walkersWanted;
-        private float _spawnTimer;
+
+        private void SwapYeoul(Texture2D tex)
+        {
+            _stage.Swap(_yeoul, tex, HeightAt(M.YeoulHeight, _yeoulAt.Y), new Vector2(0.5f, 1));
+        }
 
         /// <summary>마을에 서 있는 의뢰인과 머리 위 표시 (! 새 의뢰, 볼락 1/2 모으는 중, ✔ 건넬 수 있음)</summary>
         private readonly List<(int Id, TextureRect Node, Control Mark)> _clients = new List<(int, TextureRect, Control)>();
-        /// <summary>의뢰인 자리: 마당 양옆, 여울보다 조금 뒤</summary>
+
+        /// <summary>의뢰인 자리 (townmap.json clientSpots)</summary>
         private Vector2 ClientSpot(int i)
         {
-            return i == 0 ? new Vector2(58, _footY - 46) : new Vector2(404, _footY - 34);
+            var p = M.ClientSpots[Math.Min(i, M.ClientSpots.Count - 1)];
+            return new Vector2(p.X, p.Y);
         }
+
         private Control _tracker;
-        private float _truckX = 330;
-        /// <summary>배경 그림 속 푸드트럭 자리 (논리 좌표). 비 그림 두 장은 트럭이 다른 곳에 있다</summary>
-        private static readonly Rect2 TruckArea = new Rect2(232, 290, 208, 115);
-        private static readonly Dictionary<string, Rect2> TruckAreaByArt = new Dictionary<string, Rect2>
-        {
-            { "village-rain", new Rect2(218, 270, 226, 105) },
-            { "village-rain-dusk", new Rect2(230, 342, 214, 113) },
-        };
         private int _yeoulLine;
 
         protected override void Build()
         {
             var s = G.Save;
 
-            // ── 그림 ──
-            _stage = new ArtStage();
+            // ── 그림: 내려다본 언덕 마을 지도를 크게 보고 여울을 따라간다 ──
+            // 지도 꼭대기를 위 띠 아래로 내려 볼 때 지도 위 여백은 짙은 남색 (HUD 와 같은 색)
+            var backdrop = new ColorRect { Color = Palette.NightDeep, MouseFilter = MouseFilterEnum.Ignore };
+            backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            Art.AddChild(backdrop);
+            _stage = new ArtStage { ClampPins = false };
             _stage.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             PaintWeather(s.Slot);
             Art.AddChild(_stage);
+            _stage.Zoom = M.Zoom;
+            // 땅 누르기: 누른 곳에서 가장 가까운 길 위 점까지 걷는다
+            _ground = new Control { MouseFilter = MouseFilterEnum.Stop };
+            _ground.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+            _ground.GuiInput += e =>
+            {
+                if (e is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Left && !mb.Pressed) TapGround(_stage.ToLogical(mb.Position));
+            };
+            _stage.AddChild(_ground);
             // 하늘에 갈매기 (밤과 궂은 날은 빼고)
             string w = G.WeatherToday().Id;
-            if (s.Slot != G.Data.Balance.Time.SlotsPerDay - 1 && w != "typhoon" && w != "snow")
+            if (!G.IsNight() && w != "typhoon" && w != "snow")
             {
-                var gulls = new Gulls(_stage, 4, s.Slot == 3 ? new Color("4a3a40") : new Color("33404d"));
+                var gulls = new Gulls(_stage, 4, G.IsTruckOpen() ? new Color("4a3a40") : new Color("33404d")) { MouseFilter = MouseFilterEnum.Ignore };
                 gulls.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
                 _stage.AddChild(gulls);
             }
 
-            // 마당에 선 사람들 발밑 그림자 (모두 이 위에 선다)
+            // 땅에 선 사람들 발밑 그림자 (모두 이 위에 선다)
             _shadows = new FootShadows(_stage);
             _shadows.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.AddChild(_shadows);
 
-            // 간판은 그림 속 건물 위 (2026-10-22 눈높이 마을 그림). 긴 화면에서 좌우가 잘려도 보이게 x 90~370 안에 둔다
-            // 간판에 지금 상태를 함께 적는다 (아래 버튼판 대신). 닫힌 곳은 흐리게
-            _stage.Pin(Sign("위판장", G.IsMarketOpen() ? "경매 중" : "경매 마감", true, OpenMarket), new Vector2(150, 222));
-            _stage.Pin(Sign("미끼가게", G.IsShopOpen() ? null : "닫음", G.IsShopOpen(), OpenShop), new Vector2(96, 318));
-            _stage.Pin(Sign("할머니댁", "상환 · 잠", true, Restaurant), new Vector2(370, 262));
-            _stage.Pin(Sign("방파제 →", !G.CanFishToday() ? "출입 금지" : G.Save.Slot == G.Data.Balance.Time.SlotsPerDay - 1 ? "밤낚시" : null, G.CanFishToday(), GoFishing), new Vector2(330, 196));
-
-            // 여울호는 배경 그림 속 푸드트럭. 그 자리에 보이지 않는 누름 영역과 간판을 둔다
-            Rect2 truckArea;
-            if (!TruckAreaByArt.TryGetValue(BackgroundName(), out truckArea)) truckArea = TruckArea;
-            _truck = _stage.Place(Clear(truckArea.Size), truckArea.End, truckArea.Size.Y, new Vector2(1, 1));
-            _truckX = truckArea.GetCenter().X;
-            Tappable(_truck, OpenTruck);
-            _stage.Pin(Sign("여울호", G.IsTruckOpen() ? "손님 " + G.CustomersNow() : "새벽엔 쉼", G.IsTruckOpen(), OpenTruck), new Vector2(truckArea.GetCenter().X - 4, truckArea.End.Y + 15));
+            // 여울과 고등어: 마지막으로 들어갔던 곳 문 앞에서 시작한다
+            string start = _lastNode ?? M.Start;
+            if (!M.Nodes.Any(n => n.Id == start)) start = M.Start;
+            _yeoulAt = PosOf(start);
+            _catAt = _yeoulAt + new Vector2(-14, 4);
+            _cat = _stage.Place(Tex("cat/sit-front"), _catAt, HeightAt(M.CatHeight, _catAt.Y));
+            Tappable(_cat, TapCat);
+            _yeoul = _stage.Place(Tex("yeoul/front"), _yeoulAt, HeightAt(M.YeoulHeight, _yeoulAt.Y));
+            Tappable(_yeoul, TapYeoul);
+            _shadows.Add(_yeoul, 20);
+            _shadows.Add(_cat, 14);
             AddVillagers();
             RefreshClients();
-            _cat = _stage.Place(Tex("cat/sit-front"), new Vector2(118, 636), CatSize);
-            Tappable(_cat, TapCat);
-            _yeoul = _stage.Place(Tex("yeoul/front"), new Vector2(205, 636), YeoulSize);
-            Tappable(_yeoul, TapYeoul);
-            _shadows.Add(_yeoul, 58);
-            _shadows.Add(_cat, 44);
-            // 간판은 걸어 다니는 사람들보다 늘 위에
-            foreach (var sign in _stage.GetChildren())
-                if (sign is SignButton sb) sb.MoveToFront();
+
+            // 간판은 그림 속 건물 위. 지금 상태를 함께 적는다 (닫힌 곳은 바랜 종이)
+            foreach (var place in M.Places)
+            {
+                var pl = place;
+                _stage.Pin(PlaceSign(pl), new Vector2(pl.SignX, pl.SignY));
+            }
+            _camera = _yeoulAt;
+            _stage.Focus = CameraTarget();
+            SortByDepth();
 
             // ── 위: HUD 와 오늘 소식 ──
             var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
@@ -151,16 +185,15 @@ namespace Hanjeopsi.App.Screens
             // ── 아래: 메뉴 ──
             _menu = new PanelContainer();
             col.AddChild(_menu);
-            // 아래 판은 짧게: 안내 한 줄과 수첩. 장소는 그림 속 간판을 누르면 여울이 걸어간다
+            // 아래 판은 짧게: 안내 한 줄과 수첩. 땅을 누르면 걷고, 간판을 누르면 그곳에 들어간다
             var bar = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             bar.AddThemeConstantOverride("separation", 22);
             _menu.AddChild(bar);
-            var hint = UiKit.Text("간판을 누르면 여울이 걸어가요", TextSize.Small, Palette.GrayText, false, true);
+            var hint = UiKit.Text("누른 곳으로 걸어가요\n간판을 누르면 들어가요", TextSize.Small, Palette.GrayText, false, true);
             hint.SizeFlagsHorizontal = SizeFlags.ExpandFill;
             hint.VerticalAlignment = VerticalAlignment.Center;
             bar.AddChild(hint);
             bar.AddChild(new GameButton("수첩", Palette.Purple, OpenNotebook, "도감 · 미각", TextSize.Body, 110) { CustomMinimumSize = new Vector2(280, 110), SizeFlagsHorizontal = SizeFlags.ShrinkEnd });
-            _menu.Resized += PlaceOnFloor;
             OnSafeAreaChanged();
 
             // 메뉴가 아래에서 올라오고 HUD 가 위에서 내려온다
@@ -173,47 +206,74 @@ namespace Hanjeopsi.App.Screens
             CallDeferred(MethodName.OnEnter);
         }
 
+        /// <summary>장소 간판: 이름과 지금 상태 한 줄, 누르면 그곳까지 걸어가 들어간다</summary>
+        private SignButton PlaceSign(TownPlace p)
+        {
+            switch (p.Id)
+            {
+                case "market": return Sign(p.Name, G.IsMarketOpen() ? "경매 중" : "경매 마감", true, OpenMarket);
+                case "shop": return Sign(p.Name, G.IsShopOpen() ? null : "닫음", G.IsShopOpen(), OpenShop);
+                case "grandma": return Sign(p.Name, "상환 · 잠", true, Restaurant);
+                case "truck": return Sign(p.Name, TruckSignState(), G.IsTruckOpen(), OpenTruck);
+                case "breakwater": return Sign(p.Name + " →", FishSignState(), G.CanFishNow(), GoFishing);
+                default: return Sign(p.Name, null, true, () => WalkToPlace(p.Id, () => PlaceLine(p)));
+            }
+        }
+
+        /// <summary>들어갈 곳이 없는 장소(전망대): 도착하면 여울이 한마디</summary>
+        private void PlaceLine(TownPlace p)
+        {
+            if (string.IsNullOrEmpty(p.Line)) return;
+            Bubble(Art, p.Line, _stage.ToLocal(_yeoulAt - new Vector2(0, HeightAt(M.YeoulHeight, _yeoulAt.Y) + 4)), 2.4f);
+        }
+
+        /// <summary>카메라가 볼 곳: 여울 조금 위. 위 HUD 가 화면 위를 더 가려서 여울이 화면 가운데보다 조금 아래에 선다</summary>
+        private Vector2 CameraTarget()
+        {
+            return _yeoulAt - new Vector2(0, 20);
+        }
+
+        /// <summary>사진 확인용: 여울을 그 점으로 옮기고 카메라도 바로 따라간다</summary>
+        private void Teleport(string node)
+        {
+            _yeoulAt = PosOf(node);
+            _catAt = _yeoulAt + new Vector2(-14, 4);
+            _stage.Move(_yeoul, _yeoulAt);
+            _stage.Move(_cat, _catAt);
+            SwapYeoul(Tex("yeoul/front"));
+            SwapCat(Tex("cat/sit-front"));
+            _camera = CameraTarget();
+            _stage.Focus = _camera;
+        }
+
         /// <summary>
-        /// 오늘 날씨에 맞는 마을 그림과 비·눈·안개. 날씨 그림은 낮·밤 두 장이라 새벽과 저녁은 색만 입힌다.
+        /// 오늘 날씨와 시간대에 맞는 마을 지도. 지도는 시간대마다 한 장이고 날씨는 색과 비·눈·안개로 입힌다.
         /// 날씨 효과는 배경 바로 위, 간판·캐릭터 아래에 둔다
         /// </summary>
         private void PaintWeather(int slot)
         {
             string id = G.WeatherToday().Id;
-            bool night = slot == G.Data.Balance.Time.SlotsPerDay - 1;
-            string art = G.TownArt();
-            Color tint = Colors.White;
-            var dayTint = slot == 0 ? new Color("c8c6e8") : slot == 3 ? new Color("ffd6bc") : Colors.White;
+            bool night = G.IsNight();
+            string map = M.Maps[Math.Min(slot, M.Maps.Count - 1)];
+            _stage.Background = ArtStage.LoadBackground(map);
+            // 꼭대기를 내려 볼 때 그림 위 끝이 잘려 보이지 않게 지도 속 하늘을 이어 붙인 그림 (scripts/town_sky.py)
+            string sky = "res://art/backgrounds/" + map + "-sky.webp";
+            _stage.SkyTexture = ResourceLoader.Exists(sky) ? GD.Load<Texture2D>(sky) : null;
+            _stage.KeepClouds = false;
             switch (id)
             {
-                case "rain":
-                    // 비 그림은 낮과 노을. 밤비는 밤 그림을 더 어둡게
-                    if (night)
-                    {
-                        art = "village-night";
-                        tint = new Color("aab0cc");
-                    }
-                    else art = slot == 3 ? "village-rain-dusk" : "village-rain";
-                    if (slot == 0) tint = dayTint;
-                    break;
-                case "typhoon":
-                case "snow":
-                case "fog":
-                    art = "village-" + id + (night ? "-night" : "");
-                    if (!night) tint = dayTint;
-                    break;
-            }
-            _stage.Background = ArtStage.LoadBackground(art);
-            if (tint != Colors.White)
-            {
-                _stage.KeepClouds = false;
-                _stage.Tint = tint;
+                case "rain": _stage.Tint = night ? new Color("aab0cc") : new Color("a4adbf"); break;
+                case "typhoon": _stage.Tint = night ? new Color("8a90a8") : new Color("8e98aa"); break;
+                case "snow": _stage.Tint = night ? new Color("c8d2ea") : new Color("eef2f8"); break;
+                case "fog": _stage.Tint = night ? new Color("b8bccc") : new Color("eceef0"); break;
+                default: _stage.Tint = Colors.White; break;
             }
             Control fx = null;
             if (id == "rain" || id == "typhoon") fx = new RainOverlay { Name = "RainOverlay", Intensity = night ? 1 : 1.6f };
             else if (id == "snow") fx = new SnowOverlay { Name = "SnowOverlay" };
             else if (id == "fog") fx = new FogOverlay { Name = "FogOverlay", Center = 0.3f, Strength = 0.35f, Tone = night ? new Color("8890b0") : new Color("f2f2f4") };
             if (fx == null) return;
+            fx.MouseFilter = MouseFilterEnum.Ignore;
             fx.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
             _stage.AddChild(fx);
         }
@@ -234,6 +294,22 @@ namespace Hanjeopsi.App.Screens
             sb.BorderWidthTop = 3;
             sb.ContentMarginBottom = 30 + SafeBottom;
             _menu.AddThemeStyleboxOverride("panel", sb);
+        }
+
+        /// <summary>방파제 간판 아래 줄: 태풍, 저녁 장사 시간, 밤낚시가 열렸는지</summary>
+        private string FishSignState()
+        {
+            if (!G.CanFishToday()) return "출입 금지";
+            if (G.IsTruckOpen()) return "저녁엔 장사";
+            if (G.IsNight()) return G.NightFishingOpen() ? "밤낚시" : "밤엔 위험";
+            return null;
+        }
+
+        /// <summary>여울호 간판 아래 줄: 저녁이면 오늘 손님 수, 낮에는 여는 시간</summary>
+        private string TruckSignState()
+        {
+            if (G.IsTruckOpen()) return "손님 " + G.GuestsTonight();
+            return G.IsNight() ? "오늘 장사 끝" : "저녁에 열어요";
         }
 
         private Control NewsRibbon()
@@ -275,18 +351,16 @@ namespace Hanjeopsi.App.Screens
             return Riser(pill);
         }
 
-        /// <summary>여울과 고등어, 트럭이 메뉴 위 길에 서도록. 화면이 길면 그림 속 원래 자리</summary>
-        private void PlaceOnFloor()
+        private Vector2 PosOf(string node)
         {
-            float menuTop = _menu.GetGlobalRect().Position.Y - _stage.GetGlobalRect().Position.Y;
-            _footY = Mathf.Min(640, _stage.ToLogical(new Vector2(0, menuTop)).Y + 6);
-            _stage.Move(_yeoul, new Vector2(205, _footY));
-            _stage.Move(_cat, new Vector2(118, _footY));
-            for (int i = 0; i < _clients.Count; i++)
-            {
-                _stage.Move(_clients[i].Node, ClientSpot(i));
-                _stage.Move(_clients[i].Mark, ClientSpot(i) + new Vector2(0, -MarkUp));
-            }
+            var v = P.PosOf(node);
+            return new Vector2(v.X, v.Y);
+        }
+
+        /// <summary>코어 길 찾기(System.Numerics)를 고닷 좌표로</summary>
+        private List<Vector2> RouteTo(Vector2 from, Vector2 to)
+        {
+            return P.Route(new System.Numerics.Vector2(from.X, from.Y), new System.Numerics.Vector2(to.X, to.Y)).Select(v => new Vector2(v.X, v.Y)).ToList();
         }
 
         private Texture2D Tex(string path)
@@ -295,23 +369,11 @@ namespace Hanjeopsi.App.Screens
             if (!_tex.TryGetValue(path, out t))
             {
                 // 최적화 배경은 WebP를 우선 사용하고 기존 PNG도 지원한다.
-                t = GD.Load<Texture2D>("res://art/" + path + ".webp");
-                if (t == null) t = GD.Load<Texture2D>("res://art/" + path + ".png");
+                string webp = "res://art/" + path + ".webp";
+                t = ResourceLoader.Exists(webp) ? GD.Load<Texture2D>(webp) : GD.Load<Texture2D>("res://art/" + path + ".png");
                 _tex[path] = t;
             }
             return t;
-        }
-
-        /// <summary>투명한 빈 그림 (누름 영역용)</summary>
-        private static Texture2D Clear(Vector2 size)
-        {
-            return ImageTexture.CreateFromImage(Image.CreateEmpty((int)size.X, (int)size.Y, false, Image.Format.Rgba8));
-        }
-
-        private string BackgroundName()
-        {
-            var path = _stage.Background != null ? _stage.Background.ResourcePath : "";
-            return System.IO.Path.GetFileNameWithoutExtension(path);
         }
 
         // ───────── 의뢰 ─────────
@@ -330,23 +392,24 @@ namespace Hanjeopsi.App.Screens
                 .Where(r => !string.IsNullOrEmpty(G.Data.RequestTemplates[r.Template].Sd))
                 .GroupBy(r => G.Data.RequestTemplates[r.Template].Client)
                 .Select(g => g.First()).ToList();
-            for (int i = 0; i < reqs.Count && i < 2; i++)
+            for (int i = 0; i < reqs.Count && i < M.ClientSpots.Count; i++)
             {
                 var req = reqs[i];
                 var t = G.Data.RequestTemplates[req.Template];
                 var at = ClientSpot(i);
-                var node = _stage.Place(Tex(t.Sd + "-stand"), at, ClientSize);
-                node.FlipH = at.X > ArtStage.Logical.X / 2;
-                _shadows.Add(node, 50);
+                float h = HeightAt(M.VillagerHeight, at.Y);
+                var node = _stage.Place(Tex(t.Sd + "-stand"), at, h);
+                // 광장 가운데 쪽을 본다 (그림은 왼쪽을 본다)
+                node.FlipH = at.X < PosOf(M.Start).X;
+                _shadows.Add(node, 16);
                 int id = req.Id;
                 Tappable(node, () => TapClient(id));
                 var mark = ClientMark(req);
                 Tappable(mark, () => TapClient(id));
-                _stage.Pin(mark, at + new Vector2(0, -MarkUp));
+                _stage.Pin(mark, at - new Vector2(0, h + MarkGap));
                 _clients.Add((id, node, mark));
             }
-            foreach (var sign in _stage.GetChildren())
-                if (sign is SignButton sb) sb.MoveToFront();
+            if (_stage.Focus != null) SortByDepth();
         }
 
         private float _nodTimer = 3, _nodT = -1;
@@ -378,8 +441,8 @@ namespace Hanjeopsi.App.Screens
 
         /// <summary>머리 위 표시가 통통 튀는 높이 (논리 좌표가 아니라 화면 px)</summary>
         private const float MarkHop = 26;
-        /// <summary>의뢰인 발밑에서 머리 위 표시까지 (논리 좌표)</summary>
-        private const float MarkUp = 156;
+        /// <summary>의뢰인 발밑에서 표시 가운데까지 키에 더하는 높이 (논리 좌표). 표시는 가운데를 맞춰 다니 반 높이만큼 더 띄운다</summary>
+        private const float MarkGap = 24;
 
         /// <summary>
         /// 의뢰인 머리 위 표시. 새 의뢰 ! 와 건넬 수 있는 ✔ 는 크게, 통통 튄다.
@@ -422,8 +485,14 @@ namespace Hanjeopsi.App.Screens
             var req = G.Save.Requests.FirstOrDefault(r => r.Id == id);
             if (req == null) return;
             var spot = _clients.FirstOrDefault(c => c.Id == id);
-            float x = spot.Node != null ? (spot.Node.FlipH ? ClientSpot(1).X - 60 : ClientSpot(0).X + 60) : 205;
-            WalkThen(x, () => ClientTalk(id));
+            var foot = spot.Node != null ? _stage.FootOf(spot.Node) ?? _yeoulAt : _yeoulAt;
+            // 의뢰인 앞(광장 가운데 쪽)에 서서 이야기한다
+            float side = spot.Node != null && spot.Node.FlipH ? 22 : -22;
+            WalkTo(foot + new Vector2(side, 6), () =>
+            {
+                _yeoul.FlipH = side > 0;
+                ClientTalk(id);
+            });
         }
 
         /// <summary>의뢰인과 이야기: 새 의뢰면 듣고 맡기, 모았으면 건네기, 아직이면 무엇이 남았는지</summary>
@@ -505,6 +574,10 @@ namespace Hanjeopsi.App.Screens
         {
             foreach (Node c in _tracker.GetChildren()) c.QueueFree();
             foreach (var line in QuestLines(G)) _tracker.AddChild(Riser(TrackerPill(line)));
+            // 오늘 저녁 VIP 예약: 낮 동안 그 고기를 노릴 수 있게 미리 보여 준다
+            if (!G.IsNight())
+                foreach (var v in G.VipsToday())
+                    _tracker.AddChild(Riser(TrackerPill("VIP " + v.Vip.Name + " · " + v.Recipe.Name + " (" + G.Data.Texts.Truck["fresh" + v.Vip.Fresh] + ")")));
         }
 
         /// <summary>맡은 의뢰 한 줄씩 (낚시 화면도 쓴다)</summary>
@@ -554,33 +627,27 @@ namespace Hanjeopsi.App.Screens
         }
 
         /// <summary>
-        /// 마을 사람: 시간대와 날씨만큼(새벽·밤·궂은 날은 적게) 마당을 지나간다. 처음엔 이미 걷고 있고,
-        /// 나간 사람이 있으면 잠시 뒤 다른 사람이 화면 가장자리에서 걸어 들어온다
+        /// 마을 사람: 시간대와 날씨만큼(밤·궂은 날은 적게) 길 위를 오간다. 길 점 하나에서 다른 점까지 걷고
+        /// 잠시 섰다가 또 걷는다. 의뢰인으로 선 사람은 걷지 않는다
         /// </summary>
         private void AddVillagers()
         {
-            _walkerLayer = new Control { MouseFilter = MouseFilterEnum.Ignore };
-            _stage.AddChild(_walkerLayer);
-            _walkersWanted = Math.Min(G.VillagersWanted(), Lanes.Length);
-            var rng = GameState.I.Rng;
-            // 처음 자리는 흩어 놓는다. 여울 바로 뒤(가운데)와 양옆 의뢰인 자리는 피한다
-            var starts = StartXs.OrderBy(_ => rng.Next()).ToList();
-            for (int i = 0; i < _walkersWanted; i++) SpawnWalker(starts[i % starts.Count] + ((float)rng.Next() - 0.5f) * 30);
-            _spawnTimer = NextSpawn();
+            _walkersWanted = G.VillagersWanted();
+            for (int i = 0; i < _walkersWanted; i++) SpawnWalker();
         }
 
-        private float NextSpawn()
+        /// <summary>길 점 하나 (문 앞과 방파제 끝은 빼고)</summary>
+        private Vector2 RandomSpot()
         {
-            var t = G.Data.Balance.Town;
-            return (float)(t.SpawnMin + GameState.I.Rng.Next() * (t.SpawnMax - t.SpawnMin));
+            var doors = new HashSet<string>(M.Places.Select(p => p.Node));
+            var nodes = M.Nodes.Where(n => !doors.Contains(n.Id)).ToList();
+            var n = nodes[(int)(GameState.I.Rng.Next() * nodes.Count)];
+            return new Vector2(n.X, n.Y);
         }
 
-        /// <summary>빈 줄에 이 시간대 사람 하나. x 가 없으면 화면 가장자리 밖에서 들어온다</summary>
-        private void SpawnWalker(float? x = null)
+        private void SpawnWalker()
         {
             var rng = GameState.I.Rng;
-            var free = Lanes.Where(l => _walkers.All(w => w.Lane != l)).ToList();
-            if (free.Count == 0) return;
             // 의뢰인으로 서 있는 사람과 지금 걷는 사람은 빼고
             var busy = new HashSet<string>(G.Save.Requests.Select(r => G.Data.RequestTemplates[r.Template].Sd ?? ""));
             var pool = G.Data.Dialogue.Villagers
@@ -588,32 +655,19 @@ namespace Hanjeopsi.App.Screens
                 .ToList();
             if (pool.Count == 0) return;
             var v = pool[(int)(rng.Next() * pool.Count)];
-            float lane = free[(int)(rng.Next() * free.Count)];
-            float dir = rng.Next() < 0.5 ? -1 : 1;
-            float edge = 40;
             var w = new Walker
             {
                 Def = v,
-                X = x ?? (dir > 0 ? -edge : ArtStage.Logical.X + edge),
-                Lane = lane,
-                Dir = dir,
+                At = RandomSpot(),
                 Frame = (float)rng.Next(),
-                Speed = 17 + (float)rng.Next() * 8,
-                // 뒤 줄일수록 조금 작게
-                Height = VillagerSize * v.Height * (1 + (lane - Lanes[0]) * 0.003f),
+                Speed = 0.55f + (float)rng.Next() * 0.2f,
+                Stop = (float)rng.Next() * 2,
             };
-            w.Node = _stage.Place(Tex("villagers/" + v.Id + "-walk-1"), new Vector2(w.X, _footY + w.Lane), w.Height);
-            w.Node.FlipH = w.Dir < 0;
+            w.Node = _stage.Place(Tex("villagers/" + v.Id + "-stand"), w.At, HeightAt(M.VillagerHeight * v.Height, w.At.Y));
             var ww = w;
             Tappable(w.Node, () => TapVillager(ww));
-            _shadows.Add(w.Node, w.Height * 0.46f);
+            _shadows.Add(w.Node, 16);
             _walkers.Add(w);
-            // 먼 줄이 뒤로 가게 줄 순서대로 의뢰인·여울 아래에 끼운다
-            foreach (var o in _walkers.OrderBy(o => o.Lane))
-            {
-                int at = _walkerLayer.GetIndex();
-                _stage.MoveChild(o.Node, o.Node.GetIndex() < at ? at - 1 : at);
-            }
         }
 
         private void TapVillager(Walker w)
@@ -621,58 +675,84 @@ namespace Hanjeopsi.App.Screens
             var lines = w.Def.Lines;
             if (lines.Count == 0) return;
             w.Stop = 2.4f;
+            w.Route.Clear();
             _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));
-            w.Node.FlipH = false;
             Sound.Play("tap", -10);
-            Bubble(Art, lines[(int)(GameState.I.Rng.Next() * lines.Count)], _stage.ToLocal(new Vector2(w.X, _footY + w.Lane - w.Height - 6)), 2.2f);
+            float h = HeightAt(M.VillagerHeight * w.Def.Height, w.At.Y);
+            Bubble(Art, lines[(int)(GameState.I.Rng.Next() * lines.Count)], _stage.ToLocal(w.At - new Vector2(0, h + 4)), 2.2f);
         }
 
         private void UpdateVillagers(float dt)
         {
             var rng = GameState.I.Rng;
-            foreach (var w in _walkers.ToList())
+            foreach (var w in _walkers)
             {
+                float h = HeightAt(M.VillagerHeight * w.Def.Height, w.At.Y);
                 if (w.Stop > 0)
                 {
                     w.Stop -= dt;
-                    if (w.Stop <= 0) w.Frame = 0;
-                    SdMotion.Breathe(w.Node, _time, w.Lane);
-                    _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
+                    SdMotion.Breathe(w.Node, _time, w.Speed * 10);
+                    if (w.Stop <= 0)
+                    {
+                        w.Route.Clear();
+                        w.Route.AddRange(RouteTo(w.At, RandomSpot()));
+                    }
                     continue;
                 }
-                w.X += w.Dir * w.Speed * dt;
-                // 반대쪽 가장자리 밖으로 나가면 사라진다
-                if (w.X < -50 || w.X > ArtStage.Logical.X + 50)
+                if (w.Route.Count == 0)
                 {
-                    _stage.Remove(w.Node);
-                    _walkers.Remove(w);
+                    // 닿았으면 잠시 선다
+                    w.Stop = 1.5f + (float)rng.Next() * 3;
+                    _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"), h, new Vector2(0.5f, 1));
                     continue;
                 }
+                var next = w.Route[0];
+                var d = next - w.At;
+                float stepLen = M.WalkSpeed * w.Speed * P.ScaleAt(w.At.Y) * dt;
+                if (d.Length() <= stepLen)
+                {
+                    w.At = next;
+                    w.Route.RemoveAt(0);
+                }
+                else w.At += d.Normalized() * stepLen;
                 w.Frame += dt;
-                int f = (int)(w.Frame / 0.24f) % 2;
-                _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-walk-" + (f + 1)));
-                w.Node.FlipH = w.Dir < 0;
-                SdMotion.Walk(w.Node, w.Frame / 0.24f, 0.8f);
-                _stage.Move(w.Node, new Vector2(w.X, _footY + w.Lane));
-                // 가끔 멈춰 선다. 여울 바로 뒤와 의뢰인 자리에서는 멈추지 않는다
-                bool open = (w.X > 95 && w.X < 160) || (w.X > 255 && w.X < 365);
-                if (open && rng.Next() < dt * 0.08)
+                // 여울처럼: 아래로 내려오면 앞모습 걷기 두 장(발을 한쪽씩 든다, scripts/sd_step.py).
+                // 옆(과 위, 뒷모습 그림이 없다)은 네 박자 벌림 → 모음 → 벌림 → 모음 (모음은 scripts/sd_pass.py)
+                int f = (int)(w.Frame / 0.26f);
+                string pose;
+                if (d.Y > 0 && d.Y > Mathf.Abs(d.X) * 1.4f)
                 {
-                    w.Stop = 1.5f + (float)rng.Next() * 2;
-                    _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + "-stand"));
+                    pose = "-walk-front-" + (f % 2 + 1);
                     w.Node.FlipH = false;
                 }
-            }
-            // 모자라면 잠시 뒤 새 사람이 들어온다
-            if (_walkers.Count < _walkersWanted)
-            {
-                _spawnTimer -= dt;
-                if (_spawnTimer <= 0)
+                else
                 {
-                    _spawnTimer = NextSpawn();
-                    SpawnWalker();
+                    pose = f % 2 == 1 ? "-pass" : "-walk-" + (f / 2 % 2 + 1);
+                    if (Mathf.Abs(d.X) > 0.5f) w.Node.FlipH = d.X < 0;
                 }
+                _stage.Swap(w.Node, Tex("villagers/" + w.Def.Id + pose), h, new Vector2(0.5f, 1));
+                SdMotion.Walk(w.Node, w.Frame / 0.26f, 0.8f);
+                _stage.Move(w.Node, w.At);
             }
+        }
+
+        /// <summary>앞(아래)에 선 사람이 뒤 사람을 가리게: 발밑이 아래일수록 위에 그린다. 간판·의뢰 표시는 늘 위</summary>
+        private void SortByDepth()
+        {
+            var people = new List<(Control Node, float Y)>
+            {
+                (_yeoul, _yeoulAt.Y),
+                (_cat, _catAt.Y - 0.5f),
+            };
+            foreach (var w in _walkers) people.Add((w.Node, w.At.Y));
+            foreach (var c in _clients)
+            {
+                var f = _stage.FootOf(c.Node);
+                if (f != null) people.Add((c.Node, f.Value.Y));
+            }
+            int at = _shadows.GetIndex() + 1;
+            foreach (var p in people.Where(p => IsInstanceValid(p.Node)).OrderBy(p => p.Y))
+                _stage.MoveChild(p.Node, at++);
         }
 
         /// <summary>그림 속 종이 간판: 이름과 (있으면) 아래 작은 상태 한 줄</summary>
@@ -698,29 +778,148 @@ namespace Hanjeopsi.App.Screens
         {
             float dt = (float)delta;
             _time += dt;
-            // 숨 쉬기 (걷는 동안은 걸음 움직임이 맡는다)
-            if (!_walking)
+            if (_walking) StepYeoul(dt);
+            else
             {
+                // 숨 쉬기 (걷는 동안은 걸음 움직임이 맡는다)
                 SdMotion.Breathe(_yeoul, _time);
                 SdMotion.Breathe(_cat, _time, 1, 2.8f, 0.02f);
             }
             UpdateClients(dt);
-            _stage.Zoom = 1.01f + Mathf.Sin(_time * 0.1f) * 0.01f;
-
             UpdateVillagers(dt);
+            // 카메라는 여울을 부드럽게 따라간다. 지도 꼭대기(전망대)는 위 HUD 아래까지 내려 보인다
+            // 마을 소식·목표·의뢰 띠까지 비켜서 전망대가 가리지 않게
+            float top = Mathf.Max(_hud.GetGlobalRect().End.Y, _tracker.GetGlobalRect().End.Y);
+            _stage.PadTop = Mathf.Max(0, top - _stage.GetGlobalRect().Position.Y);
+            _camera = _camera.Lerp(CameraTarget(), 1 - Mathf.Exp(-dt * 5));
+            _stage.Focus = _camera;
+            SortByDepth();
             // 여울은 손 흔든 뒤 정면으로
             if (_yeoulReset > 0)
             {
                 _yeoulReset -= dt;
-                if (_yeoulReset <= 0) _stage.Swap(_yeoul, Tex("yeoul/front"));
+                if (_yeoulReset <= 0) SwapYeoul(Tex("yeoul/front"));
             }
             // 고등어는 가끔 자세를 바꾼다
-            _catTimer -= dt;
-            if (_catTimer <= 0)
+            if (!_walking)
             {
-                _catTimer = 4 + (float)GameState.I.Rng.Next() * 5;
-                SwapCat(Tex("cat/" + CatRest[(int)(GameState.I.Rng.Next() * CatRest.Length)]));
+                _catTimer -= dt;
+                if (_catTimer <= 0)
+                {
+                    _catTimer = 4 + (float)GameState.I.Rng.Next() * 5;
+                    SwapCat(Tex("cat/" + CatRest[(int)(GameState.I.Rng.Next() * CatRest.Length)]));
+                }
             }
+        }
+
+        // ───────── 걷기 ─────────
+
+        /// <summary>땅을 눌렀다: 가장 가까운 길 위 점까지 걷는다 (걷는 중이면 길을 바꾼다)</summary>
+        private void TapGround(Vector2 at)
+        {
+            WalkTo(at, null);
+            Sound.Play("tick", -14, 1.3f);
+        }
+
+        /// <summary>장소 문 앞까지 걸어가서 들어간다. 다음에 마을로 돌아오면 그 문 앞에서 시작한다</summary>
+        private void WalkToPlace(string place, Action then)
+        {
+            var p = M.PlaceById(place);
+            WalkTo(PosOf(p.Node), () =>
+            {
+                _lastNode = p.Node;
+                then?.Invoke();
+            });
+        }
+
+        /// <summary>길을 따라 그 점(가장 가까운 길 위 점)까지 걷고 닿으면 then. 사진 모드는 바로 간다</summary>
+        private void WalkTo(Vector2 at, Action then)
+        {
+            _route.Clear();
+            _route.AddRange(RouteTo(_yeoulAt, at));
+            _arrive = then;
+            if (GameState.I.ShotMode && then != null)
+            {
+                _yeoulAt = _route[_route.Count - 1];
+                _route.Clear();
+                _stage.Move(_yeoul, _yeoulAt);
+                then();
+                return;
+            }
+            _walking = true;
+            _yeoulReset = 0;
+        }
+
+        /// <summary>한 프레임 걷기: 길 점을 하나씩 따라가고, 고등어는 조금 뒤에서 따라온다</summary>
+        private void StepYeoul(float dt)
+        {
+            if (_route.Count == 0)
+            {
+                _walking = false;
+                _yeoul.FlipH = false;
+                SwapYeoul(Tex("yeoul/front"));
+                SwapCat(Tex("cat/sit-front"));
+                _catTimer = 3;
+                var then = _arrive;
+                _arrive = null;
+                then?.Invoke();
+                return;
+            }
+            var next = _route[0];
+            var d = next - _yeoulAt;
+            float k = P.ScaleAt(_yeoulAt.Y);
+            float stepLen = M.WalkSpeed * k * dt;
+            if (d.Length() <= stepLen)
+            {
+                _yeoulAt = next;
+                _route.RemoveAt(0);
+            }
+            else _yeoulAt += d.Normalized() * stepLen;
+            // 걸음: 옆으로 가면 벌림·모음 두 장(왼쪽이면 뒤집기), 위로 오르면 뒷모습, 내려오면 앞모습 걷기 두 장 (scripts/sd_step.py)
+            int before = (int)_step;
+            _step += stepLen / (16 * k);
+            if ((int)_step != before) Sound.Play("step", -10 - ((int)_step % 2) * 2);
+            string pose;
+            if (Mathf.Abs(d.Y) > Mathf.Abs(d.X) * 1.4f)
+            {
+                pose = (d.Y < 0 ? "yeoul/walk-back-" : "yeoul/walk-front-") + ((int)_step % 2 + 1);
+                _yeoul.FlipH = false;
+            }
+            else
+            {
+                // 옆 걷기는 네 박자: 다리 벌림 → 모음(옆모습) → 벌림 → 모음. 벌린 그림 두 장만 번갈면 다리가 오가지 않아 미끄러져 보였다
+                // (walk-2 는 웃는 얼굴이라 섞으면 얼굴이 깜빡인다)
+                // side 는 걷기 그림과 달리 왼쪽을 본다. 그대로 쓰면 한 걸음마다 얼굴이 앞뒤로 돌아서 그 장만 반대로 뒤집는다
+                bool legsTogether = (int)_step % 2 == 1;
+                pose = legsTogether ? "yeoul/side" : "yeoul/walk-1";
+                _yeoul.FlipH = legsTogether ? d.X >= 0 : d.X < 0;
+            }
+            SwapYeoul(Tex(pose));
+            SdMotion.Walk(_yeoul, _step);
+            _stage.Move(_yeoul, _yeoulAt);
+
+            // 고등어: 여울과 거리가 벌어지면 따라 걷는다
+            var toYeoul = _yeoulAt - _catAt;
+            float gap = 16 * k;
+            if (toYeoul.Length() > gap)
+            {
+                float catStep = Mathf.Min(toYeoul.Length() - gap, M.WalkSpeed * 1.15f * k * dt);
+                _catAt += toYeoul.Normalized() * catStep;
+                int f = (int)(_step * 1.3f) % 2;
+                SwapCat(Tex("cat/walk-" + (2 - f)));
+                if (Mathf.Abs(toYeoul.X) > 0.5f) _cat.FlipH = toYeoul.X < 0;
+                SdMotion.Walk(_cat, _step * 1.3f + 0.5f, 0.7f);
+                _stage.Move(_cat, _catAt);
+            }
+        }
+
+        /// <summary>대화만 하고 돌아올 때 (할머니댁, 의뢰인) 정면으로</summary>
+        private void WalkBack()
+        {
+            _yeoul.FlipH = false;
+            _cat.FlipH = false;
+            SwapYeoul(Tex("yeoul/front"));
+            SwapCat(Tex("cat/sit-front"));
         }
 
         // ───────── 들어올 때 ─────────
@@ -864,6 +1063,16 @@ namespace Hanjeopsi.App.Screens
                     TapYeoul();
                     TapCat();
                     break;
+                case "walk":
+                    // 광장에서 할머니댁 쪽으로 걷는 중
+                    TapGround(PosOf("mid3"));
+                    break;
+                case "top":
+                    Teleport("lookout");
+                    break;
+                case "sea":
+                    Teleport("breakwater1");
+                    break;
                 case "goals":
                     ShowGoals();
                     break;
@@ -892,17 +1101,19 @@ namespace Hanjeopsi.App.Screens
 
         private void TapYeoul()
         {
+            if (_walking) return;
             string pose = YeoulPoses[1 + _yeoulLine % (YeoulPoses.Length - 1)];
-            _stage.Swap(_yeoul, Tex("yeoul/" + pose));
+            SwapYeoul(Tex("yeoul/" + pose));
             _yeoulReset = 2.2f;
             var lines = G.Data.Dialogue.YeoulIdle;
             string line = lines[_yeoulLine++ % lines.Count];
             Hop(_yeoul, 10);
-            Bubble(Art, line, _stage.ToLocal(new Vector2(205, _footY - YeoulSize - 6)), 2.2f);
+            Bubble(Art, line, _stage.ToLocal(_yeoulAt - new Vector2(0, HeightAt(M.YeoulHeight, _yeoulAt.Y) + 4)), 2.2f);
         }
 
         private void TapCat()
         {
+            if (_walking) return;
             int bad = G.SpoiledFish().Count;
             if (bad > 0)
             {
@@ -924,7 +1135,7 @@ namespace Hanjeopsi.App.Screens
             SwapCat(Tex("cat/meow-1"));
             _catTimer = 1.6f;
             Hop(_cat, 14);
-            Bubble(Art, idle[(int)(GameState.I.Rng.Next() * idle.Count)], _stage.ToLocal(new Vector2(118, _footY - CatSize - 4)), 1.3f);
+            Bubble(Art, idle[(int)(GameState.I.Rng.Next() * idle.Count)], _stage.ToLocal(_catAt - new Vector2(0, HeightAt(M.CatHeight, _catAt.Y) + 4)), 1.3f);
         }
 
         /// <summary>제자리에서 톡 뛴다 (발밑 기준 크기 튕김)</summary>
@@ -945,9 +1156,19 @@ namespace Hanjeopsi.App.Screens
                 Toast("태풍이 와서 방파제 출입이 막혔다");
                 return;
             }
+            if (G.IsTruckOpen())
+            {
+                Toast("저녁엔 여울호 장사 시간이다");
+                return;
+            }
+            if (!G.IsFishingTime())
+            {
+                Toast("밤 방파제는 아직 위험하다");
+                return;
+            }
             if (G.BaitLeft() <= 0 && !G.IsShopOpen())
             {
-                Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 새벽에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
+                Modal("미끼가 없다", "미끼가게는 문을 닫았다.\n내일 아침에 사 오자.", new[] { new ModalButton("닫기", Palette.GrayDark) });
                 return;
             }
             if (G.BaitLeft() <= 0)
@@ -959,80 +1180,22 @@ namespace Hanjeopsi.App.Screens
                 });
                 return;
             }
-            WalkThen(430, () => GameState.I.GoTo("fishing"));
-        }
-
-        /// <summary>
-        /// 여울이 그 건물 쪽으로 걸어가고(고등어가 뒤따른다) 화면이 바뀐다. 사진 모드는 바로 간다
-        /// </summary>
-        private void WalkThen(float x, Action then)
-        {
-            if (_walking) return;
-            if (GameState.I.ShotMode)
-            {
-                then();
-                return;
-            }
-            _walking = true;
-            _yeoulReset = 0;
-            var from = new Vector2(205, _footY);
-            var to = new Vector2(Mathf.Clamp(x, 40, ArtStage.Logical.X - 40), _footY - 26);
-            float dist = from.DistanceTo(to);
-            double time = Mathf.Clamp(dist / 260f, 0.35f, 0.8f);
-            // 걷기 그림은 오른쪽을 본다. 왼쪽으로 갈 때만 뒤집는다
-            _yeoul.FlipH = to.X < from.X;
-            _cat.FlipH = to.X < from.X;
-            var catFrom = new Vector2(118, _footY);
-            int lastFrame = -1;
-            var tw = CreateTween();
-            tw.TweenMethod(Callable.From<float>(t =>
-            {
-                _stage.Move(_yeoul, from.Lerp(to, t));
-                // 고등어는 조금 늦게 따라간다
-                _stage.Move(_cat, catFrom.Lerp(to + new Vector2(to.X > from.X ? -60 : 60, 4), Mathf.Max(0, t * 1.1f - 0.1f)));
-                int step = (int)(t * dist / 22);
-                int frame = step % 2;
-                // 발이 땅에 닿을 때마다 발소리
-                if (step != lastFrame)
-                {
-                    lastFrame = step;
-                    Sound.Play("step", -8 - (step % 2) * 2);
-                }
-                _stage.Swap(_yeoul, Tex("yeoul/walk-" + (frame + 1)));
-                SwapCat(Tex("cat/walk-" + (2 - frame)));
-                SdMotion.Walk(_yeoul, t * dist / 22);
-                SdMotion.Walk(_cat, t * dist / 16 + 0.5f, 0.7f);
-            }), 0f, 1f, time);
-            tw.TweenCallback(Callable.From(() =>
-            {
-                _walking = false;
-                then();
-            }));
-        }
-
-        /// <summary>대화만 하고 돌아올 때 (할머니댁) 제자리로</summary>
-        private void WalkBack()
-        {
-            _yeoul.FlipH = false;
-            _cat.FlipH = false;
-            _stage.Swap(_yeoul, Tex("yeoul/front"));
-            SwapCat(Tex("cat/sit-front"));
-            PlaceOnFloor();
+            WalkToPlace("breakwater", () => GameState.I.GoTo("fishing"));
         }
 
         private void OpenMarket()
         {
-            WalkThen(150, () => GameState.I.GoTo("market"));
+            WalkToPlace("market", () => GameState.I.GoTo("market"));
         }
 
         private void OpenTruck()
         {
             if (!G.IsTruckOpen())
             {
-                Toast("새벽엔 손님이 없다");
+                Toast(G.IsNight() ? "오늘 장사는 끝났다" : "여울호는 저녁에 연다");
                 return;
             }
-            WalkThen(_truckX, () => GameState.I.GoTo("truck"));
+            WalkToPlace("truck", () => GameState.I.GoTo("truck"));
         }
 
         private void OpenShop()
@@ -1042,7 +1205,7 @@ namespace Hanjeopsi.App.Screens
                 Toast("미끼가게는 문을 닫았다");
                 return;
             }
-            WalkThen(80, () => GameState.I.GoTo("shop"));
+            WalkToPlace("shop", () => GameState.I.GoTo("shop"));
         }
 
         private void OpenNotebook()
@@ -1053,7 +1216,7 @@ namespace Hanjeopsi.App.Screens
         /// <summary>할머니댁: 할머니가 한마디 하고, 대화창 위에 갚기·잠자기 선택지가 뜬다</summary>
         private void Restaurant()
         {
-            WalkThen(370, RestaurantTalk);
+            WalkToPlace("grandma", RestaurantTalk);
         }
 
         private void RestaurantTalk()
@@ -1063,15 +1226,18 @@ namespace Hanjeopsi.App.Screens
             int step = G.Data.Balance.Chapter1.RepayStep;
             var lines = G.Data.Dialogue.Grandma;
             string line = lines[(int)(GameState.I.Rng.Next() * lines.Count)];
-            Say("grandma", "default", line, new[]
+            var choices = new List<ModalButton>
             {
                 new ModalButton(G.IsWeekly ? "이번 주 몫 갚기 (" + UiKit.Won(Math.Min(s.Money, G.DueNow())) + ")" : "10만 원 갚기", Palette.GoldDark,
                     () => Pay(G.IsWeekly ? Math.Min(s.Money, G.DueNow()) : step),
                     G.IsWeekly ? G.DueNow() <= 0 || s.Money <= 0 : s.Debt <= 0 || s.Money < step),
                 new ModalButton("있는 돈 전부 갚기 (" + UiKit.Won(canPay) + ")", Palette.Red, () => Pay(canPay), canPay <= 0),
-                new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep),
-                new ModalButton("나가기", Palette.GrayDark, WalkBack),
-            });
+            };
+            // 저녁 장사 전에는 쉬었다 갈 수 있다 (태풍이거나 미끼가 떨어졌을 때)
+            if (CanRest()) choices.Add(new ModalButton("저녁까지 쉬기", Palette.GreenDark, RestUntilEvening));
+            choices.Add(new ModalButton("하루 마치기 (잠자기)", Palette.BlueDark, Sleep));
+            choices.Add(new ModalButton("나가기", Palette.GrayDark, WalkBack));
+            Say("grandma", "default", line, choices);
         }
 
         private void Pay(int amount)
@@ -1084,9 +1250,29 @@ namespace Hanjeopsi.App.Screens
             else Toast("할머니가 말없이 손을 잡아 주셨다");
         }
 
+        /// <summary>저녁 장사 전이면 쉴 수 있다 (태풍이나 미끼가 떨어져 낚시를 못 갈 때)</summary>
+        private bool CanRest()
+        {
+            var t = G.Data.Balance.Time;
+            return t.TruckSlots.Count > 0 && G.Save.Slot < t.TruckSlots.Min();
+        }
+
+        private void RestUntilEvening()
+        {
+            Modal("저녁까지 쉴까요?", G.SlotName() + "부터 저녁까지 할머니댁에서 쉽니다.\n저녁이 되면 여울호를 열 수 있어요.", new[]
+            {
+                new ModalButton("아니", Palette.GrayDark),
+                new ModalButton("쉬기", Palette.GreenDark, () =>
+                {
+                    G.RestUntilTruck();
+                    GameState.I.GoTo("town");
+                }),
+            });
+        }
+
         private void Sleep()
         {
-            Modal("오늘을 마칠까요?", G.SlotName() + " 이후의 시간이 지나가고\n다음 날 새벽이 됩니다.\n쿨러의 생선 신선도가 떨어져요.", new[]
+            Modal("오늘을 마칠까요?", G.SlotName() + " 이후의 시간이 지나가고\n다음 날 아침이 됩니다.\n쿨러의 생선 신선도가 떨어져요.", new[]
             {
                 new ModalButton("아니", Palette.GrayDark),
                 new ModalButton("잠자기", Palette.BlueDark, () =>

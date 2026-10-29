@@ -14,7 +14,7 @@ namespace Hanjeopsi.Core.State
         public int Version = CurrentVersion;
         public int Seed;
         public int Day;
-        /// <summary>0 새벽, 1 아침, 2 점심, 3 저녁, 4 밤 (웹은 네 칸)</summary>
+        /// <summary>0 새벽, 1 아침, 2 낮, 3 저녁, 4 밤 (웹은 네 칸)</summary>
         public int Slot;
         public int Money;
         public int Debt;

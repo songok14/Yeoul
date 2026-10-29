@@ -506,7 +506,7 @@ namespace Hanjeopsi.App.Lab
         {
             if (!_game.IsMarketOpen())
             {
-                Log("경매는 새벽과 아침에만 열린다");
+                Log("경매는 아침과 점심에만 열린다");
                 return;
             }
             var uids = _game.Save.Cooler.Where(f => _game.Fresh.StageOf(f.Fresh) != FreshStage.Spoiled).Select(f => f.Uid).ToList();
@@ -525,7 +525,7 @@ namespace Hanjeopsi.App.Lab
         {
             if (!_game.IsTruckOpen())
             {
-                Log("새벽엔 손님이 없다");
+                Log("여울호는 저녁에 연다");
                 return;
             }
             if (_game.Truck.Cookable(_game.Save).Count == 0)

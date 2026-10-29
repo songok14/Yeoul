@@ -57,6 +57,8 @@ namespace Hanjeopsi.Core
         public Truck Truck { get; }
         /// <summary>여울호 등급과 손님. 웹 모양 데이터에서는 null</summary>
         public Diner Diner { get; }
+        /// <summary>걷는 언덕 마을 길 (고닷만, townmap.json 이 없으면 null)</summary>
+        public TownPath Town { get; }
 
         /// <summary>상태가 바뀌어 저장할 때 (웹 persist)</summary>
         public event Action<SaveData> Saved;
@@ -72,6 +74,7 @@ namespace Hanjeopsi.Core
             Spot = new SpotRules(data);
             Truck = new Truck(data, Fresh, Taste);
             if (data.Diner != null) Diner = new Diner(data.Diner);
+            if (data.TownMap != null && data.TownMap.Nodes.Count > 0) Town = new TownPath(data.TownMap);
             Load(save);
             if (save.Day > 1 || save.Flag("prologueDone")) BeginWeeks();
         }
@@ -137,10 +140,39 @@ namespace Hanjeopsi.Core
             return Save.Slot <= Data.Balance.Time.MarketLastSlot;
         }
 
-        /// <summary>트럭은 새벽에 쉰다</summary>
+        /// <summary>트럭은 새벽에 쉰다. 고닷은 저녁에만 연다 (time.truckSlots)</summary>
         public bool IsTruckOpen()
         {
-            return Save.Slot >= Data.Balance.Time.TruckFirstSlot;
+            var t = Data.Balance.Time;
+            if (t.TruckSlots.Count > 0) return t.TruckSlots.Contains(Save.Slot);
+            return Save.Slot >= t.TruckFirstSlot;
+        }
+
+        /// <summary>하루 마지막 칸 (고닷은 밤)</summary>
+        public bool IsNight()
+        {
+            return Save.Slot == Data.Balance.Time.SlotsPerDay - 1;
+        }
+
+        /// <summary>밤낚시가 열렸나 (노씨가 케미라이트를 건넨 장면을 봤나)</summary>
+        public bool NightFishingOpen()
+        {
+            string beat = Data.Balance.Time.NightFishBeat;
+            return string.IsNullOrEmpty(beat) || Save.Flag(BeatFlag(beat));
+        }
+
+        /// <summary>지금 시간대에 낚시하러 나갈 수 있나 (날씨는 따로 CanFishToday). 고닷은 저녁에 장사만 한다</summary>
+        public bool IsFishingTime()
+        {
+            var t = Data.Balance.Time;
+            if (t.FishSlots.Count > 0 && !t.FishSlots.Contains(Save.Slot)) return false;
+            return !IsNight() || NightFishingOpen();
+        }
+
+        /// <summary>지금 방파제에 나갈 수 있나 (시간대와 날씨)</summary>
+        public bool CanFishNow()
+        {
+            return IsFishingTime() && CanFishToday();
         }
 
         /// <summary>미끼가게는 밤에 닫는다</summary>
@@ -149,11 +181,58 @@ namespace Hanjeopsi.Core
             return Save.Slot <= Data.Balance.Time.ShopLastSlot;
         }
 
-        /// <summary>이번 장사에 올 손님 수. 여울호 등급과 시간대, 그 시간대 단골로 정한다 (웹은 늘 같은 수)</summary>
+        /// <summary>이번 장사에 올 손님 수 (VIP·특별 손님 빼고). 평판과 단골, 날씨·장날로 정한다 (웹은 늘 같은 수)</summary>
         public int CustomersNow()
         {
             if (Diner == null) return Data.Balance.Truck.CustomersPerShift;
-            return Diner.GuestCount(Save, Save.Slot, WeatherToday().GuestAdd + EventGuests());
+            if (!IsTruckOpen()) return 0;
+            return Diner.GuestCount(Save, WeatherToday().GuestAdd + EventGuests());
+        }
+
+        /// <summary>오늘 저녁 올 손님 모두 (평판 손님 + VIP 예약 + 특별 손님). 장사 시간이 아니면 그 저녁 기준</summary>
+        public int GuestsTonight()
+        {
+            if (Diner == null) return CustomersNow();
+            int n = Diner.GuestCount(Save, WeatherToday().GuestAdd + EventGuests());
+            return n + VipsToday().Count + (SpecialToday() != null ? 1 : 0);
+        }
+
+        /// <summary>오늘 저녁 VIP 예약 (시드와 날짜로 정해서 같은 날은 늘 같다)</summary>
+        public List<VipBooking> VipsToday()
+        {
+            if (Diner == null) return new List<VipBooking>();
+            var here = new HashSet<string>(InSeason().Select(sp => sp.Id));
+            return Diner.Bookings(Save, Save.Day, Data.RecipeById, r => here.Contains(r.Species) && !Rules.IsClosedSeason(r.Species, Save.Day));
+        }
+
+        /// <summary>오늘 저녁에 올 특별 손님 (없으면 null)</summary>
+        public DinerSpecial SpecialToday()
+        {
+            if (Diner == null) return null;
+            return Data.Diner.Specials.FirstOrDefault(sp =>
+                Save.Day >= sp.Day && Save.Day <= Math.Max(sp.Day, sp.Until)
+                && (string.IsNullOrEmpty(sp.After) || Save.Flag(BeatFlag(sp.After)))
+                && !Save.Flag(Systems.Diner.SpecialFlag(sp.Id)));
+        }
+
+        /// <summary>VIP 가 바라는 신선도로 그 요리를 낼 고기 (없으면 null)</summary>
+        public FishItem VipFish(PlannedGuest guest)
+        {
+            var recipe = Data.RecipeById(guest.Wish);
+            int fresh = Diner.VipById(guest.Id).Fresh;
+            return Save.Cooler
+                .Where(f => f.Species == recipe.Species && (int)Fresh.StageOf(f.Fresh) <= fresh)
+                .OrderByDescending(f => f.Fresh)
+                .ThenByDescending(f => f.Size)
+                .FirstOrDefault();
+        }
+
+        /// <summary>VIP 가 바란 요리를 못 냈다. 평판이 깎인다</summary>
+        public int MissVip(PlannedGuest guest)
+        {
+            int rep = Diner.VipMissed(Save, guest);
+            Persist();
+            return rep;
         }
 
         // ───────── 날씨 (고닷만) ─────────
@@ -180,10 +259,12 @@ namespace Hanjeopsi.Core
             return w.Kinds[0];
         }
 
-        /// <summary>이번 장사 손님 차례 (날씨 반영)</summary>
-        public List<string> PlanGuests(IRandom rng)
+        /// <summary>이번 장사 손님 차례 (날씨·장날 반영, 오늘 VIP 예약과 특별 손님까지)</summary>
+        public List<PlannedGuest> PlanGuests(IRandom rng)
         {
-            return Diner.PlanGuests(Save, Save.Slot, rng, WeatherToday().GuestAdd + EventGuests());
+            var sp = SpecialToday();
+            var special = sp == null ? null : new PlannedGuest { Id = sp.Id, Kind = GuestKind.Special };
+            return Diner.PlanGuests(Save, rng, WeatherToday().GuestAdd + EventGuests(), VipsToday(), special);
         }
 
         /// <summary>고등어 힌트 정확도 빼기 (안개)</summary>
@@ -229,11 +310,14 @@ namespace Hanjeopsi.Core
         /// 손님에게 한 접시를 낸다. 값은 ServeDish 와 같고, 손님 반응만큼 평판과 친밀도가 오른다.
         /// 재료가 없으면 null
         /// </summary>
-        public ServedDish ServeGuest(Recipe recipe, IList<SeasonResult> results, string guest)
+        public ServedDish ServeGuest(Recipe recipe, IList<SeasonResult> results, PlannedGuest guest)
         {
-            var dish = ServeDish(recipe, results);
+            // VIP 는 바라는 신선도에 맞는 고기를 쓴다
+            var fish = guest.Kind == GuestKind.Vip && recipe.Id == guest.Wish ? VipFish(guest) : null;
+            var dish = ServeDish(recipe, results, fish ?? Truck.BestFishFor(Save, recipe));
             if (dish == null || Diner == null) return dish;
-            dish.Guest = Diner.AfterServe(Save, guest, recipe, Truck.MoodOf(dish.Avg));
+            dish.Guest = Diner.AfterServe(Save, guest, recipe, Truck.MoodOf(dish.Avg), dish.Pay, dish.Stage);
+            if (dish.Guest.Tip > 0) Earn(dish.Guest.Tip);
             if (Truck.MoodOf(dish.Avg) == 2) Tally("happy");
             Persist();
             return dish;
@@ -253,6 +337,17 @@ namespace Hanjeopsi.Core
         {
             var art = Data.Balance.Time.TownArt;
             return art.Count > 0 ? art[Math.Min(Save.Slot, art.Count - 1)] : "village-" + Math.Min(Save.Slot, 3);
+        }
+
+        /// <summary>트럭을 여는 시간(저녁)까지 쉰다. 태풍이나 미끼가 없어 낚시를 못 갈 때. 이미 저녁이 지났으면 아무것도 안 한다</summary>
+        public bool RestUntilTruck()
+        {
+            var t = Data.Balance.Time;
+            int slot = t.TruckSlots.Count > 0 ? t.TruckSlots.Min() : t.TruckFirstSlot;
+            if (Save.Slot >= slot) return false;
+            Save.Slot = slot;
+            Persist();
+            return true;
         }
 
         /// <summary>행동 하나로 시간 한 칸을 쓴다. 저녁이 지나면 날이 바뀐다</summary>
@@ -589,7 +684,11 @@ namespace Hanjeopsi.Core
         /// <summary>트럭에서 요리 한 접시를 낸다. 가장 좋은 재료를 쓰고 값을 받는다. 재료가 없으면 null</summary>
         public ServedDish ServeDish(Recipe recipe, IList<SeasonResult> results)
         {
-            var fish = Truck.BestFishFor(Save, recipe);
+            return ServeDish(recipe, results, Truck.BestFishFor(Save, recipe));
+        }
+
+        private ServedDish ServeDish(Recipe recipe, IList<SeasonResult> results, FishItem fish)
+        {
             if (fish == null) return null;
             var stage = Fresh.StageOf(fish.Fresh);
             RemoveFish(new[] { fish.Uid });

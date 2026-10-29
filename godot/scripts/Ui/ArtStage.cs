@@ -13,6 +13,7 @@ namespace Hanjeopsi.App.Ui
         public static readonly Vector2 Logical = new Vector2(450, 800);
 
         private readonly TextureRect _bg;
+        private TextureRect _sky;
         private readonly List<(Control Node, Vector2 At, Vector2 Origin, float Height)> _items = new List<(Control, Vector2, Vector2, float)>();
         private readonly List<(Control Node, Vector2 At)> _anchored = new List<(Control, Vector2)>();
         private float _zoom = 1;
@@ -83,6 +84,7 @@ void fragment() {
 
         private void ApplyTint()
         {
+            if (_sky != null) _sky.SelfModulate = _tint;
             if (_keepClouds)
             {
                 _cloudShader ??= new Shader { Code = CloudShaderCode };
@@ -100,6 +102,54 @@ void fragment() {
                 _bg.SelfModulate = _tint;
             }
         }
+
+        /// <summary>
+        /// 카메라 중심 (논리 좌표). 정하면 그 점이 화면 가운데에 오도록 그림을 민다(그림 밖은 보이지 않게 막는다).
+        /// 걷는 마을처럼 Zoom 으로 크게 보고 여울을 따라갈 때 쓴다. null 이면 그림 가운데
+        /// </summary>
+        public Vector2? Focus
+        {
+            get { return _focus; }
+            set
+            {
+                _focus = value;
+                Layout();
+            }
+        }
+
+        private Vector2? _focus;
+
+        /// <summary>카메라가 지도 맨 위를 이만큼(화면 px) 더 내려 보일 수 있다. 위 HUD 에 가리는 높이만큼 준다</summary>
+        public float PadTop { get; set; }
+
+        /// <summary>
+        /// 그림 맨 위 위로 이어 붙이는 하늘 그림 (없으면 null). 걷는 마을은 꼭대기(전망대)를 HUD 아래까지 내려 보여
+        /// 그림 위 끝이 칼로 자른 듯 보였다. 지도 속 진짜 하늘 조각을 이어 붙인 그림을 scripts/town_sky.py 가 만든다.
+        /// 그림 높이는 SkyCap + SkyFeather (논리 좌표). 아래 SkyFeather 만큼은 지도 위 끝에 겹쳐 점점 투명해진다
+        /// </summary>
+        public Texture2D SkyTexture
+        {
+            get { return _sky?.Texture; }
+            set
+            {
+                if (_sky == null)
+                {
+                    _sky = new TextureRect { ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale, MouseFilter = MouseFilterEnum.Ignore };
+                    AddChild(_sky);
+                    MoveChild(_sky, _bg.GetIndex() + 1);
+                }
+                _sky.Texture = value;
+                _sky.Visible = value != null;
+                _sky.SelfModulate = _tint;
+                Layout();
+            }
+        }
+
+        /// <summary>하늘 그림 중 지도 위로 나가는 높이와 지도에 겹치는 높이 (논리 좌표, scripts/town_sky.py 의 CAP·FEATHER)</summary>
+        public const float SkyCap = 170, SkyFeather = 26;
+
+        /// <summary>간판(Pin)을 화면 안에 붙들지 않는다 (걷는 마을은 그림을 따라 화면 밖으로 나간다)</summary>
+        public bool ClampPins { get; set; } = true;
 
         /// <summary>배경을 아주 천천히 숨 쉬듯 확대한다 (1이면 그대로)</summary>
         public float Zoom
@@ -207,8 +257,20 @@ void fragment() {
             K = Mathf.Max(Size.X / Logical.X, Size.Y / Logical.Y) * _zoom;
             var drawn = Logical * K;
             Origin = (Size - drawn) / 2;
+            if (_focus.HasValue)
+            {
+                var o = Size / 2 - _focus.Value * K;
+                Origin = new Vector2(
+                    drawn.X > Size.X ? Mathf.Clamp(o.X, Size.X - drawn.X, 0) : Origin.X,
+                    drawn.Y > Size.Y ? Mathf.Clamp(o.Y, Size.Y - drawn.Y, PadTop) : Origin.Y);
+            }
             _bg.Position = Origin;
             _bg.Size = drawn;
+            if (_sky != null && _sky.Visible)
+            {
+                _sky.Position = Origin - new Vector2(0, SkyCap * K);
+                _sky.Size = new Vector2(drawn.X, (SkyCap + SkyFeather) * K);
+            }
 
             foreach (var it in _items)
             {
@@ -227,7 +289,7 @@ void fragment() {
                 a.Node.PivotOffset = size / 2;
                 // 화면이 길어 그림 양옆이 잘려도 간판은 화면 안에 남긴다
                 var pos = ToLocal(a.At) - size / 2;
-                pos.X = Mathf.Clamp(pos.X, 14, Mathf.Max(14, Size.X - size.X - 14));
+                if (ClampPins) pos.X = Mathf.Clamp(pos.X, 14, Mathf.Max(14, Size.X - size.X - 14));
                 a.Node.Position = pos;
             }
         }

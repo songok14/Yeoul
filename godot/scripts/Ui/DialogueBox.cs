@@ -26,6 +26,8 @@ namespace Hanjeopsi.App.Ui
         private TextureRect _cut;
         private string _cutKey;
         private string _portraitKey;
+        /// <summary>지금 인물의 그림 크기 배율 (dialogue.json speakers scale)</summary>
+        private float _portraitScale = 1;
         private string _speakerId;
         /// <summary>지금 그림이 SD (의뢰인)라 작게 세운다</summary>
         private bool _sd;
@@ -119,7 +121,7 @@ namespace Hanjeopsi.App.Ui
             if (tex != null)
             {
                 // SD(대화 일러스트가 없는 의뢰인)는 마당 사람 크기와 어울리게 작게, 이름표 위 오른쪽에
-                float h = _sd ? Mathf.Min(size.Y * 0.24f, 470) : size.Y * 0.7f;
+                float h = _sd ? Mathf.Min(size.Y * 0.24f, 470) : size.Y * 0.7f * _portraitScale;
                 float w = tex.GetWidth() * h / tex.GetHeight();
                 _portrait.Size = new Vector2(w, h);
                 float cx = _sd ? size.X * 0.74f : right ? size.X * 0.66f : size.X * 0.34f;
@@ -263,6 +265,7 @@ namespace Hanjeopsi.App.Ui
             _nameTag.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(sp.Color), 34, 40, 12).WithShadow(0.3f, 10, 4));
             if (key == _portraitKey) return;
             _portraitKey = key;
+            _portraitScale = sp.Scale > 0 ? sp.Scale : 1;
             _portrait.Texture = GD.Load<Texture2D>("res://art/portraits/" + key + ".png");
             Layout();
 

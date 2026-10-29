@@ -91,6 +91,8 @@ namespace Hanjeopsi.App.Ui
             _day.Text = s.Day + "일차";
             for (int i = 0; i < _slots.Length; i++)
             {
+                // 하루 칸이 칩 자리보다 적으면 (고닷 네 칸) 남는 자리는 비어 있다
+                if (_slots[i] == null) continue;
                 bool now = i == s.Slot;
                 var sb = UiKit.Box(now ? Palette.Gold : new Color(1, 1, 1, 0), 22, 18, 4);
                 _slotBoxes[i].AddThemeStyleboxOverride("panel", sb);
