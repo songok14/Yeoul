@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace Hanjeopsi.App.Ui
@@ -614,6 +615,13 @@ namespace Hanjeopsi.App.Ui
         /// <summary>밑동 그림 맨 위 대 몸통 굵기 (화면 px, K 2.4 기준). 릴이 잘 보이게 그린 대보다 조금 굵게 시작해 이어 그린 대가 가늘어진다</summary>
         private const float ButtWidth = 9.5f;
         private float _buttScale;
+        /// <summary>
+        /// 가진 낚싯대 몸통 그림 (gear/blank-단계, 곧게 선 대, 끝이 위). 밑동 그림 맨 위에서 휘는 대를 따라 늘여 붙인다.
+        /// BlankCenter: 그림 너비 중 몸통 가운데 비율, BlankBase: 맨 아래 몸통 굵기(px), BlankGuides: 고리 자리(밑동 0, 끝 1). 고리는 그림 오른쪽 = 화면 아래쪽
+        /// </summary>
+        public Texture2D BlankTex;
+        public float BlankCenter = 0.23f, BlankBase = 45;
+        public float[] BlankGuides;
 
         private readonly Vector2[] _rodPts = new Vector2[RodSegs + 1];
         private bool _rodReady;
@@ -716,6 +724,51 @@ namespace Hanjeopsi.App.Ui
             return n.Y >= 0 ? n : -n;
         }
 
+        /// <summary>그림 낚싯대: 대 곡선을 따라 몸통 그림을 띠로 붙이고, 밑동과 릴을 얹고, 그림 속 고리를 지나는 원줄을 긋는다</summary>
+        private void PaintBlank(CanvasItem c, float u)
+        {
+            int n = RodSegs + 1;
+            var len = new float[n];
+            for (int i = 1; i < n; i++) len[i] = len[i - 1] + (_rodPts[i] - _rodPts[i - 1]).Length();
+            float total = Mathf.Max(1, len[n - 1]);
+            float s = ButtWidth * 0.95f * u / BlankBase;
+            float left = BlankCenter * BlankTex.GetWidth() * s, right = (1 - BlankCenter) * BlankTex.GetWidth() * s;
+            var nrm = new Vector2[n];
+            for (int i = 0; i < n; i++)
+                nrm[i] = Down(_rodPts[Mathf.Min(n - 1, i + 1)] - _rodPts[Mathf.Max(0, i - 1)]);
+            var white = new[] { Colors.White, Colors.White, Colors.White, Colors.White };
+            for (int i = 0; i < RodSegs; i++)
+            {
+                float v0 = 1 - len[i] / total, v1 = 1 - len[i + 1] / total;
+                var pts = new[]
+                {
+                    _rodPts[i] - nrm[i] * left, _rodPts[i] + nrm[i] * right,
+                    _rodPts[i + 1] + nrm[i + 1] * right, _rodPts[i + 1] - nrm[i + 1] * left,
+                };
+                var uv = new[] { new Vector2(0, v0), new Vector2(1, v0), new Vector2(1, v1), new Vector2(0, v1) };
+                c.DrawPolygon(pts, white, uv, BlankTex);
+            }
+            float w = ButtTex.GetWidth() * _buttScale, h = ButtTex.GetHeight() * _buttScale;
+            c.DrawSetTransform(_gripPx, _d0.Angle() + Mathf.Pi / 2, new Vector2(ReelFlip ? -1 : 1, 1));
+            c.DrawTextureRect(ButtTex, new Rect2(-ButtTopX * w, -ButtHold * h, w, h), false);
+            c.DrawSetTransform(Vector2.Zero, 0, Vector2.One);
+            // 원줄: 릴에서 그림 속 고리들을 지나 끝까지
+            var line = new List<Vector2> { _reelAt };
+            var guides = BlankGuides ?? GuideAt;
+            foreach (float g in guides.OrderBy(x => x))
+            {
+                float at = Mathf.Clamp(g, 0, 1) * total;
+                int i = 0;
+                while (i < RodSegs - 1 && len[i + 1] < at) i++;
+                float f = Mathf.Clamp((at - len[i]) / Mathf.Max(0.001f, len[i + 1] - len[i]), 0, 1);
+                var p = _rodPts[i].Lerp(_rodPts[i + 1], f);
+                var d = nrm[i].Lerp(nrm[i + 1], f);
+                line.Add(p + d * BlankBase * s * 0.9f * (1 - 0.8f * g));
+            }
+            line.Add(_rodPts[RodSegs]);
+            c.DrawPolyline(line.ToArray(), LineColor(0.9f), 1f * Mathf.Max(1, u), true);
+        }
+
         /// <summary>대 몸통, 가이드 고리, 고리를 지나는 원줄 (RodView 가 여울 그림 아래에 그린다)</summary>
         public void PaintRod(CanvasItem c)
         {
@@ -723,6 +776,11 @@ namespace Hanjeopsi.App.Ui
             float u = K / 2.4f;
             var body = RodBlank;
             var gold = RodTrim;
+            if (_hasButt && BlankTex != null)
+            {
+                PaintBlank(c, u);
+                return;
+            }
             // 손잡이 쪽 굵고 끝은 아주 가늘다 (초릿대 0.8mm). 처음 한 토막은 손잡이처럼 굵다
             for (int i = 0; i < RodSegs; i++)
             {

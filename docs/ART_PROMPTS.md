@@ -41,6 +41,7 @@
 ### 받은 SD 시트
 - 2026-10-27: **차세라 표정 시트**(대화 4)와 **컷 9 고등어 찌·컷 10 차세라 첫 만남**. 옷은 파랑 대신 빨강·흰 바람막이에 검은 탱크톱, 빨간 고글로 나와 그대로 쓴다(앞으로 차세라 그림은 이 디자인). 시트는 칸 사이가 고르지 않아 칸을 직접 잘라 `sd_sheet.py`(1×1)와 `clean_halo.py --fringe`로 `portraits/sera*.png`에. 컷은 `godot/art/cuts/`.
 - 2026-10-27: **뒤에서 본 릴 열 개 다시**(두 번째 시트: 릴 다리 위, 스풀 너머, 핸들 왼쪽). `godot/art/gear/reel-back-N.png`, 다리 꼭대기 가로 위치는 `data/gearlook.json reelFoot`. 낚시 화면에서 손 위 대 아래에 매단다. 앞 시트(스풀 앞면이 보이던 것)는 버렸다.
+- 2026-10-29: **낚싯대 몸통 열 개** (SD 7-4). 곧게 선 대를 `scripts/blank_sheet.py`로 펴고(조금 기울어 왔다), 코르크 손잡이를 자르고, 몸통만 세로로 늘여(고리는 둥근 채로) `godot/art/gear/blank-N.png`에 넣었다. 게임이 휘는 대 곡선을 따라 띠로 붙이고 그림 속 고리로 원줄을 지나게 한다(`gearlook.json` blanks).
 - 2026-10-29: **투명 배경으로 전부 다시** (SD 7). 이미지 도구가 진짜 투명 PNG를 준다(채팅 미리보기엔 투명한 곳 밑 색이 비쳐 배경처럼 보이니 파일로 확인한다). 흰 배경을 지울 필요가 없어 머리카락 사이 흰 조각이 사라졌다. 여울 SD 기본 8장, 낚시 8장(빈 주먹, 대와 릴은 게임이 쥐여 준다), 여울 일러스트 다섯 장(yeoul-eat, yeoul-serve, yeoul-hands, 새 yeoul-salty-tear(프롤로그 첫 짠맛), 새 yeoul-rod-broken(프롤로그 창고)), 세라 표정 여섯 장을 바꿨다. 시트는 칸 경계 둘레 빈 줄에서 자르고, 낚시 포즈의 주먹 자리(grip)와 앉는 높이(seat)는 손으로 재서 `poses.json`에 넣었다. 캠핑 의자에 앉은 일러스트는 쓸 곳을 정하지 않아 보류.
 - 2026-10-27: **여울 낚시 포즈 다시**(SD 2-2, 뒷모습 중심 2×4). `sd_sheet.py`로 자르고 `godot/art/yeoul/fish-*.png`, `poses.json`에 넣었다. 테두리가 또렷해 `clean_halo.py`는 쓰지 않았다(쓰면 가는 낚싯대가 끊긴다). 감기는 손 위 대를 지웠다. 놀람(bite) 옆 주황 표시는 잘릴 때 빠진다.
 - 2026-10-22: **손님 SD 시트 두 장**(6명 × 서기·걷기·기쁨·실망). `scripts/sd_cells.py`로 잘라 `godot/art/customers/<id>-<포즈>.png`. 두 번째 시트는 체크무늬가 박혀 있어도 지워진다. 흰 수염 할아버지는 `--hair=0`.
@@ -248,6 +249,34 @@ Layout: exactly 1 row x 2 columns, 2 figures in total, exactly the same scale as
 2. bite: three-quarter back view turned slightly to the right, startled, shoulders up, fists gripping tight and pulled a little up, a small part of her surprised face visible.
 
 Transparent background everywhere outside the character. No background color, no white edge, no halo, no glow, no drop shadow, no ground shadow, no effect marks, no checkerboard pattern, no text, no labels, no numbers, no borders, no grid lines.
+```
+
+### SD 7-4. 낚싯대 몸통 열 개 (곧게 선 대)
+
+첨부: 낚싯대 상점 아이콘 10개, 대 밑동·릴 시트. 손잡이 위부터 끝까지만, 곧게 세로로. 게임이 휘는 곡선을 따라 늘여 붙인다.
+
+```
+Create one item sheet for a mobile fishing game as a PNG with a fully transparent background (real alpha transparency). Attached images: my 10 fishing rod shop icons (keep each rod's colors, wraps and decorations exactly, in the same order) and my rod handle and reel sheet (shows how thick the rod is where it leaves the handle).
+
+Draw only the upper part of each of the 10 float fishing rods, from just above the reel seat to the very tip: no handle, no cork grip, no reel, no fishing line, no float, no hands. Each rod is perfectly straight and perfectly vertical, tip at the top, seen from behind the angler. It starts as thick as the top of the attached handle and tapers smoothly to a very thin tip. Include small line guide rings along one side, the joint wraps between sections, and each rod's own color and decoration, so every rod looks clearly different. Keep the decoration simple and readable at small size.
+
+Order and look:
+1. Cheap brown starter rod, plain, silver guides.
+2. Dark brown rock fishing rod, silver guides.
+3. Old man's blue black porgy rod, silver wraps, a little worn.
+4. Deep green carbon rod with gold wraps.
+5. Red lighthouse keeper's rod with silver wraps.
+6. Almost black rod with gold wraps, looks handmade like an old master's rod.
+7. Purple master's rod with gold wraps.
+8. Ivory white long casting rod with gold wraps.
+9. Crimson premium rod with gold flame pattern wraps.
+10. Royal blue legendary rod with gold wraps and a faint wave pattern.
+
+Style: the same painted game icon style as the attached icons, soft shading, light from the upper left, a thin clean dark outline along each rod.
+
+Layout: exactly 1 row x 10 columns, all rods exactly the same length and the same width at the bottom, bottoms on the same baseline, tips at the same height, wide equal spacing so nothing touches. The rods should be as tall as the canvas allows.
+
+Transparent background everywhere outside the rods. No background color, no white edge, no halo, no glow, no shadow, no checkerboard pattern, no text, no labels, no numbers, no borders, no grid lines.
 ```
 
 ## SD 3. 여울 표정 시트
