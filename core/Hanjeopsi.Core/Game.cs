@@ -95,6 +95,7 @@ namespace Hanjeopsi.Core
                 NextRequestId = 1,
                 Diner = data.Diner != null ? new DinerState() : null,
                 Kit = data.Gear.Kits.Count > 0 ? new KitState() : null,
+                Tank = data.Gear.Tanks.Count > 0 ? new TankState() : null,
             };
         }
 
@@ -220,7 +221,7 @@ namespace Hanjeopsi.Core
         {
             var recipe = Data.RecipeById(guest.Wish);
             int fresh = Diner.VipById(guest.Id).Fresh;
-            return Save.Cooler
+            return AllFish()
                 .Where(f => f.Species == recipe.Species && (int)Fresh.StageOf(f.Fresh) <= fresh)
                 .OrderByDescending(f => f.Fresh)
                 .ThenByDescending(f => f.Size)
@@ -296,14 +297,10 @@ namespace Hanjeopsi.Core
             return !WeatherToday().NoFishing;
         }
 
-        /// <summary>메뉴판 기본 선택: 지금 만들 수 있는 요리 중 한 접시 값이 큰 순서로 메뉴 칸만큼</summary>
+        /// <summary>메뉴판 기본 선택 요리 (SuggestMenuPlan 칸의 요리만). 한 고기를 두 요리가 나눠 잡지 않는다</summary>
         public List<Recipe> SuggestMenu()
         {
-            int slots = Diner != null ? Diner.MenuSlots(Save) : int.MaxValue;
-            return Truck.Cookable(Save)
-                .OrderByDescending(r => Truck.DishPay(r, Fresh.StageOf(Truck.BestFishFor(Save, r).Fresh), 0.8))
-                .Take(slots)
-                .ToList();
+            return SuggestMenuPlan().Select(e => e.Recipe).ToList();
         }
 
         /// <summary>
@@ -477,17 +474,19 @@ namespace Hanjeopsi.Core
             return fish;
         }
 
+        /// <summary>쿨러와 수조에서 뺀다</summary>
         public void RemoveFish(IEnumerable<int> uids)
         {
             var set = new HashSet<int>(uids);
             Save.Cooler = Save.Cooler.Where(f => !set.Contains(f.Uid)).ToList();
+            if (Save.Tank != null) Save.Tank.Fish = Save.Tank.Fish.Where(f => !set.Contains(f.Uid)).ToList();
         }
 
         /// <summary>위판장 경매. 낙찰 배율(0.92~1.15)을 곱해 100원 단위로 받는다</summary>
         public int SellFish(IList<int> uids, double mul)
         {
             var set = new HashSet<int>(uids);
-            int total = Market.AuctionTotal(Save.Cooler.Where(f => set.Contains(f.Uid)), Save.Day, mul);
+            int total = Market.AuctionTotal(AllFish().Where(f => set.Contains(f.Uid)).ToList(), Save.Day, mul);
             RemoveFish(uids);
             Earn(total);
             Persist();
@@ -599,7 +598,7 @@ namespace Hanjeopsi.Core
             var req = Save.Requests.FirstOrDefault(r => r.Id == requestId);
             if (req == null) return null;
             var t = Data.RequestTemplates[req.Template];
-            var ok = Save.Cooler
+            var ok = AllFish()
                 .Where(f => f.Species == t.Species && (Fresh.StageOf(f.Fresh) == FreshStage.Live || Fresh.StageOf(f.Fresh) == FreshStage.Fresh))
                 .OrderByDescending(f => f.Size)
                 .ToList();
@@ -631,7 +630,7 @@ namespace Hanjeopsi.Core
         public List<CoolerGroup> CoolerGroups()
         {
             var map = new Dictionary<string, CoolerGroup>();
-            foreach (var f in Save.Cooler)
+            foreach (var f in AllFish())
             {
                 var stage = Fresh.StageOf(f.Fresh);
                 string key = f.Species + "-" + Freshness.Key(stage);
@@ -653,13 +652,13 @@ namespace Hanjeopsi.Core
         /// <summary>경매에 낼 수 있는 물고기 (상한 것 빼고 전부)</summary>
         public List<FishItem> SellableFish()
         {
-            return Save.Cooler.Where(f => Fresh.StageOf(f.Fresh) != FreshStage.Spoiled).ToList();
+            return AllFish().Where(f => Fresh.StageOf(f.Fresh) != FreshStage.Spoiled).ToList();
         }
 
         /// <summary>의뢰에 쓸 수 있는(활어·선어) 해당 어종 마릿수</summary>
         public int RequestFishHave(string species)
         {
-            return Save.Cooler.Count(f => f.Species == species && Fresh.StageOf(f.Fresh) <= FreshStage.Fresh);
+            return AllFish().Count(f => f.Species == species && Fresh.StageOf(f.Fresh) <= FreshStage.Fresh);
         }
 
         /// <summary>그 어종으로 만드는 요리 (없으면 null)</summary>
@@ -767,7 +766,7 @@ namespace Hanjeopsi.Core
         public List<Species> BoardSpecies(int n = 5)
         {
             int day = Save.Day;
-            var inCooler = Save.Cooler
+            var inCooler = AllFish()
                 .GroupBy(f => f.Species)
                 .OrderByDescending(g => g.Count())
                 .ThenBy(g => Data.SpeciesIndex(g.Key))

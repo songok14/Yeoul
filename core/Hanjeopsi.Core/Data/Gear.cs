@@ -19,6 +19,17 @@ namespace Hanjeopsi.Core.Data
         public List<string> TrapPool = new List<string>();
         /// <summary>보상 조건을 채워 가게에 장비가 들어올 때 바로 주는 미끼</summary>
         public StockGift StockGift = new StockGift();
+        /// <summary>여울호 활어 수조 단계 (고닷만). 0번이 처음 수조. 비어 있으면 수조가 없다</summary>
+        public List<TankLevel> Tanks = new List<TankLevel>();
+    }
+
+    /// <summary>활어 수조 한 단계. 넣은 고기는 활어 그대로 산다</summary>
+    public sealed class TankLevel
+    {
+        public string Name;
+        public string Desc;
+        public int Price;
+        public int Capacity;
     }
 
     public sealed class StockGift

@@ -9,7 +9,7 @@ using Hanjeopsi.Core.Systems;
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 여울의 수첩 (웹 NotebookScene). 쿨러, 어종 도감, 미각 회복, 조황일지 네 탭.
+    /// 여울의 수첩 (웹 NotebookScene). 보관(쿨러·활어 수조), 내 장비, 의뢰, 어종 도감, 미각 회복, 조황일지.
     /// 줄 쳐진 종이 위에 쓰고, 제목 줄 옆에는 고등어(SD)가 웅크리고 있다.
     /// </summary>
     public partial class NotebookScreen : PlaceScreen
@@ -45,12 +45,12 @@ namespace Hanjeopsi.App.Screens
 
         protected override IList<string> Tabs
         {
-            // 설정은 탭이 아니라 제목 줄 단추 (탭 다섯이면 글자가 넉넉하다)
-            get { return new[] { T["tabCooler"], T["tabQuest"], T["tabDex"], T["tabTaste"], T["tabJournal"] }; }
+            // 설정은 탭이 아니라 제목 줄 단추 (탭 여섯, 두 글자씩이라 넉넉하다)
+            get { return new[] { T["tabCooler"], T["tabGear"], T["tabQuest"], T["tabDex"], T["tabTaste"], T["tabJournal"] }; }
         }
 
         /// <summary>설정 쪽 번호 (탭 줄에는 없다)</summary>
-        private const int SettingsTab = 5;
+        private const int SettingsTab = 6;
 
         protected override void Decorate(ArtStage stage)
         {
@@ -103,11 +103,12 @@ namespace Hanjeopsi.App.Screens
             paper.AddChild(col);
             switch (Tab)
             {
-                case 0: Cooler(col); break;
-                case 1: Quests(col); break;
-                case 2: Dex(col); break;
-                case 3: Taste(col); break;
-                case 4: Journal(col); break;
+                case 0: Storage(col); break;
+                case 1: GearPage(col); break;
+                case 2: Quests(col); break;
+                case 3: Dex(col); break;
+                case 4: Taste(col); break;
+                case 5: Journal(col); break;
                 default: SettingsPage(col); break;
             }
             return paper;
@@ -127,22 +128,136 @@ namespace Hanjeopsi.App.Screens
             return row;
         }
 
-        // ───────── 쿨러 ─────────
+        // ───────── 보관 (쿨러와 활어 수조) ─────────
+
+        /// <summary>보관 탭에서 보는 곳 (0 쿨러, 1 수조)</summary>
+        private int _store;
+
+        private void Storage(VBoxContainer col)
+        {
+            if (!G.HasTank()) _store = 0;
+            if (G.HasTank())
+            {
+                // 쿨러 | 수조 고르는 두 알약
+                var pick = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                pick.AddThemeConstantOverride("separation", 16);
+                pick.AddChild(StoreButton(0, F("cooler", G.Save.Cooler.Count, G.CoolerCapacity())));
+                pick.AddChild(StoreButton(1, F("tank", G.TankFish().Count, G.TankCapacity())));
+                col.AddChild(pick);
+            }
+            if (_store == 1) Tank(col);
+            else Cooler(col);
+        }
+
+        private Control StoreButton(int which, string label)
+        {
+            bool on = _store == which;
+            var b = new GameButton(label, on ? Palette.Teal : Palette.GrayDark, () =>
+            {
+                if (_store == which) return;
+                _store = which;
+                Sound.Play("page", -3);
+                Redraw();
+            }, null, TextSize.Small, 84) { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+            if (!on) b.Modulate = new Color(1, 1, 1, 0.75f);
+            return b;
+        }
 
         private void Cooler(VBoxContainer col)
         {
             var cooler = G.Save.Cooler;
-            col.AddChild(Heading(F("cooler", cooler.Count, G.CoolerCapacity()), T["coolerSub"]));
+            col.AddChild(Heading(F("cooler", cooler.Count, G.CoolerCapacity()), G.HasTank() ? T["coolerSubTank"] : T["coolerSub"]));
             if (cooler.Count == 0)
             {
-                var e = UiKit.Text(T["coolerEmpty"], TextSize.Body, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Center);
-                e.SizeFlagsVertical = SizeFlags.ExpandFill;
-                e.VerticalAlignment = VerticalAlignment.Center;
-                col.AddChild(e);
+                col.AddChild(EmptyNote(T["coolerEmpty"]));
                 return;
             }
             // 위판장 쿨러처럼 쪽 넘김 대신 스크롤. 수첩은 한 마리씩 크기와 신선도 막대까지 보여 준다
-            var list = cooler.OrderByDescending(f => f.Fresh).ToList();
+            var rows = FishList(col);
+            foreach (var f in cooler.OrderByDescending(f => f.Fresh).ToList())
+            {
+                Control right = null;
+                if (G.HasTank())
+                {
+                    var fish = f;
+                    var b = SmallButton(T["toTank"], Palette.Teal, () =>
+                    {
+                        if (!G.MoveToTank(fish.Uid)) return;
+                        Sound.Play("plop", -4);
+                        Redraw();
+                    }, 160, 84);
+                    b.SetEnabled(G.CanMoveToTank(f));
+                    right = b;
+                }
+                rows.AddChild(FishLine(f, right));
+            }
+        }
+
+        /// <summary>활어 수조: 지금 수조와 넓히기, 든 고기 (꺼내면 쿨러로)</summary>
+        private void Tank(VBoxContainer col)
+        {
+            var tank = G.TankNow();
+            var fish = G.TankFish();
+            col.AddChild(Heading(F("tank", fish.Count, G.TankCapacity()), T["tankSub"]));
+            // 수조 단계와 넓히기
+            var box = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore };
+            box.AddThemeStyleboxOverride("panel", UiKit.Box(new Color("8cd3e0", 0.3f), 24, 24, 14).WithBorder(new Color("3f7a8a", 0.6f), 3));
+            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 18);
+            box.AddChild(row);
+            var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 2);
+            text.AddChild(UiKit.Text(F("tankLevel", G.Save.Tank.Level + 1, tank.Name), TextSize.Small + 2, Palette.Ink, true).Ellipsis());
+            text.AddChild(UiKit.Text(tank.Desc, TextSize.Tiny + 2, Palette.InkSoft, false, true));
+            var next = G.TankNext();
+            if (next != null) text.AddChild(UiKit.Text(F("tankNext", next.Name, next.Capacity), TextSize.Tiny + 2, Palette.Teal, true, true));
+            row.AddChild(text);
+            if (next != null)
+            {
+                var up = SmallButton(UiKit.Won(next.Price), Palette.Blue, () =>
+                {
+                    if (!G.UpgradeTank()) return;
+                    Sound.Play("coin", -3);
+                    HudBar.Refresh();
+                    Toast(F("tankUp", G.TankNow().Name, G.TankCapacity()), Palette.Gold);
+                    Redraw();
+                }, 210, 96);
+                up.SetEnabled(G.Save.Money >= next.Price);
+                row.AddChild(up);
+            }
+            else row.AddChild(Pill(T["tankBest"], Palette.GreenDark, Colors.White));
+            col.AddChild(box);
+            if (fish.Count == 0)
+            {
+                col.AddChild(EmptyNote(T["tankEmpty"]));
+                return;
+            }
+            var rows = FishList(col);
+            foreach (var f in fish.OrderByDescending(f => G.FishValue(f)).ToList())
+            {
+                var item = f;
+                var b = SmallButton(T["toCooler"], Palette.GrayDark, () =>
+                {
+                    if (!G.MoveToCooler(item.Uid)) return;
+                    Sound.Play("tick", -4);
+                    Redraw();
+                }, 160, 84);
+                b.SetEnabled(!G.CoolerFull());
+                rows.AddChild(FishLine(f, b));
+            }
+        }
+
+        private static Control EmptyNote(string text)
+        {
+            var e = UiKit.Text(text, TextSize.Body, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
+            e.SizeFlagsVertical = SizeFlags.ExpandFill;
+            e.VerticalAlignment = VerticalAlignment.Center;
+            return e;
+        }
+
+        /// <summary>손가락으로 밀어 내리는 고기 목록</summary>
+        private static VBoxContainer FishList(VBoxContainer col)
+        {
             var scroll = new ScrollContainer
             {
                 SizeFlagsVertical = SizeFlags.ExpandFill,
@@ -155,28 +270,173 @@ namespace Hanjeopsi.App.Screens
             var rows = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
             rows.AddThemeConstantOverride("separation", 10);
             scroll.AddChild(rows);
-            foreach (var f in list)
+            return rows;
+        }
+
+        /// <summary>고기 한 줄: 그림 · 이름과 크기, 값 · 신선도 막대와 단계 · 오른쪽 단추</summary>
+        private Control FishLine(Hanjeopsi.Core.State.FishItem f, Control right)
+        {
+            var stage = G.Fresh.StageOf(f.Fresh);
+            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 16);
+            var icon = FishIcon(f.Species, 110);
+            if (stage == FreshStage.Spoiled) icon.Modulate = new Color(0.7f, 0.62f, 0.55f);
+            row.AddChild(icon);
+            var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 0);
+            text.AddChild(UiKit.Text(G.Data.SpeciesById(f.Species).Name + " " + f.Size.ToString("0.0", CultureInfo.InvariantCulture) + "cm", TextSize.Small, Palette.Ink, true).Ellipsis());
+            text.AddChild(UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Tiny + 2, Palette.InkSoft));
+            row.AddChild(text);
+            var fresh = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            fresh.AddThemeConstantOverride("separation", 6);
+            var pill = MarketScreen.StagePill(stage);
+            pill.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+            fresh.AddChild(pill);
+            fresh.AddChild(FreshBar(f.Fresh, stage));
+            row.AddChild(fresh);
+            if (right != null) row.AddChild(right);
+            return row;
+        }
+
+        // ───────── 내 장비 ─────────
+
+        /// <summary>
+        /// 지금 쓰는 장비를 한눈에: 낚싯대·릴·쿨러 그림과 이름, 소품 단계, 쓰는 미끼와 가진 미끼, 장비로 정해지는 능력치 막대
+        /// </summary>
+        private void GearPage(VBoxContainer col)
+        {
+            col.AddChild(Heading(T["gearHead"], T["gearSub"]));
+            var scroll = new ScrollContainer
             {
-                var stage = G.Fresh.StageOf(f.Fresh);
-                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-                row.AddThemeConstantOverride("separation", 18);
-                var icon = FishIcon(f.Species, 120);
-                if (stage == FreshStage.Spoiled) icon.Modulate = new Color(0.7f, 0.62f, 0.55f);
-                row.AddChild(icon);
-                var name = UiKit.Text(G.Data.SpeciesById(f.Species).Name + " " + f.Size.ToString("0.0", CultureInfo.InvariantCulture) + "cm", TextSize.Small, Palette.Ink, true);
-                name.SizeFlagsHorizontal = SizeFlags.ExpandFill;
-                name.VerticalAlignment = VerticalAlignment.Center;
-                row.AddChild(name);
-                row.AddChild(FreshBar(f.Fresh, stage));
-                var pill = MarketScreen.StagePill(stage);
-                pill.CustomMinimumSize = new Vector2(100, 0);
-                row.AddChild(pill);
-                var value = UiKit.Text(UiKit.Won(G.FishValue(f)), TextSize.Small, Palette.Ink, false, false, 0, null, HorizontalAlignment.Right);
-                value.CustomMinimumSize = new Vector2(150, 0);
-                value.VerticalAlignment = VerticalAlignment.Center;
-                row.AddChild(value);
-                rows.AddChild(row);
+                SizeFlagsVertical = SizeFlags.ExpandFill,
+                HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
+                ScrollDeadzone = 24,
+                MouseFilter = MouseFilterEnum.Pass,
+            };
+            col.AddChild(scroll);
+            var body = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
+            body.AddThemeConstantOverride("separation", 14);
+            scroll.AddChild(body);
+
+            // 큰 장비 셋: 그림 카드 세 장
+            var g = G.Data.Gear;
+            var big = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            big.AddThemeConstantOverride("separation", 14);
+            big.AddChild(GearCard("rod", G.Save.Rod + 1, T["rod"], g.Rods[G.Save.Rod].Name));
+            big.AddChild(GearCard("reel", G.Save.Reel + 1, T["reel"], g.Reels[G.Save.Reel].Name));
+            big.AddChild(GearCard("cooler", G.Save.Tackle + 1, T["coolerName"], g.Tackles[G.Save.Tackle].Name));
+            body.AddChild(big);
+
+            // 능력치
+            body.AddChild(SubHead(T["abilityHead"]));
+            foreach (var a in G.Abilities()) body.AddChild(AbilityRow(a));
+
+            // 미끼
+            body.AddChild(SubHead(T["baitHead"]));
+            var bait = G.BaitNow();
+            string pickName = bait != null ? bait.Name : g.Bait.Name;
+            body.AddChild(UiKit.Text(F("baitNow", pickName, G.BaitLeft()), TextSize.Small, Palette.GoldDark, true, true));
+            if (G.Save.Kit != null)
+            {
+                var have = g.Baits.Where(b => G.BaitCount(b.Id) > 0 && (bait == null || b.Id != bait.Id)).Select(b => F("baitHave", b.Name, G.BaitCount(b.Id))).ToList();
+                if (have.Count > 0) body.AddChild(UiKit.Text(string.Join("  ·  ", have), TextSize.Tiny + 2, Palette.InkSoft, false, true));
             }
+
+            // 소품 (줄·바늘·찌·뜰채 ...)
+            if (g.Kits.Count > 0)
+            {
+                body.AddChild(SubHead(T["kitHead"]));
+                var grid = new GridContainer { Columns = 2, MouseFilter = MouseFilterEnum.Ignore };
+                grid.AddThemeConstantOverride("h_separation", 14);
+                grid.AddThemeConstantOverride("v_separation", 10);
+                foreach (var k in g.Kits) grid.AddChild(KitCell(k));
+                body.AddChild(grid);
+            }
+        }
+
+        private static Control SubHead(string text)
+        {
+            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            col.AddThemeConstantOverride("separation", 6);
+            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4), MouseFilter = MouseFilterEnum.Ignore });
+            col.AddChild(UiKit.Text(text, TextSize.Body, Palette.Ink, true));
+            col.AddChild(Rule());
+            return col;
+        }
+
+        private static TextureRect GearArt(string kind, int tier, float size)
+        {
+            return new TextureRect
+            {
+                Texture = GD.Load<Texture2D>("res://art/gear/" + kind + "-" + tier + ".png"),
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                CustomMinimumSize = new Vector2(size, size),
+                SizeFlagsHorizontal = SizeFlags.ShrinkCenter,
+                MouseFilter = MouseFilterEnum.Ignore,
+            };
+        }
+
+        /// <summary>장비 그림 카드: 그림 · 종류와 단계 · 이름</summary>
+        private Control GearCard(string kind, int tier, string label, string name)
+        {
+            var card = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            card.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.Ink, 0.06f), 24, 12, 12).WithBorder(new Color(Palette.Ink, 0.12f), 3));
+            var c = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            c.AddThemeConstantOverride("separation", 2);
+            card.AddChild(c);
+            c.AddChild(GearArt(kind, tier, 150));
+            c.AddChild(UiKit.Text(F("gearTier", label, tier), TextSize.Tiny, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Center));
+            c.AddChild(UiKit.Text(name, TextSize.Tiny + 2, Palette.Ink, true, true, 0, null, HorizontalAlignment.Center));
+            return card;
+        }
+
+        /// <summary>능력치 한 줄: 이름 · 막대 · 값</summary>
+        private Control AbilityRow(Hanjeopsi.Core.AbilityLine a)
+        {
+            var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 16);
+            var name = UiKit.Text(T["stat" + a.Id], TextSize.Small, Palette.Ink, true);
+            name.CustomMinimumSize = new Vector2(200, 0);
+            name.VerticalAlignment = VerticalAlignment.Center;
+            row.AddChild(name);
+            var track = new Panel { CustomMinimumSize = new Vector2(0, 30), SizeFlagsHorizontal = SizeFlags.ExpandFill, SizeFlagsVertical = SizeFlags.ShrinkCenter, MouseFilter = MouseFilterEnum.Ignore };
+            track.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.Ink, 0.16f), 15));
+            var fill = new Panel { MouseFilter = MouseFilterEnum.Ignore };
+            // 막대가 찰수록 파랑 → 초록 → 금빛
+            var color = a.Fill >= 0.85 ? Palette.Gold : a.Fill >= 0.45 ? Palette.Green : Palette.SeaLight;
+            fill.AddThemeStyleboxOverride("panel", UiKit.Box(color, 11));
+            track.AddChild(fill);
+            float k = (float)a.Fill;
+            track.Resized += () =>
+            {
+                fill.Position = new Vector2(4, 4);
+                fill.Size = new Vector2(Mathf.Max(22, (track.Size.X - 8) * k), track.Size.Y - 8);
+            };
+            row.AddChild(track);
+            var value = UiKit.Text(F("statv" + a.Id, a.Value.ToString("0.##", CultureInfo.InvariantCulture)), TextSize.Small, Palette.InkSoft, false, false, 0, null, HorizontalAlignment.Right);
+            value.CustomMinimumSize = new Vector2(190, 0);
+            value.VerticalAlignment = VerticalAlignment.Center;
+            row.AddChild(value);
+            return row;
+        }
+
+        /// <summary>소품 한 칸: 그림 · 이름과 단계 (없으면 흐리게)</summary>
+        private Control KitCell(Hanjeopsi.Core.Data.KitKind k)
+        {
+            int lv = G.KitLevel(k.Id);
+            var cell = new HBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            cell.AddThemeConstantOverride("separation", 10);
+            var art = GearArt(k.Id, Math.Max(1, lv), 84);
+            if (lv == 0) art.Modulate = new Color(0.3f, 0.27f, 0.24f, 0.35f);
+            cell.AddChild(art);
+            var text = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 0);
+            text.AddChild(UiKit.Text(lv > 0 ? F("gearTier", k.Name, lv) : k.Name, TextSize.Tiny, Palette.InkSoft).Ellipsis());
+            text.AddChild(UiKit.Text(lv > 0 ? k.Levels[lv - 1].Name : T["kitNone"], TextSize.Tiny + 2, lv > 0 ? Palette.Ink : Palette.InkSoft, lv > 0).Ellipsis());
+            cell.AddChild(text);
+            return cell;
         }
 
         /// <summary>신선도 막대. 남은 만큼 단계 색으로 찬다</summary>
@@ -469,21 +729,30 @@ namespace Hanjeopsi.App.Screens
             switch (action)
             {
                 case "dex":
-                    ShowTab(2);
+                    ShowTab(3);
                     break;
                 case "detail":
-                    ShowTab(2);
+                    ShowTab(3);
                     DexDetail("bollak");
                     break;
                 case "taste":
-                    ShowTab(3);
+                    ShowTab(4);
                     break;
                 case "journal":
                     G.Save.JournalPages = 1;
-                    ShowTab(4);
+                    ShowTab(5);
                     break;
                 case "quest":
                     if (G.Save.Requests.Count > 0) G.AcceptRequest(G.Save.Requests[0].Id);
+                    ShowTab(2);
+                    break;
+                case "tank":
+                    // 활어 둘을 수조에 넣어 둔 모습
+                    foreach (var f in G.Save.Cooler.Where(f => G.Fresh.StageOf(f.Fresh) == FreshStage.Live).Take(2).ToList()) G.MoveToTank(f.Uid);
+                    _store = 1;
+                    ShowTab(0);
+                    break;
+                case "gear":
                     ShowTab(1);
                     break;
                 case "settings":

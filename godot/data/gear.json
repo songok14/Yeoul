@@ -1060,5 +1060,12 @@
     "noraemi",
     "ureok",
     "gaebollak"
+  ],
+  "tanks": [
+    { "name": "고무 대야", "desc": "트럭 옆에 둔 대야. 기포기 하나로 버틴다", "price": 0, "capacity": 3 },
+    { "name": "플라스틱 수조", "desc": "기포기 두 개. 바닷물을 매일 갈아 준다", "price": 60000, "capacity": 6 },
+    { "name": "유리 활어 수조", "desc": "손님이 고기를 보고 고른다", "price": 150000, "capacity": 10 },
+    { "name": "순환 여과 수조", "desc": "물이 늘 맑다", "price": 300000, "capacity": 15 },
+    { "name": "여울호 대형 수조", "desc": "포구에서 제일 큰 수조", "price": 500000, "capacity": 20 }
   ]
 }

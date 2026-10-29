@@ -68,8 +68,8 @@ namespace Hanjeopsi.App.Screens
         private bool _walking;
         // 사진 모드: 간 맞추기를 저절로 (good 정답, bad 반대쪽 끝)
         private string _auto;
-        // 오늘의 메뉴 (등급만큼 고른다)와 이번 장사 손님 차례
-        private readonly List<Recipe> _menu = new List<Recipe>();
+        // 오늘의 메뉴판 (등급만큼 칸, 칸마다 요리와 접시 수)과 이번 장사 손님 차례
+        private readonly List<MenuEntry> _menu = new List<MenuEntry>();
         private List<PlannedGuest> _plan = new List<PlannedGuest>();
         private VBoxContainer _chalk;
 
@@ -87,7 +87,7 @@ namespace Hanjeopsi.App.Screens
             _chalk = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore, CustomMinimumSize = new Vector2(150, 0) };
             _chalk.AddThemeConstantOverride("separation", 2);
             _stage.Pin(_chalk, new Vector2(387, 384));
-            _menu.AddRange(G.SuggestMenu());
+            _menu.AddRange(G.SuggestMenuPlan());
 
             _customer = _stage.Place(Tex("fisher-walk"), new Vector2(OffLeft, _footY), CustomerHeight);
             _customer.Visible = false;
@@ -184,13 +184,17 @@ namespace Hanjeopsi.App.Screens
 
         // ───────── 메뉴판 ─────────
 
+        /// <summary>
+        /// 메뉴판: 등급만큼 칸이 있고, 칸을 눌러 요리와 접시 수를 정한다.
+        /// 한 고기는 한 접시만 되니 같은 어종을 쓰는 요리끼리 남은 고기를 나눠 잡는다 (2026-10-29 사용자 요청)
+        /// </summary>
         private void ShowMenu(bool rise = true)
         {
             ClearBody(false);
             var s = G.Save;
             int slots = G.Diner.MenuSlots(s);
-            _menu.RemoveAll(r => G.Truck.BestFishFor(s, r) == null);
-            _body.AddThemeConstantOverride("separation", 10);
+            G.FitMenu(_menu);
+            _body.AddThemeConstantOverride("separation", 12);
             _body.AddChild(UiKit.Text(F("pickMenu", _menu.Count, slots), TextSize.H1, Palette.Gold, true, false, 0, null, HorizontalAlignment.Center));
             var rank = G.Diner.Rank(s);
             var next = G.Diner.NextRank(s);
@@ -202,36 +206,25 @@ namespace Hanjeopsi.App.Screens
             var special = G.SpecialToday();
             if (special != null)
                 _body.AddChild(UiKit.Text(F("specialComing", special.Name + IGa(special.Name)), TextSize.Small, Palette.Gold, true, true, 0, null, HorizontalAlignment.Center));
-            // 재료가 있는 요리만 줄로 보이고, 나머지는 한 줄로 접는다 (못 배운 요리의 ??? 가 줄줄이 늘어서지 않게)
-            var ready = G.Data.Recipes.Recipes.Where(r => G.Truck.BestFishFor(s, r) != null).ToList();
-            // 고른 요리가 맨 위, 다음은 특별 요리, 생선구이는 재료 많은 순으로 맨 아래에 접어 둔다
-            var rest = ready.Where(r => !_menu.Contains(r)).OrderByDescending(r => Stock(r)).ToList();
-            foreach (var r in _menu) _body.AddChild(MenuRow(r, slots));
-            foreach (var r in rest.Where(r => !IsGrill(r))) _body.AddChild(MenuRow(r, slots));
-            var grills = rest.Where(IsGrill).ToList();
-            if (grills.Count >= GrillFoldMin)
-                _body.AddChild(GrillToggle(grills.Count, grills.Sum(Stock)));
-            if (grills.Count < GrillFoldMin || _grillOpen)
-                foreach (var r in grills) _body.AddChild(MenuRow(r, slots));
-            int known = G.Data.Recipes.Recipes.Count(r => !ready.Contains(r) && s.Dex.ContainsKey(r.Species) && s.Dex[r.Species].Count > 0);
-            int unknown = G.Data.Recipes.Recipes.Count - ready.Count - known;
-            if (ready.Count == 0) _body.AddChild(UiKit.Text(T["noReady"], TextSize.Body, Palette.GrayText, false, true, 0, null, HorizontalAlignment.Center));
-            if (known + unknown > 0)
-                _body.AddChild(UiKit.Text(F("folded", known, unknown), TextSize.Small, Palette.GrayText, false, true, 0, null, HorizontalAlignment.Center));
+            bool any = G.Truck.Cookable(s).Count > 0;
+            if (!any) _body.AddChild(UiKit.Text(T["noReady"], TextSize.Body, Palette.GrayText, false, true, 0, null, HorizontalAlignment.Center));
+            // 칸: 채운 칸 먼저, 빈 칸은 점선 상자
+            for (int i = 0; i < slots; i++)
+                _body.AddChild(i < _menu.Count ? FilledSlot(_menu[i]) : EmptySlot(any));
             UpdateChalk();
             var buttons = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             buttons.AddThemeConstantOverride("separation", 24);
             buttons.AddChild(new GameButton(T["toTown"], Palette.BlueDark, () => GameState.I.GoTo("town"), null, TextSize.Body, 120));
             bool can = _menu.Count > 0;
             GameButton start;
-            if (G.Truck.Cookable(s).Count == 0)
+            if (!any)
             {
                 // 요리할 고기가 없으면 장사를 쉬고 밤으로 넘어간다
                 start = new GameButton(T["skip"], Palette.GrayDark, SkipShift, T["skipSub"], TextSize.Body, 120);
             }
             else
             {
-                start = new GameButton(T["start"], Palette.Red, StartShift, can ? F("startSub", G.GuestsTonight()) : T["pickFirst"], TextSize.Body, 120);
+                start = new GameButton(T["start"], Palette.Red, StartShift, can ? F("startSub", G.GuestsTonight(), _menu.Sum(e => e.Left)) : T["pickFirst"], TextSize.Body, 120);
                 start.SetEnabled(can);
             }
             buttons.AddChild(start);
@@ -240,86 +233,191 @@ namespace Hanjeopsi.App.Screens
             if (rise) Rise();
         }
 
-        /// <summary>생선구이가 이만큼 넘으면 한 줄로 접는다</summary>
-        private const int GrillFoldMin = 3;
-        private bool _grillOpen;
-
-        private static bool IsGrill(Recipe r)
+        /// <summary>누를 수 있는 메뉴판 칸 상자</summary>
+        private PanelContainer SlotBox(bool filled, Action onTap)
         {
-            return r.Id.EndsWith("-gui");
-        }
-
-        private int Stock(Recipe r)
-        {
-            return G.Save.Cooler.Count(f => f.Species == r.Species && G.Fresh.StageOf(f.Fresh) != FreshStage.Spoiled);
-        }
-
-        /// <summary>생선구이 묶음 줄. 누르면 펴고 접는다</summary>
-        private Control GrillToggle(int count, int stock)
-        {
-            var box = new PanelContainer { MouseFilter = MouseFilterEnum.Stop, MouseDefaultCursorShape = CursorShape.PointingHand };
-            box.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(1, 1, 1, 0.06f), 22, 18, 10).WithBorder(new Color(Palette.Paper, 0.25f), 2));
-            string label = _grillOpen ? T["grillOpen"] : F("grillFolded", count, stock);
-            box.AddChild(UiKit.Text(label + (_grillOpen ? "  ▲" : "  ▼"), TextSize.Small, Palette.GreenText, true, false, 0, null, HorizontalAlignment.Center));
+            var box = new PanelContainer { MouseFilter = onTap != null ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore };
+            var sb = filled
+                ? UiKit.Box(new Color(Palette.Gold, 0.14f), 22, 18, 6).WithBorder(Palette.Gold, 3)
+                : UiKit.Box(new Color(1, 1, 1, 0.04f), 22, 18, 14).WithBorder(new Color(Palette.Paper, 0.28f), 3);
+            box.AddThemeStyleboxOverride("panel", sb);
+            if (onTap == null) return box;
+            box.MouseDefaultCursorShape = CursorShape.PointingHand;
             box.GuiInput += e =>
             {
                 if (!(e is InputEventMouseButton mb) || mb.ButtonIndex != MouseButton.Left || mb.Pressed) return;
-                _grillOpen = !_grillOpen;
-                Sound.Play("tick", -6);
-                CallDeferred(MethodName.ShowMenuQuiet);
+                Sound.Play("tick", -6, 1.1f);
+                onTap();
             };
             return box;
         }
 
-        /// <summary>메뉴판 한 줄. 재료가 있으면 눌러서 오늘 메뉴에 올리고 내린다 (등급만큼)</summary>
-        private Control MenuRow(Recipe r, int slots)
+        /// <summary>요리가 올라간 칸: 요리 그림 · 이름과 맛 · 접시 수. 누르면 접시 수를 바꾸거나 내린다</summary>
+        private Control FilledSlot(MenuEntry e)
         {
-            var s = G.Save;
-            int n = s.Cooler.Count(f => f.Species == r.Species && G.Fresh.StageOf(f.Fresh) != FreshStage.Spoiled);
-            bool known = s.Dex.ContainsKey(r.Species) && s.Dex[r.Species].Count > 0;
-            bool on = _menu.Contains(r);
-            var box = new PanelContainer { MouseFilter = n > 0 ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore };
-            var sb = on ? UiKit.Box(new Color(Palette.Gold, 0.16f), 22, 14, 2).WithBorder(Palette.Gold, 3) : UiKit.Box(new Color(1, 1, 1, 0), 22, 14, 2).WithBorder(new Color(1, 1, 1, 0), 3);
-            box.AddThemeStyleboxOverride("panel", sb);
+            var box = SlotBox(true, () => AskCount(e.Recipe, e));
             var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             row.AddThemeConstantOverride("separation", 20);
             box.AddChild(row);
-            // 아직 못 낚은 고기의 요리는 그림자로
-            var icon = PlaceScreen.DishIcon(r, 110, !known);
-            if (known && n == 0) icon.Modulate = new Color(1, 1, 1, 0.35f);
-            row.AddChild(icon);
-            var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
-            text.AddThemeConstantOverride("separation", 0);
-            text.AddChild(UiKit.Text(known ? r.Name : T["unknown"], TextSize.Body, on ? Palette.Gold : n > 0 ? Palette.Paper : Palette.Gray, true));
-            string flavors = string.Join(" · ", r.Steps.Select(st => G.Taste.CanTaste(s, st.Flavor) ? G.Data.FlavorById(st.Flavor).Name : T["unknown"]));
-            text.AddChild(UiKit.Text(flavors, TextSize.Tiny, Palette.GrayText));
-            row.AddChild(text);
-            var stock = UiKit.Text(on ? F("onMenu", n) : n > 0 ? F("stock", n) : T["noStock"], TextSize.Small, on ? Palette.Gold : n > 0 ? Palette.GreenText : Palette.Gray);
-            stock.SizeFlagsVertical = SizeFlags.ShrinkCenter;
-            row.AddChild(stock);
-            if (n > 0)
-            {
-                box.MouseDefaultCursorShape = CursorShape.PointingHand;
-                box.GuiInput += e =>
-                {
-                    if (!(e is InputEventMouseButton mb) || mb.ButtonIndex != MouseButton.Left || mb.Pressed) return;
-                    if (on) _menu.Remove(r);
-                    else if (_menu.Count < slots) _menu.Add(r);
-                    else
-                    {
-                        Toast(F("menuFull", slots));
-                        return;
-                    }
-                    Sound.Play("tick", -6, on ? 0.9f : 1.15f);
-                    CallDeferred(MethodName.ShowMenuQuiet);
-                };
-            }
+            row.AddChild(PlaceScreen.DishIcon(e.Recipe, 110));
+            row.AddChild(DishText(e.Recipe, Palette.Gold));
+            var count = UiKit.Text(F("slotCount", e.Left), TextSize.H1, Palette.Gold, true, false, 0, null, HorizontalAlignment.Right);
+            count.SizeFlagsVertical = SizeFlags.ShrinkCenter;
+            row.AddChild(count);
             return box;
         }
 
-        private void ShowMenuQuiet()
+        /// <summary>빈 칸. 누르면 요리를 고른다</summary>
+        private Control EmptySlot(bool any)
         {
-            ShowMenu(false);
+            var box = SlotBox(false, any ? PickDish : (Action)null);
+            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore, CustomMinimumSize = new Vector2(0, 62), Alignment = BoxContainer.AlignmentMode.Center };
+            box.AddChild(col);
+            col.AddChild(UiKit.Text(any ? T["slotEmpty"] : T["slotNone"], TextSize.Body, any ? Palette.Paper : Palette.Gray, true, false, 0, null, HorizontalAlignment.Center));
+            return box;
+        }
+
+        /// <summary>요리 이름과 맛 두 줄</summary>
+        private Control DishText(Recipe r, Color nameColor)
+        {
+            var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+            text.AddThemeConstantOverride("separation", 0);
+            text.AddChild(UiKit.Text(r.Name, TextSize.Body, nameColor, true));
+            string flavors = string.Join(" · ", r.Steps.Select(st => G.Taste.CanTaste(G.Save, st.Flavor) ? G.Data.FlavorById(st.Flavor).Name : T["unknown"]));
+            text.AddChild(UiKit.Text(flavors, TextSize.Tiny, Palette.GrayText));
+            return text;
+        }
+
+        /// <summary>빈 칸에 올릴 요리 고르기. 재료를 다른 칸이 다 잡은 요리는 흐리게</summary>
+        private void PickDish()
+        {
+            var s = G.Save;
+            // 아직 메뉴에 없는 요리 중 재료가 있는 것. 특별 요리 먼저, 생선구이는 아래로
+            var ready = G.Truck.Cookable(s)
+                .Where(r => !_menu.Any(e => e.Recipe == r))
+                .OrderBy(r => IsGrill(r))
+                .ThenByDescending(r => G.MenuFree(_menu, r))
+                .ThenByDescending(r => r.Price)
+                .ToList();
+            Control root = null;
+            var list = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Pass };
+            list.AddThemeConstantOverride("separation", 10);
+            foreach (var r in ready)
+            {
+                var recipe = r;
+                int free = G.MenuFree(_menu, r);
+                var item = new PanelContainer { MouseFilter = MouseFilterEnum.Pass };
+                item.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.PaperDark, free > 0 ? 0.5f : 0.2f), 22, 16, 6));
+                var row = new HBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+                row.AddThemeConstantOverride("separation", 18);
+                item.AddChild(row);
+                var icon = PlaceScreen.DishIcon(r, 100);
+                if (free <= 0) icon.Modulate = new Color(1, 1, 1, 0.35f);
+                row.AddChild(icon);
+                var text = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, SizeFlagsHorizontal = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore };
+                text.AddThemeConstantOverride("separation", 0);
+                text.AddChild(UiKit.Text(r.Name, TextSize.Body, free > 0 ? Palette.Ink : Palette.InkSoft, true));
+                text.AddChild(UiKit.Text(free > 0 ? F("dishFree", free) : T["dishTaken"], TextSize.Tiny + 2, free > 0 ? Palette.GreenDark : Palette.InkSoft, false, true));
+                row.AddChild(text);
+                if (free > 0)
+                    PlaceScreen.OnTap(item, () =>
+                    {
+                        Sound.Play("tick", -6, 1.15f);
+                        CloseModal(root);
+                        AskCount(recipe, null);
+                    });
+                list.AddChild(item);
+            }
+            Control extra = list;
+            if (ready.Count == 0) extra = UiKit.Text(T["pickNone"], TextSize.Body, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center);
+            else
+            {
+                // 요리가 많으면 손가락으로 밀어 본다
+                var scroll = new ScrollContainer
+                {
+                    HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled,
+                    VerticalScrollMode = ScrollContainer.ScrollMode.ShowNever,
+                    ScrollDeadzone = 24,
+                    MouseFilter = MouseFilterEnum.Pass,
+                    CustomMinimumSize = new Vector2(0, Mathf.Min(ready.Count * 132, GetViewportRect().Size.Y * 0.5f)),
+                };
+                scroll.AddChild(list);
+                extra = scroll;
+            }
+            root = Modal(T["pickDish"], T["pickDishSub"], new[] { new ModalButton(T["cancel"], Palette.GrayDark) }, extra);
+        }
+
+        /// <summary>
+        /// 접시 수 정하기 (− 몇 접시 +). 남은 재료만큼까지. entry 가 있으면 이미 올린 칸을 고친다 (내리기, 다른 요리로)
+        /// </summary>
+        private void AskCount(Recipe recipe, MenuEntry entry)
+        {
+            int max = G.MenuFree(_menu, recipe, entry);
+            int n = entry != null ? Mathf.Clamp(entry.Left, 1, Mathf.Max(1, max)) : max;
+            var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
+            col.AddThemeConstantOverride("separation", 14);
+            var icon = PlaceScreen.DishIcon(recipe, 220);
+            icon.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+            col.AddChild(icon);
+            var row = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center, MouseFilter = MouseFilterEnum.Ignore };
+            row.AddThemeConstantOverride("separation", 34);
+            col.AddChild(row);
+            var count = UiKit.Text(F("slotCount", n), TextSize.Title, Palette.Ink, true, false, 0, null, HorizontalAlignment.Center);
+            count.CustomMinimumSize = new Vector2(220, 0);
+            count.VerticalAlignment = VerticalAlignment.Center;
+            GameButton minus = null, plus = null;
+            void Set(int v)
+            {
+                n = Mathf.Clamp(v, 1, Mathf.Max(1, max));
+                count.Text = F("slotCount", n);
+                minus.SetEnabled(n > 1);
+                plus.SetEnabled(n < max);
+            }
+            minus = PlaceScreen.SmallButton("−", Palette.GrayDark, () => { Sound.Play("tick", -6, 0.9f); Set(n - 1); }, 130, 110);
+            plus = PlaceScreen.SmallButton("+", Palette.GrayDark, () => { Sound.Play("tick", -6, 1.15f); Set(n + 1); }, 130, 110);
+            row.AddChild(minus);
+            row.AddChild(count);
+            row.AddChild(plus);
+            col.AddChild(UiKit.Text(F("countSub", G.Data.SpeciesById(recipe.Species).Name, max), TextSize.Small, Palette.InkSoft, false, true, 0, null, HorizontalAlignment.Center));
+            Set(n);
+
+            void Apply()
+            {
+                if (max <= 0) return;
+                if (entry != null) entry.Count = entry.Served + n;
+                else _menu.Add(new MenuEntry { Recipe = recipe, Count = n });
+                Sound.Play("tick", -6, 1.2f);
+                ShowMenu(false);
+            }
+            var buttons = new List<ModalButton>();
+            if (entry != null)
+            {
+                buttons.Add(new ModalButton(T["menuSet"], Palette.Green, Apply));
+                buttons.Add(new ModalButton(T["menuOther"], Palette.Blue, () =>
+                {
+                    _menu.Remove(entry);
+                    ShowMenu(false);
+                    PickDish();
+                }));
+                buttons.Add(new ModalButton(T["menuRemove"], Palette.Red, () =>
+                {
+                    _menu.Remove(entry);
+                    Sound.Play("tick", -6, 0.9f);
+                    ShowMenu(false);
+                }));
+            }
+            else
+            {
+                buttons.Add(new ModalButton(T["cancel"], Palette.GrayDark));
+                buttons.Add(new ModalButton(T["menuAdd"], Palette.Green, Apply, max <= 0));
+            }
+            Modal(recipe.Name, null, buttons, col);
+        }
+
+        /// <summary>생선구이는 고르기 목록 아래로</summary>
+        private static bool IsGrill(Recipe r)
+        {
+            return r.Id.EndsWith("-gui");
         }
 
         /// <summary>그림 속 칠판에 오늘의 메뉴를 쓴다</summary>
@@ -334,8 +432,8 @@ namespace Hanjeopsi.App.Screens
             _chalk.AddChild(new Control { CustomMinimumSize = new Vector2(0, 4), MouseFilter = MouseFilterEnum.Ignore });
             if (_menu.Count == 0)
                 _chalk.AddChild(UiKit.Text(T["boardEmpty"], TextSize.Tiny - 7, chalk, false, false, 0, null, HorizontalAlignment.Center));
-            foreach (var r in _menu.Take(5))
-                _chalk.AddChild(UiKit.Text(r.Name, TextSize.Tiny - 7, chalk, false, false, 0, null, HorizontalAlignment.Center));
+            foreach (var e in _menu.Take(5))
+                _chalk.AddChild(UiKit.Text(F("boardDish", e.Recipe.Name, e.Left), TextSize.Tiny - 7, chalk, false, false, 0, null, HorizontalAlignment.Center));
         }
 
         // ───────── 손님 ─────────
@@ -359,8 +457,8 @@ namespace Hanjeopsi.App.Screens
 
         private void NextCustomer()
         {
-            // 오늘 메뉴 중 재료가 남은 것
-            var menu = _menu.Where(r => G.Truck.BestFishFor(G.Save, r) != null).ToList();
+            // 오늘 메뉴 중 접시와 재료가 남은 것
+            var menu = G.MenuOpen(_menu);
             int max = _plan.Count;
             if (_served >= max || menu.Count == 0)
             {
@@ -514,7 +612,7 @@ namespace Hanjeopsi.App.Screens
 
         private GameButton NextButton()
         {
-            bool last = _served >= _plan.Count || !_menu.Any(r => G.Truck.BestFishFor(G.Save, r) != null);
+            bool last = _served >= _plan.Count || G.MenuOpen(_menu).Count == 0;
             var next = new GameButton(last ? T["finish"] : T["next"], Palette.Green, Leave, null, TextSize.Body, 120);
             next.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
             next.CustomMinimumSize = new Vector2(520, 120);
@@ -600,6 +698,8 @@ namespace Hanjeopsi.App.Screens
                 return;
             }
             _served += 1;
+            CoreGame.MarkServed(_menu, recipe);
+            UpdateChalk();
             int tip = dish.Guest != null ? dish.Guest.Tip : 0;
             _sales += dish.Pay + tip;
             _hud.Refresh();
@@ -758,9 +858,15 @@ namespace Hanjeopsi.App.Screens
         {
             switch (action)
             {
-                case "grill":
-                    _grillOpen = true;
+                case "pick":
+                    // 빈 칸을 눌러 요리를 고르는 창
+                    if (_menu.Count > 0) _menu.RemoveAt(_menu.Count - 1);
                     ShowMenu(false);
+                    PickDish();
+                    break;
+                case "count":
+                    // 올린 칸을 눌러 접시 수를 고치는 창
+                    if (_menu.Count > 0) AskCount(_menu[0].Recipe, _menu[0]);
                     break;
                 case "cook":
                     StartShift();

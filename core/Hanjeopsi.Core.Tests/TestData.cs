@@ -62,6 +62,7 @@ namespace Hanjeopsi.Core.Tests
                 d.Gear.Kits.Clear();
                 d.Gear.Baits.Clear();
                 d.Gear.TrapPool.Clear();
+                d.Gear.Tanks.Clear();
                 d.Texts.Slots = new System.Collections.Generic.List<string> { "새벽", "아침", "낮", "저녁" };
                 d.Texts.SlotAfter = "밤";
                 d.Balance.Reel = ReelGolden["tuning"].ToObject<ReelBalance>(Newtonsoft.Json.JsonSerializer.Create(GameData.JsonSettings));
