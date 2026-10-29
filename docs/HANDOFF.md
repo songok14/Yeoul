@@ -12,7 +12,7 @@ songok14/Yeoul 레포의 모바일 낚시 경영 게임 "한 접시의 바다"�
 ## 지금까지 상황
 - 환경: cloud. 원격 https://github.com/songok14/Yeoul (공개). ci-build 브랜치는 CI 결과 창고라 지우지 않는다.
 - **브랜치 주의**: 2026-10-27까지는 main 에서 작업해 main 에 푸시했다(사용자 결정). 2026-10-28 세션은 세션이 준 작업 브랜치 `ccr-1656a8a0-hqkk4r` 에 올렸고 **main 에 아직 합치지 않았다**. 시작하면 git fetch origin 후 이 브랜치와 main 차이를 보고, main 에 합칠지(빨리 감기) 사용자에게 먼저 묻는다. PR은 만들지 않는다.
-- 2026-10-28 밤 세션은 그 브랜치 끝(6813e03)을 이어 `ccr-86a1dc25-dssgjw` 에 올렸다(전망대 위 하늘 잇기 `ArtStage.SkyCap`, 앉은 의자를 엉덩이 너비에 맞춤 `gearlook.json chairWidth`·`poses.json hip`). 이 브랜치가 최신이고 main 에는 아직 안 합쳤다. 마지막 APK는 빌드 #130(51747fe). 아침·저녁 지도를 맞바꿨다(주황 해돋이가 아침, 분홍·연보라가 저녁). 여울 위아래 걷기는 `scripts/sd_step.py` 로 만든 임시 두 장(SD 3-1 오면 교체). 전망대 위 하늘은 지도 속 하늘 조각을 이어 붙인 그림(`scripts/town_sky.py`, 지도를 바꾸면 다시 돌린다).
+- 2026-10-28 밤 세션은 그 브랜치 끝(6813e03)을 이어 `ccr-86a1dc25-dssgjw` 에 올렸다(전망대 위 하늘 잇기 `ArtStage.SkyCap`, 앉은 의자를 엉덩이 너비에 맞춤 `gearlook.json chairWidth`·`poses.json hip`). 이 브랜치가 최신이고 main 에는 아직 안 합쳤다. 마지막 APK는 빌드 #131(464072d). 아침·저녁 지도를 맞바꿨다(주황 해돋이가 아침, 분홍·연보라가 저녁). 여울 위아래 걷기는 `scripts/sd_step.py` 로 만든 임시 두 장(SD 3-1 오면 교체). 전망대 위 하늘은 지도 속 하늘 조각을 이어 붙인 그림(`scripts/town_sky.py`, 지도를 바꾸면 다시 돌린다).
 - 먼저 읽을 것: CLAUDE.md, docs/GAME_DESIGN.md 6·7절(새 하루, 여울호 손님 등급), 9절(이야기 장면), docs/GODOT_PLAN.md 9절 단계표(U11-6, U11-7)와 10-2 "지금 APK에서 볼 것", docs/ART_PROMPTS.md 끝 "걷는 언덕 마을"과 "대화 4. 미식 평론가", docs/POLISH.md.
 
 ### 2026-10-28 세션 뒷부분 (하루 네 칸, 걷는 언덕 마을)
