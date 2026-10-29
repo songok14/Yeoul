@@ -19,7 +19,7 @@ from scipy.ndimage import gaussian_filter, map_coordinates
 ROOT = __file__.rsplit("/scripts/", 1)[0]
 TARGET = f"{ROOT}/godot/art/backgrounds/truckstop.png"
 ORIGINAL = "4c27610:godot/art/backgrounds/truckstop.png"
-FONT = f"{ROOT}/godot/fonts/GowunBatang-Bold.ttf"
+FONT = f"{ROOT}/godot/fonts/Jua-Regular.ttf"
 
 # 간판 판 안쪽 네 귀퉁이 (900×1600 그림 좌표): 왼위, 오위, 오아래, 왼아래
 QUAD = [(405.0, 453.0), (747.0, 380.0), (747.0, 505.0), (405.0, 560.0)]
@@ -31,7 +31,7 @@ FISH_X = 420  # 이보다 왼쪽의 어두운 칠은 물고기 테두리
 # 결을 가져올 띠 (같은 줄에서 오른쪽 깨끗한 판)
 SRC_X = (968, 1012)
 TEXT = "여울호"
-STROKE = 3  # 글씨 굵게 (펴 놓은 판 px)
+STROKE = 1  # 글씨 굵게 (펴 놓은 판 px). 주아는 원래 굵다
 INK = np.array([52, 92, 160], float)  # 아래 물결과 같은 푸른 페인트
 
 
@@ -155,7 +155,7 @@ def main():
     mm = m[..., None]
     board2 = board * (1 - mm) + filled * mm
 
-    # 글씨: 고운바탕 굵게, 판 위에 칠한 페인트처럼 (결·빛을 따라간다)
+    # 글씨: 주아, 판 위에 칠한 페인트처럼 (결·빛을 따라간다)
     scale = 3
     layer = Image.new("L", (RW * scale, RH * scale), 0)
     font = ImageFont.truetype(FONT, 165 * scale)

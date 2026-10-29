@@ -145,7 +145,7 @@ namespace Hanjeopsi.App.Lab
         private Theme MakeTheme()
         {
             var t = new Theme();
-            t.DefaultFont = GD.Load<Font>("res://fonts/GowunDodum-Regular.ttf");
+            t.DefaultFont = GD.Load<Font>("res://fonts/NanumSquareRoundB.ttf");
             t.DefaultFontSize = 38;
             t.SetColor("font_color", "Label", Paper);
             t.SetColor("default_color", "RichTextLabel", Paper);

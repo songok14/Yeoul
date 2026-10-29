@@ -48,7 +48,7 @@ Yeoul/
 │  ├─ project.godot, Hanjeopsi.csproj, export_presets.cfg, icon.png
 │  ├─ data/                           species, gear, balance, texts, recipes, requests, taste, dialogue .json
 │  ├─ art/                            backgrounds/, yeoul/, cat/ (SD), props/, portraits/ (대화 일러스트) (PNG)
-│  ├─ fonts/                          고운돋움(본문), 고운바탕 굵게(제목) (OFL)
+│  ├─ fonts/                          나눔스퀘어라운드 굵게(본문), 주아(제목) (OFL)
 │  ├─ scenes/                         boot(첫 장면), title, town, core_lab .tscn (뿌리 노드에 스크립트만 붙인다)
 │  ├─ scripts/
 │  │  ├─ App/                         GameState(자동 로드: 데이터·판·전환·사진 모드), BootLoader
@@ -147,7 +147,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 | `systems/reel.ts` 릴링 텐션·거리·저항·지침·드랙, 챔질, 입질 대기·속임 입질, 고등어 힌트, 파워 게이지 | `Systems/ReelFight` (`ReelRules`, `BiteWait`, `ReelFight.Step(holding, dt)`) | core | ✅ |
 | localStorage | `SaveStore` → `user://save.json` (임시 파일에 쓰고 바꿔 끼움) | godot | ✅ |
 | `ui/ui.ts` txt, Button, modal, toast, bubble, floatText, `ui/hud.ts` | `Ui/UiKit`, `GameButton`, `Screen.Modal/Toast/Bubble/FloatText`, `Hud` (코드로 만든다) | godot | ✅ |
-| 고운돋움·고운바탕 | `Fonts.Body`, `Fonts.Title` (TTF 그대로, 동적 글리프) | godot | ✅ |
+| 나눔스퀘어라운드·주아 (2026-10-29, 전엔 고운돋움·고운바탕) | `Fonts.Body`, `Fonts.Title` (TTF 그대로, 동적 글리프) | godot | ✅ |
 | `goTo`, `fadeIn` | `GameState.GoTo("town")` 어둡게 덮었다 걷기 | godot | ✅ |
 | tween, 카메라 흔들기 | `Tween`, `Camera2D` 오프셋 | godot | U5~ (Tween ✅) |
 | `scripts/art.py` | SD 시트는 `scripts/sd_sheet.py`(PNG). 배경은 WebP를 PNG로 | scripts | ✅ |
@@ -316,7 +316,7 @@ C# 코어가 같은 입력으로 계산해서 비교 (테스트 72개, 자동 �
 
 타이틀과 마을 (U5)
 - 켜면 어두운 막이 걷히며 타이틀. 제목 → 머리말 세 줄 → 버튼 순서로 떠오르는지, 빛 알갱이가 바다 위로 오르는지, 고등어가 숨 쉬는지.
-- 제목 글꼴(고운바탕 굵게)과 본문 글꼴(고운돋움)이 깨지지 않는지.
+- 제목 글꼴(주아)과 본문 글꼴(나눔스퀘어라운드 굵게)이 깨지지 않는지. 주아에 없는 기호(· × 화살표)가 네모로 나오지 않는지.
 - 새로 시작 → 마을. 위쪽 HUD(날짜, 시간대 칩, D-day, 소지금, 상환 막대)와 아래 메뉴 여섯 개.
 - 버튼을 누르면 살짝 눌렸다 튕기는지. 아직 없는 화면은 "…는 다음 빌드에서 열려요" 알림.
 - 간판, 여울, 고등어, 트럭을 눌러 본다. 여울은 손을 흔들고 말풍선, 고등어는 냐옹.

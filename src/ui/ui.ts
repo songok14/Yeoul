@@ -6,8 +6,8 @@ import { C, FONT, FONT_BOLD, FONT_SMALL, GAME_H, GAME_W, RENDER_SCALE, T } from 
 export type TextSize = 'title' | 'h1' | 'body' | 'small';
 
 const SIZE: Record<TextSize, { font: string; px: number; bold?: boolean }> = {
-  title: { font: FONT_BOLD, px: 44, bold: true },
-  h1: { font: FONT_BOLD, px: 22, bold: true },
+  title: { font: FONT_BOLD, px: 46 },
+  h1: { font: FONT_BOLD, px: 23 },
   body: { font: FONT, px: 21 },
   small: { font: FONT_SMALL, px: 17 },
 };

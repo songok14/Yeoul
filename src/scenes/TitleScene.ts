@@ -22,11 +22,10 @@ export class TitleScene extends Phaser.Scene {
     const cat = sprite(this, 'ch-cat-sleep', 330, 600, 52);
     this.tweens.add({ targets: cat, scaleY: cat.scaleY * 1.04, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
 
-    txt(this, GAME_W / 2, 140, TITLE.name, { size: 'title', color: T.paper, origin: [0.5, 0.5], stroke: '#1b2a41' });
-    txt(this, GAME_W / 2, 186, TITLE.subtitle, { size: 'h1', color: '#f3d9a4', origin: [0.5, 0.5], stroke: '#1b2a41' });
-    txt(this, GAME_W / 2, 226, '나는 맛을 잃었다.\n다시 맛을 느낄 수 있는 건\n내 손으로 낚은 물고기뿐이다.', {
-      size: 'small', color: '#fbf3e0', origin: [0.5, 0], align: 'center', lineSpacing: 8, stroke: '#1b2a41',
-    });
+    // 테두리 없이 부드러운 그림자만
+    const title = txt(this, GAME_W / 2, 170, TITLE.name, { size: 'title', color: T.paper, origin: [0.5, 0.5] });
+    title.setFontSize(64).setShadow(0, 4, 'rgba(15,26,43,0.6)', 10, false, true);
+    txt(this, GAME_W / 2, 226, TITLE.subtitle, { size: 'h1', color: '#ffdeaa', origin: [0.5, 0.5] }).setShadow(0, 2, 'rgba(15,26,43,0.65)', 6, false, true);
 
     const saved = hasSave();
     new Button(this, GAME_W / 2, 650, '새로 시작', () => {

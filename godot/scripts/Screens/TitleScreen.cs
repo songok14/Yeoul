@@ -5,7 +5,7 @@ using Hanjeopsi.Core.Systems;
 namespace Hanjeopsi.App.Screens
 {
     /// <summary>
-    /// 타이틀 (웹 TitleScene). 노을 지는 마을, 잠든 고등어, 제목과 챕터 부제, 세 줄 머리말이 차례로 떠오르고 버튼이 올라온다.
+    /// 타이틀 (웹 TitleScene). 노을 지는 마을, 잠든 고등어, 제목과 챕터 부제가 차례로 떠오르고 버튼이 올라온다.
     /// 부제는 저장된 판의 챕터를 따른다 (코어 TitleCard). 새로 시작 / 이어하기. 아래 작은 글씨를 누르면 점검 화면.
     /// </summary>
     public partial class TitleScreen : Screen
@@ -45,44 +45,25 @@ namespace Hanjeopsi.App.Screens
             // 잠든 고등어 (숨 쉬기)
             _cat = _stage.Place(GD.Load<Texture2D>("res://art/cat/sleep.png"), new Vector2(352, 572), 46);
 
-            // 제목과 머리말
+            // 제목과 부제
             var col = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
             col.AddThemeConstantOverride("separation", 0);
             Safe.AddChild(col);
-            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 230), MouseFilter = MouseFilterEnum.Ignore });
+            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 280), MouseFilter = MouseFilterEnum.Ignore });
 
             var titleTexts = gs.Data.Texts.Title;
             var peek = gs.PeekSave();
             int chapter = TitleCard.Chapter(peek);
-            var title = UiKit.Shadowed(titleTexts.Name, TextSize.Hero, Palette.Paper, true, 14);
-            title.LabelSettings.OutlineSize = 6;
-            title.LabelSettings.OutlineColor = new Color(Palette.NightDeep, 0.6f);
+            // 테두리 없이 부드러운 그림자만
+            var title = UiKit.Shadowed(titleTexts.Name, TextSize.Hero, Palette.Paper, true, 18);
+            title.LabelSettings.ShadowColor = new Color(Palette.NightDeep, 0.6f);
             col.AddChild(Riser(title));
-            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 6), MouseFilter = MouseFilterEnum.Ignore });
+            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 14), MouseFilter = MouseFilterEnum.Ignore });
 
             // 챕터 부제
-            var subtitle = UiKit.Shadowed(TitleCard.Subtitle(titleTexts, peek), TextSize.H1, new Color("f3d9a4"), true, 10);
-            subtitle.LabelSettings.OutlineSize = 4;
-            subtitle.LabelSettings.OutlineColor = new Color(Palette.NightDeep, 0.5f);
+            var subtitle = UiKit.Shadowed(TitleCard.Subtitle(titleTexts, peek), TextSize.H1, new Color("ffdeaa"), true, 12);
+            subtitle.LabelSettings.ShadowColor = new Color(Palette.NightDeep, 0.65f);
             col.AddChild(Riser(subtitle));
-            col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 44), MouseFilter = MouseFilterEnum.Ignore });
-
-            var lines = new[] { "나는 맛을 잃었다.", "다시 맛을 느낄 수 있는 건", "내 손으로 낚은 물고기뿐이다." };
-            var lineLabels = new Label[lines.Length];
-            // 그림 위에서도 읽히게 글 뒤에 옅은 그늘
-            var shade = new PanelContainer { MouseFilter = MouseFilterEnum.Ignore, SizeFlagsHorizontal = SizeFlags.ShrinkCenter };
-            shade.AddThemeStyleboxOverride("panel", UiKit.Box(new Color(Palette.NightDeep, 0.38f), 44, 48, 18));
-            var lineCol = new VBoxContainer { MouseFilter = MouseFilterEnum.Ignore };
-            lineCol.AddThemeConstantOverride("separation", 0);
-            shade.AddChild(lineCol);
-            col.AddChild(shade);
-            for (int i = 0; i < lines.Length; i++)
-            {
-                var l = UiKit.Shadowed(lines[i], TextSize.Body, new Color("fbf3e0"), false, 8);
-                l.LabelSettings.LineSpacing = 0;
-                lineCol.AddChild(Riser(l));
-                lineLabels[i] = l;
-            }
 
             col.AddChild(new Control { SizeFlagsVertical = SizeFlags.ExpandFill, MouseFilter = MouseFilterEnum.Ignore });
 
@@ -114,10 +95,9 @@ namespace Hanjeopsi.App.Screens
             col.AddChild(Riser(foot));
             col.AddChild(new Control { CustomMinimumSize = new Vector2(0, 40), MouseFilter = MouseFilterEnum.Ignore });
 
-            // 등장 연출: 제목 → 부제 → 머리말 한 줄씩 → 버튼
+            // 등장 연출: 제목 → 부제 → 버튼
             FadeUp(title, 0.15, 40);
             FadeUp(subtitle, 0.5, 12, 1.0);
-            for (int i = 0; i < lineLabels.Length; i++) FadeUp(lineLabels[i], 0.8 + i * 0.3, 18);
             FadeUp(btnBox, 1.6, 60);
             FadeUp(foot, 1.9, 0);
         }

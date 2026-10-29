@@ -1,0 +1,8 @@
+/* 본문 글꼴 나눔스퀘어라운드 굵게 (OFL, public/fonts). 제목은 주아(@fontsource/jua) */
+@font-face {
+  font-family: 'NanumSquareRound';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/NanumSquareRoundB.woff2') format('woff2');
+}

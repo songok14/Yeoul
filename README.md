@@ -1,7 +1,5 @@
 # 🎣 여울호
 
-> 나는 맛을 잃었다. 다시 맛을 느낄 수 있는 건 내 손으로 낚은 물고기뿐이다.
-
 미각을 잃은 셰프 한여울이 고향 남해 물비늘포로 돌아와 직접 낚은 물고기로 맛과 할머니의 식당을 되찾는 **모바일 웹 낚시 경영 게임**입니다.
 지금은 1장 물비늘포 MVP(v0.1)입니다. 그래픽은 재미 확인용 임시 도트입니다.
 
@@ -36,7 +34,7 @@ node scripts/playtest.mjs   # 빌드 후 실행. 새 게임부터 하루를 자�
 |---|---|
 | 엔진 | Phaser 3.90.0 |
 | 언어 · 빌드 | TypeScript, Vite |
-| 글꼴 | [Galmuri](https://github.com/quiple/galmuri) 2.40.3 (Galmuri11 · Galmuri9, SIL OFL 1.1) |
+| 글꼴 | 주아(제목) · 나눔스퀘어라운드 굵게(본문), 둘 다 SIL OFL 1.1 |
 | 화면 | 450×800 세로, Scale.FIT, 픽셀아트 확대 |
 | 세이브 | localStorage (`hanjeopsi-save-v1`) |
 | 점검 | Playwright + Chromium 스크린샷 |
@@ -47,7 +45,7 @@ node scripts/playtest.mjs   # 빌드 후 실행. 새 게임부터 하루를 자�
 src/
   main.ts          게임 설정과 씬 등록
   config.ts        화면 크기, 색, 1장 목표 수치
-  fonts.ts         Galmuri 글꼴 미리 불러오기
+  fonts.ts         글꼴 미리 불러오기
   data/            어종, 장비, 요리, 의뢰, 대사
   state/           세이브 구조(save.ts)와 상태를 바꾸는 행동(actions.ts)
   systems/         시세·신선도, 미각, 시간, 입질 계산
@@ -69,5 +67,5 @@ scripts/           스크린샷, 자동 플레이 점검
 
 ## 크레딧
 
-- 글꼴: Galmuri © Lee Minseo (quiple), SIL Open Font License 1.1
+- 글꼴: 주아 © The Jua Project Authors, 나눔스퀘어라운드 © NAVER Corporation. 모두 SIL Open Font License 1.1
 - 게임 엔진: Phaser © Phaser Studio, MIT License

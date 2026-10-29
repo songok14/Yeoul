@@ -32,7 +32,7 @@ project/assembly_name="Hanjeopsi"
 
 [gui]
 
-theme/custom_font="res://fonts/GowunDodum-Regular.ttf"
+theme/custom_font="res://fonts/NanumSquareRoundB.ttf"
 
 [input_devices]
 

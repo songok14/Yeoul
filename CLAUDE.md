@@ -17,7 +17,7 @@
 
 - Phaser **3.90.0** + TypeScript + Vite. 버전은 고정해 둔다.
 - 그림체는 **일러스트(애니메이션 채색 + 수채화 배경)**로 확정. 기준 그림은 `docs/ART_PROMPTS.md`.
-- 글꼴은 고운돋움(본문, `@fontsource/gowun-dodum`)과 고운바탕 굵게(제목, `@fontsource/gowun-batang`). 모두 OFL. 글자는 `ui/ui.ts`의 `txt()`로만 만든다(해상도 2배로 그린다).
+- 글꼴은 나눔스퀘어라운드 굵게(본문, `public/fonts`)와 주아(제목, `@fontsource/jua`). 모두 OFL (2026-10-29 고운돋움·고운바탕에서 바꿨다). 글자는 `ui/ui.ts`의 `txt()`로만 만든다(해상도 2배로 그린다).
 - 화면은 논리 좌표 세로 450×800. 캔버스는 두 배(900×1600)로 만들고 `fadeIn()`에서 카메라를 2배 확대한다. 그래서 씬 좌표는 계속 450×800 기준으로 쓰고, 포인터는 `p.x` 대신 `p.worldX`/`p.worldY`를 쓴다.
 - 물고기 그림은 FishingPlan 레포(`songok14/FishingPlan`)의 도감 그림을 가져와 쓰고, 규정도 그 앱 기본표를 따른다. 그 레포에는 쓰지 않는다.
 - 아직 그림이 없는 것(손님, 요리)은 `ui/art.ts`의 임시 도트로 그린다(NEAREST 필터).
@@ -36,7 +36,7 @@
 - **APK와 화면 사진은 GitHub Actions(`.github/workflows/android.yml`)가 만든다.** 비밀값은 필요 없다. `core/`나 `godot/`를 푸시하면 돌고, 사용자는 릴리스 `test-latest`에서 받아 폰에서 테스트한다.
 - 푸시한 뒤에는 GitHub MCP 도구로 실행 결과를 확인한다. 성공하면 `git fetch origin ci-build`로 `lab.png` 같은 화면 사진과 APK(`cat hanjeopsi.apk.part-* > hanjeopsi.apk`로 합친다)를 받아 **직접 열어 본다**(글자 겹침, 화면 밖 글자, 버튼 겹침). 실패하면 로그를 보고 고쳐서 다시 푸시한다.
 - `godot/Hanjeopsi.sln`은 지우지 않는다. 없으면 C#이 빠진 APK가 나와 켜자마자 꺼진다(워크플로가 검사한다).
-- 화면은 `Ui/Screen`을 물려받아 `Build()`에서 코드로 만든다. `.tscn`은 뿌리 노드에 스크립트만 붙인다. 색은 `Palette`, 글자는 `UiKit.Text`(크기는 `TextSize` 단계), 버튼은 `GameButton`, 알림은 `Toast`, 확인은 `Modal`. 이동은 `GameState.I.GoTo("town")`.
+- 화면은 `Ui/Screen`을 물려받아 `Build()`에서 코드로 만든다. `.tscn`은 뿌리 노드에 스크립트만 붙인다. 색은 `Palette`, 글자는 `UiKit.Text`(크기는 `TextSize` 단계, 제목 주아·본문 나눔스퀘어라운드 굵게, 주아에 없는 기호는 본문 글꼴이 대신 그린다), 버튼은 `GameButton`, 알림은 `Toast`, 확인은 `Modal`. 이동은 `GameState.I.GoTo("town")`.
 - 그림 위에 놓는 것(간판, 캐릭터)은 `ArtStage`에 웹 논리 좌표(450×800)로 놓는다. 화면 비율이 달라도 그림에 붙어 있다.
 - 새 화면을 만들면 워크플로 `shots=( ... )` 목록에 `이름:--screen=<씬> [--demo=…] [--shot-action=…]`을 한 줄 추가한다. 사진 모드는 체험 판(`GameState.SetupDemo`)으로 시작하고 3초 뒤 찍는다. `town-tall`은 1080×2400 긴 화면이다.
 - 그림 역할: **화면 위에서 움직이는 캐릭터는 SD(2~2.5등신)**, **대화와 감정은 일러스트**. 마을·낚시·트럭에서 걷고 반응하는 건 SD와 한 줄 말풍선(`Screen.Bubble`). 누군가와 이야기하는 장면은 대화창(`Screen.Talk`/`Say`/`TalkScene`)에 감정 일러스트(`godot/art/portraits/`)가 들어온다. 감정이 터지는 장면은 한 장짜리 컷신 일러스트. 배경은 수채화 그대로. 새 시트 프롬프트는 배경 #EDEDED, 그림 한 장당 코드 블록 하나(`docs/ART_PROMPTS.md`).

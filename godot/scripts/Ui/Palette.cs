@@ -36,7 +36,10 @@ namespace Hanjeopsi.App.Ui
         public static readonly Color GrayDark = new Color("5c6269");
     }
 
-    /// <summary>글꼴: 본문 고운돋움, 제목 고운바탕 굵게 (둘 다 OFL)</summary>
+    /// <summary>
+    /// 글꼴: 본문 나눔스퀘어라운드 굵게, 제목 주아 (둘 다 OFL, 2026-10-29).
+    /// 주아에 없는 기호(· × 화살표 ...)는 본문 글꼴이 대신 그린다
+    /// </summary>
     public static class Fonts
     {
         private static Font _body;
@@ -44,12 +47,21 @@ namespace Hanjeopsi.App.Ui
 
         public static Font Body
         {
-            get { return _body ??= GD.Load<Font>("res://fonts/GowunDodum-Regular.ttf"); }
+            get { return _body ??= GD.Load<Font>("res://fonts/NanumSquareRoundB.ttf"); }
         }
 
         public static Font Title
         {
-            get { return _title ??= GD.Load<Font>("res://fonts/GowunBatang-Bold.ttf"); }
+            get
+            {
+                if (_title == null)
+                {
+                    var f = GD.Load<FontFile>("res://fonts/Jua-Regular.ttf");
+                    f.Fallbacks = new Godot.Collections.Array<Font> { Body };
+                    _title = f;
+                }
+                return _title;
+            }
         }
     }
 
